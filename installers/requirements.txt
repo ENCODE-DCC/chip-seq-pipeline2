@@ -1,0 +1,36 @@
+# channels : defaults, r, bioconda
+
+bwa ==0.7.13
+samtools ==1.2 # 0.1.19
+htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
+bedtools ==2.26.0 #2.19.1
+ucsc-fetchchromsizes
+ucsc-wigtobigwig
+ucsc-bedgraphtobigwig
+ucsc-bigwiginfo
+ucsc-bedclip
+ucsc-bedtobigbed
+ucsc-twobittofa
+#picard ==1.126 # 1.97 in bioconda has corrupted .jar
+deeptools ==2.5.4 #2.2.3 does not support plotFingerprint --outQualityMetrics
+numpy ==1.10.2 # 1.9.3 (conflict)
+matplotlib ==1.5.1
+macs2 ==2.1.0
+boost ==1.57.0
+openssl ==1.0.2g-0
+graphviz ==2.38.0
+libtool
+ghostscript
+pigz
+zlib
+sambamba ==0.6.5
+pyfaidx ==0.4.7.1
+six ==1.4.1
+r ==3.2.2
+r-snow
+r-snowfall
+r-bitops
+r-catools
+bioconductor-rsamtools
+r-spp ==1.13
+#glibc #segmentation fault in conda with openssl
