@@ -21,6 +21,8 @@
 	],
 
 	"chipseq.paired_end" : false,
+	"chipseq.choose_ctl.always_use_pooled_ctl" : true,
+	"chipseq.spp_cpu" : 2,
 
 	"chipseq.qc_report.name" : "ENCSR000DYI",
 	"chipseq.qc_report.desc" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"

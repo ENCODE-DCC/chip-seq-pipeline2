@@ -98,12 +98,15 @@ workflow chipseq {
 				fastqs = merge_fastq.merged_fastqs, #[R1,R2]
 				paired_end = paired_end,
 			}
-		}		
+		}
 		if ( inputs.is_before_bam && paired_end ) {
 			# for paired end dataset, map R1 only as SE for xcor analysis
+			call trim_fastq { input :
+				fastq = merge_fastq.merged_fastqs[0],
+			}
 			call bwa as bwa_R1 { input :
 				idx_tar = inputs.bwa_idx_tar,
-				fastqs = merge_fastq.merged_fastqs[0],
+				fastqs = [trim_fastq.trimmed_fastq],
 				paired_end = false,
 			}
 		}
@@ -157,6 +160,15 @@ workflow chipseq {
 			}
 		}
 	}
+	# fingerprint/jsd plot
+	#if ( inputs.is_before_ta && inputs.num_ctl>0 ) {
+	#	call fingerprint { input :
+	#		nodup_bams = if inputs.is_before_nodup_bam then filter.nodup_bam
+	#					else nodup_bams,
+	#		ctl_bam = if inputs.is_ctl_before_nodup_bam then filter_ctl.nodup_bam[0]
+	#					else ctl_nodup_bams[0],
+	#	}
+	#}
 
 	# align controls
 	scatter(i in range(inputs.num_ctl)) {
@@ -626,22 +638,22 @@ workflow chipseq {
 						then xcor.score else [],
 
 		frip_qcs = if inputs.align_only || !inputs.is_before_peak then []
-						else if peak_caller=='spp' then spp.frip_qc
+						else if inputs.peak_caller=='spp' then spp.frip_qc
 						else macs2.frip_qc,
 		frip_qcs_pr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only then []
-						else if peak_caller=='spp' then spp_pr1.frip_qc
+						else if inputs.peak_caller=='spp' then spp_pr1.frip_qc
 						else macs2_pr1.frip_qc,
 		frip_qcs_pr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only then []
-						else if peak_caller=='spp' then spp_pr2.frip_qc
+						else if inputs.peak_caller=='spp' then spp_pr2.frip_qc
 						else macs2_pr2.frip_qc,
 		frip_qc_pooled = if inputs.align_only || !inputs.is_before_peak || inputs.num_rep<=1 then []
-						else if peak_caller=='spp' then [spp_pooled.frip_qc]
+						else if inputs.peak_caller=='spp' then [spp_pooled.frip_qc]
 						else [macs2_pooled.frip_qc],
 		frip_qc_ppr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
-						else if peak_caller=='spp' then [spp_ppr1.frip_qc]
+						else if inputs.peak_caller=='spp' then [spp_ppr1.frip_qc]
 						else [macs2_ppr1.frip_qc],
 		frip_qc_ppr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
-						else if peak_caller=='spp' then [spp_ppr2.frip_qc]
+						else if inputs.peak_caller=='spp' then [spp_ppr2.frip_qc]
 						else [macs2_ppr2.frip_qc],
 
 		idr_plots = if !inputs.align_only && inputs.num_rep>1 && inputs.enable_idr 
@@ -708,6 +720,21 @@ task merge_fastq { # trim adapters and merge trimmed fastqs
 	}
 }
 
+task trim_fastq { # trim fastq (for PE R1 only)
+	# parameters from workflow
+	File fastq
+	Int? trim_bp
+
+	command {
+		python $(which encode_trim_fastq.py) \
+			${fastq} \
+			--trim_bp ${select_first([trim_bp,50])}
+	}
+	output {
+		File trimmed_fastq = glob("*.fastq.gz")[0]
+	}
+}
+
 task bwa {
 	# parameters from workflow
 	File idx_tar 		# reference bwa index tar
@@ -745,8 +772,8 @@ task bwa {
 
 task fingerprint {
 	# parameters from workflow
-	Array[File] nodup_bam 	
-	File ctl_bam	 		# one control bam is required
+	Array[File?] nodup_bams
+	File? ctl_bam	 		# one control bam is required
 
 	# resource
 	Int? cpu
@@ -756,8 +783,8 @@ task fingerprint {
 
 	command {
 		python $(which encode_fingerprint.py) \
-			${sep=' ' nodup_bam} \
-			--ctl ctl_bam
+			${sep=' ' nodup_bams} \
+			--ctl-bam ctl_bam
 			${"--nth " + select_first([cpu,2])}
 	}
 	output {

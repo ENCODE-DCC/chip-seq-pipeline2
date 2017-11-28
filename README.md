@@ -2,13 +2,13 @@ AQUAS Transcription Factor and Histone ChIP-Seq processing pipeline
 ===================================================
 
 # Directories
-    * `backends/` : Backend configuration files (`.conf`)
-    * `workflow_opts/` : Workflow option files (`.json`)
-    * `examples/` : input JSON examples (SE and PE)
-    * `genome/` : genome data TSV files
-    * `src/` : Python script for each task in WDL
-    * `installers/` : dependency/genome data installers for Local, SGE and SLURM
-    * `docker_image/` : Dockerfile
+* `backends/` : Backend configuration files (`.conf`)
+* `workflow_opts/` : Workflow option files (`.json`)
+* `examples/` : input JSON examples (SE and PE)
+* `genome/` : genome data TSV files
+* `src/` : Python script for each task in WDL
+* `installers/` : dependency/genome data installers for Local, SGE and SLURM
+* `docker_image/` : Dockerfile
 
 # Usage
 
@@ -40,7 +40,7 @@ Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and pres
         ...
     }
     ```
-6) Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. Pipeline defaults to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible) with 1 retry. If all retrial fails then the instance will be upgraded to a regular one. **Disabling it will cost you significantly more** but you can get your samples processed much faster and stabler. Preemptible instance is disabled in `chipseq.wdl` for `bowtie2` task since it can take longer than the limit (24 hours) of preemptible instances.
+6) Set `default_runtime_attributes.preemptible` as `"0"` to disable preemptible instances. Pipeline defaults to use [preemptible instances](https://cloud.google.com/compute/docs/instances/preemptible) with 1 retry. If all retrial fails then the instance will be upgraded to a regular one. **Disabling it will cost you significantly more** but you can get your samples processed much faster and stabler. Preemptible instance is disabled in `chipseq.wdl` for `bwa` task since it can take longer than the limit (24 hours) of preemptible instances.
     ```
     {
       "default_runtime_attributes" : {
@@ -146,7 +146,7 @@ Not supported yet.
 
 # Input JSON
 
-Optional parameters and flags are marked with `?`.
+Optional parameters and flags are marked with `?`. **`Input` in this document does not mean `control` here. `Control` is explicitly referred to as `control`.
 
 1) Reference genome
 
@@ -163,7 +163,7 @@ Optional parameters and flags are marked with `?`.
 
 2) Input genome data files
     Choose any genome data type you want to start with and set all others as `[]`.
-
+    
     * `"chipseq.fastqs"` : 3-dimensional array with FASTQ file path/URI.
         - 1st dimension: replicate ID
         - 2nd dimension: merge ID (this dimension will be reduced after merging FASTQs)
@@ -195,15 +195,42 @@ Optional parameters and flags are marked with `?`.
         else: peaks_pr1[], peaks_pr2[]
     ```
 
+    Default peak caller (`"chipseq.peak_caller"`) for TF (`"chipseq.pipeline_type":"tf"`) ChIP-Seq pipeline and Histone ChIP-Seq pipeline (`"chipseq.pipeline_type":"histone"`) are 'spp' and 'macs2', respectively. However you can also manually specify a peak caller for these pipeline types. 'macs2` can work without controls but `spp` cannot. Therefore, if a peak caller is chosen as `spp` by default or by a workflow parameter then make sure to define the following control data files. Choose any genome data type you want to start with and set all others as `[]`.
+
+    * `"chipseq.ctl_fastqs"` : 3-dimensional array with control FASTQ file path/URI.
+        - 1st dimension: replicate ID
+        - 2nd dimension: merge ID (this dimension will be reduced after merging FASTQs)
+        - 3rd dimension: endedness ID (0 for SE and 0,1 for PE)
+    * `"chipseq.ctl_bams"` : Array of raw (unfiltered) control BAM file path/URI.
+        - 1st dimension: replicate ID
+    * `"chipseq.ctl_nodup_bams"` : Array of filtered (deduped) control BAM file path/URI.
+        - 1st dimension: replicate ID
+    * `"chipseq.ctl_tas"` : Array of control TAG-ALIGN file path/URI.
+        - 1st dimension: replicate ID
+
+    You can mix up different data types for IP replicates and controls. For example,
+    ```
+    input.json
+    {
+        "chipseq.paired_end" : false,
+        "chipseq.fastqs" : [],
+        "chipseq.bams" : ["rep1.bam","rep2.bam"],
+        ...
+        "chipseq.ctl_fastqs" : [],
+        "chipseq.ctl_tas" : ["ctl1.tagAlign.gz","ctl2.tagAlign.gz"],
+        ...
+    }
+    ```
+
 3) Pipeline settings
 
-    Pipeline type (chip-seq or DNase-Seq) : The only difference between two types is TN5 shifting.
+    Pipeline type (chip-seq or DNase-Seq) : 'tf' ChIP-Seq always requires controls.
 
     * `"chipseq.pipeline_type` : `tf` for Transcription Factor ChIP-Seq. `histone` for Transcription Factor ChIP-Seq.
 
     Input data endedness.
 
-    * `"chipseq.paired_end"` : Set it as `true` if input data are paired end, otherwise `false`.
+    * `"chipseq.paired_end"` : Set it as `true` if input dataset is paired end, otherwise `false`.
 
     Other important settings.
 
@@ -211,9 +238,9 @@ Optional parameters and flags are marked with `?`.
     * `"chipseq.multimapping"`? : Multimapping reads.
     * `"chipseq.true_rep_only"`? : Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"chipseq.enable_idr"`.
 
-4) Bowtie2 settings
+4) Trim FASTQ settings (**for paired end dataset only**)
 
-    * `"chipseq.bowtie2.score_min"`? : Min. acceptable alignment score function w.r.t read length.
+    * `"chipseq.trim_fastq.trim_bp`? : For paired end dataset only. Number of basepairs after trimming FASTQ. It's 50 by default. Trimmed FASTQS is only used for cross-correlation analysis. FASTQ mapping is not affected by this parameter.
 
 5) Filter/dedup (post-alignment) settings
 
@@ -223,57 +250,64 @@ Optional parameters and flags are marked with `?`.
 
 6) BAM-2-TAGALIGN settings
 
-    * `"chipseq.bam2ta.regex_grep_v_ta"`? : Perl-style regular expression pattern to remove matching reads from TAGALIGN.
+    Pipeline filters out chrM reads by default.
+
+    * `"chipseq.bam2ta.regex_grep_v_ta"`? : Perl-style regular expression pattern to remove matching reads from TAGALIGN (default: `chrM`).
     * `"chipseq.bam2ta.subsample"`? : Number of reads to subsample TAGALIGN. Subsampled TAGALIGN will be used for all downstream analysis (MACS2, IDR, naive-overlap).
 
-7) Cross correlation analysis settings
+7) Choose control settings
+
+    * "chipseq.choose_ctl.ctl_depth_ratio"? : if ratio between controls is higher than this then always use pooled control for all exp rep.
+    * "chipseq.choose_ctl.always_use_pooled_ctl"? : Always use pooled control for all exp replicates (ignoring `ctl_depth_ratio`).
+
+8) Cross correlation analysis settings
 
     * `"chipseq.xcor.subsample"`? : Number of reads to subsample TAGALIGN. Only one end (R1) will be used for cross correlation analysis. This will not affect downstream analysis.
 
-8) MACS2 settings
+9) MACS2 settings
 
     **DO NOT DEFINE MACS2 PARAMETERS IN `"chipseq.macs2"` SCOPE**. All MACS2 parameters must be defined in `"chipseq"` scope.
 
     * `"chipseq.macs2_cap_num_peak"`? : Cap number of raw peaks called from MACS2.
     * `"chipseq.pval_thresh"`? : P-value threshold.
 
-9) SPP settings
+10) SPP settings
 
     **DO NOT DEFINE SPP PARAMETERS IN `"chipseq.spp"` SCOPE**. All SPP parameters must be defined in `"chipseq"` scope.
 
     * `"chipseq.spp_cap_num_peak"`? : Cap number of raw peaks called from MACS2.
 
-10) IDR settings
+11) IDR settings
 
     **DO NOT DEFINE IDR PARAMETERS IN `"chipseq.idr"` SCOPE**. All IDR parameters must be defined in `"chipseq"` scope.
 
     * `"chipseq.enable_idr"`? : Set it as `true` to enable IDR on raw peaks.
     * `"chipseq.idr_thresh"`? : IDR threshold.
 
-11) Resources
+12) Resources
 
-    **RESOURCES DEFINED IN `input.json` ARE PER TASK**. For example, if you have FASTQs for 2 replicates (2 tasks) and set `cpu` for `bowtie2` task as 4 then total number of cpu cores to map FASTQs is 2 x 4 = 8.
+    **RESOURCES DEFINED IN `input.json` ARE PER TASK**. For example, if you have FASTQs for 2 replicates (2 tasks) and set `cpu` for `bwa` task as 4 then total number of cpu cores to map FASTQs is 2 x 4 = 8.
 
     CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
 
     * `"chipseq.merge_fastq.cpu"`? : Number of cores for `merge_fastq` (default: 2).
-    * `"chipseq.bowtie2.cpu"`? : Number of cores for `bowtie2` (default: 4).
+    * `"chipseq.bwa.cpu"`? : Number of cores for `bwa` (default: 4).
     * `"chipseq.filter.cpu"`? : Number of cores for `filter` (default: 2).
     * `"chipseq.bam2ta.cpu"`? : Number of cores for `bam2ta` (default: 2).
     * `"chipseq.xcor.cpu"`? : Number of cores for `xcor` (default: 2).
     * `"chipseq.spp_cpu"`? : Number of cores for `spp` (default: 2).
     * `"chipseq.merge_fastq.mem_mb"`? : Max. memory limit in MB for `merge_fastq` (default: 10000).
-    * `"chipseq.bowtie2.mem_mb"`? : Max. memory limit in MB for `bowtie2` (default: 20000).
+    * `"chipseq.bwa.mem_mb"`? : Max. memory limit in MB for `bwa` (default: 20000).
     * `"chipseq.filter.mem_mb"`? : Max. memory limit in MB for `filter` (default: 20000).
     * `"chipseq.bam2ta.mem_mb"`? : Max. memory limit in MB for `bam2ta` (default: 10000).
     * `"chipseq.xcor.mem_mb"`? : Max. memory limit in MB for `xcor` (default: 10000).
     * `"chipseq.macs2_mem_mb"`? : Max. memory limit in MB for `macs2` (default: 16000).
     * `"chipseq.spp_mem_mb"`? : Max. memory limit in MB for `spp` (default: 16000).
-`
+
     Disks (`disks`) is used for Cloud platforms (Google Cloud Platforms, AWS, ...).
 
     * `"chipseq.merge_fastq.disks"`? : Disks for `merge_fastq` (default: "local-disk 100 HDD").
-    * `"chipseq.bowtie2.disks"`? : Disks for `bowtie2` (default: "local-disk 100 HDD").
+    * `"chipseq.bwa.disks"`? : Disks for `bwa` (default: "local-disk 100 HDD").
     * `"chipseq.filter.disks"`? : Disks for `filter` (default: "local-disk 100 HDD").
     * `"chipseq.bam2ta.disks"`? : Disks for `bam2ta` (default: "local-disk 100 HDD").
     * `"chipseq.xcor.disks"`? : Disks for `xcor` (default: "local-disk 100 HDD").
@@ -283,14 +317,14 @@ Optional parameters and flags are marked with `?`.
     Walltime (`time`) settings (for SGE and SLURM only).
 
     * `"chipseq.merge_fastq.time_hr"`? : Walltime for `merge_fastq` (default: 6).
-    * `"chipseq.bowtie2.time_hr"`? : Walltime for `bowtie2` (default: 48).
+    * `"chipseq.bwa.time_hr"`? : Walltime for `bwa` (default: 48).
     * `"chipseq.filter.time_hr"`? : Walltime for `filter` (default: 24).
     * `"chipseq.bam2ta.time_hr"`? : Walltime for `bam2ta` (default: 6).
     * `"chipseq.xcor.time_hr"`? : Walltime for `xcor` (default: 6).
     * `"chipseq.macs2_time_hr"`? : Walltime for `macs2` (default: 24).
     * `"chipseq.spp_time_hr"`? : Walltime for `spp` (default: 72).
 
-12) QC report HTML/JSON
+13) QC report HTML/JSON
 
     * `"chipseq.qc_report.name"`? : Name of sample.
     * `"chipseq.qc_report.desc"`? : Description for sample.
