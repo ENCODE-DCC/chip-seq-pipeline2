@@ -160,16 +160,6 @@ workflow chipseq {
 			}
 		}
 	}
-	# fingerprint/jsd plot
-	#if ( inputs.is_before_ta && inputs.num_ctl>0 ) {
-	#	call fingerprint { input :
-	#		nodup_bams = if inputs.is_before_nodup_bam then filter.nodup_bam
-	#					else nodup_bams,
-	#		ctl_bam = if inputs.is_ctl_before_nodup_bam then filter_ctl.nodup_bam[0]
-	#					else ctl_nodup_bams[0],
-	#	}
-	#}
-
 	# align controls
 	scatter(i in range(inputs.num_ctl)) {
 		if ( inputs.is_ctl_before_bam ) {
@@ -203,7 +193,16 @@ workflow chipseq {
 			}
 		}
 	}
-
+	# fingerprint and jsd plot
+	if ( inputs.is_before_ta && inputs.is_ctl_before_ta && inputs.num_ctl>0 ) {
+		call fingerprint { input :
+			nodup_bams = if inputs.is_before_nodup_bam then filter.nodup_bam
+						else nodup_bams,
+			ctl_bam = if inputs.is_ctl_before_nodup_bam then filter_ctl.nodup_bam[0]
+						else ctl_nodup_bams[0],
+			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+		}
+	}
 	# pool ta
 	if ( !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1 ) {
 		# pool tagaligns from true replicates
@@ -467,11 +466,7 @@ workflow chipseq {
 	if ( !inputs.align_only && inputs.num_rep>1 ) {
 		scatter( pair in inputs.pairs ) {
 			call overlap { input :
-				prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
-				peak1 = if inputs.is_before_peak && inputs.peak_caller=='macs2' then macs2.npeak[(pair[0])] 
-						else if inputs.is_before_peak && inputs.peak_caller=='spp' then spp.rpeak[(pair[0])] 
-						else peaks[(pair[0])],
-				peak2 = if inputs.is_before_peak && inputs.peak_caller=='macs2' then macs2.npeak[(pair[1])]
+				3 = "rep"+(pair[0]+1)+"-rep"+(pair[1]+)]
 						else if inputs.is_before_peak && inputs.peak_caller=='spp' then spp.rpeak[(pair[1])]
 						else peaks[(pair[1])],
 				peak_pooled = if inputs.is_before_peak && inputs.peak_caller=='macs2' then macs2_pooled.npeak
@@ -774,6 +769,7 @@ task fingerprint {
 	# parameters from workflow
 	Array[File?] nodup_bams
 	File? ctl_bam	 		# one control bam is required
+	Array[File] blacklist
 
 	# resource
 	Int? cpu
@@ -785,11 +781,12 @@ task fingerprint {
 		python $(which encode_fingerprint.py) \
 			${sep=' ' nodup_bams} \
 			--ctl-bam ctl_bam
+			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
 			${"--nth " + select_first([cpu,2])}
 	}
 	output {
-		File plot = glob("*.png")[0]
-		File qc = glob("*.qc")[0]
+		File plot = glob("*.png")
+		Array[File] jsd_qcs = glob("*.jsd.qc")
 	}
 	runtime {
 		cpu : select_first([cpu,2])
@@ -1049,6 +1046,9 @@ task spr { # make two self pseudo replicates
 	File ta
 	Boolean paired_end
 
+	# resource
+	Int? mem_mb
+
 	command {
 		python $(which encode_spr.py) \
 			${ta} \
@@ -1057,6 +1057,9 @@ task spr { # make two self pseudo replicates
 	output {
 		File ta_pr1 = glob("*.pr1.tagAlign.gz")[0]
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
+	}
+	runtime {
+		memory : "${select_first([mem_mb,'12000'])} MB"
 	}
 }
 

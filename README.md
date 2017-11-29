@@ -300,6 +300,7 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
     * `"chipseq.bwa.mem_mb"`? : Max. memory limit in MB for `bwa` (default: 20000).
     * `"chipseq.filter.mem_mb"`? : Max. memory limit in MB for `filter` (default: 20000).
     * `"chipseq.bam2ta.mem_mb"`? : Max. memory limit in MB for `bam2ta` (default: 10000).
+    * `"chipseq.spr.mem_mb"`? : Max. memory limit in MB for `spr` (default: 12000).
     * `"chipseq.xcor.mem_mb"`? : Max. memory limit in MB for `xcor` (default: 10000).
     * `"chipseq.macs2_mem_mb"`? : Max. memory limit in MB for `macs2` (default: 16000).
     * `"chipseq.spp_mem_mb"`? : Max. memory limit in MB for `spp` (default: 16000).

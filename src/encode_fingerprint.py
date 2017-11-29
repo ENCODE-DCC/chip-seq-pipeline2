@@ -15,6 +15,10 @@ def parse_arguments():
                         help='List o paths for filtered experiment BAM files.')
     parser.add_argument('--ctl-bam', type=str,
                         help='Path for filtered control BAM file.')
+    parser.add_argument('--blacklist', type=str, default='',
+                        help='Blacklist BED file.')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
                             help='Output directory.')
     parser.add_argument('--log-level', default='INFO', 
@@ -27,21 +31,55 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def bam2ta_se(bam, regex_grep_v_ta, out_dir):
+def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
-    ta = '{}.tagAlign.gz'.format(prefix)
+        os.path.basename(strip_ext_bam(bams[0])))
+    plot_png =  '{}.jsd_plot.png'.format(prefix)
+    tmp_log = '{}.jsd.tmp'.format(prefix)
+    mapq_thresh = 30
 
-    cmd = 'bedtools bamtobed -i {} | '
-    cmd += 'awk \'BEGIN{{OFS="\\t"}}{{$4="N";$5="1000";print $0}}\' | '
-    if regex_grep_v_ta:
-        cmd += 'grep -P -v \'{}\' | '.format(regex_grep_v_ta)
-    cmd += 'gzip -nc > {}'
+    labels = []
+    bam_paths = []
+    jsd_qcs = []
+    for i, bam in enumerate(bams):
+        prefix_ = os.path.join(out_dir,
+            os.path.basename(strip_ext_bam(bam))))
+        jsd_qcs.append('rep{}.{}.jsd.qc'.format(i+1,prefix_))
+        labels.append(i+1) # repN
+        bam_paths.append(bam)
+    # add control
+    labels.append('ctl1')
+    bam_paths.append(ctl_bam)
+
+    cmd = 'plotFingerprint -b {} --JSDsample {} '
+    cmd += '--labels {} '
+    cmd += '--outQualityMetrics {} '
+    cmd += '--minMappingQuality {} '
+    cmd += '-T "Fingerprints of different samples" '
+    if blacklist:
+        cmd += '--blackListFileName {} '.format(blacklist)
+    cmd += '--numberOfProcessors {} '
+    cmd += '--plotFile {}'
     cmd = cmd.format(
-        bam,
-        ta)
+        ' '.join(bam_paths),
+        ctl_bam,
+        ' '.join(labels),
+        tmp_log,
+        mapq_thresh,
+        nth,
+        plot_png)
     run_shell_cmd(cmd)
-    return ta
+
+    # parse tmp_log to get jsd_qc for each exp replicate
+    with open(tmp_log,'r') as fp:
+        for i, line in enumerate(fp.readlines): # i is rep_id-1
+            if i==0: continue
+            if i>=len(jsd_qc): break
+            with open(jsd_qc,'w') as fp2:
+                # removing repN from lines
+                fp2.write('\t'.join(line.strip().split('\t')[1:]))
+    rm_f(tmp_log)
+    return plot_png, jsd_qcs
 
 def main():
     # read params
@@ -53,35 +91,10 @@ def main():
     # declare temp arrays
     temp_files = [] # files to deleted later at the end
 
-    log.info('Converting BAM to TAGALIGN...')
-    if args.paired_end:
-        ta = bam2ta_pe(args.bam, args.regex_grep_v_ta,
-                        args.nth, args.out_dir)
-    else:
-        ta = bam2ta_se(args.bam, args.regex_grep_v_ta,
-                        args.out_dir)
-
-    if args.subsample:
-        log.info('Subsampling TAGALIGN...')
-        if args.paired_end:
-            subsampled_ta = subsample_ta_pe(
-                ta, args.subsample, False, False, args.out_dir)
-        else:
-            subsampled_ta = subsample_ta_se(
-                ta, args.subsample, False, args.out_dir)
-        temp_files.append(ta)
-    else:
-        subsampled_ta = ta
-
-    if args.disable_tn5_shift:
-        shifted_ta = subsampled_ta
-    else:
-        log.info("TN5-shifting TAGALIGN...")
-        shifted_ta = tn5_shift_ta(subsampled_ta, args.out_dir)
-        temp_files.append(subsampled_ta)
-
-    log.info('Removing temporary files...')
-    rm_f(temp_files)
+    log.info('Plotting Fingerprint on BAMs and calculating JSD...')
+    plot_png, jsd_qcs = fingerprint(
+        args.bams, args.ctl_bam, args.blacklist,
+        args.blacklist, args.nth, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

@@ -69,7 +69,7 @@ RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picar
 RUN chmod +x picard.jar
 
 # Install Bwa 0.7.13
-RUN git clone --branch 0.7.13 https://github.com/lh3/bwa.git
+RUN git clone --branch v0.7.13 https://github.com/lh3/bwa.git
 RUN cd bwa && make && cp bwa /usr/local/bin/
 ENV PATH="/software/bwa:${PATH}"
 
