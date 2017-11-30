@@ -128,8 +128,7 @@ workflow chipseq {
 		if ( inputs.is_before_ta ) {
 			# convert bam to tagalign and subsample it if necessary
 			call bam2ta { input :
-				bam = if defined(filter.nodup_bam) 
-						then filter.nodup_bam else nodup_bams[i],
+				bam = if defined(filter.nodup_bam) then filter.nodup_bam else nodup_bams[i],
 				disable_tn5_shift = inputs.disable_tn5_shift,
 				paired_end = paired_end,
 			}
@@ -217,6 +216,9 @@ workflow chipseq {
 		}
 	}
 	# choose appropriate control for each exp IP replicate
+	# outputs:
+	# 	choose_ctl.idx : control replicate index for each exp replicate 
+	#					-1 means pooled ctl replicate
 	if ( !inputs.align_only && inputs.is_before_peak && inputs.num_ctl>0 ) {
 		call choose_ctl { input:
 			tas = if defined(bam2ta.ta[0]) then bam2ta.ta else tas,
@@ -466,8 +468,12 @@ workflow chipseq {
 	if ( !inputs.align_only && inputs.num_rep>1 ) {
 		scatter( pair in inputs.pairs ) {
 			call overlap { input :
-				3 = "rep"+(pair[0]+1)+"-rep"+(pair[1]+)]
-						else if inputs.is_before_peak && inputs.peak_caller=='spp' then spp.rpeak[(pair[1])]
+				prefix = "rep"+(pair[0]+1)+"-rep"+(pair[1]+1),
+				peak1 = if inputs.is_before_peak && inputs.peak_caller=='macs2'  then macs2.npeak[(pair[0])]
+						else if inputs.is_before_peak && inputs.peak_caller=='spp'  then spp.rpeak[(pair[0])]
+						else peaks[(pair[0])],
+				peak2 = if inputs.is_before_peak && inputs.peak_caller=='macs2'  then macs2.npeak[(pair[1])]
+						else if inputs.is_before_peak && inputs.peak_caller=='spp'  then spp.rpeak[(pair[1])]
 						else peaks[(pair[1])],
 				peak_pooled = if inputs.is_before_peak && inputs.peak_caller=='macs2' then macs2_pooled.npeak
 						else if inputs.is_before_peak && inputs.peak_caller=='spp' then spp_pooled.rpeak
@@ -631,7 +637,10 @@ workflow chipseq {
 						then xcor.plot_png else [],
 		xcor_scores = if !inputs.align_only && inputs.is_before_peak
 						then xcor.score else [],
-
+		jsd_plot = if inputs.is_before_ta && inputs.is_ctl_before_ta		
+						then fingerprint.plot else [],
+		jsd_qcs = if inputs.is_before_ta && inputs.is_ctl_before_ta		
+						then fingerprint.jsd_qcs else [],
 		frip_qcs = if inputs.align_only || !inputs.is_before_peak then []
 						else if inputs.peak_caller=='spp' then spp.frip_qc
 						else macs2.frip_qc,
@@ -780,12 +789,12 @@ task fingerprint {
 	command {
 		python $(which encode_fingerprint.py) \
 			${sep=' ' nodup_bams} \
-			--ctl-bam ctl_bam
+			--ctl-bam ${ctl_bam} \
 			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
 			${"--nth " + select_first([cpu,2])}
 	}
 	output {
-		File plot = glob("*.png")
+		File plot = glob("*.png")[0]
 		Array[File] jsd_qcs = glob("*.jsd.qc")
 	}
 	runtime {
@@ -1201,6 +1210,8 @@ task qc_report {
 	Array[File?] pbc_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
+	Array[File?] jsd_plot # not actually an array
+	Array[File?] jsd_qcs
 	Array[File?] idr_plots
 	Array[File?] idr_plots_pr
 	Array[File?] idr_plot_ppr # not actually an array
@@ -1233,6 +1244,8 @@ task qc_report {
 			--pbc-qcs ${sep=' ' pbc_qcs} \
 			--xcor-plots ${sep=' ' xcor_plots} \
 			--xcor-scores ${sep=' ' xcor_scores} \
+			--jsd-plot ${sep=' ' jsd_plot} \
+			--jsd-qcs ${sep=' ' jsd_qcs} \
 			--idr-plots ${sep=' ' idr_plots} \
 			--idr-plots-pr ${sep=' ' idr_plots_pr} \
 			--idr-plot-ppr ${sep=' ' idr_plot_ppr} \

@@ -43,9 +43,9 @@ def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
     jsd_qcs = []
     for i, bam in enumerate(bams):
         prefix_ = os.path.join(out_dir,
-            os.path.basename(strip_ext_bam(bam))))
+            os.path.basename(strip_ext_bam(bam)))
         jsd_qcs.append('rep{}.{}.jsd.qc'.format(i+1,prefix_))
-        labels.append(i+1) # repN
+        labels.append('rep{}'.format(i+1)) # repN
         bam_paths.append(bam)
     # add control
     labels.append('ctl1')
@@ -72,10 +72,10 @@ def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
 
     # parse tmp_log to get jsd_qc for each exp replicate
     with open(tmp_log,'r') as fp:
-        for i, line in enumerate(fp.readlines): # i is rep_id-1
+        for i, line in enumerate(fp.readlines()): # i is rep_id-1
             if i==0: continue
-            if i>=len(jsd_qc): break
-            with open(jsd_qc,'w') as fp2:
+            if i>len(jsd_qcs): break
+            with open(jsd_qcs[i-1],'w') as fp2:
                 # removing repN from lines
                 fp2.write('\t'.join(line.strip().split('\t')[1:]))
     rm_f(tmp_log)
@@ -93,8 +93,7 @@ def main():
 
     log.info('Plotting Fingerprint on BAMs and calculating JSD...')
     plot_png, jsd_qcs = fingerprint(
-        args.bams, args.ctl_bam, args.blacklist,
-        args.blacklist, args.nth, args.out_dir)
+        args.bams, args.ctl_bam, args.blacklist, args.nth, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
