@@ -13,9 +13,10 @@ AQUAS Transcription Factor and Histone ChIP-Seq processing pipeline
 # Usage
 
 Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `Docker`.
-    ```
-    $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run chipseq.wdl -i input.json -o [WORKFLOW_OPT]
-    ```
+
+```
+$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run chipseq.wdl -i input.json -o [WORKFLOW_OPT]
+```
 
 ### Google Cloud Platform
 

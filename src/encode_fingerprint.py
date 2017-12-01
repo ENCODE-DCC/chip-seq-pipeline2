@@ -6,13 +6,13 @@
 import sys
 import os
 import argparse
-from encode_common import *
+from encode_common_genomic import *
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Fingerprint/JSD plot.',
                                         description='')
     parser.add_argument('bams', nargs='+', type=str,
-                        help='List o paths for filtered experiment BAM files.')
+                        help='List of paths for filtered experiment BAM files.')
     parser.add_argument('--ctl-bam', type=str,
                         help='Path for filtered control BAM file.')
     parser.add_argument('--blacklist', type=str, default='',
@@ -32,6 +32,11 @@ def parse_arguments():
     return args
 
 def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
+    # make bam index (.bai) first
+    for bam in bams:
+        sambamba_index(bam, nth)
+    sambamba_index(ctl_bam, nth)
+
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bams[0])))
     plot_png =  '{}.jsd_plot.png'.format(prefix)
