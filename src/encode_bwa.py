@@ -117,7 +117,7 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, out_dir):
     pool.close()
     pool.join()
     
-    cmd = 'bwa sampe {} {} {} {} {} | gzip -nc > $sam'.format(
+    cmd = 'bwa sampe {} {} {} {} {} | gzip -nc > {}'.format(
         ref_index_prefix,
         sai1,
         sai2,

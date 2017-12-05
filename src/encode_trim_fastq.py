@@ -44,14 +44,6 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    # update array with trimmed fastqs
-    fastqs_R1 = []
-    fastqs_R2 = []
-    for fastqs in args.fastqs:
-        fastqs_R1.append(fastqs[0])
-        if args.paired_end:
-            fastqs_R2.append(fastqs[1])
-
     log.info('Trimming fastqs ({} bp)...'.format(args.trim_bp))
     trimmed = trim_fastq(args.fastq, args.trim_bp, args.out_dir)
 

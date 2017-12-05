@@ -10,7 +10,7 @@ AQUAS Transcription Factor and Histone ChIP-Seq processing pipeline
 * `installers/` : dependency/genome data installers for Local, SGE and SLURM
 * `docker_image/` : Dockerfile
 
-# Usage
+# General usage
 
 Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `Docker`.
 

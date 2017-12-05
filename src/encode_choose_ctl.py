@@ -77,7 +77,7 @@ def main():
             ctl_ta_idx = [-1]*len(args.tas) # use pooled control for all exp replicates
         else:
             for i in range(len(args.tas)):
-                if i>len(args.ctl_ta)-1:
+                if i>len(args.ctl_tas)-1:
                     ctl_ta_idx[i] = -1 # use pooled control
                 elif nlines_ctl[i] < nlines[i]:
                     log.info('Fewer reads in control {} than experiment replicate {}. Using pooled control for replicate {}.'.format(

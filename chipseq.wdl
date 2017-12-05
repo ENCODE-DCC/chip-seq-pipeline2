@@ -44,6 +44,8 @@ workflow chipseq {
 							# naive-overlap and IDR will also be disabled
 	Int? multimapping 		# multimapping reads
 
+	# task-specific variables but defined in workflow level (limit of WDL)
+
 	# optional for MACS2
 	Int? macs2_cap_num_peak	# cap number of raw peaks called from MACS2
 	Float? pval_thresh 		# p.value threshold
@@ -63,9 +65,10 @@ workflow chipseq {
 
 	# OTHER IMPORTANT mandatory/optional parameters are declared in a task level
 
-	# 1) determine input file type and num_rep (number of replicates)
+	# initialization 
+	# 1) determine input file type and num_rep (number of exp replicates)
 	# 2) generate pairs of all replicates for later use
-	# 3) read from genome_tsv
+	# 3) useful booleans for better code readability
 	call inputs {
 		input :
 			pipeline_type = pipeline_type,
@@ -83,6 +86,8 @@ workflow chipseq {
 			align_only_ = align_only,
 			true_rep_only_ = true_rep_only,
 	}
+	# temp null variable for optional inputs
+	String? null
 
 	# pipeline starts here (parallelized for each replicate)
 	scatter(i in range(inputs.num_rep)) {
@@ -94,7 +99,7 @@ workflow chipseq {
 			}
 			# align merged fastqs with bowtie2
 			call bwa { input :
-				idx_tar = inputs.bwa_idx_tar,
+				idx_tar = inputs.genome['bwa_idx_tar'],
 				fastqs = merge_fastq.merged_fastqs, #[R1,R2]
 				paired_end = paired_end,
 			}
@@ -105,7 +110,7 @@ workflow chipseq {
 				fastq = merge_fastq.merged_fastqs[0],
 			}
 			call bwa as bwa_R1 { input :
-				idx_tar = inputs.bwa_idx_tar,
+				idx_tar = inputs.genome['bwa_idx_tar'],
 				fastqs = [trim_fastq.trimmed_fastq],
 				paired_end = false,
 			}
@@ -169,7 +174,7 @@ workflow chipseq {
 			}
 			# align merged fastqs with bowtie2
 			call bwa as bwa_ctl { input :
-				idx_tar = inputs.bwa_idx_tar,
+				idx_tar = inputs.genome['bwa_idx_tar'],
 				fastqs = merge_fastq_ctl.merged_fastqs, #[R1,R2]
 				paired_end = paired_end,
 			}
@@ -197,7 +202,7 @@ workflow chipseq {
 		call fingerprint { input :
 			nodup_bams = if inputs.is_before_nodup_bam then filter.nodup_bam else nodup_bams,
 			ctl_bam = if inputs.is_ctl_before_nodup_bam then filter_ctl.nodup_bam[0] else ctl_nodup_bams[0],
-			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+			blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 		}
 	}
 	# pool ta
@@ -221,15 +226,15 @@ workflow chipseq {
 		call choose_ctl { input:
 			tas = if defined(bam2ta.ta[0]) then bam2ta.ta else tas,
 			ctl_tas = if defined(bam2ta_ctl.ta[0]) then bam2ta_ctl.ta else ctl_tas,
-			ta_pooled = if inputs.num_rep>1 then [pool_ta.ta_pooled] else [],
-			ctl_ta_pooled = if inputs.num_ctl>1 then [pool_ta_ctl.ta_pooled] else [],
+			ta_pooled = if inputs.num_rep>1 then pool_ta.ta_pooled else null,
+			ctl_ta_pooled = if inputs.num_ctl>1 then pool_ta_ctl.ta_pooled else null,
 		}
 	}
 	# get sum, rounded mean of fragment length
 	# these will be used for 
 	# 1) calling peaks for pooled true/pseudo replicates
 	# 2) calculating FRiP
-	if ( inputs.is_before_peak && inputs.num_rep>1 ) {
+	if ( !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1 ) {
 		call fraglen_mean { input :
 			ints = xcor.fraglen,
 		}
@@ -241,17 +246,17 @@ workflow chipseq {
 			# call peaks on tagalign
 			call macs2 { input :
 				ta = if defined(bam2ta.ta[0]) then bam2ta.ta[i] else tas[i],
-				ctl_ta = if inputs.num_ctl==0 then [] 
-					else if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then [bam2ta_ctl.ta[(choose_ctl.idx[i])]]
-					else if choose_ctl.idx[i]<0 then [pool_ta_ctl.ta_pooled]
-					else [ctl_tas[(choose_ctl.idx[i])]],
-				gensz = inputs.gensz,
-				chrsz = inputs.chrsz,
+				ctl_ta = if inputs.num_ctl==0 then null
+					else if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then bam2ta_ctl.ta[(choose_ctl.idx[i])]
+					else if choose_ctl.idx[i]<0 then pool_ta_ctl.ta_pooled
+					else ctl_tas[(choose_ctl.idx[i])],
+				gensz = inputs.genome['gensz'],
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				pval_thresh = pval_thresh,
 				make_signal = true,
 				fraglen = xcor.fraglen[i],
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -264,10 +269,10 @@ workflow chipseq {
 				ctl_ta = if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then bam2ta_ctl.ta[(choose_ctl.idx[i])]
 					else if choose_ctl.idx[i]<0 then pool_ta_ctl.ta_pooled
 					else ctl_tas[(choose_ctl.idx[i])],
-				chrsz = inputs.chrsz,
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				fraglen = xcor.fraglen[i],
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
 				disks = spp_disks,
@@ -281,17 +286,17 @@ workflow chipseq {
 		# always call MACS2 peaks for pooled replicate to get signal tracks
 		call macs2 as macs2_pooled { input :
 			ta = pool_ta.ta_pooled,
-			ctl_ta = if inputs.num_ctl==0 then [] 
-					else if defined(pool_ta_ctl.ta_pooled) then [pool_ta_ctl.ta_pooled]
-					else if defined(bam2ta_ctl.ta[0]) then [bam2ta_ctl.ta[0]]
-					else [ctl_tas[0]],
-			gensz = inputs.gensz,
-			chrsz = inputs.chrsz,
+			ctl_ta = if inputs.num_ctl==0 then null
+					else if defined(pool_ta_ctl.ta_pooled) then pool_ta_ctl.ta_pooled
+					else if defined(bam2ta_ctl.ta[0]) then bam2ta_ctl.ta[0]
+					else ctl_tas[0],
+			gensz = inputs.genome['gensz'],
+			chrsz = inputs.genome['chrsz'],
 			cap_num_peak = cap_num_peak,
 			pval_thresh = pval_thresh,
 			make_signal = true,
 			fraglen = fraglen_mean.rounded_mean,
-			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+			blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -303,10 +308,10 @@ workflow chipseq {
 				ctl_ta = if defined(pool_ta_ctl.ta_pooled) then pool_ta_ctl.ta_pooled
 						else if defined(bam2ta_ctl.ta[0]) then bam2ta_ctl.ta[0]
 						else ctl_tas[0],
-				chrsz = inputs.chrsz,
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				fraglen = fraglen_mean.rounded_mean,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
 				disks = spp_disks,
@@ -320,32 +325,32 @@ workflow chipseq {
 				# call peaks on 1st pseudo replicated tagalign 
 				call macs2 as macs2_pr1 { input :
 					ta = spr.ta_pr1[i],
-					ctl_ta = if inputs.num_ctl==0 then [] 
-						else if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then [bam2ta_ctl.ta[(choose_ctl.idx[i])]]
-						else if choose_ctl.idx[i]<0 then [pool_ta_ctl.ta_pooled]
-						else [ctl_tas[(choose_ctl.idx[i])]],
-					gensz = inputs.gensz,
-					chrsz = inputs.chrsz,
+					ctl_ta = if inputs.num_ctl==0 then null
+						else if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then bam2ta_ctl.ta[(choose_ctl.idx[i])]
+						else if choose_ctl.idx[i]<0 then pool_ta_ctl.ta_pooled
+						else ctl_tas[(choose_ctl.idx[i])],
+					gensz = inputs.genome['gensz'],
+					chrsz = inputs.genome['chrsz'],
 					cap_num_peak = cap_num_peak,
 					pval_thresh = pval_thresh,
 					fraglen = xcor.fraglen[i],
-					blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+					blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 					mem_mb = macs2_mem_mb,
 					disks = macs2_disks,
 					time_hr = macs2_time_hr,
 				}
 				call macs2 as macs2_pr2 { input :
 					ta = spr.ta_pr2[i],
-					ctl_ta = if inputs.num_ctl==0 then [] 
-						else if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then [bam2ta_ctl.ta[(choose_ctl.idx[i])]]
-						else if choose_ctl.idx[i]<0 then [pool_ta_ctl.ta_pooled]
-						else [ctl_tas[(choose_ctl.idx[i])]],
-					gensz = inputs.gensz,
-					chrsz = inputs.chrsz,
+					ctl_ta = if inputs.num_ctl==0 then null
+						else if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then bam2ta_ctl.ta[(choose_ctl.idx[i])]
+						else if choose_ctl.idx[i]<0 then pool_ta_ctl.ta_pooled
+						else ctl_tas[(choose_ctl.idx[i])],
+					gensz = inputs.genome['gensz'],
+					chrsz = inputs.genome['chrsz'],
 					cap_num_peak = cap_num_peak,
 					pval_thresh = pval_thresh,
 					fraglen = xcor.fraglen[i],
-					blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+					blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 					mem_mb = macs2_mem_mb,
 					disks = macs2_disks,
 					time_hr = macs2_time_hr,
@@ -358,10 +363,10 @@ workflow chipseq {
 					ctl_ta = if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then bam2ta_ctl.ta[(choose_ctl.idx[i])]
 						else if choose_ctl.idx[i]<0 then pool_ta_ctl.ta_pooled
 						else ctl_tas[(choose_ctl.idx[i])],
-					chrsz = inputs.chrsz,
+					chrsz = inputs.genome['chrsz'],
 					cap_num_peak = cap_num_peak,
 					fraglen = xcor.fraglen[i],
-					blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+					blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 					cpu = spp_cpu,
 					mem_mb = spp_mem_mb,
 					disks = spp_disks,
@@ -372,10 +377,10 @@ workflow chipseq {
 					ctl_ta = if defined(bam2ta_ctl.ta[0]) && choose_ctl.idx[i]>=0 then bam2ta_ctl.ta[(choose_ctl.idx[i])]
 						else if choose_ctl.idx[i]<0 then pool_ta_ctl.ta_pooled
 						else ctl_tas[(choose_ctl.idx[i])],
-					chrsz = inputs.chrsz,
+					chrsz = inputs.genome['chrsz'],
 					cap_num_peak = cap_num_peak,
 					fraglen = xcor.fraglen[i],
-					blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+					blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 					cpu = spp_cpu,
 					mem_mb = spp_mem_mb,
 					disks = spp_disks,
@@ -396,16 +401,16 @@ workflow chipseq {
 			# call peaks on 1st pooled pseudo replicates
 			call macs2 as macs2_ppr1 { input :
 				ta = pool_ta_pr1.ta_pooled,
-				ctl_ta = if inputs.num_ctl==0 then [] 
-					else if defined(pool_ta_ctl.ta_pooled) then [pool_ta_ctl.ta_pooled]
-					else if defined(bam2ta_ctl.ta[0]) then [bam2ta_ctl.ta[0]]
-					else [ctl_tas[0]],
-				gensz = inputs.gensz,
-				chrsz = inputs.chrsz,
+				ctl_ta = if inputs.num_ctl==0 then null
+					else if defined(pool_ta_ctl.ta_pooled) then pool_ta_ctl.ta_pooled
+					else if defined(bam2ta_ctl.ta[0]) then bam2ta_ctl.ta[0]
+					else ctl_tas[0],
+				gensz = inputs.genome['gensz'],
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_mean.rounded_mean,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -413,16 +418,16 @@ workflow chipseq {
 			# call peaks on 2nd pooled pseudo replicates
 			call macs2 as macs2_ppr2 { input :
 				ta = pool_ta_pr2.ta_pooled,
-				ctl_ta = if inputs.num_ctl==0 then [] 
-					else if defined(pool_ta_ctl.ta_pooled) then [pool_ta_ctl.ta_pooled]
-					else if defined(bam2ta_ctl.ta[0]) then [bam2ta_ctl.ta[0]]
-					else [ctl_tas[0]],
-				gensz = inputs.gensz,
-				chrsz = inputs.chrsz,
+				ctl_ta = if inputs.num_ctl==0 then null
+					else if defined(pool_ta_ctl.ta_pooled) then pool_ta_ctl.ta_pooled
+					else if defined(bam2ta_ctl.ta[0]) then bam2ta_ctl.ta[0]
+					else ctl_tas[0],
+				gensz = inputs.genome['gensz'],
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_mean.rounded_mean,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -435,10 +440,10 @@ workflow chipseq {
 				ctl_ta = if defined(pool_ta_ctl.ta_pooled) then pool_ta_ctl.ta_pooled
 						else if defined(bam2ta_ctl.ta[0]) then bam2ta_ctl.ta[0]
 						else ctl_tas[0],
-				chrsz = inputs.chrsz,
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				fraglen = fraglen_mean.rounded_mean,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
 				disks = spp_disks,
@@ -450,10 +455,10 @@ workflow chipseq {
 				ctl_ta = if defined(pool_ta_ctl.ta_pooled) then pool_ta_ctl.ta_pooled
 						else if defined(bam2ta_ctl.ta[0]) then bam2ta_ctl.ta[0]
 						else ctl_tas[0],
-				chrsz = inputs.chrsz,
+				chrsz = inputs.genome['chrsz'],
 				cap_num_peak = cap_num_peak,
 				fraglen = fraglen_mean.rounded_mean,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
 				disks = spp_disks,
@@ -477,10 +482,10 @@ workflow chipseq {
 						else if inputs.is_before_peak && inputs.peak_caller=='spp' then spp_pooled.rpeak
 						else peak_pooled,
 				peak_type = inputs.peak_type,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				chrsz = inputs.chrsz,
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				chrsz = inputs.genome['chrsz'],
 				fraglen = if inputs.is_before_peak then fraglen_mean.rounded_mean else 0,
-				ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
+				ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 			}
 		}
 	}
@@ -499,12 +504,12 @@ workflow chipseq {
 						else if inputs.is_before_peak && inputs.peak_caller=='spp'  then spp.rpeak[i]
 						else peak_pooled,
 				peak_type = inputs.peak_type,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				chrsz = inputs.chrsz,
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				chrsz = inputs.genome['chrsz'],
 				fraglen = if inputs.is_before_peak then xcor.fraglen[i] else 0,
-				ta = if inputs.is_before_ta then [bam2ta.ta[i]]
-						else if inputs.is_before_peak then [tas[i]]
-						else [],
+				ta = if inputs.is_before_ta then bam2ta.ta[i]
+						else if inputs.is_before_peak then tas[i]
+						else null,
 			}
 		}
 	}
@@ -522,11 +527,10 @@ workflow chipseq {
 					else if inputs.is_before_peak && inputs.peak_caller=='spp'  then spp_pooled.rpeak
 					else peak_pooled,
 			peak_type = inputs.peak_type,
-			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-			chrsz = inputs.chrsz,
+			blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+			chrsz = inputs.genome['chrsz'],
 			fraglen = if inputs.is_before_peak then fraglen_mean.rounded_mean else 0,
-			ta = if inputs.is_before_peak then [pool_ta.ta_pooled]
-					else [],
+			ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 		}
 	}
 	if ( !inputs.align_only && !inputs.true_rep_only ) {
@@ -556,10 +560,10 @@ workflow chipseq {
 				idr_thresh = select_first([idr_thresh,0.05]),
 				peak_type = inputs.peak_type,
 				rank = inputs.idr_rank,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				chrsz = inputs.chrsz,
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				chrsz = inputs.genome['chrsz'],
 				fraglen = if inputs.is_before_peak then fraglen_mean.rounded_mean else 0,
-				ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
+				ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 			}
 		}
 	}
@@ -580,12 +584,12 @@ workflow chipseq {
 				idr_thresh = select_first([idr_thresh,0.05]),
 				peak_type = inputs.peak_type,
 				rank = inputs.idr_rank,
-				blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-				chrsz = inputs.chrsz,
+				blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+				chrsz = inputs.genome['chrsz'],
 				fraglen = if inputs.is_before_peak then xcor.fraglen[i] else 0,
-				ta = if inputs.is_before_ta then [bam2ta.ta[i]]
-						else if inputs.is_before_peak then [tas[i]]
-						else [],
+				ta = if inputs.is_before_ta then bam2ta.ta[i]
+						else if inputs.is_before_peak then tas[i]
+						else null,
 			}
 		}
 	}
@@ -605,10 +609,10 @@ workflow chipseq {
 			idr_thresh = select_first([idr_thresh,0.05]),
 			peak_type = inputs.peak_type,
 			rank = inputs.idr_rank,
-			blacklist = if inputs.has_blacklist then [inputs.blacklist] else [],
-			chrsz = inputs.chrsz,
+			blacklist = if inputs.genome['blacklist']!='/dev/null' then inputs.genome['blacklist'] else null,
+			chrsz = inputs.genome['chrsz'],
 			fraglen = if inputs.is_before_peak then fraglen_mean.rounded_mean else 0,
-			ta = if inputs.is_before_peak then [pool_ta.ta_pooled] else [],
+			ta = if inputs.is_before_peak then pool_ta.ta_pooled else null,
 		}
 	}
 	if ( !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr ) {
@@ -634,6 +638,14 @@ workflow chipseq {
 						then filter.dup_qc else [],
 		pbc_qcs = if inputs.is_before_nodup_bam
 						then filter.pbc_qc else [],
+		ctl_flagstat_qcs = if inputs.is_ctl_before_bam 
+						then bwa_ctl.flagstat_qc else [],
+		ctl_nodup_flagstat_qcs = if inputs.is_ctl_before_nodup_bam 
+						then filter_ctl.flagstat_qc	else [],
+		ctl_dup_qcs = if inputs.is_ctl_before_nodup_bam
+						then filter_ctl.dup_qc else [],
+		ctl_pbc_qcs = if inputs.is_ctl_before_nodup_bam
+						then filter_ctl.pbc_qc else [],
 		xcor_plots = if !inputs.align_only && inputs.is_before_peak
 						then xcor.plot_png else [],
 		xcor_scores = if !inputs.align_only && inputs.is_before_peak
@@ -651,42 +663,42 @@ workflow chipseq {
 		frip_qcs_pr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only then []
 						else if inputs.peak_caller=='spp' then spp_pr2.frip_qc
 						else macs2_pr2.frip_qc,
-		frip_qc_pooled = if inputs.align_only || !inputs.is_before_peak || inputs.num_rep<=1 then []
-						else if inputs.peak_caller=='spp' then [spp_pooled.frip_qc]
-						else [macs2_pooled.frip_qc],
-		frip_qc_ppr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
-						else if inputs.peak_caller=='spp' then [spp_ppr1.frip_qc]
-						else [macs2_ppr1.frip_qc],
-		frip_qc_ppr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then []
-						else if inputs.peak_caller=='spp' then [spp_ppr2.frip_qc]
-						else [macs2_ppr2.frip_qc],
+		frip_qc_pooled = if inputs.align_only || !inputs.is_before_peak || inputs.num_rep<=1 then null
+						else if inputs.peak_caller=='spp' then spp_pooled.frip_qc
+						else macs2_pooled.frip_qc,
+		frip_qc_ppr1 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then null
+						else if inputs.peak_caller=='spp' then spp_ppr1.frip_qc
+						else macs2_ppr1.frip_qc,
+		frip_qc_ppr2 = if inputs.align_only || !inputs.is_before_peak || inputs.true_rep_only || inputs.num_rep<=1 then null
+						else if inputs.peak_caller=='spp' then spp_ppr2.frip_qc
+						else macs2_ppr2.frip_qc,
 
 		idr_plots = if !inputs.align_only && inputs.num_rep>1 && inputs.enable_idr 
 						then idr.idr_plot else [],
 		idr_plots_pr = if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr
 						then idr_pr.idr_plot else [],
 		idr_plot_ppr = if !inputs.align_only && !inputs.true_rep_only && inputs.num_rep>1 && inputs.enable_idr
-						then [idr_ppr.idr_plot] else [],
+						then idr_ppr.idr_plot else null,
 		frip_idr_qcs = if !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1 && inputs.enable_idr
 						then idr.frip_qc else [],
 		frip_idr_qcs_pr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.enable_idr
 						then idr_pr.frip_qc else [],
 		frip_idr_qc_ppr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.num_rep>1 && inputs.enable_idr
-						then [idr_ppr.frip_qc] else [],
+						then idr_ppr.frip_qc else null,
 		frip_overlap_qcs = if !inputs.align_only && inputs.is_before_peak && inputs.num_rep>1
 						then overlap.frip_qc else [],
 		frip_overlap_qcs_pr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only
 						then overlap_pr.frip_qc else [],
 		frip_overlap_qc_ppr = if !inputs.align_only && inputs.is_before_peak && !inputs.true_rep_only && inputs.num_rep>1
-						then [overlap_ppr.frip_qc] else [],
+						then overlap_ppr.frip_qc else null,
 		idr_reproducibility_qc =
 				if !inputs.align_only && !inputs.true_rep_only && inputs.enable_idr &&
 					defined(reproducibility_idr.reproducibility_qc)
-						then [reproducibility_idr.reproducibility_qc] else [],
+						then reproducibility_idr.reproducibility_qc else null,
 		overlap_reproducibility_qc = 
 				if !inputs.align_only && !inputs.true_rep_only && 
 					defined(reproducibility_overlap.reproducibility_qc)
-						then [reproducibility_overlap.reproducibility_qc] else [],
+						then reproducibility_overlap.reproducibility_qc else null,
 	}
 }
 
@@ -733,7 +745,7 @@ task trim_fastq { # trim fastq (for PE R1 only)
 	command {
 		python $(which encode_trim_fastq.py) \
 			${fastq} \
-			--trim_bp ${select_first([trim_bp,50])}
+			--trim-bp ${select_first([trim_bp,50])}
 	}
 	output {
 		File trimmed_fastq = glob("*.fastq.gz")[0]
@@ -745,7 +757,6 @@ task bwa {
 	File idx_tar 		# reference bwa index tar
 	Array[File] fastqs 	# [end_id]
 	Boolean paired_end
-	Int? multimapping
 
 	# resource
 	Int? cpu
@@ -758,7 +769,6 @@ task bwa {
 			${idx_tar} \
 			${sep=' ' fastqs} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--multimapping " + multimapping} \
 			${"--nth " + select_first([cpu,4])}
 	}
 	output {
@@ -779,7 +789,7 @@ task fingerprint {
 	# parameters from workflow
 	Array[File?] nodup_bams
 	File? ctl_bam	 		# one control bam is required
-	Array[File] blacklist
+	File? blacklist
 
 	# resource
 	Int? cpu
@@ -791,7 +801,7 @@ task fingerprint {
 		python $(which encode_fingerprint.py) \
 			${sep=' ' nodup_bams} \
 			--ctl-bam ${ctl_bam} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
+			${"--blacklist "+ blacklist} \
 			${"--nth " + select_first([cpu,2])}
 	}
 	output {
@@ -845,8 +855,8 @@ task choose_ctl {
 	# parameters from workflow
 	Array[File?] tas
 	Array[File?] ctl_tas
-	Array[File?] ta_pooled 		# not actually an array, for optional var 
-	Array[File?] ctl_ta_pooled 	# not actually an array, for optional var
+	File? ta_pooled
+	File? ctl_ta_pooled
 	# optional
 	Boolean? alway_use_pooled_ctl # always use pooled control for all exp rep.
 	Float? ctl_depth_ratio 	# if ratio between controls is higher than this
@@ -855,8 +865,8 @@ task choose_ctl {
 		python $(which encode_choose_ctl.py) \
 			--tas ${sep=' ' tas} \
 			--ctl-tas ${sep=' ' ctl_tas} \
-			--ta-pooled ${sep=' ' ta_pooled} \
-			--ctl-ta-pooled ${sep=' ' ctl_ta_pooled} \
+			${"--ta-pooled " + ta_pooled} \
+			${"--ctl-ta-pooled " + ctl_ta_pooled} \
 			${if select_first([alway_use_pooled_ctl,false]) then 
 				"--always-use-pooled-ctl" else ""} \
 			${"--ctl-depth-ratio " + select_first([ctl_depth_ratio,"1.2"])}				
@@ -869,7 +879,7 @@ task choose_ctl {
 task macs2 {
 	# parameters from workflow
 	File? ta
-	Array[File?] ctl_ta # not actually an array (to make it optional)
+	File? ctl_ta 		# optional. macs2 can work without control
 	Int? fraglen 		# fragment length from xcor
 	File chrsz			# 2-col chromosome sizes file
 	String gensz		# Genome size (sum of entries in 2nd column of 
@@ -877,7 +887,7 @@ task macs2 {
 	Int? cap_num_peak	# cap number of raw peaks called from MACS2
 	Float? pval_thresh	# p.value threshold
 	Boolean? make_signal
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# fixed var
 	String peak_type = "narrowPeak"
 	# resource
@@ -890,25 +900,25 @@ task macs2 {
 	command {
 		python $(which encode_macs2_chipseq.py) \
 			${ta} \
-			--ctl-ta ${sep=' ' ctl_ta} \
+			${"--ctl-ta " + ctl_ta} \
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
 			${"--fraglen " + fraglen} \
 			${"--cap-num-peak " + select_first([cap_num_peak,500000])} \
 			${"--p-val-thresh "+ pval_thresh} \
 			${if make_signal_ then "--make-signal" else ""} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""}
+			${"--blacklist "+ blacklist}
 
 		# ugly part to deal with optional outputs
 		${if make_signal_ then "" 
 			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
-		${if length(blacklist)>0 then "" 
+		${if defined(blacklist) then "" 
 			else "touch null.bfilt."+peak_type+".gz"}
 		touch null
 	}
 	output {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_npeak = if length(blacklist)>0 then glob("*.bfilt."+peak_type+".gz")[0] else npeak
+		File bfilt_npeak = if defined(blacklist) then glob("*.bfilt."+peak_type+".gz")[0] else npeak
 		File sig_pval = if make_signal_ then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
 		File sig_fc = if make_signal_ then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
@@ -927,7 +937,7 @@ task spp {
 	Int? fraglen 		# fragment length from xcor
 	File chrsz			# 2-col chromosome sizes file
 	Int? cap_num_peak	# cap number of raw peaks called from MACS2
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# fixed var
 	String peak_type = "regionPeak"
 	# resource
@@ -944,16 +954,15 @@ task spp {
 			${"--fraglen " + fraglen} \
 			${"--cap-num-peak " + select_first([cap_num_peak,300000])} \
 			${"--nth " + select_first([cpu,2])} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""}
+			${"--blacklist "+ blacklist}
 
 		# ugly part to deal with optional outputs
-		${if length(blacklist)>0 then "" 
+		${if defined(blacklist) then "" 
 			else "touch null.bfilt."+peak_type+".gz"}
-		touch null
 	}
 	output {
 		File rpeak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_rpeak = if length(blacklist)>0 then glob("*.bfilt."+peak_type+".gz")[0] else rpeak
+		File bfilt_rpeak = if defined(blacklist) then glob("*.bfilt."+peak_type+".gz")[0] else rpeak
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
@@ -1093,9 +1102,9 @@ task idr {
 	File? peak2
 	File? peak_pooled
 	Float? idr_thresh
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# parameters to compute FRiP
-	Array[File?] ta		# to calculate FRiP
+	File? ta			# to calculate FRiP
 	Int? fraglen 		# fragment length from xcor
 	File? chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -1110,24 +1119,24 @@ task idr {
 			--idr-rank ${rank} \
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
-			${if length(ta)>0 then "--ta "+ ta[0] else ""}
+			${"--blacklist "+ blacklist} \
+			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs
-		${if length(blacklist)>0 then "" 
+		${if defined(blacklist) then "" 
 			else "touch null.bfilt."+peak_type+".gz"}
-		${if length(ta)>0 then "" 
+		${if defined(ta) then "" 
 			else "touch null.frip.qc"}
 		touch null
 	}
 	output {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_idr_peak = if length(blacklist)>0 then 
+		File bfilt_idr_peak = if defined(blacklist) then 
 							glob("*.bfilt."+peak_type+".gz")[0] else idr_peak
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
-		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 }
 
@@ -1137,9 +1146,9 @@ task overlap {
 	File? peak1
 	File? peak2
 	File? peak_pooled
-	Array[File] blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	# parameters to compute FRiP
-	Array[File?] ta		# to calculate FRiP
+	File? ta			# to calculate FRiP
 	Int? fraglen 		# fragment length from xcor
 	File? chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -1151,22 +1160,22 @@ task overlap {
 			${"--peak-type " + peak_type} \
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
-			${if length(blacklist)>0 then "--blacklist "+ blacklist[0] else ""} \
-			${if length(ta)>0 then "--ta "+ ta[0] else ""}
+			${"--blacklist "+ blacklist} \
+			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs
-		${if length(blacklist)>0 then "" 
+		${if defined(blacklist) then "" 
 			else "touch null.bfilt."+peak_type+".gz"}
-		${if length(ta)>0 then "" 
+		${if defined(ta) then "" 
 			else "touch null.frip.qc"}
 		touch null
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_overlap_peak = if length(blacklist)>0 then 
+		File bfilt_overlap_peak = if defined(blacklist) then 
 							glob("*.bfilt."+peak_type+".gz")[0] else overlap_peak
 		# need temporary boolean in output (cromwell if bug in output)
-		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 }
 
@@ -1210,27 +1219,31 @@ task qc_report {
 	Array[File?] nodup_flagstat_qcs
 	Array[File?] dup_qcs
 	Array[File?] pbc_qcs
+	Array[File?] ctl_flagstat_qcs
+	Array[File?] ctl_nodup_flagstat_qcs
+	Array[File?] ctl_dup_qcs
+	Array[File?] ctl_pbc_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
-	Array[File?] jsd_plot # not actually an array
+	File? jsd_plot 
 	Array[File?] jsd_qcs
 	Array[File?] idr_plots
 	Array[File?] idr_plots_pr
-	Array[File?] idr_plot_ppr # not actually an array
+	File? idr_plot_ppr
 	Array[File?] frip_qcs
 	Array[File?] frip_qcs_pr1
 	Array[File?] frip_qcs_pr2
-	Array[File?] frip_qc_pooled # not actually an array
-	Array[File?] frip_qc_ppr1 # not actually an array
-	Array[File?] frip_qc_ppr2 # not actually an array
+	File? frip_qc_pooled
+	File? frip_qc_ppr1
+	File? frip_qc_ppr2
 	Array[File?] frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
-	Array[File?] frip_idr_qc_ppr # not actually an array
+	File? frip_idr_qc_ppr
 	Array[File?] frip_overlap_qcs
 	Array[File?] frip_overlap_qcs_pr
-	Array[File?] frip_overlap_qc_ppr # not actually an array
-	Array[File?] idr_reproducibility_qc # not actually an array
-	Array[File?] overlap_reproducibility_qc # not actually an array
+	File? frip_overlap_qc_ppr
+	File? idr_reproducibility_qc
+	File? overlap_reproducibility_qc
 
 	command {
 		python $(which encode_qc_report.py) \
@@ -1244,27 +1257,31 @@ task qc_report {
 			--nodup-flagstat-qcs ${sep=' ' nodup_flagstat_qcs} \
 			--dup-qcs ${sep=' ' dup_qcs} \
 			--pbc-qcs ${sep=' ' pbc_qcs} \
+			--ctl-flagstat-qcs ${sep=' ' ctl_flagstat_qcs} \
+			--ctl-nodup-flagstat-qcs ${sep=' ' ctl_nodup_flagstat_qcs} \
+			--ctl-dup-qcs ${sep=' ' ctl_dup_qcs} \
+			--ctl-pbc-qcs ${sep=' ' ctl_pbc_qcs} \
 			--xcor-plots ${sep=' ' xcor_plots} \
 			--xcor-scores ${sep=' ' xcor_scores} \
-			--jsd-plot ${sep=' ' jsd_plot} \
+			${"--jsd-plot " + jsd_plot} \
 			--jsd-qcs ${sep=' ' jsd_qcs} \
 			--idr-plots ${sep=' ' idr_plots} \
 			--idr-plots-pr ${sep=' ' idr_plots_pr} \
-			--idr-plot-ppr ${sep=' ' idr_plot_ppr} \
+			${"--idr-plot-ppr " + idr_plot_ppr} \
 			--frip-qcs ${sep=' ' frip_qcs} \
 			--frip-qcs-pr1 ${sep=' ' frip_qcs_pr1} \
 			--frip-qcs-pr2 ${sep=' ' frip_qcs_pr2} \
-			--frip-qc-pooled ${sep=' ' frip_qc_pooled} \
-			--frip-qc-ppr1 ${sep=' ' frip_qc_ppr1} \
-			--frip-qc-ppr2 ${sep=' ' frip_qc_ppr2} \
+			${"--frip-qc-pooled " + frip_qc_pooled} \
+			${"--frip-qc-ppr1 " + frip_qc_ppr1} \
+			${"--frip-qc-ppr2 " + frip_qc_ppr2} \
 			--frip-idr-qcs ${sep=' ' frip_idr_qcs} \
 			--frip-idr-qcs-pr ${sep=' ' frip_idr_qcs_pr} \
-			--frip-idr-qc-ppr ${sep=' ' frip_idr_qc_ppr} \
+			${"--frip-idr-qc-ppr " + frip_idr_qc_ppr} \
 			--frip-overlap-qcs ${sep=' ' frip_overlap_qcs} \
 			--frip-overlap-qcs-pr ${sep=' ' frip_overlap_qcs_pr} \
-			--frip-overlap-qc-ppr ${sep=' ' frip_overlap_qc_ppr} \
-			--idr-reproducibility-qc ${sep=' ' idr_reproducibility_qc} \
-			--overlap-reproducibility-qc ${sep=' ' overlap_reproducibility_qc} \
+			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
+			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
+			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json
 	}
@@ -1281,7 +1298,7 @@ task qc_report {
 # we have only one task to
 # 	1) determine input type and number of replicates	
 # 	2) generate pair (rep-x_vs_rep-y) of all true replicate
-# 	3) read genome_tsv and get ready to download files 
+# 	3) read genome_tsv
 # 		On Google Cloud Platform 
 #		files are downloaded from gs://atac-seq-pipeline-genome-data/
 # 		ENCODE DCC chip-seq and atac-seq pipelines 
@@ -1345,20 +1362,12 @@ task inputs {
 		String idr_rank = if peak_caller=='macs2' then 'p.value'
 							else if peak_caller=='spp' then 'signal.value'
 							else 'p.value'
-		# read genome TSV
-		Map[String,String] genome = read_map(genome_tsv)
-		String ref_fa = genome['ref_fa']
-		#String bowtie2_idx_tar = genome['bowtie2_idx_tar']
-		String bwa_idx_tar = genome['bwa_idx_tar']
-		String blacklist = genome['blacklist']
-		String chrsz = genome['chrsz']
-		String gensz = genome['gensz']
-
-		# input types and useful booleans
+		# input types and number of exp replicates/controls
 		String type = read_string("type_rep.txt")
 		String type_ctl = read_string("type_ctl.txt")
 		Int num_rep = read_int("num_rep.txt")
 		Int num_ctl = read_int("num_ctl.txt")
+		# useful booleans
 		Boolean is_before_bam =
 			type=='fastq'
 		Boolean is_before_nodup_bam =
@@ -1378,8 +1387,8 @@ task inputs {
 		Boolean align_only = select_first([align_only_,false])
 		Boolean true_rep_only = select_first([true_rep_only_,false])
 		Boolean disable_tn5_shift = pipeline_type!='atac'
-		Boolean has_blacklist = blacklist!='/dev/null'
-
+		# read genome_tsv
+		Map[String,String] genome = read_map(genome_tsv)
 		# pair of true replicates
 		Array[Array[Int]] pairs = if num_rep>1 then read_tsv(stdout()) else [[]]
 	}
