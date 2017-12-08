@@ -1,24 +1,14 @@
 {
 	"chipseq.pipeline_type" : "tf",
 	"chipseq.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
-	"chipseq.fastqs" : [],
 	"chipseq.bams" : [
 		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/rep1/rep1.bam",
 		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/rep2/rep2.bam"
 	],
-	"chipseq.nodup_bams" : [],
-	"chipseq.tas" : [],
-	"chipseq.peaks" : [],
-	"chipseq.peaks_pr1" : [],
-	"chipseq.peaks_pr2" : [],
-
-	"chipseq.ctl_fastqs" : [],
 	"chipseq.ctl_bams" : [
 		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/ctl1/ctl1.bam",
 		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/ctl2/ctl2.bam"
 	],
-	"chipseq.ctl_nodup_bams" : [],
-	"chipseq.ctl_tas" : [],
 
 	"chipseq.paired_end" : false,
 	"chipseq.choose_ctl.always_use_pooled_ctl" : true,

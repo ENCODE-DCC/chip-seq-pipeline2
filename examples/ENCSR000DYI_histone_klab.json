@@ -5,20 +5,10 @@
 		[["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/rep1.fastq.gz"]],
 		[["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/rep2.fastq.gz"]]
 	],
-	"chipseq.bams" : [],
-	"chipseq.nodup_bams" : [],
-	"chipseq.tas" : [],
-	"chipseq.peaks" : [],
-	"chipseq.peaks_pr1" : [],
-	"chipseq.peaks_pr2" : [],
-
 	"chipseq.ctl_fastqs" : [
 		[["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ctl1.fastq.gz"]],
 		[["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ctl2.fastq.gz"]]
 	],
-	"chipseq.ctl_bams" : [],
-	"chipseq.ctl_nodup_bams" : [],
-	"chipseq.ctl_tas" : [],
 
 	"chipseq.paired_end" : false,
 

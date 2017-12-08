@@ -10,12 +10,16 @@ AQUAS Transcription Factor and Histone ChIP-Seq processing pipeline
 * `installers/` : dependency/genome data installers for Local, SGE and SLURM
 * `docker_image/` : Dockerfile
 
+# Important notice
+
+Cromwell has been recently updated to `cromwell-30.jar` but there is a [known bug](https://github.com/broadinstitute/cromwell/issues/2992) for multiple conditionals in a workflow level so our pipeline does not work with `cromwell-30.jar`. This bug is fixed but will not be applied until a new release 31 comes out. We included `cromwell-30-x.jar` in this repository. Use it until `cromwell-31.jar`.
+
 # General usage
 
 Choose `[BACKEND_CONF]` and `[WORKFLOW_OPT]` according to your platform and presence of `Docker`.
 
 ```
-$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run chipseq.wdl -i input.json -o [WORKFLOW_OPT]
+$ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run chipseq.wdl -i input.json -o [WORKFLOW_OPT]
 ```
 
 ### Google Cloud Platform
@@ -63,7 +67,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run chipseq.wdl -i input
 10) You don't have to repeat step 1-9 for next pipeline run. Credential information will be stored in `$HOME/.config/gcloud`. Go directly to step 11.
 11) Run a pipeline. Use any string for `[SAMPLE_NAME]` to distinguish between multiple samples.
     ```
-    $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-*.jar run chipseq.wdl -i input.json -o workflow_opts/docker_google.json
+    $ java -jar -Dconfig.file=backends/google.conf -Dbackend.providers.JES.config.project=[PROJ_NAME] -Dbackend.providers.JES.config.root=[OUT_BUCKET]/[SAMPLE_NAME] cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/docker_google.json
     ```
 
 ### Local computer with `Docker`
@@ -71,7 +75,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run chipseq.wdl -i input
 1) Install [genome data](#genome-data-installation).
 2) Run a pipeline.
     ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run chipseq.wdl -i input.json -o workflow_opts/docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/docker.json
     ```
 
 ### Local computer without `Docker`
@@ -81,7 +85,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-*.jar run chipseq.wdl -i input
 3) Run a pipeline.
     ```
     $ source activate chip-seq-pipeline
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -97,7 +101,7 @@ Genome data have already been installed and shared on Stanford SCG4. You can ski
 4) Run a pipeline.
     ```
     $ source activate chip-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -110,7 +114,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 4) Run a pipeline.
     ```
     $ source activate chip-seq-pipeline
-    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-*.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/slurm.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -119,7 +123,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 Jobs will run locally without being submitted to Sun GridEngine (SGE). Genome data have already been installed and shared.
 1) Run a pipeline. 
     ```
-    $ java -jar -Dconfig.file=backends/default.conf cromwell-*.jar run chipseq.wdl -i input.json -o workflow_opts/docker.json
+    $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/docker.json
     ```
 
 ### Kundaje lab cluster with Sun GridEngine (SGE)
@@ -129,7 +133,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 2) Run a pipeline.
     ```
     $ source activate chip-seq-pipeline
-    $ java -jar -Dconfig.file=backends/sge.conf cromwell-*.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
+    $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
 
@@ -163,7 +167,7 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
     * `"chipseq.genome_tsv"` : TSV file path/URI.
 
 2) Input genome data files
-    Choose any genome data type you want to start with and set all others as `[]`.
+    Choose any genome data type you want to start with and do not define all others.
     
     * `"chipseq.fastqs"` : 3-dimensional array with FASTQ file path/URI.
         - 1st dimension: replicate ID
@@ -196,7 +200,7 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
         else: peaks_pr1[], peaks_pr2[]
     ```
 
-    Default peak caller (`"chipseq.peak_caller"`) for TF (`"chipseq.pipeline_type":"tf"`) ChIP-Seq pipeline and Histone ChIP-Seq pipeline (`"chipseq.pipeline_type":"histone"`) are 'spp' and 'macs2', respectively. However you can also manually specify a peak caller for these pipeline types. 'macs2` can work without controls but `spp` cannot. Therefore, if a peak caller is chosen as `spp` by default or by a workflow parameter then make sure to define the following control data files. Choose any genome data type you want to start with and set all others as `[]`.
+    Default peak caller (`"chipseq.peak_caller"`) for TF (`"chipseq.pipeline_type":"tf"`) ChIP-Seq pipeline and Histone ChIP-Seq pipeline (`"chipseq.pipeline_type":"histone"`) are 'spp' and 'macs2', respectively. However you can also manually specify a peak caller for these pipeline types. `macs2` can work without controls but `spp` cannot. Therefore, if a peak caller is chosen as `spp` by default or by a workflow parameter then make sure to define the following control data files. Choose any genome data type you want to start with and do not define all others.
 
     * `"chipseq.ctl_fastqs"` : 3-dimensional array with control FASTQ file path/URI.
         - 1st dimension: replicate ID
@@ -214,10 +218,8 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
     input.json
     {
         "chipseq.paired_end" : false,
-        "chipseq.fastqs" : [],
         "chipseq.bams" : ["rep1.bam","rep2.bam"],
         ...
-        "chipseq.ctl_fastqs" : [],
         "chipseq.ctl_tas" : ["ctl1.tagAlign.gz","ctl2.tagAlign.gz"],
         ...
     }
@@ -389,6 +391,23 @@ A TSV file will be generated under `[DEST_DIR]`. Use it for `chipseq.genomv_tsv`
    $ bash install_genome_data.sh [GENOME] [DEST_DIR]
    $ source deactivate
    ```
+
+### Custom genome data installation
+
+You can also install genome data for any species if you have a valid URL for reference `fasta` or `2bit` file. Modfy `installers/install_genome_data.sh` like the following.
+```
+...
+elif [[ $GENOME == "mm10" ]]; then
+  REF_FA="https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz"
+  BLACKLIST="http://mitra.stanford.edu/kundaje/genome_data/mm10/mm10.blacklist.bed.gz"
+
+elif [[ $GENOME == "[YOUR_CUSTOM_GENOME_NAME]" ]]; then
+  REF_FA="[YOUR_CUSTOM_GENOME_FA_OR_2BIT_URL]"
+  BLACKLIST="[YOUR_CUSTOM_GENOME_BLACKLIST_BED]" # if it doesn't exist then comment this line out.
+
+fi
+...
+```
 
 ### Docker build
 
