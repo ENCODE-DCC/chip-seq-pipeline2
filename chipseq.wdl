@@ -84,9 +84,6 @@ workflow chipseq {
 						else if pipeline_type=='tf' then 'spp'
 						else if pipeline_type=='histone' then 'macs2'
 						else 'macs2'
-	# enable_idr
-	Boolean enable_idr = pipeline_type=='tf'
-
 	# simplified variables for optional flags
 	Boolean align_only_ = select_first([align_only, false])
 	Boolean true_rep_only_ = select_first([true_rep_only, false])
@@ -193,7 +190,7 @@ workflow chipseq {
 	}
 	Array[String] ctl_bams_ = select_first([ctl_bams, bwa_ctl.bam, []])
 	if ( length(ctl_bams_)>0 ) {
-		scatter(bam in bams_) {
+		scatter(bam in ctl_bams_) {
 			# filter/dedup bam
 			call filter as filter_ctl { input :
 				bam = bam,
@@ -482,6 +479,9 @@ workflow chipseq {
 	String idr_rank = if peak_caller_=='macs2' then 'p.value'
 					else if peak_caller_=='spp' then 'signal.value'
 					else 'p.value'
+	# enable_idr for TF chipseq only
+	Boolean enable_idr = pipeline_type=='tf'
+	
 	# generate all possible pairs of true replicates
 	call pair_gen { input: num_rep = num_rep }
 
