@@ -169,21 +169,21 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
 2) Input genome data files
     Choose any genome data type you want to start with and do not define all others.
     
-    * `"chipseq.fastqs"` : 3-dimensional array with FASTQ file path/URI.
+    * `"chipseq.fastqs"`? : 3-dimensional array with FASTQ file path/URI.
         - 1st dimension: replicate ID
         - 2nd dimension: merge ID (this dimension will be reduced after merging FASTQs)
         - 3rd dimension: endedness ID (0 for SE and 0,1 for PE)
-    * `"chipseq.bams"` : Array of raw (unfiltered) BAM file path/URI.
+    * `"chipseq.bams"`? : Array of raw (unfiltered) BAM file path/URI.
         - 1st dimension: replicate ID
-    * `"chipseq.nodup_bams"` : Array of filtered (deduped) BAM file path/URI.
+    * `"chipseq.nodup_bams"`? : Array of filtered (deduped) BAM file path/URI.
         - 1st dimension: replicate ID
-    * `"chipseq.tas"` : Array of TAG-ALIGN file path/URI.
+    * `"chipseq.tas"`? : Array of TAG-ALIGN file path/URI.
         - 1st dimension: replicate ID
-    * `"chipseq.peaks"` : Array of NARROWPEAK file path/URI.
+    * `"chipseq.peaks"`? : Array of NARROWPEAK file path/URI.
         - 1st dimension: replicate ID
-    * `"chipseq.peaks_pr1"` : Array of NARROWPEAK file path/URI for 1st self pseudo replicate of replicate ID.
+    * `"chipseq.peaks_pr1"`? : Array of NARROWPEAK file path/URI for 1st self pseudo replicate of replicate ID.
         - 1st dimension: replicate ID
-    * `"chipseq.peaks_pr2"` : Array of NARROWPEAK file path/URI for 2nd self pseudo replicate of replicate ID.
+    * `"chipseq.peaks_pr2"`? : Array of NARROWPEAK file path/URI for 2nd self pseudo replicate of replicate ID.
         - 1st dimension: replicate ID
     * `"chipseq.peak_ppr1"`? : NARROWPEAK file path/URI for pooled 1st pseudo replicates.
     * `"chipseq.peak_ppr2"`? : NARROWPEAK file path/URI for pooled 2nd pseudo replicates.
@@ -202,15 +202,15 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
 
     Default peak caller (`"chipseq.peak_caller"`) for TF (`"chipseq.pipeline_type":"tf"`) ChIP-Seq pipeline and Histone ChIP-Seq pipeline (`"chipseq.pipeline_type":"histone"`) are 'spp' and 'macs2', respectively. However you can also manually specify a peak caller for these pipeline types. `macs2` can work without controls but `spp` cannot. Therefore, if a peak caller is chosen as `spp` by default or by a workflow parameter then make sure to define the following control data files. Choose any genome data type you want to start with and do not define all others.
 
-    * `"chipseq.ctl_fastqs"` : 3-dimensional array with control FASTQ file path/URI.
+    * `"chipseq.ctl_fastqs"`? : 3-dimensional array with control FASTQ file path/URI.
         - 1st dimension: replicate ID
         - 2nd dimension: merge ID (this dimension will be reduced after merging FASTQs)
         - 3rd dimension: endedness ID (0 for SE and 0,1 for PE)
-    * `"chipseq.ctl_bams"` : Array of raw (unfiltered) control BAM file path/URI.
+    * `"chipseq.ctl_bams"`? : Array of raw (unfiltered) control BAM file path/URI.
         - 1st dimension: replicate ID
-    * `"chipseq.ctl_nodup_bams"` : Array of filtered (deduped) control BAM file path/URI.
+    * `"chipseq.ctl_nodup_bams"`? : Array of filtered (deduped) control BAM file path/URI.
         - 1st dimension: replicate ID
-    * `"chipseq.ctl_tas"` : Array of control TAG-ALIGN file path/URI.
+    * `"chipseq.ctl_tas"`? : Array of control TAG-ALIGN file path/URI.
         - 1st dimension: replicate ID
 
     You can mix up different data types for IP replicates and controls. For example,
@@ -229,7 +229,7 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
 
     Pipeline type (chip-seq or DNase-Seq) : 'tf' ChIP-Seq always requires controls.
 
-    * `"chipseq.pipeline_type` : `tf` for Transcription Factor ChIP-Seq. `histone` for Transcription Factor ChIP-Seq.
+    * `"chipseq.pipeline_type` : `tf` for Transcription Factor ChIP-Seq. `histone` for Histone Factor ChIP-Seq.
 
     Input data endedness.
 
