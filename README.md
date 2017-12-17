@@ -260,8 +260,8 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
 
 7) Choose control settings
 
-    * "chipseq.choose_ctl.ctl_depth_ratio"? : if ratio between controls is higher than this then always use pooled control for all exp rep.
-    * "chipseq.choose_ctl.always_use_pooled_ctl"? : Always use pooled control for all exp replicates (ignoring `ctl_depth_ratio`).
+    * `"chipseq.choose_ctl.ctl_depth_ratio"`? : if ratio between controls is higher than this then always use pooled control for all exp rep.
+    * `"chipseq.choose_ctl.always_use_pooled_ctl"`? : Always use pooled control for all exp replicates (ignoring `ctl_depth_ratio`).
 
 8) Cross correlation analysis settings
 
