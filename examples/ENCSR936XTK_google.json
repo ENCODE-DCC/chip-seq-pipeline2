@@ -1,0 +1,18 @@
+{
+	"chipseq.pipeline_type" : "tf",
+	"chipseq.genome_tsv" : "gs://atac-seq-pipeline-genome-data/hg38_google.tsv",
+	"chipseq.fastqs" : [
+		[["gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/rep1-R1.fastq.gz","gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/rep1-R2.fastq.gz"]],
+		[["gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/rep2-R1.fastq.gz","gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/rep2-R2.fastq.gz"]]
+	],
+	"chipseq.ctl_fastqs" : [
+		[["gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/ctl1-R1.fastq.gz","gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/ctl1-R2.fastq.gz"]],
+		[["gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/ctl2-R1.fastq.gz","gs://chip-seq-pipeline-test-samples2/ENCSR936XTK/ctl2-R2.fastq.gz"]]
+	],
+
+	"chipseq.paired_end" : true,
+
+	"chipseq.choose_ctl.always_use_pooled_ctl" : true,
+	"chipseq.qc_report.name" : "ENCSR936XTK",
+	"chipseq.qc_report.desc" : "ZNF143 ChIP-seq on human GM12878"
+}

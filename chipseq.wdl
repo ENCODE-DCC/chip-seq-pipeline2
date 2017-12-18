@@ -44,7 +44,6 @@ workflow chipseq {
 							# after alignment
 	Boolean? true_rep_only 	# disable all analyses for pseudo replicates
 							# naive-overlap and IDR will also be disabled
-	Int? multimapping 		# multimapping reads
 
 	# task-specific variables but defined in workflow level (limit of WDL)
 	# optional for MACS2
@@ -119,7 +118,6 @@ workflow chipseq {
 				call filter as filter_R1 { input :
 					bam = bwa_R1.bam,
 					paired_end = false,
-					multimapping = multimapping,				
 				}			
 				call bam2ta as bam2ta_R1 { input :
 					bam = filter_R1.nodup_bam,
@@ -136,7 +134,6 @@ workflow chipseq {
 			call filter { input :
 				bam = bam,
 				paired_end = paired_end,
-				multimapping = multimapping,
 			}
 		}
 	}
@@ -195,7 +192,6 @@ workflow chipseq {
 			call filter as filter_ctl { input :
 				bam = bam,
 				paired_end = paired_end,
-				multimapping = multimapping,
 			}
 		}
 	}
@@ -913,7 +909,6 @@ task filter {
 	# parameters from workflow
 	File bam
 	Boolean paired_end
-	Int? multimapping
 	# optional
 	String? dup_marker 			# picard.jar MarkDuplicates (picard) or 
 								# sambamba markdup (sambamba)
@@ -931,7 +926,6 @@ task filter {
 		python $(which encode_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--multimapping " + multimapping} \
 			${"--dup-marker " + dup_marker} \
 			${"--mapq-thresh " + mapq_thresh} \
 			${if select_first([no_dup_removal,false]) then "--no-dup-removal" else ""} \

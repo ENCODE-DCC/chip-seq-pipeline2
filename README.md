@@ -238,7 +238,6 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
     Other important settings.
 
     * `"chipseq.align_only`? : Disable all downstream analysis after mapping.
-    * `"chipseq.multimapping"`? : Multimapping reads.
     * `"chipseq.true_rep_only"`? : Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"chipseq.enable_idr"`.
 
 4) Trim FASTQ settings (**for paired end dataset only**)
