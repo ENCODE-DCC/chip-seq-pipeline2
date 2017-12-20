@@ -1,19 +1,19 @@
 {
-	"chipseq.pipeline_type" : "tf",
-	"chipseq.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
-	"chipseq.tas" : [
-		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/rep1/rep1.nodup.tagAlign.gz",
-		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/rep2/rep2.nodup.tagAlign.gz"
-	],
-	"chipseq.ctl_tas" : [
-		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/ctl1/ctl1.nodup.tagAlign.gz",
-		"/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/ctl2/ctl2.nodup.tagAlign.gz"
-	],
+    "chipseq.pipeline_type" : "tf",
+    "chipseq.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
+    "chipseq.tas" : [
+        "/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/rep1/rep1.nodup.tagAlign.gz",
+        "/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/rep2/rep2.nodup.tagAlign.gz"
+    ],
+    "chipseq.ctl_tas" : [
+        "/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/ctl1/ctl1.nodup.tagAlign.gz",
+        "/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ENCSR000DYI/SE/align/ctl2/ctl2.nodup.tagAlign.gz"
+    ],
 
-	"chipseq.paired_end" : false,
-	"chipseq.choose_ctl.always_use_pooled_ctl" : true,
-	"chipseq.spp_cpu" : 2,
+    "chipseq.paired_end" : false,
+    "chipseq.choose_ctl.always_use_pooled_ctl" : true,
+    "chipseq.spp_cpu" : 2,
 
-	"chipseq.qc_report.name" : "ENCSR000DYI",
-	"chipseq.qc_report.desc" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
+    "chipseq.qc_report.name" : "ENCSR000DYI",
+    "chipseq.qc_report.desc" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
 }
