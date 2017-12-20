@@ -1,6 +1,6 @@
 ############################################################
 # Dockerfile for ENCODE DCC chip-seq-pipeline
-# Based on Ubuntu 16.04
+# Based on Ubuntu 14.04
 ############################################################
 
 # IMPORTANT!
@@ -8,8 +8,8 @@
 #  and not sure about math library dependencies like BLAS and numpy,
 #  then install with --no-dependencies
 
-# Set the base image to Ubuntu 16.04
-FROM ubuntu:16.04
+# Set the base image to Ubuntu 14.04
+FROM ubuntu:14.04
 
 # File Author / Maintainer
 MAINTAINER Jin Lee
@@ -27,7 +27,6 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     zlib1g-dev \
     r-base \
-    default-jdk \
     python-dev \
     python-setuptools \
     python-pip \
@@ -37,8 +36,7 @@ RUN apt-get update && apt-get install -y \
     git \
     wget \
     unzip \
-    ghostscript \
-    pkg-config
+    ghostscript
 
 # Make directory for all softwares
 RUN mkdir /software
@@ -52,6 +50,27 @@ ENV PATH="/software:${PATH}"
 RUN git clone --branch v0.2.19 https://github.com/xianyi/OpenBLAS
 RUN cd OpenBLAS && make FC=gfortran TARGET=NEHALEM USE_THREAD=0 && make PREFIX=/opt/openblas install
 ENV LD_LIBRARY_PATH="/opt/openblas/lib:${LD_LIBRARY_PATH}"
+
+# Install Java 8 for picard
+RUN echo debconf shared/accepted-oracle-license-v1-1 select true | \
+    sudo debconf-set-selections
+RUN echo debconf shared/accepted-oracle-license-v1-1 seen true | \
+    sudo debconf-set-selections
+RUN add-apt-repository ppa:webupd8team/java
+RUN apt-get update --fix-missing && apt-get install -y \
+    oracle-java8-installer
+
+# Install R packages
+RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
+RUN Rscript -e "install.packages('snow')"
+RUN Rscript -e "install.packages('snowfall')"
+RUN Rscript -e "install.packages('bitops')"
+RUN Rscript -e "install.packages('caTools')"
+RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
+
+# Install R package spp 1.13 (required for phantompeakqualtools)
+RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz
+RUN Rscript -e "install.packages('./1.13.tar.gz')"
 
 # Install samtools dependencies
 RUN wget http://zlib.net/zlib-1.2.11.tar.gz && tar -xvf zlib-1.2.11.tar.gz
@@ -109,25 +128,13 @@ RUN cd bedtools2 && make && make install
 RUN wget https://github.com/broadinstitute/picard/releases/download/2.10.6/picard.jar
 RUN chmod +x picard.jar
 
-# Install sambamba 0.6.5
-RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.5/sambamba_v0.6.5_linux.tar.bz2 && tar -xvjf sambamba_v0.6.5_linux.tar.bz2
-RUN mv sambamba_v0.6.5 sambamba
-
-# Install R packages
-RUN echo "r <- getOption('repos'); r['CRAN'] <- 'http://cran.us.r-project.org'; options(repos = r);" > ~/.Rprofile
-RUN Rscript -e "install.packages('snow')"
-RUN Rscript -e "install.packages('snowfall')"
-RUN Rscript -e "install.packages('bitops')"
-RUN Rscript -e "install.packages('caTools')"
-RUN Rscript -e "source('http://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
-
-# Install R package spp 1.13 (required for phantompeakqualtools)
-RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz
-RUN Rscript -e "install.packages('./1.13.tar.gz')"
-
 # Install phantompeakqualtools 1.2
 RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz && tar -xvf 1.2.tar.gz
 ENV PATH="/software/phantompeakqualtools-1.2:${PATH}"
+
+# Install sambamba 0.6.5
+RUN wget https://github.com/lomereiter/sambamba/releases/download/v0.6.5/sambamba_v0.6.5_linux.tar.bz2 && tar -xvjf sambamba_v0.6.5_linux.tar.bz2
+RUN mv sambamba_v0.6.5 sambamba
 
 # Install Bwa 0.7.13
 RUN git clone --branch v0.7.13 https://github.com/lh3/bwa.git
