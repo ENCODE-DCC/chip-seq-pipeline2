@@ -20,20 +20,19 @@ echo "=== Installing additional packages for python3 env..."
   rm -rf idr_tmp
   git clone --branch 2.0.4.1 https://github.com/kundajelab/idr idr_tmp
   cd idr_tmp
-  $CONDA_BIN/python3 setup.py install
+  $CONDA_BIN/python setup.py install
   cd $CONDA_BIN
   rm -rf idr_tmp
 
 echo "=== Installing additional packages for python2 env..."
 source activate encode-chip-seq-pipeline
-  CONDA_BIN=$(dirname $(which activate))
+  CONDA_BIN=$(dirname $(which activate))/../envs/encode-chip-seq-pipeline/bin
   CONDA_LIB="$CONDA_BIN/../lib"
   cd $CONDA_BIN
 
   # soft-link IDR
+  rm -f idr
   ln -s ../../../bin/idr
-  ln -s ../../../bin/python3
-  ln -s ../../../bin/pip3
 
   # graphviz in bioconda has segmentation fault bug
   conda uninstall -y graphviz -y

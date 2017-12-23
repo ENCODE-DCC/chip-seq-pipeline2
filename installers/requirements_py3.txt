@@ -1,6 +1,8 @@
-python ==3.5
+nomkl
+python ==3.5.0
 numpy ==1.11.3
 idr ==2.0.3
+bedtools ==2.26.0
 java-jdk ==8.0.92
 # to resolve 'CXXABI_1.3.9' not found issue
 libgcc==5.2.0 # this does not work with MacOS...

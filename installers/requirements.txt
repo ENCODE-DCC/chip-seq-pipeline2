@@ -38,4 +38,4 @@ pyfaidx ==0.4.7.1
 
 bwa ==0.7.13
 deeptools ==2.5.4 #2.2.3 does not support plotFingerprint --outQualityMetrics
-openssl ==1.0.2g-0
+#openssl ==1.0.2g-0
