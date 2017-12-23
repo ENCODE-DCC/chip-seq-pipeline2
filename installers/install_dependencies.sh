@@ -8,7 +8,7 @@ conda install --file requirements_py3.txt -y \
   -c defaults -c bioconda -c r -c bcbio -c daler -c asmeurer
 
 echo "=== Installing packages for python2 env..."
-conda create -n chip-seq-pipeline --file requirements.txt \
+conda create -n encode-chip-seq-pipeline --file requirements.txt \
   -y -c defaults -c bioconda -c r -c bcbio -c daler -c asmeurer
 
 echo "=== Installing additional packages for python3 env..."
@@ -25,7 +25,7 @@ echo "=== Installing additional packages for python3 env..."
   rm -rf idr_tmp
 
 echo "=== Installing additional packages for python2 env..."
-source activate chip-seq-pipeline
+source activate encode-chip-seq-pipeline
   CONDA_BIN=$(dirname $(which activate))
   CONDA_LIB="$CONDA_BIN/../lib"
   cd $CONDA_BIN

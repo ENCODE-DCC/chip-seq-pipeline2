@@ -1,0 +1,22 @@
+{
+    "chipseq.pipeline_type" : "tf",
+    "chipseq.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
+    "chipseq.fastqs" : [
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.rep1-R1.fastq.gz",
+          "/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.rep1-R2.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.rep2-R1.fastq.gz",
+          "/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.rep2-R2.fastq.gz"]]
+    ],
+    "chipseq.ctl_fastqs" : [
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.ctl1-R1.fastq.gz",
+          "/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.ctl1-R2.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.ctl2-R1.fastq.gz",
+          "/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_chr21/ENCSR936XTK.chr21.ctl2-R2.fastq.gz"]]
+    ],
+
+    "chipseq.paired_end" : true,
+
+    "chipseq.choose_ctl.always_use_pooled_ctl" : true,
+    "chipseq.qc_report.name" : "ENCSR936XTK",
+    "chipseq.qc_report.desc" : "ZNF143 ChIP-seq on human GM12878 (chr21 only)"
+}

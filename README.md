@@ -84,7 +84,7 @@ $ java -jar -Dconfig.file=[BACKEND_CONF] cromwell-30-x.jar run chipseq.wdl -i in
 2) Install [genome data](#genome-data-installation).
 3) Run a pipeline.
     ```
-    $ source activate chip-seq-pipeline
+    $ source activate encode-chip-seq-pipeline
     $ java -jar -Dconfig.file=backends/default.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -100,7 +100,7 @@ Genome data have already been installed and shared on Stanford SCG4. You can ski
 3) Install [genome data](#genome-data-installation).
 4) Run a pipeline.
     ```
-    $ source activate chip-seq-pipeline
+    $ source activate encode-chip-seq-pipeline
     $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -113,7 +113,7 @@ Genome data have already been installed and shared on Stanford Sherlock-2. You c
 3) Install [genome data](#genome-data-installation).
 4) Run a pipeline.
     ```
-    $ source activate chip-seq-pipeline
+    $ source activate encode-chip-seq-pipeline
     $ java -jar -Dconfig.file=backends/slurm.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -132,7 +132,7 @@ Jobs will be submitted to Sun GridEngine (SGE) and distributed to all server nod
 1) Install [dependencies](#dependency-installation).
 2) Run a pipeline.
     ```
-    $ source activate chip-seq-pipeline
+    $ source activate encode-chip-seq-pipeline
     $ java -jar -Dconfig.file=backends/sge.conf cromwell-30-x.jar run chipseq.wdl -i input.json -o workflow_opts/non_docker.json
     $ source deactivate
     ```
@@ -361,7 +361,7 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
    ```
 9) **ACTIVATE MINICONDA3 ENVIRONMENT** and run a pipeline.
    ```
-   $ source activate chip-seq-pipeline
+   $ source activate encode-chip-seq-pipeline
    $ java -jar -Dconfig.file=[BACKEND_OPT] $(which cromwell-29.jar) run chipseq.wdl -i input.json -o [WORKFLOW_OPT]
    $ source deactivate
    ```
@@ -369,7 +369,7 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
 # Genome data installation
 
 **WE DO NOT RECOMMEND RUNNING OUR PIPELINE WITH LOCALLY INSTALLED/BUILT GENOME DATA!** Use it with caution. **We will provide an official downloader for all genome data later**. Cromwell is planning to support AWS buckets (`s3://`). Until then, use this installer.
-**On Google Cloud TSV** files are already installed and shared on a bucket `gs://chip-seq-pipeline-genome-data`.
+**On Google Cloud TSV** files are already installed and shared on a bucket `gs://encode-chip-seq-pipeline-genome-data`.
 
 Supported genomes:
 
@@ -386,7 +386,7 @@ A TSV file will be generated under `[DEST_DIR]`. Use it for `chipseq.genomv_tsv`
 4) Install genome data.
    ```
    $ cd installers/
-   $ source activate chip-seq-pipeline
+   $ source activate encode-chip-seq-pipeline
    $ bash install_genome_data.sh [GENOME] [DEST_DIR]
    $ source deactivate
    ```

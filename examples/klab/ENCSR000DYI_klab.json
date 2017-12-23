@@ -2,12 +2,12 @@
     "chipseq.pipeline_type" : "tf",
     "chipseq.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
     "chipseq.fastqs" : [
-        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR000DYI/fastq/rep1.fastq.gz"]],
-        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR000DYI/fastq/rep2.fastq.gz"]]
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/rep1.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/rep2.fastq.gz"]]
     ],
     "chipseq.ctl_fastqs" : [
-        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR000DYI/fastq/ctl1.fastq.gz"]],
-        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR000DYI/fastq/ctl2.fastq.gz"]]
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/ctl1.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/ctl2.fastq.gz"]]
     ],
 
     "chipseq.paired_end" : false,
