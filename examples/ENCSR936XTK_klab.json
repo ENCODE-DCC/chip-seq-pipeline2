@@ -2,12 +2,12 @@
     "chipseq.pipeline_type" : "tf",
     "chipseq.genome_tsv" : "/users/leepc12/code/atac-seq-pipeline/genome/hg38_klab.tsv",
     "chipseq.fastqs" : [
-        [["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/rep1-R1.fastq.gz","/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/rep1-R2.fastq.gz"]],
-        [["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/rep2-R1.fastq.gz","/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/rep2-R2.fastq.gz"]]
+        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/rep1-R1.fastq.gz","/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/rep1-R2.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/rep2-R1.fastq.gz","/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/rep2-R2.fastq.gz"]]
     ],
     "chipseq.ctl_fastqs" : [
-        [["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ctl1-R1.fastq.gz","/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ctl1-R2.fastq.gz"]],
-        [["/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ctl2-R1.fastq.gz","/srv/scratch/shared/surya/leepc12/run/NatProtocol_TestCase/ctl2-R2.fastq.gz"]]
+        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/ctl1-R1.fastq.gz","/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/ctl1-R2.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/ctl2-R1.fastq.gz","/mnt/data/pipeline_test_samples/chipseq/ENCSR936XTK/fastq/ctl2-R2.fastq.gz"]]
     ],
 
     "chipseq.paired_end" : true,
