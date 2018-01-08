@@ -26,7 +26,8 @@ echo "=== Installing additional packages for python3 env..."
 
 echo "=== Installing additional packages for python2 env..."
 source activate encode-chip-seq-pipeline
-  CONDA_BIN=$(dirname $(which activate))/../envs/encode-chip-seq-pipeline/bin
+  # CONDA_BIN=$(dirname $(which activate))/../envs/encode-chip-seq-pipeline/bin
+  CONDA_BIN=$(dirname $(which activate))
   CONDA_LIB="$CONDA_BIN/../lib"
   cd $CONDA_BIN
 
