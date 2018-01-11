@@ -1,10 +1,9 @@
 {
     "default_runtime_attributes" : {
-        "failOnStderr": "false",
-        "memory": "4 GB",
         "cpu": "1",
+        "memory": "4 GB",
         "sge_pe" : "shm",
-        "sge_queue" : "extended",
+        "sge_queue" : "q",
         "slurm_partition" : "akundaje"
     }
 }
