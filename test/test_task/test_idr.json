@@ -1,0 +1,14 @@
+{
+    "test_idr.se_blacklist" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38.blacklist.bed.gz",
+
+    "test_idr.se_peak_rep1" : "chip-seq-pipeline-test-data/input/se/rpeaks/rep1/rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.300K.regionPeak.gz",
+    "test_idr.se_peak_rep2" : "chip-seq-pipeline-test-data/input/se/rpeaks/rep2/rep2.subsampled.20.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.300K.regionPeak.gz",
+    "test_idr.se_peak_pooled" : "chip-seq-pipeline-test-data/input/se/rpeaks/pooled_rep/rep1.subsampled.25.merged.nodup.pooled_x_ctl1.subsampled.25.merged.nodup.pooled.300K.regionPeak.gz",
+    "test_idr.se_ta_pooled" : "chip-seq-pipeline-test-data/input/se/tas/pooled_rep/rep1.subsampled.25.merged.nodup.pooled.tagAlign.gz",
+
+    "test_idr.ref_se_idr_peak" : "chip-seq-pipeline-test-data/ref_output/test_idr/rep1-rep2.idr0.1.regionPeak.gz",
+    "test_idr.ref_se_idr_bfilt_peak" : "chip-seq-pipeline-test-data/ref_output/test_idr/rep1-rep2.idr0.1.bfilt.regionPeak.gz",
+    "test_idr.ref_se_idr_frip_qc" : "chip-seq-pipeline-test-data/ref_output/test_idr/rep1-rep2.idr0.1.bfilt.frip.qc",
+
+    "test_idr.idr_thresh" : 0.1
+}

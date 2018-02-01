@@ -104,8 +104,10 @@ def sambamba_name_sort(bam, nth, out_dir):
 def subsample_ta_se(ta, subsample, non_mito, out_dir):
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_ta(ta)))
-    ta_subsampled = '{}.{}.tagAlign.gz'.format(
-        prefix, human_readable_number(subsample))
+    ta_subsampled = '{}.{}{}.tagAlign.gz'.format(
+        prefix,
+        'no_chrM.' if non_mito else '',
+        human_readable_number(subsample))
 
     cmd = 'zcat -f {} | '
     if non_mito:

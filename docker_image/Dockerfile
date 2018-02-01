@@ -150,8 +150,8 @@ RUN pip install --no-dependencies deeptools==2.5.4
 # and it gets whatever is checked out plus local modifications
 # so the buildling command should:
 # cd [GIT_REPO_DIR] && docker build -f docker_image/Dockerfile .
-RUN mkdir chip-seq-pipeline
-COPY / chip-seq-pipeline
+RUN mkdir -p chip-seq-pipeline/src
+COPY /src chip-seq-pipeline/src
 ENV PATH="/software/chip-seq-pipeline/src:${PATH}"
 
 ENTRYPOINT ["/bin/bash","-c"]

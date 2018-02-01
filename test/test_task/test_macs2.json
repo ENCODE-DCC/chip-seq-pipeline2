@@ -1,0 +1,19 @@
+{
+    "test_macs2.se_blacklist" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38.blacklist.bed.gz",
+    "test_macs2.se_chrsz" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes",
+    "test_macs2.se_gensz" : "hs",
+
+    "test_macs2.se_ta" : "chip-seq-pipeline-test-data/input/se/tas/rep1/rep1.subsampled.25.merged.nodup.tagAlign.gz",
+    "test_macs2.se_ctl_ta" : "chip-seq-pipeline-test-data/input/se/tas/pooled_ctl/ctl1.subsampled.25.merged.nodup.pooled.tagAlign.gz",
+
+    "test_macs2.fraglen" : 95,
+
+    "test_macs2.ref_se_macs2_npeak" : "chip-seq-pipeline-test-data/ref_output/test_macs2/rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.narrowPeak.gz",
+    "test_macs2.ref_se_macs2_bfilt_npeak" : "chip-seq-pipeline-test-data/ref_output/test_macs2/rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.bfilt.narrowPeak.gz",
+    "test_macs2.ref_se_macs2_frip_qc" : "chip-seq-pipeline-test-data/ref_output/test_macs2/rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.bfilt.frip.qc",
+    "test_macs2.ref_se_macs2_sig_pval" : "chip-seq-pipeline-test-data/ref_output/test_macs2/rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval.signal.bigwig",
+    "test_macs2.ref_se_macs2_sig_fc" : "chip-seq-pipeline-test-data/ref_output/test_macs2/rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.fc.signal.bigwig",
+    
+    "test_macs2.cap_num_peak" : 500000,
+    "test_macs2.pval_thresh" : 0.01
+}

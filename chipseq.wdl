@@ -356,7 +356,7 @@ workflow chipseq {
 			# these will be used for 
 			# 1) calling peaks for pooled true/pseudo replicates
 			# 2) calculating FRiP
-			call fraglen_mean { input :
+			call rounded_mean { input :
 				ints = select_first([xcor.fraglen]),
 			}
 			# call peaks on pooled replicate
@@ -369,7 +369,7 @@ workflow chipseq {
 				cap_num_peak = macs2_cap_num_peak,
 				pval_thresh = pval_thresh,
 				make_signal = true,
-				fraglen = fraglen_mean.rounded_mean,
+				fraglen = rounded_mean.rounded_mean,
 				blacklist = blacklist,
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
@@ -382,7 +382,7 @@ workflow chipseq {
 					ctl_ta = ctl_ta_pooled,
 					chrsz = chrsz,
 					cap_num_peak = spp_cap_num_peak,
-					fraglen = fraglen_mean.rounded_mean,
+					fraglen = rounded_mean.rounded_mean,
 					blacklist = blacklist,
 					cpu = spp_cpu,
 					mem_mb = spp_mem_mb,
@@ -407,7 +407,7 @@ workflow chipseq {
 						chrsz = chrsz,
 						cap_num_peak = macs2_cap_num_peak,
 						pval_thresh = pval_thresh,
-						fraglen = fraglen_mean.rounded_mean,
+						fraglen = rounded_mean.rounded_mean,
 						blacklist = blacklist,
 						mem_mb = macs2_mem_mb,
 						disks = macs2_disks,
@@ -421,7 +421,7 @@ workflow chipseq {
 						chrsz = chrsz,
 						cap_num_peak = macs2_cap_num_peak,
 						pval_thresh = pval_thresh,
-						fraglen = fraglen_mean.rounded_mean,
+						fraglen = rounded_mean.rounded_mean,
 						blacklist = blacklist,
 						mem_mb = macs2_mem_mb,
 						disks = macs2_disks,
@@ -435,7 +435,7 @@ workflow chipseq {
 						ctl_ta = ctl_ta_pooled,
 						chrsz = chrsz,
 						cap_num_peak = spp_cap_num_peak,
-						fraglen = fraglen_mean.rounded_mean,
+						fraglen = rounded_mean.rounded_mean,
 						blacklist = blacklist,
 						cpu = spp_cpu,
 						mem_mb = spp_mem_mb,
@@ -448,7 +448,7 @@ workflow chipseq {
 						ctl_ta = ctl_ta_pooled,
 						chrsz = chrsz,
 						cap_num_peak = spp_cap_num_peak,
-						fraglen = fraglen_mean.rounded_mean,
+						fraglen = rounded_mean.rounded_mean,
 						blacklist = blacklist,
 						cpu = spp_cpu,
 						mem_mb = spp_mem_mb,
@@ -793,7 +793,7 @@ task choose_ctl {
 	File? ta_pooled
 	File? ctl_ta_pooled
 	# optional
-	Boolean? alway_use_pooled_ctl # always use pooled control for all exp rep.
+	Boolean? always_use_pooled_ctl # always use pooled control for all exp rep.
 	Float? ctl_depth_ratio 	# if ratio between controls is higher than this
 							# then always use pooled control for all exp rep.
 	command {
@@ -802,7 +802,7 @@ task choose_ctl {
 			--ctl-tas ${sep=' ' ctl_tas} \
 			${"--ta-pooled " + ta_pooled} \
 			${"--ctl-ta-pooled " + ctl_ta_pooled} \
-			${if select_first([alway_use_pooled_ctl,false]) then 
+			${if select_first([always_use_pooled_ctl,false]) then 
 				"--always-use-pooled-ctl" else ""} \
 			${"--ctl-depth-ratio " + select_first([ctl_depth_ratio,"1.2"])}				
 	}
@@ -1244,25 +1244,104 @@ task pair_gen {
 	}
 }
 
-task fraglen_mean {
+task rounded_mean {
 	Array[Int?] ints
 	command <<<
 		python <<CODE
 		arr = [${sep=',' ints}]
 		sum_ = sum(arr)
 		mean_ = sum(arr)/float(len(arr))
-		rounded_mean_ = int(round(mean_))
-		with open('sum.txt','w') as fp:
-		    fp.write(str(sum_))
-		with open('mean.txt','w') as fp:
-		    fp.write(str(mean_))
-		with open('rounded_mean.txt','w') as fp:
-		    fp.write(str(rounded_mean_))
+		print(int(round(mean_)))
 		CODE
 	>>>
 	output {
-		Int sum = read_int('sum.txt')
-		Float mean = read_float('mean.txt')
-		Int rounded_mean = read_int('rounded_mean.txt')
+		Int rounded_mean = read_int(stdout())
+	}
+}
+
+task compare_md5sum {
+	Array[String] labels
+	Array[File] files
+	Array[File] ref_files
+
+	command <<<
+		python <<CODE	
+		from collections import OrderedDict
+		import os
+		import json
+		import hashlib
+
+		def md5sum(filename, blocksize=65536):
+		    hash = hashlib.md5()
+		    with open(filename, 'rb') as f:
+		        for block in iter(lambda: f.read(blocksize), b""):
+		            hash.update(block)
+		    return hash.hexdigest()
+
+		with open('${write_lines(labels)}','r') as fp:
+			labels = fp.read().splitlines()
+		with open('${write_lines(files)}','r') as fp:
+			files = fp.read().splitlines()
+		with open('${write_lines(ref_files)}','r') as fp:
+			ref_files = fp.read().splitlines()
+
+		result = OrderedDict()
+		match = OrderedDict()
+		match_overall = True
+
+		result['tasks'] = []
+		result['failed_task_labels'] = []
+		result['succeeded_task_labels'] = []
+		for i, label in enumerate(labels):
+			f = files[i]
+			ref_f = ref_files[i]
+			md5 = md5sum(f)
+			ref_md5 = md5sum(ref_f)
+			# if text file, read in contents
+			if f.endswith('.qc') or f.endswith('.txt') or \
+				f.endswith('.log') or f.endswith('.out'):
+				with open(f,'r') as fp:
+					contents = fp.read()
+				with open(ref_f,'r') as fp:
+					ref_contents = fp.read()
+			else:
+				contents = ''
+				ref_contents = ''
+			matched = md5==ref_md5
+			result['tasks'].append(OrderedDict([
+				('label', label),
+				('match', matched),
+				('md5sum', md5),
+				('ref_md5sum', ref_md5),
+				('basename', os.path.basename(f)),
+				('ref_basename', os.path.basename(ref_f)),
+				('contents', contents),
+				('ref_contents', ref_contents),
+				]))
+			match[label] = matched
+			match_overall &= matched
+			if matched:
+				result['succeeded_task_labels'].append(label)
+			else:
+				result['failed_task_labels'].append(label)		
+		result['match_overall'] = match_overall
+
+		with open('result.json','w') as fp:
+			fp.write(json.dumps(result, indent=4))
+		match_tmp = []
+		for key in match:
+			val = match[key]
+			match_tmp.append('{}\t{}'.format(key, val))
+		with open('match.tsv','w') as fp:
+			fp.writelines('\n'.join(match_tmp))
+		with open('match_overall.txt','w') as fp:
+			fp.write(str(match_overall))
+		CODE
+	>>>
+	output {
+		Map[String,String] match = read_map('match.tsv') # key:label, val:match
+		Boolean match_overall = read_boolean('match_overall.txt')
+		File json = glob('result.json')[0] # details (json file)
+		String json_str =read_string('result.json') # details (string)
 	}
 }

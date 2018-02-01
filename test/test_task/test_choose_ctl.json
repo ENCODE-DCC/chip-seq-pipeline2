@@ -1,0 +1,18 @@
+{
+    "test_choose_ctl.se_ta_rep1" : "chip-seq-pipeline-test-data/input/se/tas/rep1/rep1.subsampled.25.merged.nodup.tagAlign.gz",
+    "test_choose_ctl.se_ta_rep2" : "chip-seq-pipeline-test-data/input/se/tas/rep2/rep2.subsampled.20.merged.nodup.tagAlign.gz",
+    "test_choose_ctl.se_ta_pooled" : "chip-seq-pipeline-test-data/input/se/tas/pooled_rep/rep1.subsampled.25.merged.nodup.pooled.tagAlign.gz",
+    "test_choose_ctl.se_ctl_ta_rep1" : "chip-seq-pipeline-test-data/input/se/tas/ctl1_fake_doubled/ctl1.double.tagAlign.gz",
+    "test_choose_ctl.se_ctl_ta_rep2" : "chip-seq-pipeline-test-data/input/se/tas/ctl2_fake_doubled/ctl2.double.tagAlign.gz",
+    "test_choose_ctl.se_ctl_ta_pooled" : "chip-seq-pipeline-test-data/input/se/tas/pooled_ctl_fake_doubled/ctl_pooled.double.tagnAlign.gz",
+
+	"test_choose_ctl.ref_se_choose_ctl_idx1" : "chip-seq-pipeline-test-data/ref_output/test_choose_ctl/se_choose_ctl_idx1.txt",
+    "test_choose_ctl.ref_se_choose_ctl_idx2" : "chip-seq-pipeline-test-data/ref_output/test_choose_ctl/se_choose_ctl_idx2.txt",
+	"test_choose_ctl.ref_se_choose_ctl_always_use_pooled_ctl_idx1" : "chip-seq-pipeline-test-data/ref_output/test_choose_ctl/se_choose_ctl_always_use_pooled_ctl_idx1.txt",
+    "test_choose_ctl.ref_se_choose_ctl_always_use_pooled_ctl_idx2" : "chip-seq-pipeline-test-data/ref_output/test_choose_ctl/se_choose_ctl_always_use_pooled_ctl_idx2.txt",
+	"test_choose_ctl.ref_se_choose_ctl_single_rep_idx1" : "chip-seq-pipeline-test-data/ref_output/test_choose_ctl/se_choose_ctl_single_rep_idx1.txt",
+	"test_choose_ctl.ref_se_choose_ctl_single_ctl_idx1" : "chip-seq-pipeline-test-data/ref_output/test_choose_ctl/se_choose_ctl_single_ctl_idx1.txt",
+    "test_choose_ctl.ref_se_choose_ctl_single_ctl_idx2" : "chip-seq-pipeline-test-data/ref_output/test_choose_ctl/se_choose_ctl_single_ctl_idx2.txt",
+
+    "test_choose_ctl.ctl_depth_ratio" : 1.5
+}

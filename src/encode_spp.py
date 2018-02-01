@@ -50,6 +50,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
         prefix,
         human_readable_number(cap_num_peak))
     rpeak_tmp = '{}.tmp'.format(rpeak)
+    rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
 
     cmd0 = 'Rscript $(which run_spp.R) -c={} -i={} '
     cmd0 += '-npeak={} -odir={} -speak={} -savr={} -rf -p={}'
@@ -71,7 +72,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
         rpeak_tmp,
         rpeak)
     run_shell_cmd(cmd1)
-    rm_f(rpeak_tmp)
+    rm_f([rpeak_tmp, rpeak_tmp_gz])
 
     return rpeak
 

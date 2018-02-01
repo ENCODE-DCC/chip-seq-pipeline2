@@ -1,0 +1,52 @@
+{
+    "tasks": [
+        {
+            "label": "se_macs2_npeak", 
+            "match": true, 
+            "md5sum": "1c73f4add41366fd782859582c1ac4c8", 
+            "ref_md5sum": "1c73f4add41366fd782859582c1ac4c8", 
+            "basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.narrowPeak.gz", 
+            "ref_basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.narrowPeak.gz", 
+            "contents": "", 
+            "ref_contents": ""
+        }, 
+        {
+            "label": "se_macs2_bfilt_npeak", 
+            "match": true, 
+            "md5sum": "1c73f4add41366fd782859582c1ac4c8", 
+            "ref_md5sum": "1c73f4add41366fd782859582c1ac4c8", 
+            "basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.bfilt.narrowPeak.gz", 
+            "ref_basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.bfilt.narrowPeak.gz", 
+            "contents": "", 
+            "ref_contents": ""
+        }, 
+        {
+            "label": "se_macs2_frip_qc", 
+            "match": true, 
+            "md5sum": "29ec37c9bc4274399b27ca14ce556c14", 
+            "ref_md5sum": "29ec37c9bc4274399b27ca14ce556c14", 
+            "basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.bfilt.frip.qc", 
+            "ref_basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval0.01.500K.bfilt.frip.qc", 
+            "contents": "0.728157827312\n", 
+            "ref_contents": "0.728157827312\n"
+        }, 
+        {
+            "label": "se_macs2_sig_pval", 
+            "match": true, 
+            "md5sum": "75f12a402533896800f200503d587ac7", 
+            "ref_md5sum": "75f12a402533896800f200503d587ac7", 
+            "basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval.signal.bigwig", 
+            "ref_basename": "rep1.subsampled.25.merged.nodup_x_ctl1.subsampled.25.merged.nodup.pooled.pval.signal.bigwig", 
+            "contents": "", 
+            "ref_contents": ""
+        }
+    ], 
+    "failed_task_labels": [], 
+    "succeeded_task_labels": [
+        "se_macs2_npeak", 
+        "se_macs2_bfilt_npeak", 
+        "se_macs2_frip_qc", 
+        "se_macs2_sig_pval"
+    ], 
+    "match_overall": true
+}

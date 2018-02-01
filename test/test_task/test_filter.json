@@ -1,0 +1,10 @@
+{
+    "test_filter.pe_bam" : "chip-seq-pipeline-test-data/input/pe/bams/rep1/rep1-R1.subsampled.67.merged.bam",
+    "test_filter.se_bam" : "chip-seq-pipeline-test-data/input/se/bams/rep1/rep1.subsampled.25.merged.bam",
+
+    "test_filter.ref_pe_nodup_bam" : "chip-seq-pipeline-test-data/ref_output/test_filter/pe/rep1-R1.subsampled.67.merged.nodup.bam",
+    "test_filter.ref_pe_filt_bam" : "chip-seq-pipeline-test-data/ref_output/test_filter/pe/rep1-R1.subsampled.67.merged.filt.bam",
+
+    "test_filter.ref_se_nodup_bam" : "chip-seq-pipeline-test-data/ref_output/test_filter/se/rep1.subsampled.25.merged.nodup.bam",
+    "test_filter.ref_se_filt_bam" : "chip-seq-pipeline-test-data/ref_output/test_filter/se/rep1.subsampled.25.merged.filt.bam"
+}

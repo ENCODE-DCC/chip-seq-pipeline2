@@ -1,0 +1,85 @@
+{
+    "tasks": [
+        {
+            "label": "se_choose_ctl_idx1", 
+            "match": true, 
+            "md5sum": "897316929176464ebc9ad085f31e7284", 
+            "ref_md5sum": "897316929176464ebc9ad085f31e7284", 
+            "basename": "tmp.txt", 
+            "ref_basename": "se_choose_ctl_idx1.txt", 
+            "contents": "0\n", 
+            "ref_contents": "0\n"
+        }, 
+        {
+            "label": "se_choose_ctl_idx2", 
+            "match": true, 
+            "md5sum": "b026324c6904b2a9cb4b88d6d61c81d1", 
+            "ref_md5sum": "b026324c6904b2a9cb4b88d6d61c81d1", 
+            "basename": "tmp.txt", 
+            "ref_basename": "se_choose_ctl_idx2.txt", 
+            "contents": "1\n", 
+            "ref_contents": "1\n"
+        }, 
+        {
+            "label": "se_choose_ctl_always_use_pooled_ctl_idx1", 
+            "match": true, 
+            "md5sum": "eb844645e8e61de0a4cf4b991e65e63e", 
+            "ref_md5sum": "eb844645e8e61de0a4cf4b991e65e63e", 
+            "basename": "tmp.txt", 
+            "ref_basename": "se_choose_ctl_always_use_pooled_ctl_idx1.txt", 
+            "contents": "-1\n", 
+            "ref_contents": "-1\n"
+        }, 
+        {
+            "label": "se_choose_ctl_always_use_pooled_ctl_idx2", 
+            "match": true, 
+            "md5sum": "eb844645e8e61de0a4cf4b991e65e63e", 
+            "ref_md5sum": "eb844645e8e61de0a4cf4b991e65e63e", 
+            "basename": "tmp.txt", 
+            "ref_basename": "se_choose_ctl_always_use_pooled_ctl_idx2.txt", 
+            "contents": "-1\n", 
+            "ref_contents": "-1\n"
+        }, 
+        {
+            "label": "se_choose_ctl_single_rep_idx1", 
+            "match": true, 
+            "md5sum": "897316929176464ebc9ad085f31e7284", 
+            "ref_md5sum": "897316929176464ebc9ad085f31e7284", 
+            "basename": "tmp.txt", 
+            "ref_basename": "se_choose_ctl_single_rep_idx1.txt", 
+            "contents": "0\n", 
+            "ref_contents": "0\n"
+        }, 
+        {
+            "label": "se_choose_ctl_single_ctl_idx1", 
+            "match": true, 
+            "md5sum": "897316929176464ebc9ad085f31e7284", 
+            "ref_md5sum": "897316929176464ebc9ad085f31e7284", 
+            "basename": "tmp.txt", 
+            "ref_basename": "se_choose_ctl_single_ctl_idx1.txt", 
+            "contents": "0\n", 
+            "ref_contents": "0\n"
+        }, 
+        {
+            "label": "se_choose_ctl_single_ctl_idx2", 
+            "match": true, 
+            "md5sum": "897316929176464ebc9ad085f31e7284", 
+            "ref_md5sum": "897316929176464ebc9ad085f31e7284", 
+            "basename": "tmp.txt", 
+            "ref_basename": "se_choose_ctl_single_ctl_idx2.txt", 
+            "contents": "0\n", 
+            "ref_contents": "0\n"
+        }
+    ], 
+    "failed_task_labels": [], 
+    "succeeded_task_labels": [
+        "se_choose_ctl_idx1", 
+        "se_choose_ctl_idx2", 
+        "se_choose_ctl_always_use_pooled_ctl_idx1", 
+        "se_choose_ctl_always_use_pooled_ctl_idx2", 
+        "se_choose_ctl_single_rep_idx1", 
+        "se_choose_ctl_single_ctl_idx1", 
+        "se_choose_ctl_single_ctl_idx2"
+    ], 
+    "match_overall": true
+}

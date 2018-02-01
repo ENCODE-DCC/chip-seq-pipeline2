@@ -86,7 +86,7 @@ def main():
                 else:
                     ctl_ta_idx[i] = i
 
-    log.info('Writeing idx.txt...')
+    log.info('Writing idx.txt...')
     out_txt = os.path.join(args.out_dir, 'idx.txt')
     write_txt(out_txt, ctl_ta_idx)
     
