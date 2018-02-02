@@ -1214,6 +1214,7 @@ task qc_report {
 	output {
 		File report = glob('*qc.html')[0]
 		File qc_json = glob('*qc.json')[0]
+		String qc_json_str = read_string(qc_json)
 		#File encode_accession_json= glob('*encode_accession.json')[0]
 	}
 }
@@ -1342,6 +1343,6 @@ task compare_md5sum {
 		Map[String,String] match = read_map('match.tsv') # key:label, val:match
 		Boolean match_overall = read_boolean('match_overall.txt')
 		File json = glob('result.json')[0] # details (json file)
-		String json_str =read_string('result.json') # details (string)
+		String json_str = read_string('result.json') # details (string)
 	}
 }

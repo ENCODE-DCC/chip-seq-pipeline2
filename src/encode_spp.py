@@ -87,6 +87,9 @@ def main():
     rpeak = spp(args.ta, args.ctl_ta, 
         args.fraglen, args.cap_num_peak, args.nth, args.out_dir)
 
+    log.info('Checking if output is empty...')
+    assert_file_not_empty(rpeak)
+
     if args.blacklist:
         log.info('Blacklist-filtering peaks...')
         bfilt_rpeak = blacklist_filter(
