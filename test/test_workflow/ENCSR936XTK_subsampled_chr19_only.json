@@ -1,0 +1,22 @@
+{
+    "chipseq.pipeline_type" : "tf",
+    "chipseq.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_chr19_chrM_google.tsv",
+    "chipseq.fastqs" : [
+        [["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R1.subsampled.67.fastq.gz",
+          "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R2.subsampled.67.fastq.gz"]],
+        [["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R1.subsampled.67.fastq.gz",
+          "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R2.subsampled.67.fastq.gz"]]
+    ],
+    "chipseq.ctl_fastqs" : [
+        [["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R1.subsampled.80.fastq.gz",
+          "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz"]],
+        [["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz",
+          "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz"]]
+    ],
+
+    "chipseq.paired_end" : true,
+
+    "chipseq.choose_ctl.always_use_pooled_ctl" : true,
+    "chipseq.qc_report.name" : "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only)",
+    "chipseq.qc_report.desc" : "ZNF143 ChIP-seq on human GM12878"
+}
