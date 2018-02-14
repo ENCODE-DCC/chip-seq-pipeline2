@@ -12,7 +12,7 @@ AQUAS Transcription Factor and Histone ChIP-Seq processing pipeline
 
 # Usage
 
-See [Usage](https://github.com/kundajelab/wdl_pipelines/blob/master/USAGE.md).
+See [Usage](https://github.com/encode-dcc/wdl-pipelines/blob/master/USAGE.md).
 
 # Input JSON
 
