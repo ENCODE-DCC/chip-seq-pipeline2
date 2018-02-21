@@ -115,11 +115,7 @@ workflow chipseq {
 					fastqs = [trim_fastq.trimmed_fastq],
 					paired_end = false,
 				}
-				call filter as filter_R1 { input :
-					bam = bwa_R1.bam,
-					paired_end = false,
-				}			
-				call bam2ta as bam2ta_R1 { input :
+				call bam2ta as bam2ta_no_filt_R1 { input :
 					bam = filter_R1.nodup_bam,
 					disable_tn5_shift = true,
 					paired_end = false,
@@ -133,6 +129,12 @@ workflow chipseq {
 			# filter/dedup bam
 			call filter { input :
 				bam = bam,
+				paired_end = paired_end,
+			}
+			# convert unfiltered bam to tagalign for xcor
+			call bam2ta as bam2ta_no_filt { input :
+				bam = bam,
+				disable_tn5_shift = true,
 				paired_end = paired_end,
 			}
 		}
@@ -156,8 +158,8 @@ workflow chipseq {
 			# (mapping with both ends for tag-aligns to be used for xcor)
 			# subsample tagalign (non-mito) and cross-correlation analysis
 			call xcor { input :
-				ta = select_first([bam2ta_R1.ta, tas_])[i],
-				paired_end = if defined(bam2ta_R1.ta) then false else paired_end,
+				ta = select_first([bam2ta_no_filt_R1.ta, bam2ta_no_filt.ta, tas_])[i],
+				paired_end = if defined(bam2ta_no_filt_R1.ta) then false else paired_end,
 			}
 		}
 		if ( !align_only_ && tas_len>1 )  {		
