@@ -3,13 +3,13 @@ ENCODE ChIP-seq pipeline test
 
 # Task level test (local)
 
-This test requires `chip-seq-pipeline-test-data` directory in `test_task/`. Git glone [a data repo](https://github.com/leepc12/chip-seq-pipeline-test-data) on `test_task/`. This repo has 1/400 subsampled test samples and chr19-chrM only bowtie2 indices and other genome data for hg38 and mm10. Make sure that you have `cromwell-30.1.jar` in your `$PATH` as an executable (`chmod +x`) and `Docker` installed on your system.
+This test requires `chip-seq-pipeline-test-data` directory in `test_task/`. Git glone [a data repo](https://github.com/leepc12/chip-seq-pipeline-test-data) on `test_task/`. This repo has 1/400 subsampled test samples and chr19-chrM only bowtie2 indices and other genome data for hg38 and mm10. Make sure that you have `cromwell-30.2.jar` in your `$PATH` as an executable (`chmod +x`) and `Docker` installed on your system.
 ```
 $ cd test_task/
 $ git clone https://github.com/encode-dcc/chip-seq-pipeline-test-data
 ```
 
-Each task in `../chipseq.wdl` has a corresponding pair of tester WDL/JSON (`[TASK_NAME].WDL` and [TASK_NAME].json`). You can also specify your own docker image to test each task.
+Each task in `../chip.wdl` has a corresponding pair of tester WDL/JSON (`[TASK_NAME].WDL` and [TASK_NAME].json`). You can also specify your own docker image to test each task.
 ```
 $ cd test_task/
 $ ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional)
@@ -17,26 +17,26 @@ $ ./test.sh [WDL] [INPUT_JSON] [DOCKER_IMAGE](optional)
 
 # Workflow level test (on GC)
 
-Make sure that you have a Cromwell server running on GC. This shell script will submit `../chipseq.wdl` to the server and wait for a response (`result.json`). There are two input JSON files (original and subsampled) for each endedness (SE and PE). You can also check all outputs on GC bucket `gs://encode-pipeline-test-runs`.
+Make sure that you have a Cromwell server running on GC. This shell script will submit `../chip.wdl` to the server and wait for a response (`result.json`). There are two input JSON files (original and subsampled) for each endedness (SE and PE). You can also check all outputs on GC bucket `gs://encode-pipeline-test-runs`.
 ```
 $ cd test_workflow/
-$ ./test_chipseq.sh [INPUT_JSON] [QC_JSON_TO_COMPARE] [DOCKER_IMAGE](optional)
+$ ./test_chip.sh [INPUT_JSON] [QC_JSON_TO_COMPARE] [DOCKER_IMAGE](optional)
 ```
 
 Jenkins must do the following:
 ```
 $ cd test_workflow/
 # For master branch (full test sample ~1day)
-$ ./test_chipseq.sh ENCSR356KRQ.json ref_output/ENCSR356KRQ_qc.json [NEW_DOCKER_IMAGE]
-$ ./test_chipseq.sh ENCSR889WQX.json ref_output/ENCSR889WQX_qc.json [NEW_DOCKER_IMAGE]
+$ ./test_chip.sh ENCSR356KRQ.json ref_output/ENCSR356KRQ_qc.json [NEW_DOCKER_IMAGE]
+$ ./test_chip.sh ENCSR889WQX.json ref_output/ENCSR889WQX_qc.json [NEW_DOCKER_IMAGE]
 # For develop branch (1/400 subsampled test sample, chr19 only ~1hr)
-$ ./test_chipseq.sh ENCSR356KRQ_subsampled.json ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json [NEW_DOCKER_IMAGE]
-$ ./test_chipseq.sh ENCSR889WQX_subsampled.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json [NEW_DOCKER_IMAGE]
+$ ./test_chip.sh ENCSR356KRQ_subsampled.json ref_output/ENCSR356KRQ_subsampled_chr19_only_qc.json [NEW_DOCKER_IMAGE]
+$ ./test_chip.sh ENCSR889WQX_subsampled.json ref_output/ENCSR889WQX_subsampled_chr19_only_qc.json [NEW_DOCKER_IMAGE]
 ```
 
-`test_chipseq.sh` will generate the following files to validate pipeline outputs. Jenkins must check if `PREFIX.qc_json_diff.txt` is empty or not.
-* `PREFIX.result.json`: all outputs of `chipseq.wdl`.
-* `PREFIX.result.qc.json`: qc summary JSON file `qc.json` of `chipseq.wdl`.
+`test_chip.sh` will generate the following files to validate pipeline outputs. Jenkins must check if `PREFIX.qc_json_diff.txt` is empty or not.
+* `PREFIX.result.json`: all outputs of `chip.wdl`.
+* `PREFIX.result.qc.json`: qc summary JSON file `qc.json` of `chip.wdl`.
 * `PREFIX.qc_json_diff.txt`: diff between `PREFIX.result.qc.json` and reference in `ref_output/`.
 
 # How to run a Cromwell server on GC
@@ -63,7 +63,7 @@ $ sudo usermod -aG docker $USER
 4) Install cromwell.
 ```
 $ cd
-$ wget https://github.com/broadinstitute/cromwell/releases/download/30.1/cromwell-30.1.jar
+$ wget https://github.com/broadinstitute/cromwell/releases/download/30.2/cromwell-30.2.jar
 $ chmod +x cromwell*.jar
 $ echo "export PATH=\$PATH:\$HOME">> ~/.bashrc
 $ source ~/.bashrc
@@ -72,15 +72,15 @@ $ source ~/.bashrc
 5) Clone pipeline, make DB directory (where metadata of all pipelines are stored) and run `MySQL` container.
 ```
 $ cd
-$ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-dev
+$ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
 $ mkdir cromwell_db
-$ docker run -d --name mysql-cromwell -v $HOME/cromwell_db:/var/lib/mysql -v $HOME/chip-seq-pipeline-dev/docker_image/mysql:/docker-entrypoint-initdb.d -e MYSQL_ROOT_PASSWORD=cromwell -e MYSQL_DATABASE=cromwell_db --publish 3306:3306 mysql
+$ docker run -d --name mysql-cromwell -v $HOME/cromwell_db:/var/lib/mysql -v $HOME/chip-seq-pipeline2/docker_image/mysql:/docker-entrypoint-initdb.d -e MYSQL_ROOT_PASSWORD=cromwell -e MYSQL_DATABASE=cromwell_db --publish 3306:3306 mysql
 $ docker ps
 ```
 
 4) Run Cromwell server
 ```
-$ cd $HOME/chip-seq-pipeline-dev
+$ cd $HOME/chip-seq-pipeline2
 $ git checkout develop_test_jenkins
 $ cd test
 $ screen -RD cromwell # make screen for cromwell server

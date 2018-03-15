@@ -13,10 +13,8 @@ from encode_frip import frip_shifted
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 callpeak',
                                         description='')
-    parser.add_argument('ta', type=str,
-                        help='Path for TAGALIGN file.')
-    parser.add_argument('--ctl-ta', type=str, nargs='*',
-                        help='Path for control TAGALIGN file.')
+    parser.add_argument('tas', type=str, nargs='+',
+                        help='Path for TAGALIGN file (first) and control TAGALIGN file (second; optional).')
     parser.add_argument('--fraglen', type=int, required=True,
                         help='Fragment length.')
     parser.add_argument('--chrsz', type=str,
@@ -39,10 +37,8 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if args.ctl_ta:
-        args.ctl_ta = args.ctl_ta[0]
-    else:
-        args.ctl_ta = ''
+    if len(args.tas)==1:
+        args.tas.append('')
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
@@ -50,10 +46,13 @@ def parse_arguments():
 def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, fraglen, cap_num_peak, 
         make_signal, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
-    basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
-    basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
-    if len(basename_prefix) > 200: # UNIX cannot have len(filename) > 255
-        basename_prefix = '{}_x_control'.format(basename_ta)
+    if ctl_ta:
+        basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
+        basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
+        if len(basename_prefix) > 200: # UNIX cannot have len(filename) > 255
+            basename_prefix = '{}_x_control'.format(basename_ta)
+    else:
+        basename_prefix = basename_ta
     prefix = os.path.join(out_dir, basename_prefix)
     npeak = '{}.{}.{}.narrowPeak.gz'.format(
         prefix,
@@ -187,7 +186,7 @@ def main():
 
     log.info('Calling peaks and generating signal tracks with MACS2...')
     npeak, fc_bigwig, pval_bigwig = macs2(
-        args.ta, args.ctl_ta, args.chrsz, args.gensz, args.pval_thresh,
+        args.tas[0], args.tas[1], args.chrsz, args.gensz, args.pval_thresh,
         args.fraglen, args.cap_num_peak, args.make_signal, 
         args.out_dir)
 
@@ -201,12 +200,9 @@ def main():
     else:
         bfilt_npeak = npeak
 
-    if args.ta: # if TAG-ALIGN is given
-        log.info('Shifted FRiP with fragment length...')
-        frip_qc = frip_shifted( args.ta, bfilt_npeak,
-            args.chrsz, args.fraglen, args.out_dir)
-    else:
-        frip_qc = '/dev/null'
+    log.info('Shifted FRiP with fragment length...')
+    frip_qc = frip_shifted( args.tas[0], bfilt_npeak,
+        args.chrsz, args.fraglen, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

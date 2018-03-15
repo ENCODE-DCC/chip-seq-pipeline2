@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_idr {
 	Float idr_thresh
@@ -15,8 +15,11 @@ workflow test_idr {
 	String ref_se_idr_frip_qc
 
 	String se_blacklist
+	String se_chrsz
 
-	call chipseq.idr as se_idr { input : 
+	Int fraglen
+
+	call chip.idr as se_idr { input : 
 		prefix = "rep1-rep2",
 		peak1 = se_peak_rep1,
 		peak2 = se_peak_rep2,
@@ -24,11 +27,13 @@ workflow test_idr {
 		idr_thresh = idr_thresh,
 		peak_type = 'regionPeak', # using SPP regionPeaks
 		rank = 'signal.value', # need to use signal.value for regionPeaks instead of p.value
+		chrsz = se_chrsz,
+		fraglen = fraglen,
 		blacklist = se_blacklist,
 		ta = se_ta_pooled,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'se_idr_peak',
 			'se_idr_bfilt_peak',

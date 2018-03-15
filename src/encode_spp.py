@@ -13,10 +13,8 @@ from encode_frip import frip_shifted
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC spp callpeak',
                                         description='')
-    parser.add_argument('ta', type=str,
-                        help='Path for experiment IP TAGALIGN file.')
-    parser.add_argument('--ctl-ta', type=str, required=True,
-                        help='Path for control TAGALIGN file.')
+    parser.add_argument('tas', type=str, nargs=2,
+                        help='Path for TAGALIGN file and control TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
     parser.add_argument('--fraglen', type=int, required=True,
@@ -84,7 +82,7 @@ def main():
     mkdir_p(args.out_dir)
 
     log.info('Calling peaks and generating signal tracks with spp...')
-    rpeak = spp(args.ta, args.ctl_ta, 
+    rpeak = spp(args.tas[0], args.tas[1], 
         args.fraglen, args.cap_num_peak, args.nth, args.out_dir)
 
     log.info('Checking if output is empty...')
@@ -97,12 +95,9 @@ def main():
     else:
         bfilt_rpeak = rpeak
 
-    if args.ta: # if TAG-ALIGN is given
-        log.info('Shifted FRiP with fragment length...')
-        frip_qc = frip_shifted( args.ta, bfilt_rpeak,
-            args.chrsz, args.fraglen, args.out_dir)
-    else:
-        frip_qc = '/dev/null'
+    log.info('Shifted FRiP with fragment length...')
+    frip_qc = frip_shifted( args.tas[0], bfilt_rpeak,
+        args.chrsz, args.fraglen, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

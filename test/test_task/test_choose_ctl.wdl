@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_choose_ctl {
 	String se_ta_rep1
@@ -22,14 +22,14 @@ workflow test_choose_ctl {
 
 	Float ctl_depth_ratio
 
-	call chipseq.choose_ctl as se_choose_ctl { input :
+	call chip.choose_ctl as se_choose_ctl { input :
 		tas = [se_ta_rep1, se_ta_rep2],
 		ctl_tas = [se_ctl_ta_rep1, se_ctl_ta_rep2],
 		ta_pooled = se_ta_pooled,
 		ctl_ta_pooled = se_ctl_ta_pooled,
 		ctl_depth_ratio = ctl_depth_ratio,
 	}
-	call chipseq.choose_ctl as se_choose_ctl_always_use_pooled_ctl { input :
+	call chip.choose_ctl as se_choose_ctl_always_use_pooled_ctl { input :
 		tas = [se_ta_rep1, se_ta_rep2],
 		ctl_tas = [se_ctl_ta_rep1, se_ctl_ta_rep2],
 		ta_pooled = se_ta_pooled,
@@ -37,14 +37,14 @@ workflow test_choose_ctl {
 		ctl_ta_pooled = se_ctl_ta_pooled,
 		ctl_depth_ratio = ctl_depth_ratio,
 	}
-	call chipseq.choose_ctl as se_choose_ctl_single_rep { input :
+	call chip.choose_ctl as se_choose_ctl_single_rep { input :
 		tas = [se_ta_rep1],
 		ctl_tas = [se_ctl_ta_rep2, se_ctl_ta_rep1],
 		ta_pooled = null,
 		ctl_ta_pooled = se_ctl_ta_pooled,
 		ctl_depth_ratio = ctl_depth_ratio,
 	}
-	call chipseq.choose_ctl as se_choose_ctl_single_ctl { input :
+	call chip.choose_ctl as se_choose_ctl_single_ctl { input :
 		tas = [se_ta_rep1, se_ta_rep2],
 		ctl_tas = [se_ctl_ta_rep1],
 		ta_pooled = se_ta_pooled,
@@ -52,15 +52,7 @@ workflow test_choose_ctl {
 		ctl_depth_ratio = ctl_depth_ratio,
 	}
 
-	call write_to_file as se_choose_ctl_idx1 { input : i=se_choose_ctl.idx[0] }
-	call write_to_file as se_choose_ctl_idx2 { input : i=se_choose_ctl.idx[1] }
-	call write_to_file as se_choose_ctl_always_use_pooled_ctl_idx1 { input : i=se_choose_ctl_always_use_pooled_ctl.idx[0] }
-	call write_to_file as se_choose_ctl_always_use_pooled_ctl_idx2 { input : i=se_choose_ctl_always_use_pooled_ctl.idx[1] }
-	call write_to_file as se_choose_ctl_single_rep_idx1 { input : i=se_choose_ctl_single_rep.idx[0] }
-	call write_to_file as se_choose_ctl_single_ctl_idx1 { input : i=se_choose_ctl_single_ctl.idx[0] }
-	call write_to_file as se_choose_ctl_single_ctl_idx2 { input : i=se_choose_ctl_single_ctl.idx[1] }
-
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'se_choose_ctl_idx1',
 			'se_choose_ctl_idx2',
@@ -71,13 +63,13 @@ workflow test_choose_ctl {
 			'se_choose_ctl_single_ctl_idx2',
 		],
 		files = [
-			se_choose_ctl_idx1.f,
-			se_choose_ctl_idx2.f,
-			se_choose_ctl_always_use_pooled_ctl_idx1.f,
-			se_choose_ctl_always_use_pooled_ctl_idx2.f,
-			se_choose_ctl_single_rep_idx1.f,
-			se_choose_ctl_single_ctl_idx1.f,
-			se_choose_ctl_single_ctl_idx2.f,
+			se_choose_ctl.chosen_ctl_tas[0],
+			se_choose_ctl.chosen_ctl_tas[1],
+			se_choose_ctl_always_use_pooled_ctl.chosen_ctl_tas[0],
+			se_choose_ctl_always_use_pooled_ctl.chosen_ctl_tas[1],
+			se_choose_ctl_single_rep.chosen_ctl_tas[0],
+			se_choose_ctl_single_ctl.chosen_ctl_tas[0],
+			se_choose_ctl_single_ctl.chosen_ctl_tas[1],
 		],
 		ref_files = [
 			ref_se_choose_ctl_idx1,

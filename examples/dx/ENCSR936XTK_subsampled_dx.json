@@ -1,0 +1,36 @@
+{
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "dx://project-FB7q5G00QyxBbQZb5k11115j:hg38_dx.tsv",
+
+    "chip.fastqs_rep1_R1" : [
+      "dx://file-FBVJPx80b8753032GZG3KGx5"
+    ],
+    "chip.fastqs_rep1_R2" : [
+      "dx://file-FBVJQ100x4zBbZ0G9G1v99Bf"
+    ],
+    "chip.fastqs_rep2_R1" : [
+      "dx://file-FBVJVp008KfkbK2vGYx1pkVG"
+    ],
+    "chip.fastqs_rep2_R2" : [
+      "dx://file-FBVJQ2j0zV4g531v8fpGXkZQ"
+    ],
+    "chip.ctl_fastqs_rep1_R1" : [
+      "dx://file-FBVJVjj0gqZBJpp38f9Gf411"
+    ],
+    "chip.ctl_fastqs_rep1_R2" : [
+      "dx://file-FBVJVzj0fXJbxjF9GYbgQ9G9"
+    ],
+    "chip.ctl_fastqs_rep2_R1" : [
+      "dx://file-FBVJQ4j0663k7GkX8fY5VBf8"
+    ],
+    "chip.ctl_fastqs_rep2_R2" : [
+      "dx://file-FBVJPz803Xy5xjF9GYbgQ37Z"
+    ],
+
+    "chip.paired_end" : true,
+
+    "chip.choose_ctl.always_use_pooled_ctl" : true,
+    "chip.qc_report.name" : "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only)",
+    "chip.qc_report.desc" : "ZNF143 ChIP-seq on human GM12878"
+
+}

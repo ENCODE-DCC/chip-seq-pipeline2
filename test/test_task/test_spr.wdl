@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_spr {
 	String pe_ta
@@ -11,16 +11,16 @@ workflow test_spr {
 	String ref_se_ta_pr1
 	String ref_se_ta_pr2
 
-	call chipseq.spr as pe_spr { input :
+	call chip.spr as pe_spr { input :
 		ta = pe_ta,
 		paired_end = true,
 	}	
-	call chipseq.spr as se_spr { input :
+	call chip.spr as se_spr { input :
 		ta = se_ta,
 		paired_end = false,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'pe_spr_pr1',
 			'pe_spr_pr2',

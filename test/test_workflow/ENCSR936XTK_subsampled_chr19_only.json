@@ -1,4 +1,5 @@
 {
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ENCSR936XTK_subsampled_chr19_only_qc.json",
     "chipseq.pipeline_type" : "tf",
     "chipseq.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_chr19_chrM_google.tsv",
     "chipseq.fastqs" : [

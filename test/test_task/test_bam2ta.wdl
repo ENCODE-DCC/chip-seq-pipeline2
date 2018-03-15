@@ -1,6 +1,6 @@
-# ENCODE DCC chipseq-Seq/DNase-Seq pipeline tester
+# ENCODE DCC ChIP-Seq pipeline tester for task bam2ta
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_bam2ta {
 	Int bam2ta_subsample
@@ -13,30 +13,30 @@ workflow test_bam2ta {
 	String ref_se_ta
 	String ref_se_ta_subsample
 
-	call chipseq.bam2ta as pe_bam2ta { input :
+	call chip.bam2ta as pe_bam2ta { input :
 		bam = pe_nodup_bam,
 		disable_tn5_shift = true,
 		paired_end = true,
 	}
-	call chipseq.bam2ta as pe_bam2ta_subsample { input :
+	call chip.bam2ta as pe_bam2ta_subsample { input :
 		bam = pe_nodup_bam,
 		disable_tn5_shift = true,
 		subsample = bam2ta_subsample,
 		paired_end = true,
 	}
-	call chipseq.bam2ta as se_bam2ta { input :
+	call chip.bam2ta as se_bam2ta { input :
 		bam = se_nodup_bam,
 		disable_tn5_shift = true,
 		paired_end = false,
 	}
-	call chipseq.bam2ta as se_bam2ta_subsample { input :
+	call chip.bam2ta as se_bam2ta_subsample { input :
 		bam = se_nodup_bam,
 		disable_tn5_shift = true,
 		subsample = bam2ta_subsample,
 		paired_end = false,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'pe_bam2ta',
 			'pe_bam2ta_subsample',

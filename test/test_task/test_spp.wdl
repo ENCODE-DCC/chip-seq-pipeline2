@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task spp
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_spp {
 	Int cap_num_peak
@@ -17,16 +17,15 @@ workflow test_spp {
 	String se_blacklist
 	String se_chrsz
 
-	call chipseq.spp as se_spp { input :
-		ta = se_ta,
-		ctl_ta = se_ctl_ta,
+	call chip.spp as se_spp { input :
+		tas = [se_ta, se_ctl_ta],
 		chrsz = se_chrsz,
 		fraglen = fraglen,
 		cap_num_peak = cap_num_peak,
 		blacklist = se_blacklist,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'se_spp_rpeak',
 			'se_spp_bfilt_rpeak',

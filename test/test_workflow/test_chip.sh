@@ -3,21 +3,20 @@ set -e # exit on error
 
 CROMWELL_SVR_URL=35.185.235.240:8000
 DOCKER_IMAGE=quay.io/encode-dcc/chip-seq-pipeline:latest
-WDL=../../chipseq.wdl
+WDL=../../chip.wdl
 
-if [ $# -lt 2 ]; then
-  echo "Usage: ./test_chipseq.sh [INPUT_JSON] [QC_JSON_TO_COMPARE] [DOCKER_IMAGE](optional)"
+if [ $# -lt 1 ]; then
+  echo "Usage: ./test_chip.sh [INPUT_JSON] [DOCKER_IMAGE](optional)"
   exit 1
 fi
-if [ $# -gt 2 ]; then
-  DOCKER_IMAGE=$3
+if [ $# -gt 1 ]; then
+  DOCKER_IMAGE=$2
 fi
 INPUT=$1
-QC_JSON_TO_COMPARE=$2
 PREFIX=$(basename $INPUT .json)
 
 # Write workflow option JSON file
-TMP_WF_OPT=$PREFIX.test_chipseq_wf_opt.json
+TMP_WF_OPT=$PREFIX.test_chip_wf_opt.json
 cat > $TMP_WF_OPT << EOM
 {
     "default_runtime_attributes" : {
@@ -59,7 +58,7 @@ while true; do
   rm -f $PREFIX.status.json
   echo "Workflow status: $WF_STATUS, Iter: $ITER"
   if [ $WF_STATUS == Succeeded ]; then
-  	echo "Workflow has been done successfully."
+    echo "Workflow has been done successfully."
     break
   elif [ $WF_STATUS == Failed ]; then
     echo "Workflow has failed. Check out $PREFIX.status.json."
@@ -67,16 +66,16 @@ while true; do
     exit 2
   fi
   if [ $ITER -gt $ITER_MAX ]; then
-  	echo "Iteration reached limit ($ITER_MAX). Failed."
-  	exit 3
+    echo "Iteration reached limit ($ITER_MAX). Failed."
+    exit 3
     break
   fi
   sleep 300
 done 
 
+set -x #why are we exiting with 1??
 # Get output of workflow
 curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/outputs" > $PREFIX.result.json
-cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['chipseq.qc_report.qc_json_str'])" > $PREFIX.result.qc.json
+cat $PREFIX.result.json | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['chip.qc_report.qc_json_match'])" > $PREFIX.result.qc_json_match.txt
 
 echo "Done testing successfully."
-diff $PREFIX.result.qc.json $QC_JSON_TO_COMPARE > $PREFIX.qc_json_diff.txt

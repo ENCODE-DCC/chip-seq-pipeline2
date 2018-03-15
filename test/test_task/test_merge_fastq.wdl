@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task bowtie2
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_merge_fastq {
 	# test merging rep1 and rep2
@@ -11,16 +11,16 @@ workflow test_merge_fastq {
 	String ref_pe_merged_fastq_R2
 	String ref_se_merged_fastq
 
-	call chipseq.merge_fastq as pe_merge_fastq { input :
+	call chip.merge_fastq as pe_merge_fastq { input :
 		fastqs = pe_fastqs,
 		paired_end = true,
 	}
-	call chipseq.merge_fastq as se_merge_fastq { input :
+	call chip.merge_fastq as se_merge_fastq { input :
 		fastqs = se_fastqs,
 		paired_end = false,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'pe_merge_fastq_R1',
 			'pe_merge_fastq_R2',
