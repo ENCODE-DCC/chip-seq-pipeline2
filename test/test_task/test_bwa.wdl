@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task bwa
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_bwa {
 	Array[String] pe_fastqs
@@ -14,20 +14,20 @@ workflow test_bwa {
 	String pe_bwa_idx_tar
 	String se_bwa_idx_tar
 
-	call chipseq.bwa as pe_bwa { input :
+	call chip.bwa as pe_bwa { input :
 		idx_tar = pe_bwa_idx_tar,
 		fastqs = pe_fastqs,
 		paired_end = true,
 		cpu = 1,
 	}
-	call chipseq.bwa as se_bwa { input :
+	call chip.bwa as se_bwa { input :
 		idx_tar = se_bwa_idx_tar,
 		fastqs = se_fastqs,
 		paired_end = false,
 		cpu = 1,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'pe_bwa',
 			'se_bwa',

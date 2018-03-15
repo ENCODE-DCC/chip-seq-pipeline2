@@ -12,9 +12,8 @@ from encode_common import *
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC Choose control.',
                         description='Choose appropriate control for each IP replicate.\
-                        idx.txt will be generated on --out-dir. idx.txt contains \
-                        zero-based index of control in each line for each IP replicate.\
-                        -1 means pooled TAG-ALIGN.')
+                        ctl_for_repN.tagAlign.gz will be generated for each IP replicate \
+                        on --out-dir.')
     parser.add_argument('--tas', type=str, nargs='+', required=True,
                         help='List of experiment TAG-ALIGN per IP replicate.')
     parser.add_argument('--ctl-tas', type=str, nargs='+', required=True,
@@ -86,10 +85,22 @@ def main():
                 else:
                     ctl_ta_idx[i] = i
 
-    log.info('Writing idx.txt...')
-    out_txt = os.path.join(args.out_dir, 'idx.txt')
-    write_txt(out_txt, ctl_ta_idx)
+    # log.info('Writing idx.txt...')
+    # out_txt = os.path.join(args.out_dir, 'idx.txt')
+    # write_txt(out_txt, ctl_ta_idx)
+    log.info('Writing ctl_for_repN.tagAlign.gz files...')
+    for i, ctl_id in enumerate(ctl_ta_idx):
+        rep_id = i+1
+        dest = os.path.join(args.out_dir, 'ctl_for_rep{}.tagAlign.gz'.format(rep_id))
+        if ctl_id==-1:
+            src = args.ctl_ta_pooled[0]
+        else:
+            src = args.ctl_tas[ctl_id]
+        copy_f_to_f(src, dest)
     
+    log.info('List all files in output directory...')
+    ls_l(args.out_dir)
+
     log.info('All done.')
 
 if __name__=='__main__':

@@ -291,26 +291,26 @@
     ], 
     "xcor_score": [
         {
-            "num_reads": 427469, 
+            "num_reads": 509318, 
             "est_frag_len": 225, 
-            "corr_est_frag_len": 0.0382382558220388, 
+            "corr_est_frag_len": 0.0476858094392947, 
             "phantom_peak": 55, 
-            "corr_phantom_peak": 0.01807683, 
+            "corr_phantom_peak": 0.02711322, 
             "argmin_corr": 1500, 
-            "min_corr": 0.008878444, 
-            "NSC": 4.306864, 
-            "RSC": 3.191844
+            "min_corr": 0.01369737, 
+            "NSC": 3.481384, 
+            "RSC": 2.533455
         }, 
         {
-            "num_reads": 522235, 
+            "num_reads": 628960, 
             "est_frag_len": 220, 
-            "corr_est_frag_len": 0.0325888072291016, 
-            "phantom_peak": 55, 
-            "corr_phantom_peak": 0.02416708, 
+            "corr_est_frag_len": 0.0389446770767726, 
+            "phantom_peak": 50, 
+            "corr_phantom_peak": 0.03264421, 
             "argmin_corr": 1500, 
-            "min_corr": 0.01983354, 
-            "NSC": 1.643116, 
-            "RSC": 2.943384
+            "min_corr": 0.02434597, 
+            "NSC": 1.599635, 
+            "RSC": 1.759253
         }
     ], 
     "jsd_qc": [
@@ -323,9 +323,9 @@
             "syn_auc": 0.490632183928, 
             "syn_elbow_pt": 0.160108380923, 
             "syn_jsd": 0.234463085159, 
-            "syn_x_intcpt": 8.44106251025, 
-            "x_intcpt": 88.0463629795, 
-            "diff_enrich": 0.847229481282
+            "syn_x_intcpt": 8.38728122613, 
+            "x_intcpt": 88.0512240399, 
+            "diff_enrich": 0.846285350613
         }, 
         {
             "pct_gen_enrich": 0.0368554761073, 
@@ -336,12 +336,23 @@
             "syn_auc": 0.550539479364, 
             "syn_elbow_pt": 0.140274061808, 
             "syn_jsd": 0.221651054219, 
-            "syn_x_intcpt": 10.4281709965, 
-            "x_intcpt": 85.6300315206, 
-            "diff_enrich": 0.822399432691
+            "syn_x_intcpt": 10.418974197, 
+            "x_intcpt": 85.6320964358, 
+            "diff_enrich": 0.822263567402
         }
     ], 
-    "frip_qc": {
+    "frip_macs2_qc": {
+        "rep1": {
+            "FRiP": 0.770968464423
+        }, 
+        "rep2": {
+            "FRiP": 0.712040197776
+        }, 
+        "pooled": {
+            "FRiP": 0.0911646989985
+        }
+    }, 
+    "frip_spp_qc": {
         "rep1": {
             "FRiP": 0.156417216061
         }, 
@@ -384,44 +395,44 @@
         "reproducibility": "pass"
     }, 
     "idr_reproducibility_qc": {
-        "Nt": 1608, 
-        "N1": 955, 
-        "N2": 571, 
-        "Np": 1609, 
-        "N_opt": 1609, 
-        "N_consv": 1608, 
+        "Nt": 1314, 
+        "N1": 801, 
+        "N2": 452, 
+        "Np": 1432, 
+        "N_opt": 1432, 
+        "N_consv": 1314, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.00062189055, 
-        "self_consistency_ratio": 1.67250437828, 
+        "rescue_ratio": 1.0898021309, 
+        "self_consistency_ratio": 1.77212389381, 
         "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
         "rep1-rep2": {
-            "FRiP": 0.0597022425844
+            "FRiP": 0.0610252440015
         }, 
         "rep1-pr": {
-            "FRiP": 0.070384587239
+            "FRiP": 0.0721453106879
         }, 
         "rep2-pr": {
-            "FRiP": 0.0379873312381
+            "FRiP": 0.038755435852
         }, 
         "ppr": {
-            "FRiP": 0.059758963969
+            "FRiP": 0.0610600729218
         }
     }, 
     "idr_frip_qc": {
         "rep1-rep2": {
-            "FRiP": 0.0525269874377
+            "FRiP": 0.0509487397902
         }, 
         "rep1-pr": {
-            "FRiP": 0.0588888814971
+            "FRiP": 0.0566513878448
         }, 
         "rep2-pr": {
-            "FRiP": 0.0277140448515
+            "FRiP": 0.0256435019794
         }, 
         "ppr": {
-            "FRiP": 0.0529922023023
+            "FRiP": 0.052663317783
         }
     }
 }
