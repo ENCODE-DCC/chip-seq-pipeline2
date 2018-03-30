@@ -92,9 +92,9 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
 
 3) Pipeline settings
 
-    Pipeline type (chip-seq or DNase-Seq) : 'tf' ChIP-Seq always requires controls.
+    Pipeline type (TF ChIP-Seq or Histone ChIP-Seq) : TF ChIP-Seq always requires controls.
 
-    * `"chip.pipeline_type` : `tf` for Transcription Factor ChIP-Seq. `histone` for Histone Factor ChIP-Seq.
+    * `"chip.pipeline_type` : `tf` for Transcription Factor ChIP-Seq. `histone` for Histone ChIP-Seq.
 
     Input data endedness.
 
@@ -142,13 +142,12 @@ Optional parameters and flags are marked with `?`. **`Input` in this document do
 
     **DO NOT DEFINE SPP PARAMETERS IN `"chip.spp"` SCOPE**. All SPP parameters must be defined in `"chipseq"` scope.
 
-    * `"chip.spp_cap_num_peak"`? : Cap number of raw peaks called from MACS2.
+    * `"chip.spp_cap_num_peak"`? : Cap number of raw peaks called from SPP.
 
 11) IDR settings
 
     **DO NOT DEFINE IDR PARAMETERS IN `"chip.idr"` SCOPE**. All IDR parameters must be defined in `"chipseq"` scope.
 
-    * `"chip.enable_idr"`? : Set it as `true` to enable IDR on raw peaks.
     * `"chip.idr_thresh"`? : IDR threshold.
 
 12) Resources
