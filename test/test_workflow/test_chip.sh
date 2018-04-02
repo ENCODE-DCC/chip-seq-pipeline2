@@ -61,8 +61,8 @@ while true; do
     echo "Workflow has been done successfully."
     break
   elif [ $WF_STATUS == Failed ]; then
-    echo "Workflow has failed. Check out $PREFIX.status.json."
-    cat $PREFIX.status.json
+    echo "Workflow has failed. Check out $PREFIX.metadata.json."
+    curl -X GET --header "Accept: application/json" -v "$CROMWELL_SVR_URL/api/workflows/v1/$WF_ID/metadata" > $PREFIX.metadata.json
     exit 2
   fi
   if [ $ITER -gt $ITER_MAX ]; then
