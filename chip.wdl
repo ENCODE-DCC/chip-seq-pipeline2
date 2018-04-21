@@ -771,7 +771,9 @@ task trim_fastq { # trim fastq (for PE R1 only)
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "8000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
@@ -913,7 +915,9 @@ task spr { # make two self pseudo replicates
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "${select_first([mem_mb,'12000'])} MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
@@ -931,7 +935,9 @@ task pool_ta {
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
@@ -1029,7 +1035,9 @@ task choose_ctl {
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "8000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -1074,6 +1082,7 @@ task macs2 {
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
@@ -1159,7 +1168,9 @@ task idr {
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -1199,7 +1210,9 @@ task overlap {
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -1226,7 +1239,9 @@ task reproducibility {
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -1339,7 +1354,9 @@ task qc_report {
 	}
 	runtime {
 		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -1355,7 +1372,9 @@ task read_genome_tsv {
 		Map[String,String] genome = read_map(genome_tsv)
 	}
 	runtime {
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -1377,7 +1396,9 @@ task rounded_mean {
 		Int rounded_mean = read_int(stdout())
 	}
 	runtime {
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"
 	}	
 }
@@ -1468,7 +1489,9 @@ task compare_md5sum {
 		String json_str = read_string('result.json') # details (string)
 	}
 	runtime {
+		cpu : 1
 		memory : "4000 MB"
+		time : 1
 		disks : "local-disk 50 HDD"		
 	}
 }
