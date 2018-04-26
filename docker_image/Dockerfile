@@ -124,6 +124,9 @@ RUN git clone --branch 0.2.8 --single-branch https://github.com/deeptools/pyBigW
 # Install deeptools 2.5.4 (python2)
 RUN pip install --no-cache-dir --no-dependencies deeptools==2.5.4
 
+# Install pyfaidx (for building genome data)
+RUN pip install --no-cache-dir pyfaidx==0.4.7.1
+
 # Get ENCODE chip-seq-pipeline container repository
 # This COPY assumes the build context is the root of the chip-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
