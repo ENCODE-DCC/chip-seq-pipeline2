@@ -133,7 +133,8 @@ RUN pip install --no-cache-dir pyfaidx==0.4.7.1
 # so the buildling command should:
 # cd [GIT_REPO_DIR] && docker build -f docker_image/Dockerfile .
 RUN mkdir -p chip-seq-pipeline/src
-COPY /src chip-seq-pipeline/src
-ENV PATH="/software/chip-seq-pipeline/src:${PATH}"
+COPY src chip-seq-pipeline/src/
+COPY chip.wdl chip-seq-pipeline/
+ENV PATH="/software/chip-seq-pipeline:/software/chip-seq-pipeline/src:${PATH}"
 
 ENTRYPOINT ["/bin/bash","-c"]
