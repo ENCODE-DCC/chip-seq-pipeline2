@@ -1,7 +1,9 @@
 {
     "default_runtime_attributes" : {
         "docker" : "quay.io/encode-dcc/chip-seq-pipeline:v1",
-        "cpu": "1",
-        "memory": "4 GB"
+        "zones": "us-west1-a us-west1-b us-west1-c us-central1-c us-central1-b",
+        "preemptible": "0",
+        "bootDiskSizeGb": "10",
+        "noAddress": "false"
     }
 }
