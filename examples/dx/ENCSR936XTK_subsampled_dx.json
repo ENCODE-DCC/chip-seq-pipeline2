@@ -1,30 +1,30 @@
 {
     "chip.pipeline_type" : "tf",
-    "chip.genome_tsv" : "dx://project-FB7q5G00QyxBbQZb5k11115j:hg38_dx.tsv",
+    "chip.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/hg38_chr19_only_dx.tsv",
 
     "chip.fastqs_rep1_R1" : [
-      "dx://file-FBVJPx80b8753032GZG3KGx5"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R1.subsampled.67.fastq.gz"
     ],
     "chip.fastqs_rep1_R2" : [
-      "dx://file-FBVJQ100x4zBbZ0G9G1v99Bf"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R2.subsampled.67.fastq.gz"
     ],
     "chip.fastqs_rep2_R1" : [
-      "dx://file-FBVJVp008KfkbK2vGYx1pkVG"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R1.subsampled.67.fastq.gz"
     ],
     "chip.fastqs_rep2_R2" : [
-      "dx://file-FBVJQ2j0zV4g531v8fpGXkZQ"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R2.subsampled.67.fastq.gz"
     ],
     "chip.ctl_fastqs_rep1_R1" : [
-      "dx://file-FBVJVjj0gqZBJpp38f9Gf411"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R1.subsampled.80.fastq.gz"
     ],
     "chip.ctl_fastqs_rep1_R2" : [
-      "dx://file-FBVJVzj0fXJbxjF9GYbgQ9G9"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R2.subsampled.80.fastq.gz"
     ],
     "chip.ctl_fastqs_rep2_R1" : [
-      "dx://file-FBVJQ4j0663k7GkX8fY5VBf8"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R1.subsampled.80.fastq.gz"
     ],
     "chip.ctl_fastqs_rep2_R2" : [
-      "dx://file-FBVJPz803Xy5xjF9GYbgQ37Z"
+      "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R2.subsampled.80.fastq.gz"
     ],
 
     "chip.paired_end" : true,
