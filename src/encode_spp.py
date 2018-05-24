@@ -50,7 +50,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
     rpeak_tmp = '{}.tmp'.format(rpeak)
     rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
 
-    cmd0 = 'Rscript $(which run_spp.R) -c={} -i={} '
+    cmd0 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
     cmd0 += '-npeak={} -odir={} -speak={} -savr={} -rf -p={}'
     cmd0 = cmd0.format(
         ta,
