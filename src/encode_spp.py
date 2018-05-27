@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from encode_common import *
+from encode_common_genomic import peak_to_bigbed
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip_shifted
 
@@ -88,12 +89,12 @@ def main():
     log.info('Checking if output is empty...')
     assert_file_not_empty(rpeak)
 
-    if args.blacklist:
-        log.info('Blacklist-filtering peaks...')
-        bfilt_rpeak = blacklist_filter(
-                rpeak, args.blacklist, False, args.out_dir)
-    else:
-        bfilt_rpeak = rpeak
+    log.info('Blacklist-filtering peaks...')
+    bfilt_rpeak = blacklist_filter(
+            rpeak, args.blacklist, False, args.out_dir)
+
+    log.info('Converting peak to bigbed...')
+    peak_to_bigbed(bfilt_rpeak, 'regionPeak', args.chrsz, args.out_dir)
 
     log.info('Shifted FRiP with fragment length...')
     frip_qc = frip_shifted( args.tas[0], bfilt_rpeak,

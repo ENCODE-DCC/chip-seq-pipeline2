@@ -293,24 +293,24 @@
         {
             "num_reads": 15000000, 
             "est_frag_len": 120, 
-            "corr_est_frag_len": 0.209552727415644, 
+            "corr_est_frag_len": 0.209418557366498, 
             "phantom_peak": 40, 
-            "corr_phantom_peak": 0.1961533, 
+            "corr_phantom_peak": 0.1963714, 
             "argmin_corr": 1500, 
-            "min_corr": 0.1659531, 
-            "NSC": 1.262722, 
-            "RSC": 1.443686
+            "min_corr": 0.1660973, 
+            "NSC": 1.260818, 
+            "RSC": 1.430966
         }, 
         {
             "num_reads": 15000000, 
             "est_frag_len": 105, 
-            "corr_est_frag_len": 0.228199512902044, 
+            "corr_est_frag_len": 0.227804982175876, 
             "phantom_peak": 40, 
-            "corr_phantom_peak": 0.2087714, 
+            "corr_phantom_peak": 0.2086889, 
             "argmin_corr": 1500, 
-            "min_corr": 0.1639338, 
-            "NSC": 1.392022, 
-            "RSC": 1.433302
+            "min_corr": 0.1638962, 
+            "NSC": 1.389935, 
+            "RSC": 1.426767
         }
     ], 
     "jsd_qc": [
@@ -323,9 +323,9 @@
             "syn_auc": 0.522936719531, 
             "syn_elbow_pt": 0.121506993215, 
             "syn_jsd": 0.300972473571, 
-            "syn_x_intcpt": 27.0401900139, 
-            "x_intcpt": 21.3418290438, 
-            "diff_enrich": 0.182238822159
+            "syn_x_intcpt": 27.013399337, 
+            "x_intcpt": 21.342011803, 
+            "diff_enrich": 0.182233301391
         }, 
         {
             "pct_gen_enrich": 0.211460268789, 
@@ -336,9 +336,9 @@
             "syn_auc": 0.496427849315, 
             "syn_elbow_pt": 0.141270711407, 
             "syn_jsd": 0.31480110074, 
-            "syn_x_intcpt": 25.5169201118, 
-            "x_intcpt": 26.5558608496, 
-            "diff_enrich": 0.227106492901
+            "syn_x_intcpt": 25.5535073794, 
+            "x_intcpt": 26.5550551474, 
+            "diff_enrich": 0.227109008764
         }
     ], 
     "frip_macs2_qc": {
@@ -360,51 +360,51 @@
             "FRiP": 0.218936285018
         }, 
         "rep1-pr1": {
-            "FRiP": 0.194153628
+            "FRiP": 0.194216485525
         }, 
         "rep2-pr1": {
-            "FRiP": 0.215724276751
+            "FRiP": 0.21567315057
         }, 
         "rep1-pr2": {
-            "FRiP": 0.194290963
+            "FRiP": 0.194336527844
         }, 
         "rep2-pr2": {
-            "FRiP": 0.216233138262
+            "FRiP": 0.216308627387
         }, 
         "pooled": {
             "FRiP": 0.193095948173
         }, 
         "ppr1": {
-            "FRiP": 0.198158531872
+            "FRiP": 0.198105733082
         }, 
         "ppr2": {
-            "FRiP": 0.198324196512
+            "FRiP": 0.198224309716
         }
     }, 
     "overlap_reproducibility_qc": {
         "Nt": 123178, 
-        "N1": 85804, 
-        "N2": 87486, 
-        "Np": 126353, 
-        "N_opt": 126353, 
+        "N1": 85732, 
+        "N2": 87652, 
+        "Np": 126008, 
+        "N_opt": 126008, 
         "N_consv": 123178, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.0257757067, 
-        "self_consistency_ratio": 1.01960281572, 
+        "rescue_ratio": 1.02297488188, 
+        "self_consistency_ratio": 1.02239537162, 
         "reproducibility": "pass"
     }, 
     "idr_reproducibility_qc": {
         "Nt": 43744, 
-        "N1": 29014, 
-        "N2": 28348, 
-        "Np": 46680, 
-        "N_opt": 46680, 
+        "N1": 28780, 
+        "N2": 28410, 
+        "Np": 46864, 
+        "N_opt": 46864, 
         "N_consv": 43744, 
         "opt_set": "ppr", 
         "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.06711777615, 
-        "self_consistency_ratio": 1.0234937209, 
+        "rescue_ratio": 1.0713240673, 
+        "self_consistency_ratio": 1.01302358325, 
         "reproducibility": "pass"
     }, 
     "overlap_frip_qc": {
@@ -412,13 +412,13 @@
             "FRiP": 0.131802860635
         }, 
         "rep1-pr": {
-            "FRiP": 0.103363023983
+            "FRiP": 0.103310139486
         }, 
         "rep2-pr": {
-            "FRiP": 0.12843406511
+            "FRiP": 0.128625188213
         }, 
         "ppr": {
-            "FRiP": 0.133623510362
+            "FRiP": 0.13338503323
         }
     }, 
     "idr_frip_qc": {
@@ -426,13 +426,13 @@
             "FRiP": 0.0848046691367
         }, 
         "rep1-pr": {
-            "FRiP": 0.0645566453808
+            "FRiP": 0.0642682967779
         }, 
         "rep2-pr": {
-            "FRiP": 0.0777994643993
+            "FRiP": 0.0778515506954
         }, 
         "ppr": {
-            "FRiP": 0.087490139164
+            "FRiP": 0.0876150755342
         }
     }
 }

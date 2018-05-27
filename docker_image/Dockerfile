@@ -127,6 +127,9 @@ RUN pip install --no-cache-dir --no-dependencies deeptools==2.5.4
 # Install pyfaidx (for building genome data)
 RUN pip install --no-cache-dir pyfaidx==0.4.7.1
 
+# Install UCSC tools (Kent utils) latest for peak2bigbed conversion
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && chmod +x bedToBigBed
+
 # Get ENCODE chip-seq-pipeline container repository
 # This COPY assumes the build context is the root of the chip-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
