@@ -6,3 +6,4 @@
 *.metadata.json
 *.submit.json
 *.test_chip_wf_opt.json
+cromwell*.jar

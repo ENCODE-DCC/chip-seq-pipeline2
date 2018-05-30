@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from encode_common import *
+from encode_common_genomic import peak_to_bigbed
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip_shifted
 
@@ -50,7 +51,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
     rpeak_tmp = '{}.tmp'.format(rpeak)
     rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
 
-    cmd0 = 'Rscript $(which run_spp.R) -c={} -i={} '
+    cmd0 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
     cmd0 += '-npeak={} -odir={} -speak={} -savr={} -rf -p={}'
     cmd0 = cmd0.format(
         ta,
@@ -88,12 +89,12 @@ def main():
     log.info('Checking if output is empty...')
     assert_file_not_empty(rpeak)
 
-    if args.blacklist:
-        log.info('Blacklist-filtering peaks...')
-        bfilt_rpeak = blacklist_filter(
-                rpeak, args.blacklist, False, args.out_dir)
-    else:
-        bfilt_rpeak = rpeak
+    log.info('Blacklist-filtering peaks...')
+    bfilt_rpeak = blacklist_filter(
+            rpeak, args.blacklist, False, args.out_dir)
+
+    log.info('Converting peak to bigbed...')
+    peak_to_bigbed(bfilt_rpeak, 'regionPeak', args.chrsz, args.out_dir)
 
     log.info('Shifted FRiP with fragment length...')
     frip_qc = frip_shifted( args.tas[0], bfilt_rpeak,

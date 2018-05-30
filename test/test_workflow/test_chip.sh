@@ -2,7 +2,6 @@
 set -e # exit on error
 
 CROMWELL_SVR_URL=35.185.235.240:8000
-DOCKER_IMAGE=quay.io/encode-dcc/chip-seq-pipeline:latest
 WDL=../../chip.wdl
 
 if [ $# -lt 1 ]; then
@@ -11,6 +10,8 @@ if [ $# -lt 1 ]; then
 fi
 if [ $# -gt 1 ]; then
   DOCKER_IMAGE=$2
+else
+  DOCKER_IMAGE=quay.io/encode-dcc/chip-seq-pipeline:v1
 fi
 INPUT=$1
 PREFIX=$(basename $INPUT .json)

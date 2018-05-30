@@ -18,7 +18,7 @@
         ]
     ],
 
-    "test_merge_fastq.ref_pe_merged_fastq_R1" : "chip-seq-pipeline-test-data/ref_output/test_merge_fastq/pe_R1_merged.fastq.gz",
-    "test_merge_fastq.ref_pe_merged_fastq_R2" : "chip-seq-pipeline-test-data/ref_output/test_merge_fastq/pe_R2_merged.fastq.gz",
-    "test_merge_fastq.ref_se_merged_fastq" : "chip-seq-pipeline-test-data/ref_output/test_merge_fastq/se_merged.fastq.gz"
+    "test_merge_fastq.ref_pe_merged_fastq_R1" : "chip-seq-pipeline-test-data/chip-seq-pipeline-test-data/ref_output/test_merge_fastq/pe_R1_merged.fastq.gz",
+    "test_merge_fastq.ref_pe_merged_fastq_R2" : "chip-seq-pipeline-test-data/chip-seq-pipeline-test-data/ref_output/test_merge_fastq/pe_R2_merged.fastq.gz",
+    "test_merge_fastq.ref_se_merged_fastq" : "chip-seq-pipeline-test-data/chip-seq-pipeline-test-data/ref_output/test_merge_fastq/se_merged.fastq.gz"
 }
