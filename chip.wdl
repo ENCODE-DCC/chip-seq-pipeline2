@@ -99,8 +99,6 @@ workflow chip {
 	File blacklist = read_genome_tsv.genome['blacklist']
 	File chrsz = read_genome_tsv.genome['chrsz']
 	String gensz = read_genome_tsv.genome['gensz']
-	Boolean no_blacklist = basename(blacklist)=='null.blacklist.gz'
-    #@call dummy { input: f = blacklist } # due to DNANexus bug...
 
 	### pipeline starts here
 	# temporary 2-dim arrays for DNANexus style fastqs and adapters
@@ -192,15 +190,24 @@ workflow chip {
 		}
 	}
 
-	Array[File] tas_pr = if align_only || true_rep_only then [] else flatten([bam2ta.ta, tas])
-	scatter( ta in tas_pr ) {
-		# make two self pseudo replicates per true replicate
-		call spr { input :
-			ta = ta,
-			paired_end = paired_end,
+	Array[File] tas_ = if align_only then [] else flatten([bam2ta.ta, tas])	
+	if ( length(tas_)>1 )  {
+		# pool tagaligns from true replicates
+		call pool_ta { input :
+			tas = tas_,
 		}
 	}
-	if ( length(tas_pr)>1 ) {
+
+	if ( !true_rep_only ) {
+		scatter( ta in tas_ ) {
+			# make two self pseudo replicates per true replicate
+			call spr { input :
+				ta = ta,
+				paired_end = paired_end,
+			}
+		}
+	}
+	if ( !true_rep_only && length(tas_)>1 ) {
 		# pool tagaligns from pseudo replicates
 		call pool_ta as pool_ta_pr1 { input :
 			tas = spr.ta_pr1,
@@ -210,13 +217,6 @@ workflow chip {
 		}
 	}
 
-	Array[File] tas_ = if align_only then [] else flatten([bam2ta.ta, tas])	
-	if ( length(tas_)>1 )  {
-		# pool tagaligns from true replicates
-		call pool_ta { input :
-			tas = tas_,
-		}
-	}
 	# align controls
 	Array[Array[File]] ctl_fastqs_rep1 = transpose([ctl_fastqs_rep1_R1,ctl_fastqs_rep1_R2])
 	Array[Array[File]] ctl_fastqs_rep2 = transpose([ctl_fastqs_rep2_R1,ctl_fastqs_rep2_R2])
@@ -268,7 +268,7 @@ workflow chip {
 		}
 	}
 
-	if ( !no_jsd && length(nodup_bams_)>0 && length(ctl_nodup_bams_)>0 && !no_blacklist ) {
+	if ( !no_jsd && length(nodup_bams_)>0 && length(ctl_nodup_bams_)>0 && basename(blacklist)!='null' ) {
 		# fingerprint and JS-distance plot
 		call fingerprint { input :
 			nodup_bams = nodup_bams_,
@@ -296,7 +296,7 @@ workflow chip {
 		else xcor.fraglen
 
 	# make control ta array [[1,2,3,4]] -> [[1],[2],[3],[4]], will be zipped with exp ta array latter
-	Array[Array[File]] chosen_ctl_tas =	if length(tas_)<1 || length(ctl_tas_)<1 then [[],[],[],[]]
+	Array[Array[File]] chosen_ctl_tas =	if length(tas_)<1 || length(ctl_tas_)<1 then [[],[],[],[],[],[]]
 		else transpose(select_all([choose_ctl.chosen_ctl_tas]))
 
 	# we have all tas and ctl_tas (optional for histone chipseq) ready, let's call peaks
@@ -320,85 +320,84 @@ workflow chip {
 	}
 
 	# SPP cannot call peaks without controls
-	Array[File] tas_spp = if peak_caller_!='spp' then [] else tas_
-	scatter(i in range(length(tas_spp))) {
-		# call peaks on tagalign
-		call spp { input :
-			tas = flatten([[tas_[i]], chosen_ctl_tas[i]]),
-			chrsz = chrsz,
-			cap_num_peak = spp_cap_num_peak,
-			fraglen = fraglen_[i],
-			blacklist = blacklist,
-			# resource
-			cpu = spp_cpu,
-			mem_mb = spp_mem_mb,
-			disks = spp_disks,
-			time_hr = spp_time_hr,
+	if ( peak_caller_=='spp' ) {
+		scatter(i in range(length(tas_))) {
+			# call peaks on tagalign
+			call spp { input :
+				tas = flatten([[tas_[i]], chosen_ctl_tas[i]]),
+				chrsz = chrsz,
+				cap_num_peak = spp_cap_num_peak,
+				fraglen = fraglen_[i],
+				blacklist = blacklist,
+				# resource
+				cpu = spp_cpu,
+				mem_mb = spp_mem_mb,
+				disks = spp_disks,
+				time_hr = spp_time_hr,
+			}
 		}
 	}
 
-	Array[File] tas_pr_macs2 = if peak_caller_!='macs2' then [] else tas_pr
-	scatter(i in range(length(tas_pr_macs2))) {
-		# call peaks on 1st pseudo replicated tagalign 
-		call macs2 as macs2_pr1 { input :
-			tas = flatten([[spr.ta_pr1[i]], chosen_ctl_tas[i]]),
-			gensz = gensz,
-			chrsz = chrsz,
-			cap_num_peak = macs2_cap_num_peak,
-			pval_thresh = pval_thresh,
-			fraglen = fraglen_[i],
-			blacklist = blacklist,
-			# resource
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+	if ( peak_caller_=='macs2' ) {
+		scatter(i in range(length(tas_))) {
+			# call peaks on 1st pseudo replicated tagalign 
+			call macs2 as macs2_pr1 { input :
+				tas = flatten([[select_first([spr.ta_pr1])[i]], chosen_ctl_tas[i]]),
+				gensz = gensz,
+				chrsz = chrsz,
+				cap_num_peak = macs2_cap_num_peak,
+				pval_thresh = pval_thresh,
+				fraglen = fraglen_[i],
+				blacklist = blacklist,
+				# resource
+				mem_mb = macs2_mem_mb,
+				disks = macs2_disks,
+				time_hr = macs2_time_hr,
+			}
+			call macs2 as macs2_pr2 { input :
+				tas = flatten([[select_first([spr.ta_pr2])[i]], chosen_ctl_tas[i]]),
+				gensz = gensz,
+				chrsz = chrsz,
+				cap_num_peak = macs2_cap_num_peak,
+				pval_thresh = pval_thresh,
+				fraglen = fraglen_[i],
+				blacklist = blacklist,
+				# resource
+				mem_mb = macs2_mem_mb,
+				disks = macs2_disks,
+				time_hr = macs2_time_hr,
+			}					
 		}
-	}
-	scatter(i in range(length(tas_pr_macs2))) {
-		call macs2 as macs2_pr2 { input :
-			tas = flatten([[spr.ta_pr2[i]], chosen_ctl_tas[i]]),
-			gensz = gensz,
-			chrsz = chrsz,
-			cap_num_peak = macs2_cap_num_peak,
-			pval_thresh = pval_thresh,
-			fraglen = fraglen_[i],
-			blacklist = blacklist,
-			# resource
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
-		}					
 	}
 
-	Array[File] tas_pr_spp = if peak_caller_!='spp' then [] else tas_pr
-	scatter(i in range(length(tas_pr_spp))) {
-		# call peaks on 1st pseudo replicated tagalign 
-		call spp as spp_pr1 { input :
-			tas = flatten([[spr.ta_pr1[i]], chosen_ctl_tas[i]]),
-			chrsz = chrsz,
-			cap_num_peak = spp_cap_num_peak,
-			fraglen = fraglen_[i],
-			blacklist = blacklist,
-			# resource
-			cpu = spp_cpu,
-			mem_mb = spp_mem_mb,
-			disks = spp_disks,
-			time_hr = spp_time_hr,
-		}
-	}
-	scatter(i in range(length(tas_pr_spp))) {
-		# call peaks on 2nd pseudo replicated tagalign 
-		call spp as spp_pr2 { input :
-			tas = flatten([[spr.ta_pr2[i]], chosen_ctl_tas[i]]),
-			chrsz = chrsz,
-			cap_num_peak = spp_cap_num_peak,
-			fraglen = fraglen_[i],
-			blacklist = blacklist,
-			# resource
-			cpu = spp_cpu,
-			mem_mb = spp_mem_mb,
-			disks = spp_disks,
-			time_hr = spp_time_hr,
+	if ( peak_caller_=='spp' ) {
+		scatter(i in range(length(tas_))) {
+			# call peaks on 1st pseudo replicated tagalign 
+			call spp as spp_pr1 { input :
+				tas = flatten([[select_first([spr.ta_pr1])[i]], chosen_ctl_tas[i]]),
+				chrsz = chrsz,
+				cap_num_peak = spp_cap_num_peak,
+				fraglen = fraglen_[i],
+				blacklist = blacklist,
+				# resource
+				cpu = spp_cpu,
+				mem_mb = spp_mem_mb,
+				disks = spp_disks,
+				time_hr = spp_time_hr,
+			}
+			# call peaks on 2nd pseudo replicated tagalign 
+			call spp as spp_pr2 { input :
+				tas = flatten([[select_first([spr.ta_pr2])[i]], chosen_ctl_tas[i]]),
+				chrsz = chrsz,
+				cap_num_peak = spp_cap_num_peak,
+				fraglen = fraglen_[i],
+				blacklist = blacklist,
+				# resource
+				cpu = spp_cpu,
+				mem_mb = spp_mem_mb,
+				disks = spp_disks,
+				time_hr = spp_time_hr,
+			}
 		}
 	}
 
@@ -409,18 +408,16 @@ workflow chip {
 		ints = fraglen_,
 	}
 
-	# actually not an array but due to dxWDL limit
+	# actually not an array
 	Array[File] chosen_ctl_ta_pooled = if length(tas_)<2 || length(ctl_tas_)<1 then []
 		else if length(ctl_tas_)<2 then [ctl_tas_[0]] # choose first (only) control
 		else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
 
-	# actually not an array but due to dxWDL limit
-	Array[File] ta_pooled_pair = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled])
 	if ( length(tas_)>1 ) {
 		# call peaks on pooled replicate
 		# always call MACS2 peaks for pooled replicate to get signal tracks
 		call macs2 as macs2_pooled { input :
-			tas = ta_pooled_pair,
+			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz,
 			chrsz = chrsz,
 			cap_num_peak = macs2_cap_num_peak,
@@ -437,7 +434,7 @@ workflow chip {
 	if ( length(tas_)>1 && peak_caller_=='spp' ) {
 		# call peaks on pooled replicate
 		call spp as spp_pooled { input :
-			tas = ta_pooled_pair,
+			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
 			chrsz = chrsz,
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
@@ -450,12 +447,10 @@ workflow chip {
 		}
 	}
 
-	Array[File] ta_ppr1_pair = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled])
-	Array[File] ta_ppr2_pair = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled])
 	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='macs2' ) {
 		# call peaks on 1st pooled pseudo replicates
 		call macs2 as macs2_ppr1 { input :
-			tas = ta_ppr1_pair,
+			tas = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz,
 			chrsz = chrsz,
 			cap_num_peak = macs2_cap_num_peak,
@@ -469,7 +464,7 @@ workflow chip {
 		}
 		# call peaks on 2nd pooled pseudo replicates
 		call macs2 as macs2_ppr2 { input :
-			tas = ta_ppr2_pair,
+			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz,
 			chrsz = chrsz,
 			cap_num_peak = macs2_cap_num_peak,
@@ -485,7 +480,7 @@ workflow chip {
 	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='spp' ) {
 		# call peaks on 1st pooled pseudo replicates
 		call spp as spp_ppr1 { input :
-			tas = ta_ppr1_pair,
+			tas = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled]),
 			chrsz = chrsz,
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
@@ -498,7 +493,7 @@ workflow chip {
 		}
 		# call peaks on 2nd pooled pseudo replicates
 		call spp as spp_ppr2 { input :
-			tas = ta_ppr2_pair,
+			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
 			chrsz = chrsz,
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
@@ -511,146 +506,131 @@ workflow chip {
 		}
 	}
 
-	# not an array but due to dxWDL limit
-	Array[File] peak_pooled_ = if align_only then []
-		else if peak_caller_=='spp' then select_all([spp_pooled.rpeak, peak_pooled]) 
-		else select_all([macs2_pooled.npeak, peak_pooled])
 	# make peak arrays
-	Array[File] peaks_ = if align_only then [] 
-		else if peak_caller_=='spp' then flatten([spp.rpeak, peaks])
-		else flatten([macs2.npeak, peaks])
+	Array[File] peaks_ = if align_only then [] else select_first([spp.rpeak ,flatten([macs2.npeak, peaks])])
 
 	# generate all possible pairs of true replicates (pair: left=prefix, right=[peak1,peak2])
-	Array[Pair[String,Array[File]]] peak_pairs_overlap =  
+	Array[Pair[String,Array[File]]] peak_pairs =  
 		if length(peaks_)<=1 then [] # 1 rep
 		else if length(peaks_)<=2 then # 2 reps
 			 [('rep1-rep2',[peaks_[0],peaks_[1]])]
 		else if length(peaks_)<=3 then # 3 reps
 			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]),
 			  ('rep2-rep3',[peaks_[1],peaks_[2]])]
-		else # 4 reps
+		else if length(peaks_)<=4 then # 4 reps
 			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]), ('rep1-rep4',[peaks_[0],peaks_[3]]),
 			  ('rep2-rep3',[peaks_[1],peaks_[2]]), ('rep2-rep4',[peaks_[1],peaks_[3]]),
 			  ('rep3-rep4',[peaks_[2],peaks_[3]])]
-	scatter( pair in peak_pairs_overlap ) {
+		else if length(peaks_)<=5 then # 5 reps
+			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]), ('rep1-rep4',[peaks_[0],peaks_[3]]), ('rep1-rep5',[peaks_[0],peaks_[4]]),
+			  ('rep2-rep3',[peaks_[1],peaks_[2]]), ('rep2-rep4',[peaks_[1],peaks_[3]]), ('rep2-rep5',[peaks_[1],peaks_[4]]),
+			  ('rep3-rep4',[peaks_[2],peaks_[3]]), ('rep3-rep5',[peaks_[2],peaks_[4]]),
+			  ('rep4-rep5',[peaks_[3],peaks_[4]])]
+		else # 6 reps
+			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]), ('rep1-rep4',[peaks_[0],peaks_[3]]), ('rep1-rep5',[peaks_[0],peaks_[4]]), ('rep1-rep6',[peaks_[0],peaks_[5]]),
+			  ('rep2-rep3',[peaks_[1],peaks_[2]]), ('rep2-rep4',[peaks_[1],peaks_[3]]), ('rep2-rep5',[peaks_[1],peaks_[4]]), ('rep2-rep6',[peaks_[1],peaks_[5]]),
+			  ('rep3-rep4',[peaks_[2],peaks_[3]]), ('rep3-rep5',[peaks_[2],peaks_[4]]), ('rep3-rep6',[peaks_[2],peaks_[5]]),
+			  ('rep4-rep5',[peaks_[3],peaks_[4]]), ('rep4-rep6',[peaks_[3],peaks_[5]]),
+			  ('rep5-rep6',[peaks_[4],peaks_[5]])]
+	scatter( pair in peak_pairs ) {
 		# Naive overlap on every pair of true replicates
 		call overlap { input :
 			prefix = pair.left,
 			peak1 = pair.right[0],
 			peak2 = pair.right[1],
-			peak_pooled = peak_pooled_[0],
+			peak_pooled = select_first([spp_pooled.rpeak, macs2_pooled.npeak, peak_pooled]),
 			fraglen = fraglen_mean.rounded_mean,
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
-			# NEED TO CHECK AFTER dxWDL BUG FIXED
-			ta = [select_first([pool_ta.ta_pooled])],
+			ta = pool_ta.ta_pooled,
 		}
 	}
-	Array[Pair[String,Array[File]]] peak_pairs_idr = if !enable_idr then [] else peak_pairs_overlap
-	scatter( pair in peak_pairs_idr ) {
-		# IDR on every pair of true replicates
-		call idr { input : 
-			prefix = pair.left,
-			peak1 = pair.right[0],
-			peak2 = pair.right[1],
-			peak_pooled = peak_pooled_[0],
-			idr_thresh = idr_thresh,
-			peak_type = peak_type,
-			fraglen = fraglen_mean.rounded_mean,
-			rank = idr_rank,
-			blacklist = blacklist,
-			chrsz = chrsz,
-			# NEED TO CHECK AFTER dxWDL BUG FIXED
-			ta = [select_first([pool_ta.ta_pooled])],
+	if ( enable_idr ) {
+		scatter( pair in peak_pairs ) {
+			# IDR on every pair of true replicates
+			call idr { input : 
+				prefix = pair.left,
+				peak1 = pair.right[0],
+				peak2 = pair.right[1],
+				peak_pooled = select_first([spp_pooled.rpeak, macs2_pooled.npeak, peak_pooled]),
+				idr_thresh = idr_thresh,
+				peak_type = peak_type,
+				fraglen = fraglen_mean.rounded_mean,
+				rank = idr_rank,
+				blacklist = blacklist,
+				chrsz = chrsz,
+				ta = pool_ta.ta_pooled,
+			}
 		}
 	}
-	
-	# NEED TO CHECK AFTER dxWDL BUG FIXED
-	# dxWDL 60.1 bug
-	# could not use tas_[i] in the following scatter block because task idr/overlap's File? ta
-	# as a workaround, make it an array (Array[File] ta)
-	Array[Array[File]] tas_overlap = if length(tas_)<1 then [[],[],[],[]] else transpose([tas_])
 
-	Array[File] peaks_pr1_overlap = if peak_caller_=='spp' then flatten([spp_pr1.rpeak, peaks_pr1])
-		else flatten([macs2_pr1.npeak, peaks_pr1])
-	Array[File] peaks_pr2_overlap = if peak_caller_=='spp' then flatten([spp_pr2.rpeak, peaks_pr2])
-		else flatten([macs2_pr2.npeak, peaks_pr2])
-	scatter( i in range(length(peaks_pr1_overlap)) ) {
+	Array[File] peaks_pr1_ = select_first([spp_pr1.rpeak, macs2_pr1.npeak, peaks_pr1])
+	Array[File] peaks_pr2_ = select_first([spp_pr2.rpeak, macs2_pr2.npeak, peaks_pr2])
+	scatter( i in range(length(peaks_pr1_)) ) {
 		# Naive overlap on pseduo replicates
 		call overlap as overlap_pr { input : 
 			prefix = "rep"+(i+1)+"-pr",
-			peak1 = peaks_pr1_overlap[i],
-			peak2 = peaks_pr2_overlap[i],
+			peak1 = peaks_pr1_[i],
+			peak2 = peaks_pr2_[i],
 			peak_pooled = peaks_[i],
 			fraglen = fraglen_[i],
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
-			# NEED TO CHECK AFTER dxWDL BUG FIXED
-			ta = tas_overlap[i]
+			ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
+		}
+	}
+	if ( enable_idr ) {
+		scatter( i in range(length(peaks_pr1_)) ) {
+			# IDR on pseduo replicates
+			call idr as idr_pr { input : 
+				prefix = "rep"+(i+1)+"-pr",
+				peak1 = peaks_pr1_[i],
+				peak2 = peaks_pr2_[i],
+				peak_pooled = peaks_[i],
+				fraglen = fraglen_[i],
+				idr_thresh = idr_thresh,
+				peak_type = peak_type,
+				rank = idr_rank,
+				blacklist = blacklist,
+				chrsz = chrsz,
+				ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
+			}
 		}
 	}
 
-	Array[File] peaks_pr1_idr = if !enable_idr then [] else peaks_pr1_overlap
-	Array[File] peaks_pr2_idr = if !enable_idr then [] else peaks_pr2_overlap
-	scatter( i in range(length(peaks_pr1_idr)) ) {
-		# IDR on pseduo replicates
-		call idr as idr_pr { input : 
-			prefix = "rep"+(i+1)+"-pr",
-			peak1 = peaks_pr1_idr[i],
-			peak2 = peaks_pr2_idr[i],
-			peak_pooled = peaks_[i],
-			fraglen = fraglen_[i],
-			idr_thresh = idr_thresh,
-			peak_type = peak_type,
-			rank = idr_rank,
-			blacklist = blacklist,
-			chrsz = chrsz,
-			# NEED TO CHECK AFTER dxWDL BUG FIXED
-			ta = tas_overlap[i]
-		}
-	}
-	# not an array but due to dxWDL limit
-	Array[File] peak_ppr1_overlap = if peak_caller_=='spp' then select_all([spp_ppr1.rpeak, peak_ppr1])
-		else select_all([macs2_ppr1.npeak, peak_ppr1])
-	Array[File] peak_ppr2_overlap = if peak_caller_=='spp' then select_all([spp_ppr2.rpeak, peak_ppr2])
-		else select_all([macs2_ppr2.npeak, peak_ppr2])
-	if ( length(peak_ppr1_overlap)>0 ) {
+	if ( length(peaks_pr1_)>1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input : 
 			prefix = "ppr",
-			peak1 = peak_ppr1_overlap[0],
-			peak2 = peak_ppr2_overlap[0],
-			peak_pooled = peak_pooled_[0],
+			peak1 = select_first([spp_ppr1.rpeak, macs2_ppr1.npeak, peak_ppr1]), #peak_ppr1_[0],
+			peak2 = select_first([spp_ppr2.rpeak, macs2_ppr2.npeak, peak_ppr2]), #peak_ppr2_[0],
+			peak_pooled = select_first([spp_pooled.rpeak, macs2_pooled.npeak, peak_pooled]),
 			peak_type = peak_type,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
 			chrsz = chrsz,
-			# NEED TO CHECK AFTER dxWDL BUG FIXED
-			ta = [select_first([pool_ta.ta_pooled])],
+			ta = pool_ta.ta_pooled,
 		}
 	}
-	# not an array but due to dxWDL limit
-	Array[File] peak_ppr1_idr = if !enable_idr then [] else peak_ppr1_overlap
-	Array[File] peak_ppr2_idr = if !enable_idr then [] else peak_ppr2_overlap
-	if ( length(peak_ppr1_idr)>0 ) {
+	if ( enable_idr && length(peaks_pr1_)>1 ) {
 		# IDR on pooled pseduo replicates
 		call idr as idr_ppr { input : 
 			prefix = "ppr",
-			peak1 = peak_ppr1_idr[0],
-			peak2 = peak_ppr2_idr[0],
-			peak_pooled = peak_pooled_[0],
+			peak1 = select_first([spp_ppr1.rpeak, macs2_ppr1.npeak, peak_ppr1]), #peak_ppr1_[0],
+			peak2 = select_first([spp_ppr2.rpeak, macs2_ppr2.npeak, peak_ppr2]), #peak_ppr2_[0],
+			peak_pooled = select_first([spp_pooled.rpeak, macs2_pooled.npeak, peak_pooled]),
 			idr_thresh = idr_thresh,
 			peak_type = peak_type,
 			rank = idr_rank,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
 			chrsz = chrsz,
-			# NEED TO CHECK AFTER dxWDL BUG FIXED
-			ta = [select_first([pool_ta.ta_pooled])],
+			ta = pool_ta.ta_pooled,
 		}
 	}
+
 	if ( !align_only && !true_rep_only ) {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
@@ -716,12 +696,6 @@ workflow chip {
 	}
 }
 
-#@task dummy {
-#@	File f
-#@	command {zcat -f ${f} | wc -l}
-#@	output {Int out = read_int(stdout())}
-#@}
-
 task merge_fastq { # merge trimmed fastqs
 	# parameters from workflow
 	Array[Array[File]] fastqs 		# [merge_id][read_end_id]
@@ -748,7 +722,6 @@ task merge_fastq { # merge trimmed fastqs
 		Array[File] merged_fastqs = glob("merge_fastqs_R?_*.fastq.gz")
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'10000'])} MB"
 		time : select_first([time_hr,6])
@@ -770,7 +743,6 @@ task trim_fastq { # trim fastq (for PE R1 only)
 		File trimmed_fastq = glob("*.fastq.gz")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "8000 MB"
 		time : 1
@@ -803,7 +775,6 @@ task bwa {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : select_first([cpu,4])
 		memory : "${select_first([mem_mb,'20000'])} MB"
 		time : select_first([time_hr,48])
@@ -914,7 +885,6 @@ task spr { # make two self pseudo replicates
 		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "${select_first([mem_mb,'12000'])} MB"
 		time : 1
@@ -934,7 +904,6 @@ task pool_ta {
 		File ta_pooled = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
 		time : 1
@@ -1002,7 +971,6 @@ task fingerprint {
 		Array[File] jsd_qcs = glob("*.jsd.qc")
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'10000'])} MB"
 		time : select_first([time_hr,6])
@@ -1034,7 +1002,6 @@ task choose_ctl {
 		Array[File] chosen_ctl_tas = glob("ctl_for_rep*.tagAlign.gz")
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "8000 MB"
 		time : 1
@@ -1082,7 +1049,6 @@ task macs2 {
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : select_first([time_hr,24])
@@ -1119,7 +1085,6 @@ task spp {
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : select_first([time_hr,72])
@@ -1137,8 +1102,7 @@ task idr {
 	Float? idr_thresh
 	File blacklist 		# blacklist BED to filter raw peaks
 	# parameters to compute FRiP
-	# NEED TO CHECK AFTER dxWDL BUG FIXED	
-	Array[File] ta		# to calculate FRiP (not an array but due to dxWDL bug)
+	File? ta			# to calculate FRiP
 	Int fraglen 		# fragment length from xcor
 	File chrsz			# 2-col chromosome sizes file
 	String peak_type
@@ -1154,10 +1118,10 @@ task idr {
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
-			${if length(ta)>0 then "--ta " + ta[0] else ""}
+			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs with Google backend
-		${if length(ta)>0 then "" else "touch null.frip.qc"}			
+		${if defined(ta) then "" else "touch null.frip.qc"}			
 		touch null 
 	}
 	output {
@@ -1167,10 +1131,9 @@ task idr {
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
-		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
 		time : 1
@@ -1186,10 +1149,9 @@ task overlap {
 	File peak_pooled
 	File blacklist 	# blacklist BED to filter raw peaks
 	# parameters to compute FRiP
-	# NEED TO CHECK AFTER dxWDL BUG FIXED	
-	Array[File] ta		# to calculate FRiP (not an array but due to dxWDL bug)
-	Int fraglen 		# fragment length from xcor (for FRIP)
-	File chrsz			# 2-col chromosome sizes file
+	File? ta		# to calculate FRiP
+	Int fraglen 	# fragment length from xcor (for FRIP)
+	File chrsz		# 2-col chromosome sizes file
 	String peak_type
 
 	command {
@@ -1200,20 +1162,19 @@ task overlap {
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
-			${if length(ta)>0 then "--ta " + ta[0] else ""}
+			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs with Google backend
-		${if length(ta)>0 then "" else "touch null.frip.qc"}			
+		${if defined(ta) then "" else "touch null.frip.qc"}			
 		touch null 
 	}
 	output {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		File frip_qc = if length(ta)>0 then glob("*.frip.qc")[0] else glob("null")[0]
+		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
 		time : 1
@@ -1242,7 +1203,6 @@ task reproducibility {
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
 		time : 1
@@ -1264,44 +1224,43 @@ task qc_report {
 	String peak_caller
 	Float idr_thresh
 	# QCs
-	Array[File] flagstat_qcs
-	Array[File] nodup_flagstat_qcs
-	Array[File] dup_qcs
-	Array[File] pbc_qcs
-	Array[File] ctl_flagstat_qcs
-	Array[File] ctl_nodup_flagstat_qcs
-	Array[File] ctl_dup_qcs
-	Array[File] ctl_pbc_qcs
-	Array[File] xcor_plots
-	Array[File] xcor_scores
+	Array[File]? flagstat_qcs
+	Array[File]? nodup_flagstat_qcs
+	Array[File]? dup_qcs
+	Array[File]? pbc_qcs
+	Array[File]? ctl_flagstat_qcs
+	Array[File]? ctl_nodup_flagstat_qcs
+	Array[File]? ctl_dup_qcs
+	Array[File]? ctl_pbc_qcs
+	Array[File]? xcor_plots
+	Array[File]? xcor_scores
 	File? jsd_plot 
-	Array[File] jsd_qcs
-	Array[File] idr_plots
-	Array[File] idr_plots_pr
+	Array[File]? jsd_qcs
+	Array[File]? idr_plots
+	Array[File]? idr_plots_pr
 	File? idr_plot_ppr
-	Array[File] frip_macs2_qcs
-	Array[File] frip_macs2_qcs_pr1
-	Array[File] frip_macs2_qcs_pr2
+	Array[File]? frip_macs2_qcs
+	Array[File]? frip_macs2_qcs_pr1
+	Array[File]? frip_macs2_qcs_pr2
 	File? frip_macs2_qc_pooled
 	File? frip_macs2_qc_ppr1 
 	File? frip_macs2_qc_ppr2 
-	Array[File] frip_spp_qcs
-	Array[File] frip_spp_qcs_pr1
-	Array[File] frip_spp_qcs_pr2
+	Array[File]? frip_spp_qcs
+	Array[File]? frip_spp_qcs_pr1
+	Array[File]? frip_spp_qcs_pr2
 	File? frip_spp_qc_pooled
 	File? frip_spp_qc_ppr1 
 	File? frip_spp_qc_ppr2 
-	Array[File] frip_idr_qcs
-	Array[File] frip_idr_qcs_pr
+	Array[File]? frip_idr_qcs
+	Array[File]? frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
-	Array[File] frip_overlap_qcs
-	Array[File] frip_overlap_qcs_pr
+	Array[File]? frip_overlap_qcs
+	Array[File]? frip_overlap_qcs_pr
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
 
 	File? qc_json_ref
-	String tmp = select_first([qc_json_ref,'/dev/null'])
 
 	command {
 		python $(which encode_qc_report.py) \
@@ -1349,7 +1308,7 @@ task qc_report {
 			--out-qc-html qc.html \
 			--out-qc-json qc.json
 
-		diff qc.json ${tmp} | wc -l > qc_json_match.txt
+		diff qc.json ${if defined(qc_json_ref) then qc_json_ref else "/dev/null"} | wc -l > qc_json_match.txt
 	}
 	output {
 		File report = glob('*qc.html')[0]
@@ -1357,7 +1316,6 @@ task qc_report {
 		Boolean qc_json_match = read_int("qc_json_match.txt")==0
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/chip-seq-pipeline:v1"
 		cpu : 1
 		memory : "4000 MB"
 		time : 1

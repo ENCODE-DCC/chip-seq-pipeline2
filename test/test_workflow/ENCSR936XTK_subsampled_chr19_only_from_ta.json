@@ -1,0 +1,19 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ref_output_v1_PIP-316/ENCSR936XTK_subsampled_chr19_only_from_ta_qc.json",
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_chr19_chrM_google.tsv",
+    "chip.tas" : [
+      "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ta_subsampled_chr19_only/rep1-R1.subsampled.67.merged.nodup.tagAlign.gz",
+      "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ta_subsampled_chr19_only/rep2-R1.subsampled.67.merged.nodup.tagAlign.gz"
+    ],
+    "chip.ctl_tas" : [
+      "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ta_subsampled_chr19_only/ctl1-R1.subsampled.80.merged.nodup.tagAlign.gz",
+      "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ta_subsampled_chr19_only/ctl2-R1.subsampled.80.merged.nodup.tagAlign.gz"
+    ],
+
+    "chip.paired_end" : true,
+
+    "chip.choose_ctl.always_use_pooled_ctl" : true,
+    "chip.qc_report.name" : "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only, from TAG-ALIGN)",
+    "chip.qc_report.desc" : "ZNF143 ChIP-seq on human GM12878"
+}
