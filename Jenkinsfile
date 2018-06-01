@@ -106,8 +106,8 @@ pipeline {
                 stage('Run-Workflow-Level-Quick-Tests'){
                     agent {label 'master-builder'}
                     when {not {branch 'master'}}
-                    steps{
-                        //echo "running subsampled/chr19_only/paired_end workflow level tests when there is an event on master branch"
+                    steps {
+                        echo "running subsampled/chr19_only/paired_end workflow level tests when there is an event on master branch"
                         //sh """cd test/test_workflow
                         //      ./test_chip.sh ENCSR936XTK_subsampled_chr19_only.json $TAG
                         //      python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR936XTK_subsampled_chr19_only.result.json
@@ -118,7 +118,7 @@ pipeline {
                 stage('Run-Workflow-Level-Full-Tests'){
                     agent {label 'master-builder'}
                     when { branch 'master'}
-                    steps{
+                    steps {
                         echo "running subsampled/paired_end workflow level tests when there is an event on master branch"
                         sh """
                               ./test_chip.sh ENCSR936XTK_subsampled.json $TAG
