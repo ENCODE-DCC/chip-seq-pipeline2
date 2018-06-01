@@ -29,7 +29,7 @@
 
     "chip.paired_end" : true,
 
-    "chip.choose_ctl.always_use_pooled_ctl" : true,
-    "chip.qc_report.name" : "ENCSR936XTK",
-    "chip.qc_report.desc" : "ZNF143 ChIP-seq on human GM12878"
+    "choose_ctl.always_use_pooled_ctl" : true,
+    "qc_report.name" : "ENCSR936XTK",
+    "qc_report.desc" : "ZNF143 ChIP-seq on human GM12878"
 }

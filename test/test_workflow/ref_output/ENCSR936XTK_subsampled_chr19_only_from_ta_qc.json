@@ -1,0 +1,122 @@
+{
+    "name": "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only, from TAG-ALIGN)", 
+    "desc": "ZNF143 ChIP-seq on human GM12878", 
+    "xcor_score": [
+        {
+            "num_reads": 18072, 
+            "est_frag_len": 245, 
+            "corr_est_frag_len": 0.141651979950292, 
+            "phantom_peak": 105, 
+            "corr_phantom_peak": 0.08714105, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.01172955, 
+            "NSC": 12.07651, 
+            "RSC": 1.722846
+        }, 
+        {
+            "num_reads": 18265, 
+            "est_frag_len": 225, 
+            "corr_est_frag_len": 0.0840619382320576, 
+            "phantom_peak": 105, 
+            "corr_phantom_peak": 0.05248281, 
+            "argmin_corr": 1500, 
+            "min_corr": 0.01213723, 
+            "NSC": 6.925958, 
+            "RSC": 1.782716
+        }
+    ], 
+    "frip_macs2_qc": {
+        "rep1": {
+            "FRiP": 0.466273793714
+        }, 
+        "rep2": {
+            "FRiP": 0.354886394744
+        }, 
+        "pooled": {
+            "FRiP": 0.374920879544
+        }
+    }, 
+    "frip_spp_qc": {
+        "rep1": {
+            "FRiP": 0.44629814077
+        }, 
+        "rep2": {
+            "FRiP": 0.347057213249
+        }, 
+        "rep1-pr1": {
+            "FRiP": 0.41777335104
+        }, 
+        "rep2-pr1": {
+            "FRiP": 0.298368553597
+        }, 
+        "rep1-pr2": {
+            "FRiP": 0.405821159805
+        }, 
+        "rep2-pr2": {
+            "FRiP": 0.298948751643
+        }, 
+        "pooled": {
+            "FRiP": 0.399248699673
+        }, 
+        "ppr1": {
+            "FRiP": 0.392591777203
+        }, 
+        "ppr2": {
+            "FRiP": 0.392118009687
+        }
+    }, 
+    "overlap_reproducibility_qc": {
+        "Nt": 387, 
+        "N1": 283, 
+        "N2": 231, 
+        "Np": 379, 
+        "N_opt": 387, 
+        "N_consv": 387, 
+        "opt_set": "rep1-rep2", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.02110817942, 
+        "self_consistency_ratio": 1.22510822511, 
+        "reproducibility": "pass"
+    }, 
+    "idr_reproducibility_qc": {
+        "Nt": 247, 
+        "N1": 231, 
+        "N2": 86, 
+        "Np": 246, 
+        "N_opt": 247, 
+        "N_consv": 247, 
+        "opt_set": "rep1-rep2", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.00406504065, 
+        "self_consistency_ratio": 2.68604651163, 
+        "reproducibility": "borderline"
+    }, 
+    "overlap_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.303354707323
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.343265825587
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.224089789214
+        }, 
+        "ppr": {
+            "FRiP": 0.301813578446
+        }
+    }, 
+    "idr_frip_qc": {
+        "rep1-rep2": {
+            "FRiP": 0.275531827063
+        }, 
+        "rep1-pr": {
+            "FRiP": 0.326665559982
+        }, 
+        "rep2-pr": {
+            "FRiP": 0.150862304955
+        }, 
+        "ppr": {
+            "FRiP": 0.274417260643
+        }
+    }
+}
