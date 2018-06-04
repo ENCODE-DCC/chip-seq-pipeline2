@@ -1,1 +1,5 @@
 chip-seq-pipeline-test-data
+*.result.json
+*.metadata.json
+*wf_opt.json
+cromwell*.jar

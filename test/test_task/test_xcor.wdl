@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_xcor {
 	Int xcor_subsample
@@ -13,26 +13,26 @@ workflow test_xcor {
 	String ref_se_xcor_log
 	String ref_se_xcor_log_subsample
 
-	call chipseq.xcor as pe_xcor { input :
+	call chip.xcor as pe_xcor { input :
 		ta = pe_ta,
 		paired_end = true,
 	}
-	call chipseq.xcor as pe_xcor_subsample { input :
+	call chip.xcor as pe_xcor_subsample { input :
 		ta = pe_ta,
 		subsample = xcor_subsample,
 		paired_end = true,
 	}
-	call chipseq.xcor as se_xcor { input :
+	call chip.xcor as se_xcor { input :
 		ta = se_ta,
 		paired_end = false,
 	}
-	call chipseq.xcor as se_xcor_subsample { input :
+	call chip.xcor as se_xcor_subsample { input :
 		ta = se_ta,
 		subsample = xcor_subsample,
 		paired_end = false,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'pe_xcor',
 			'pe_xcor_subsample',

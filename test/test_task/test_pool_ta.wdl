@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_pool_ta {
 	String se_ta_rep1
@@ -8,11 +8,11 @@ workflow test_pool_ta {
 
 	String ref_se_pooled_ta
 
-	call chipseq.pool_ta as se_pool_ta { input :
+	call chip.pool_ta as se_pool_ta { input :
 		tas = [se_ta_rep1, se_ta_rep2],
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'se_pool_ta',
 		],

@@ -25,7 +25,7 @@ def parse_arguments():
                             'WARNING','CRITICAL','ERROR','CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if args.blacklist.endswith('/dev/null'):
+    if args.blacklist.endswith('null'):
         args.blacklist = ''
 
     log.setLevel(args.log_level)
@@ -38,7 +38,7 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
     peak_ext = get_ext(peak)
     filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
 
-    if get_num_lines(peak)==0:
+    if get_num_lines(peak)==0 or blacklist=='' or get_num_lines(blacklist)==0:
         cmd = 'zcat -f {} | gzip -nc > {}'.format(peak, filtered)
         run_shell_cmd(cmd)
     else:

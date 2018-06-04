@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task macs2
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chipseq.wdl" as chipseq
+import "../../chip.wdl" as chip
 
 workflow test_macs2 {
 	Int cap_num_peak
@@ -20,9 +20,8 @@ workflow test_macs2 {
 	String se_chrsz
 	String se_gensz
 
-	call chipseq.macs2 as se_macs2 { input :
-		ta = se_ta,
-		ctl_ta = se_ctl_ta,
+	call chip.macs2 as se_macs2 { input :
+		tas = [se_ta, se_ctl_ta],
 		gensz = se_gensz,
 		chrsz = se_chrsz,
 		fraglen = fraglen,
@@ -32,7 +31,7 @@ workflow test_macs2 {
 		blacklist = se_blacklist,
 	}
 
-	call chipseq.compare_md5sum { input :
+	call chip.compare_md5sum { input :
 		labels = [
 			'se_macs2_npeak',
 			'se_macs2_bfilt_npeak',
