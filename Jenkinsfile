@@ -79,6 +79,8 @@ pipeline {
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_choose_ctl.result.json
                                       ./test.sh test_filter.wdl test_filter.json $TAG
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_filter.result.json
+                                      ./test.sh test_fingerprint.wdl test_fingerprint.json $TAG
+                                      python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_fingerprint.result.json
                                       ./test.sh test_idr.wdl test_idr.json $TAG
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_idr.result.json
                                       ./test.sh test_macs2.wdl test_macs2.json $TAG
