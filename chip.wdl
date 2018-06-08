@@ -20,14 +20,22 @@ workflow chip {
 	Array[File] fastqs_rep3_R2 = []	# do not define _R2 array if your sample is not paired end
 	Array[File] fastqs_rep4_R1 = [] # do not define if you have <=3 replicates
 	Array[File] fastqs_rep4_R2 = []	# do not define _R2 array if your sample is not paired end
+	Array[File] fastqs_rep5_R1 = [] # do not define if you have <=4 replicates
+	Array[File] fastqs_rep5_R2 = []	# do not define _R2 array if your sample is not paired end
+	Array[File] fastqs_rep6_R1 = [] # do not define if you have <=5 replicates
+	Array[File] fastqs_rep6_R2 = []	# do not define _R2 array if your sample is not paired end
 	Array[File] ctl_fastqs_rep1_R1 = []	# [merge_id]
 	Array[File] ctl_fastqs_rep1_R2 = [] # do not define _R2 array if your sample is not paired end
-	Array[File] ctl_fastqs_rep2_R1 = [] # do not define if you have a single replicate
+	Array[File] ctl_fastqs_rep2_R1 = [] # do not define if you have a single control
 	Array[File] ctl_fastqs_rep2_R2 = []	# do not define _R2 array if your sample is not paired end
-	Array[File] ctl_fastqs_rep3_R1 = [] # do not define if you have <=2 replicates
+	Array[File] ctl_fastqs_rep3_R1 = [] # do not define if you have <=2 controls
 	Array[File] ctl_fastqs_rep3_R2 = []	# do not define _R2 array if your sample is not paired end
-	Array[File] ctl_fastqs_rep4_R1 = [] # do not define if you have <=3 replicates
+	Array[File] ctl_fastqs_rep4_R1 = [] # do not define if you have <=3 controls
 	Array[File] ctl_fastqs_rep4_R2 = []	# do not define _R2 array if your sample is not paired end
+	Array[File] ctl_fastqs_rep5_R1 = [] # do not define if you have <=4 controls
+	Array[File] ctl_fastqs_rep5_R2 = []	# do not define _R2 array if your sample is not paired end
+	Array[File] ctl_fastqs_rep6_R1 = [] # do not define if you have <=5 controls
+	Array[File] ctl_fastqs_rep6_R2 = []	# do not define _R2 array if your sample is not paired end
  	## default style fastq definition
  	# [read_end_id] is for fastq R1 or fastq R2
 	Array[Array[Array[File]]] fastqs = [] 		# [rep_id][merge_id][read_end_id]
@@ -101,17 +109,27 @@ workflow chip {
 	String gensz = read_genome_tsv.genome['gensz']
 
 	### pipeline starts here
-	# temporary 2-dim arrays for DNANexus style fastqs and adapters
-	Array[Array[File]] fastqs_rep1 = transpose([fastqs_rep1_R1,fastqs_rep1_R2])
-	Array[Array[File]] fastqs_rep2 = transpose([fastqs_rep2_R1,fastqs_rep2_R2])
-	Array[Array[File]] fastqs_rep3 = transpose([fastqs_rep3_R1,fastqs_rep3_R2])
-	Array[Array[File]] fastqs_rep4 = transpose([fastqs_rep4_R1,fastqs_rep4_R2])
-
+	# temporary 2-dim arrays for DNANexus style fastqs
+	Array[Array[File]] fastqs_rep1 = if length(fastqs_rep1_R2)>0 then transpose([fastqs_rep1_R1,fastqs_rep1_R2])
+									else transpose([fastqs_rep1_R1])
+	Array[Array[File]] fastqs_rep2 = if length(fastqs_rep2_R2)>0 then transpose([fastqs_rep2_R1,fastqs_rep2_R2])
+									else transpose([fastqs_rep2_R1])
+	Array[Array[File]] fastqs_rep3 = if length(fastqs_rep3_R2)>0 then transpose([fastqs_rep3_R1,fastqs_rep3_R2])
+									else transpose([fastqs_rep3_R1])
+	Array[Array[File]] fastqs_rep4 = if length(fastqs_rep4_R2)>0 then transpose([fastqs_rep4_R1,fastqs_rep4_R2])
+									else transpose([fastqs_rep4_R1])
+	Array[Array[File]] fastqs_rep5 = if length(fastqs_rep5_R2)>0 then transpose([fastqs_rep5_R1,fastqs_rep5_R2])
+									else transpose([fastqs_rep5_R1])
+	Array[Array[File]] fastqs_rep6 = if length(fastqs_rep6_R2)>0 then transpose([fastqs_rep6_R1,fastqs_rep6_R2])
+									else transpose([fastqs_rep6_R1])
 	Array[Array[Array[File]]] fastqs_ = if length(fastqs_rep1)<1 then fastqs
 		else if length(fastqs_rep2)<1 then [fastqs_rep1]
 		else if length(fastqs_rep3)<1 then [fastqs_rep1,fastqs_rep2]
 		else if length(fastqs_rep4)<1 then [fastqs_rep1,fastqs_rep2,fastqs_rep3]
-		else [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4]
+		else if length(fastqs_rep5)<1 then [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4]
+		else if length(fastqs_rep6)<1 then [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4,fastqs_rep5]
+		else [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4,fastqs_rep5,fastqs_rep6]
+
 	scatter(fastq_set in fastqs_) {
 		# merge fastqs
 		call merge_fastq { input :
@@ -218,15 +236,26 @@ workflow chip {
 	}
 
 	# align controls
-	Array[Array[File]] ctl_fastqs_rep1 = transpose([ctl_fastqs_rep1_R1,ctl_fastqs_rep1_R2])
-	Array[Array[File]] ctl_fastqs_rep2 = transpose([ctl_fastqs_rep2_R1,ctl_fastqs_rep2_R2])
-	Array[Array[File]] ctl_fastqs_rep3 = transpose([ctl_fastqs_rep3_R1,ctl_fastqs_rep3_R2])
-	Array[Array[File]] ctl_fastqs_rep4 = transpose([ctl_fastqs_rep4_R1,ctl_fastqs_rep4_R2])
+	Array[Array[File]] ctl_fastqs_rep1 = if length(ctl_fastqs_rep1_R2)>0 then transpose([ctl_fastqs_rep1_R1,ctl_fastqs_rep1_R2])
+									else transpose([ctl_fastqs_rep1_R1])
+	Array[Array[File]] ctl_fastqs_rep2 = if length(ctl_fastqs_rep2_R2)>0 then transpose([ctl_fastqs_rep2_R1,ctl_fastqs_rep2_R2])
+									else transpose([ctl_fastqs_rep2_R1])
+	Array[Array[File]] ctl_fastqs_rep3 = if length(ctl_fastqs_rep3_R2)>0 then transpose([ctl_fastqs_rep3_R1,ctl_fastqs_rep3_R2])
+									else transpose([ctl_fastqs_rep3_R1])
+	Array[Array[File]] ctl_fastqs_rep4 = if length(ctl_fastqs_rep4_R2)>0 then transpose([ctl_fastqs_rep4_R1,ctl_fastqs_rep4_R2])
+									else transpose([ctl_fastqs_rep4_R1])
+	Array[Array[File]] ctl_fastqs_rep5 = if length(ctl_fastqs_rep5_R2)>0 then transpose([ctl_fastqs_rep5_R1,ctl_fastqs_rep5_R2])
+									else transpose([ctl_fastqs_rep5_R1])
+	Array[Array[File]] ctl_fastqs_rep6 = if length(ctl_fastqs_rep6_R2)>0 then transpose([ctl_fastqs_rep6_R1,ctl_fastqs_rep6_R2])
+									else transpose([ctl_fastqs_rep6_R1])
 	Array[Array[Array[File]]] ctl_fastqs_ = if length(ctl_fastqs_rep1)<1 then ctl_fastqs
 		else if length(ctl_fastqs_rep2)<1 then [ctl_fastqs_rep1]
 		else if length(ctl_fastqs_rep3)<1 then [ctl_fastqs_rep1,ctl_fastqs_rep2]
 		else if length(ctl_fastqs_rep4)<1 then [ctl_fastqs_rep1,ctl_fastqs_rep2,ctl_fastqs_rep3]
-		else [ctl_fastqs_rep1,ctl_fastqs_rep2,ctl_fastqs_rep3,ctl_fastqs_rep4]
+		else if length(ctl_fastqs_rep5)<1 then [ctl_fastqs_rep1,ctl_fastqs_rep2,ctl_fastqs_rep3,ctl_fastqs_rep4]
+		else if length(ctl_fastqs_rep6)<1 then [ctl_fastqs_rep1,ctl_fastqs_rep2,ctl_fastqs_rep3,ctl_fastqs_rep4,ctl_fastqs_rep5]
+		else [ctl_fastqs_rep1,ctl_fastqs_rep2,ctl_fastqs_rep3,ctl_fastqs_rep4,ctl_fastqs_rep5,ctl_fastqs_rep6]
+
 	scatter(fastq_set in ctl_fastqs_) {
 		# merge fastqs
 		call merge_fastq as merge_fastq_ctl { input :
@@ -723,7 +752,7 @@ task merge_fastq { # merge trimmed fastqs
 	}
 	runtime {
 		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
+		memory : "${select_first([mem_mb,'12000'])} MB"
 		time : select_first([time_hr,6])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
@@ -886,7 +915,7 @@ task spr { # make two self pseudo replicates
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'12000'])} MB"
+		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : 1
 		disks : "local-disk 50 HDD"
 	}
@@ -941,7 +970,7 @@ task xcor {
 	runtime {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
+		memory : "${select_first([mem_mb,'16000'])} MB"
 		time : select_first([time_hr,6])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
@@ -972,7 +1001,7 @@ task fingerprint {
 	}
 	runtime {
 		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
+		memory : "${select_first([mem_mb,'12000'])} MB"
 		time : select_first([time_hr,6])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
