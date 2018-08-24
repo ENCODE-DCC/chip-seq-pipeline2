@@ -723,6 +723,12 @@ workflow chip {
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
 	}
+
+	output {
+		File report = qc_report.report
+		File qc_json = qc_report.qc_json
+		Boolean qc_json_match = qc_report.qc_json_match
+	}	
 }
 
 task merge_fastq { # merge trimmed fastqs
