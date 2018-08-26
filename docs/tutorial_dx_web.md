@@ -14,7 +14,7 @@ This document describes instruction for the item 2).
 
 2. Create a new [DX project](https://platform.dnanexus.com/projects) by clicking on "+New Project" on the top left.
 
-3. Move to our official [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq/workflows/test_ENCSR936XTK_subsampled) for the pipeline. This DX workflow is pre-built with all parameters defined.
+3. Move to our official [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/test_ENCSR936XTK_subsampled) for the pipeline. This DX workflow is pre-built with all parameters defined.
 
 4. Copy it to your project by right-clicking on the DX workflow `chip` and choose "Copy". 
 
@@ -37,7 +37,7 @@ This document describes instruction for the item 2).
 
 1. DNANexus allows only one copy of a workflow per project. The example workflow in the previous section is pre-built for the subsampled test sample [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/) with all parameters defined already.
 
-2. To run pipelines for your own samples, try to copy a DX workflow `chip` on [general workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq/workflows/general) instead of [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq/workflows/test_ENCSR936XTK_subsampled).
+2. To run pipelines for your own samples, try to copy a DX workflow `chip` on [general workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1/general) instead of [test workflow](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1/test_ENCSR936XTK_subsampled).
 
 3. Click on the DX workflow `chip`.
 
