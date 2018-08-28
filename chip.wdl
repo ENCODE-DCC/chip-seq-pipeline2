@@ -491,6 +491,8 @@ workflow chip {
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
 		}
+	}
+	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='macs2' ) {
 		# call peaks on 2nd pooled pseudo replicates
 		call macs2 as macs2_ppr2 { input :
 			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
@@ -520,6 +522,8 @@ workflow chip {
 			disks = spp_disks,
 			time_hr = spp_time_hr,
 		}
+	}
+	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='spp' ) {
 		# call peaks on 2nd pooled pseudo replicates
 		call spp as spp_ppr2 { input :
 			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
@@ -723,6 +727,12 @@ workflow chip {
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
 	}
+
+	output {
+		File report = qc_report.report
+		File qc_json = qc_report.qc_json
+		Boolean qc_json_match = qc_report.qc_json_match
+	}	
 }
 
 task merge_fastq { # merge trimmed fastqs
@@ -1357,17 +1367,17 @@ task qc_report {
 task read_genome_tsv {
 	File genome_tsv
 	command {
-		echo "Reading genome_tsv ${genome_tsv} ..."
+		cat ${genome_tsv}
 	}
 	output {
-		Map[String,String] genome = read_map(genome_tsv)
+		Map[String,String] genome = read_map(stdout())
 	}
 	runtime {
 		cpu : 1
 		memory : "4000 MB"
 		time : 1
-		disks : "local-disk 50 HDD"
-	}	
+		disks : "local-disk 50 HDD"		
+	}
 }
 
 task rounded_mean {
