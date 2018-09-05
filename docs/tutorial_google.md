@@ -30,23 +30,19 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
       $ gcloud config set project [YOUR_PROJECT_NAME]
     ```
 
-8. Git clone this pipeline.
+8. Git clone this pipeline and move into it.
     ```
       $ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
-    ```
-
-9. Move to pipeline's directory.
-    ```
       $ cd chip-seq-pipeline2
     ```
 
-9. Download cromwell.
+9. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```
       $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
       $ chmod +rx cromwell-34.jar
     ```
 
-10. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
+10. Run a pipeline for a SUBSAMPLED (1/400) paired-end sample of [ENCSR356KRQ](https://www.encodeproject.org/experiments/ENCSR356KRQ/).
     ```
       $ PROJECT=[YOUR_PROJECT_NAME]
       $ BUCKET=gs://[YOUR_BUCKET_NAME]/ENCSR356KRQ_subsampled
