@@ -17,4 +17,7 @@ java -jar ~/dxWDL-0.75.jar compile chip.wdl -project "ENCODE Uniform Processing 
 
 # mm9
 java -jar ~/dxWDL-0.75.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/v1.1/mm9 -defaults examples/dx/template_mm9.json
+
+# test sample
+java -jar ~/dxWDL-0.75.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/v1.1/test_ENCSR936XTK_subsampled -defaults examples/dx/ENCSR936XTK_subsampled_dx.json
 ```
