@@ -15,13 +15,13 @@ Tutorial for SLURM clusters
 
 3. Download a SUBSAMPLED (1/400) paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
     ```
-      $ wget https://storage.cloud.google.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ENCSR936XTK_fastq_subsampled.tar
+      $ wget https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ENCSR936XTK_fastq_subsampled.tar
       $ tar xvf ENCSR936XTK_fastq_subsampled.tar
     ```
 
 4. Download pre-built genome database for hg38.
     ```
-      $ wget https://storage.cloud.google.com/encode-pipeline-genome-data/test_genome_database_hg38_chip.tar
+      $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_chip.tar
       $ tar xvf test_genome_database_hg38_chip.tar
     ```
 
