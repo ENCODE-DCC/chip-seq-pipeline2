@@ -126,7 +126,7 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, out_dir):
         sam)
     run_shell_cmd(cmd)
 
-    cmd2 = 'zcat -f {} | awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" |'
+    cmd2 = 'zcat -f {} | awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
     cmd2 += '{{ cigar=$6; gsub("[0-9]+D","",cigar); n = split(cigar,vals,"[A-Z]"); s = 0; '
     cmd2 += 'for (i=1;i<=n;i++) s=s+vals[i]; seqlen=length($10); '
     cmd2 += 'if (s!=seqlen) print $1"\\t"; }}\' | '
