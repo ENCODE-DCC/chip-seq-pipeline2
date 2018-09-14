@@ -127,7 +127,7 @@ else:
 3. Filter/dedup (post-alignment) settings (remove a prefix `chip.` for DNANexus CLI).
 
     * `"chip.filter.dup_marker"` : (optional) Dup marker. Choose between `picard` (default) and `sambamba`.
-    * `"chip.filter.mapq_thresh"` : (optional) Threshold for low MAPQ reads removal.
+    * `"chip.filter.mapq_thresh"` : (optional) Threshold for low MAPQ reads removal (default: 30).
     * `"chip.filter.no_dup_removal"` : (optional) No dup reads removal when filtering BAM.
 
 4. BAM-2-TAGALIGN settings (remove a prefix `chip.` for DNANexus CLI).
@@ -139,7 +139,7 @@ else:
 
 5. Choose control settings.
 
-    * `"chip.choose_ctl.ctl_depth_ratio"` : (optional) if ratio between controls is higher than this then always use pooled control for all exp rep.
+    * `"chip.choose_ctl.ctl_depth_ratio"` : (optional) if ratio between controls is higher than this then always use pooled control for all exp rep (default: 1.2).
     * `"chip.choose_ctl.always_use_pooled_ctl"` : (optional) Always use pooled control for all exp replicates (ignoring ctl_depth_ratio).
 
 6. Cross correlation analysis settings (remove a prefix `chip.` for DNANexus CLI).
@@ -153,7 +153,7 @@ else:
     **DO NOT DEFINE MACS2 PARAMETERS IN `"chip.macs2"` SCOPE**. All MACS2 parameters must be defined in `"chip"` scope.
 
     * `"chip.macs2_cap_num_peak"` : (optional) Cap number of raw peaks called from MACS2 (default: 500000).
-    * `"chip.pval_thresh"` : (optional) P-value threshold.
+    * `"chip.pval_thresh"` : (optional) P-value threshold (default: 0.01).
 
 8. SPP settings
 
@@ -166,7 +166,7 @@ else:
     **DO NOT DEFINE IDR PARAMETERS IN `"chip.idr"` SCOPE**. All IDR parameters must be defined in `"chip"` scope.
 
     * `"chip.enable_idr"` : (optional) Set it as `true` to enable IDR on raw peaks.
-    * `"chip.idr_thresh"` : (optional) IDR threshold.
+    * `"chip.idr_thresh"` : (optional) IDR threshold (default: 0.05).
 
 ## Resource
 
