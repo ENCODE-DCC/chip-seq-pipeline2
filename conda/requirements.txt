@@ -35,6 +35,7 @@ r-spp ==1.13
 #glibc #segmentation fault in conda with openssl
 pyfaidx ==0.4.7.1
 cromwell==0.34
+ncurses==6.1
 
 bwa ==0.7.13
 deeptools ==2.5.4 #2.2.3 does not support plotFingerprint --outQualityMetrics
