@@ -46,6 +46,7 @@ def main():
 
     log.info('Trimming fastqs ({} bp)...'.format(args.trim_bp))
     trimmed = trim_fastq(args.fastq, args.trim_bp, args.out_dir)
+    assert_file_not_empty(trimmed)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
