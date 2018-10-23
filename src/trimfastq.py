@@ -18,10 +18,10 @@ import os
 def run():
 
     if len(sys.argv) < 2:
-        print 'usage: python %s <inputfilename> <bpToKeep | max> [-trim5 bp] [-flowcellID flowcell] [-addEnd 1 | 2] [-replace string newstring | blank] [-renameIDs prefix] [-stdout]' % sys.argv[0]
-        print '\tthe -trim5 option will trim additional bp from the 5 end, i.e. if you want the middle 36bp of 38bp reads, use 36 as bp to keep and 1 as the trim5 argument'
-        print '\tUse - to specify standard input, the script will print to standard output by default'
-        print '\tThe script can read compressed files as long as they have the correct suffix - .bz2 or .gz'
+        print('usage: python %s <inputfilename> <bpToKeep | max> [-trim5 bp] [-flowcellID flowcell] [-addEnd 1 | 2] [-replace string newstring | blank] [-renameIDs prefix] [-stdout]' % sys.argv[0])
+        print('\tthe -trim5 option will trim additional bp from the 5 end, i.e. if you want the middle 36bp of 38bp reads, use 36 as bp to keep and 1 as the trim5 argument')
+        print('\tUse - to specify standard input, the script will print(to standard output by default')
+        print('\tThe script can read compressed files as long as they have the correct suffix - .bz2 or .gz')
         sys.exit(1)
 
     inputfilename = sys.argv[1]
@@ -45,7 +45,7 @@ def run():
         if doStdOut:
             pass
         else:
-            print 'will include flowcell ID', flowcellID, 'in reads headers'
+            print('will include flowcell ID', flowcellID, 'in reads headers')
 
     doRenameIDs = False
     if '-renameIDs' in sys.argv:
@@ -59,7 +59,7 @@ def run():
         if doStdOut:
             pass
         else:
-            print 'will trim ', trim5, 'bp from the 5-end'
+            print('will trim ', trim5, 'bp from the 5-end')
         outputfilename = inputfilename.split('.fastq')[0] + '.' +str(trim)+'bp-5prim-trim.fastq'
 
     doAddEnd=False
@@ -69,7 +69,7 @@ def run():
         if doStdOut:
             pass
         else:
-            print 'will add',  '/'+END, 'to read IDs'
+            print('will add',  '/'+END, 'to read IDs')
 
     doReplace=False
     if '-replace' in sys.argv:
@@ -81,7 +81,7 @@ def run():
         if doStdOut:
             pass
         else:
-            print 'will replace',  oldstring, 'with', newstring, 'in read IDs'
+            print('will replace',  oldstring, 'with', newstring, 'in read IDs')
 
     i=0 
     shorter=0
@@ -146,16 +146,16 @@ def run():
                     if doStdOut:
                         pass
                     else:
-                        print str(j/1000000) + 'M reads processed'
+                        print(str(j/1000000) + 'M reads processed')
                 if doMax: 
                     sequence=sequence.replace('.','N')
                 else:
                     sequence=sequence[0:trim].replace('.','N')+'\n'
                 if doStdOut:
-                    print ID.strip()
-                    print sequence.strip()
-                    print plus.strip()
-                    print scores
+                    print(ID.strip())
+                    print(sequence.strip())
+                    print(plus.strip())
+                    print(scores)
                 else:
                     outfile.write(ID.strip()+'\n')
                     outfile.write(sequence.strip()+'\n')
@@ -192,7 +192,7 @@ def run():
                     if doStdOut:
                         pass
                     else:
-                        print str(j/1000000) + 'M reads processed'
+                        print(str(j/1000000) + 'M reads processed')
                 if doMax: 
                     sequence=line
                 else:
@@ -211,10 +211,10 @@ def run():
                 if doMax: 
                     scores=line
                     if doStdOut:
-                        print ID.strip()
-                        print sequence.strip()
-                        print plus.strip()
-                        print line.strip()
+                        print(ID.strip())
+                        print(sequence.strip())
+                        print(plus.strip())
+                        print(line.strip())
                     else:
                         outfile.write(ID)
                         outfile.write(sequence)
@@ -225,10 +225,10 @@ def run():
                         continue
                     scores=line[0:trim]+'\n'
                     if doStdOut:
-                        print ID.strip()
-                        print sequence.strip()
-                        print plus.strip()
-                        print scores.strip()
+                        print(ID.strip())
+                        print(sequence.strip())
+                        print(plus.strip())
+                        print(scores.strip())
                     else:
                         outfile.write(ID)
                         outfile.write(sequence)
@@ -242,6 +242,6 @@ def run():
         outfile.close()
 
     if shorter>0:
-        print shorter, 'sequences shorter than desired length'
+        print(shorter, 'sequences shorter than desired length')
 run()
 

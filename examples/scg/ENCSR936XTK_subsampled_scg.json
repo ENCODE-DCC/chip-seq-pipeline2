@@ -1,17 +1,17 @@
 {
     "chip.pipeline_type" : "tf",
-    "chip.genome_tsv" : "/ifs/scratch/leepc12/pipeline_genome_data/hg38_scg.tsv",
+    "chip.genome_tsv" : "/scratch/users/leepc12/pipeline_genome_data/hg38_scg.tsv",
     "chip.fastqs" : [
-        [["/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R1.subsampled.67.fastq.gz",
-          "/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R2.subsampled.67.fastq.gz"]],
-        [["/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R1.subsampled.67.fastq.gz",
-          "/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R2.subsampled.67.fastq.gz"]]
+        [["/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R1.subsampled.67.fastq.gz",
+          "/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R2.subsampled.67.fastq.gz"]],
+        [["/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R1.subsampled.67.fastq.gz",
+          "/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R2.subsampled.67.fastq.gz"]]
     ],
     "chip.ctl_fastqs" : [
-        [["/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R1.subsampled.80.fastq.gz",
-          "/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R2.subsampled.80.fastq.gz"]],
-        [["/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R1.subsampled.80.fastq.gz",
-          "/ifs/scratch/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R2.subsampled.80.fastq.gz"]]
+        [["/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R1.subsampled.80.fastq.gz",
+          "/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R2.subsampled.80.fastq.gz"]],
+        [["/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R1.subsampled.80.fastq.gz",
+          "/scratch/users/leepc12/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R2.subsampled.80.fastq.gz"]]
     ],
 
     "chip.paired_end" : true,

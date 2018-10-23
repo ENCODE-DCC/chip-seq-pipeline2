@@ -127,6 +127,9 @@ RUN pip install --no-cache-dir pyfaidx==0.4.7.1
 # Install UCSC tools (Kent utils) latest for peak2bigbed conversion
 RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && chmod +x bedToBigBed
 
+# Prevent conflict with locally installed python outside of singularity container
+ENV PYTHONNOUSERSITE=True
+
 # Get ENCODE chip-seq-pipeline container repository
 # This COPY assumes the build context is the root of the chip-seq-pipeline repo
 # and it gets whatever is checked out plus local modifications
