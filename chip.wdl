@@ -985,7 +985,7 @@ task xcor {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,6])
+		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
