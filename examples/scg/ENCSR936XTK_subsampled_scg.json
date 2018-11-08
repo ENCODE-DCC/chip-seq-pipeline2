@@ -1,17 +1,17 @@
 {
     "chip.pipeline_type" : "tf",
-    "chip.genome_tsv" : "/home/groups/cherry/encode/pipeline_genome_data/hg38_scg.tsv",
+    "chip.genome_tsv" : "/reference/ENCODE/pipeline_genome_data/hg38_scg.tsv",
     "chip.fastqs" : [
-        [["/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R1.subsampled.67.fastq.gz",
-          "/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R2.subsampled.67.fastq.gz"]],
-        [["/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R1.subsampled.67.fastq.gz",
-          "/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R2.subsampled.67.fastq.gz"]]
+        [["/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R1.subsampled.67.fastq.gz",
+          "/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep1-R2.subsampled.67.fastq.gz"]],
+        [["/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R1.subsampled.67.fastq.gz",
+          "/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/rep2-R2.subsampled.67.fastq.gz"]]
     ],
     "chip.ctl_fastqs" : [
-        [["/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R1.subsampled.80.fastq.gz",
-          "/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R2.subsampled.80.fastq.gz"]],
-        [["/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R1.subsampled.80.fastq.gz",
-          "/home/groups/cherry/encode/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R2.subsampled.80.fastq.gz"]]
+        [["/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R1.subsampled.80.fastq.gz",
+          "/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl1-R2.subsampled.80.fastq.gz"]],
+        [["/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R1.subsampled.80.fastq.gz",
+          "/reference/ENCODE/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq/ctl2-R2.subsampled.80.fastq.gz"]]
     ],
 
     "chip.paired_end" : true,
