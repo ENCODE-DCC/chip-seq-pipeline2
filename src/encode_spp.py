@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 from encode_common import *
-from encode_common_genomic import peak_to_bigbed
+from encode_common_genomic import peak_to_bigbed, peak_to_hammock
 from encode_blacklist_filter import blacklist_filter
 from encode_frip import frip_shifted
 
@@ -95,6 +95,9 @@ def main():
 
     log.info('Converting peak to bigbed...')
     peak_to_bigbed(bfilt_rpeak, 'regionPeak', args.chrsz, args.out_dir)
+
+    log.info('Converting peak to hammock...')
+    peak_to_hammock(bfilt_rpeak, args.out_dir)
 
     log.info('Shifted FRiP with fragment length...')
     frip_qc = frip_shifted( args.tas[0], bfilt_rpeak,
