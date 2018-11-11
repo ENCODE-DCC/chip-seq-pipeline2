@@ -37,7 +37,6 @@ RUN apt-get update && apt-get install -y \
     r-base-core \
     default-jre \
     apt-transport-https \
-    tabix \
 && rm -rf /var/lib/apt/lists/*
 
 # Make directory for all softwares
@@ -127,6 +126,9 @@ RUN pip install --no-cache-dir pyfaidx==0.4.7.1
 
 # Install UCSC tools (Kent utils) latest for peak2bigbed conversion
 RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && chmod +x bedToBigBed
+
+# Install bgzip/tabix for Wash U browser track (hammock type)
+RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
 
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
