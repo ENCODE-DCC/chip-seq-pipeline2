@@ -69,7 +69,7 @@ pipeline {
                 stage('Run-Task-Level-Tests-Non-Master'){
                         agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
                         steps{
-                                sh "cd test/test_task && git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data"
+                                sh "cd test/test_task && rm -rf chip-seq-pipeline-test-data && git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data"
                                 sh """cd test/test_task
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_bam2ta.result.json
