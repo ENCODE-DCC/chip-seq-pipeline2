@@ -40,9 +40,9 @@ pipeline {
 				                slackSend "The images will be tagged as $TAG"
 
                                 // pull the cache template image (the image is going to stay pretty much the same so it is no need to be dynamic)
-                                sh "docker pull quay.io/encode-dcc/chip-seq-pipeline:v1.1"
+                                sh "docker pull quay.io/encode-dcc/chip-seq-pipeline:v1.1.1"
                                 sh "docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io"
-                                sh "docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:v1.1 -f docker_image/Dockerfile -t chip-seq-pipeline ."
+                                sh "docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:v1.1.1 -f docker_image/Dockerfile -t chip-seq-pipeline ."
                                 sh "docker tag chip-seq-pipeline $TAG"
                                 sh "docker push $TAG"
                                 sh "docker logout"
@@ -57,9 +57,9 @@ pipeline {
                                 slackSend (color: '#7CFC00', message: "started job: ${env.JOB_NAME}, build number ${env.BUILD_NUMBER} on branch: ${env.BRANCH_NAME}.")
                                 slackSend "The images will be tagged as quay.io/encode-dcc/chip-seq-pipeline:latest"
                                 // pull the cache template image (the image is going to stay pretty much the same so it is no need to be dynamic)
-                                sh "docker pull quay.io/encode-dcc/chip-seq-pipeline:v1.1"
+                                sh "docker pull quay.io/encode-dcc/chip-seq-pipeline:v1.1.1"
                                 sh "docker login -u=${QUAY_USER} -p=${QUAY_PASS} quay.io"
-                                sh "docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:v1.1 -f docker_image/Dockerfile -t chip-seq-pipeline ."
+                                sh "docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:v1.1.1 -f docker_image/Dockerfile -t chip-seq-pipeline ."
                                 sh "docker tag chip-seq-pipeline quay.io/encode-dcc/chip-seq-pipeline:latest"
                                 sh "docker push quay.io/encode-dcc/chip-seq-pipeline:latest"
                                 sh "docker logout"
@@ -69,7 +69,7 @@ pipeline {
                 stage('Run-Task-Level-Tests-Non-Master'){
                         agent {label 'slave-w-docker-cromwell-60GB-ebs'} 
                         steps{
-                                sh "cd test/test_task && git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data"
+                                sh "cd test/test_task && rm -rf chip-seq-pipeline-test-data && git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data"
                                 sh """cd test/test_task
                                       ./test.sh test_bam2ta.wdl test_bam2ta.json $TAG
                                       python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < test_bam2ta.result.json

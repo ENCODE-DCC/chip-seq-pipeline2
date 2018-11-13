@@ -202,6 +202,6 @@ Walltime (`time`) settings (for SGE and SLURM only).
 * `"chip.bwa.time_hr"` : (optional) Walltime for `bwa` (default: 48).
 * `"chip.filter.time_hr"` : (optional) Walltime for `filter` (default: 24).
 * `"chip.bam2ta.time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
-* `"chip.xcor.time_hr"` : (optional) Walltime for `xcor` (default: 6).
+* `"chip.xcor.time_hr"` : (optional) Walltime for `xcor` (default: 24).
 * `"chip.macs2_time_hr"` : (optional) Walltime for `macs2` (default: 24).
 

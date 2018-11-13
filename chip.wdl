@@ -691,6 +691,8 @@ workflow chip {
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
 		peak_caller = peak_caller_,
+		macs2_cap_num_peak = macs2_cap_num_peak,
+		macs2_cap_num_peak = spp_cap_num_peak,		
 		idr_thresh = idr_thresh,
 		flagstat_qcs = bwa.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
@@ -985,7 +987,7 @@ task xcor {
 		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
 		cpu : select_first([cpu,2])
 		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,6])
+		time : select_first([time_hr,24])
 		disks : select_first([disks,"local-disk 100 HDD"])
 	}
 }
@@ -1087,6 +1089,7 @@ task macs2 {
 		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
 		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
 		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
+		Array[File] bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")
 		File sig_pval = if select_first([make_signal,false]) then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
 		File sig_fc = if select_first([make_signal,false]) then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
@@ -1125,6 +1128,7 @@ task spp {
 		File rpeak = glob("*[!.][!b][!f][!i][!l][!t].regionPeak.gz")[0]
 		File bfilt_rpeak = glob("*.bfilt.regionPeak.gz")[0]
 		File bfilt_rpeak_peak_bb = glob("*.bfilt.regionPeak.bb")[0]
+		Array[File] bfilt_rpeak_hammock = glob("*.bfilt.regionPeak.hammock.gz*")
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
@@ -1171,6 +1175,7 @@ task idr {
 		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
+		Array[File] bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
 		File idr_log = glob("*.log")[0]
@@ -1215,6 +1220,7 @@ task overlap {
 		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
 		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
 		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
+		Array[File] bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {
@@ -1247,10 +1253,12 @@ task reproducibility {
 			${"--chrsz " + chrsz}
 	}
 	output {
-		File optimal_peak = glob("optimal_peak.gz")[0]
-		File conservative_peak = glob("conservative_peak.gz")[0]
+		File optimal_peak = glob("optimal_peak.*.gz")[0]
+		File conservative_peak = glob("conservative_peak.*.gz")[0]
 		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
 		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
+		Array[File] optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")
+		Array[File] conservative_peak_hammock = glob("conservative_peak.*.hammock_gz*")
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
 	}
 	runtime {
@@ -1270,9 +1278,12 @@ task qc_report {
 	String? desc # description for sample
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
+	Int? multimapping
 	Boolean paired_end
 	String pipeline_type
 	String peak_caller
+	Int? macs2_cap_num_peak
+	Int? spp_cap_num_peak
 	Float idr_thresh
 	# QCs
 	Array[File]? flagstat_qcs
@@ -1315,11 +1326,14 @@ task qc_report {
 
 	command {
 		python $(which encode_qc_report.py) \
-			${"--name '" + name + "'"} \
-			${"--desc '" + desc + "'"} \
+			${"--name '" + sub(select_first([name,""]),"'","_") + "'"} \
+			${"--desc '" + sub(select_first([desc,""]),"'","_") + "'"} \
+			${"--multimapping " + multimapping} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \
+			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
+			${"--spp-cap-num-peak " + spp_cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--flagstat-qcs ${sep=' ' flagstat_qcs} \
 			--nodup-flagstat-qcs ${sep=' ' nodup_flagstat_qcs} \
