@@ -33,7 +33,7 @@ java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing 
 ## DX Azure
 ```
 # version
-VER=v1.1
+VER=v1.1.1
 
 # general
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/general -defaults examples/dx_azure/template_general.json
