@@ -29,7 +29,9 @@ Choose one TSV file for `"chip.genome_tsv"` in your input JSON. `[GENOME]` shoul
 |-|-|
 |Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`|
 |DNANexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv`|
+|DNANexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:data/pipeline-genome-data/[GENOME]_dx.tsv`|
 |DNANExus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
+|DNANExus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data)|
 |Stanford Sherlock|`genome/scg/[GENOME]_scg.tsv`|
 |Stanford SCG|`genome/sherlock/[GENOME]_sherlock.tsv`|
 |Local/SLURM/SGE|You need to [build a genome database](build_genome_database.md). |
