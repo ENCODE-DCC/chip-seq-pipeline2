@@ -114,3 +114,5 @@ output_*.json
 test_genome*
 test_sample*
 tmp
+hg38
+*.fastq.gz

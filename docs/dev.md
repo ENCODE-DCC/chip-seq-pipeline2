@@ -26,8 +26,17 @@ java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing 
 # mm9
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/mm9 -defaults examples/dx/template_mm9.json
 
-# test sample
+# test sample PE ENCSR936XTK (full)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK -defaults examples/dx/ENCSR936XTK_dx.json
+
+# test sample SE ENCSR000DYI (full)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults examples/dx/ENCSR000DYI_dx.json
+
+# test sample PE ENCSR936XTK (subsampled)
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled -defaults examples/dx/ENCSR936XTK_subsampled_dx.json
+
+# test sample SE ENCSR000DYI (subsampled)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled -defaults examples/dx/ENCSR000DYI_subsampled_dx.json
 ```
 
 ## DX Azure
@@ -50,6 +59,15 @@ java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing 
 # mm9
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/mm9 -defaults examples/dx_azure/template_mm9.json
 
-# test sample
+# test sample PE ENCSR936XTK (full)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK -defaults examples/dx_azure/ENCSR936XTK_dx_azure.json
+
+# test sample SE ENCSR000DYI (full)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults examples/dx_azure/ENCSR000DYI_dx_azure.json
+
+# test sample PE ENCSR936XTK (subsampled)
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled -defaults examples/dx_azure/ENCSR936XTK_subsampled_dx_azure.json
+
+# test sample SE ENCSR000DYI (subsampled)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled -defaults examples/dx_azure/ENCSR000DYI_subsampled_dx_azure.json
 ```

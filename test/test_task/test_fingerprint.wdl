@@ -8,10 +8,20 @@ workflow test_fingerprint {
 	File se_blacklist
 	Array[File] ref_se_fingerprint_logs
 
+	Int fingerprint_cpu = 1
+	Int fingerprint_mem_mb = 12000
+	Int fingerprint_time_hr = 6
+	String fingerprint_disks = "local-disk 100 HDD"
+
 	call chip.fingerprint as se_fingerprint { input :
 		nodup_bams = se_nodup_bams,
 		ctl_bam = se_ctl_nodup_bam, # use first control only
 		blacklist = se_blacklist,
+
+		cpu = fingerprint_cpu,
+		mem_mb = fingerprint_mem_mb,
+		time_hr = fingerprint_time_hr,
+		disks = fingerprint_disks,
 	}
 
 	# take first 8 columns (vaule in other columns are random)

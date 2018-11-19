@@ -8,10 +8,6 @@ An input JSON file includes all input parameters and metadata for running pipeli
 3) Pipeline parameters.
 4) Resource for instances/jobs.
 
-## For DNANexus CLI users
-
-dxWDL (DNANexus CLI for WDL) does not support definition of task level variables with a prefix `chip.` in an input JSON file. Therefore, `chip.[TASK_NAME].[VAR_NAME]` should be replaced with `[TASK_NAME].[VAR_NAME]`. Simply remove a prefix `chip.` for task level variables. BUT DO NOT REMOVE it for workflow level variables. For example, `chip.qc_report.name` is a task (task `qc_report` in a workflow `chip`) level variable so it should be replaced with `qc_report.name`. But `chip.genome_tsv` is a workflow (`chip`) level variable, so you need to keep it the same. This is the only difference between DNANexus CLI and other platforms.
-
 ## Reference genome
 
 We currently support 4 genomes. You can also [build a genome database for your own genome](build_genome_database.md).
@@ -119,36 +115,36 @@ else:
     * `"chip.true_rep_only"` : (optional) Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"chip.enable_idr"`.
     * `"chip.disable_xcor` : (optional) Disable cross-correlation analysis.
 
-    * `"chip.qc_report.name"` : (optional) Name of sample.
-    * `"chip.qc_report.desc"` : (optional) Description for sample.
+    * `"chip.title"` : (optional) Name of sample.
+    * `"chip.description"` : (optional) Description for sample.
 
 2. Trim FASTQ settings (for paired end dataset only).
 
-    * `"chip.trim_fastq.trim_bp"` : For paired end dataset only. Number of basepairs after trimming FASTQ. It’s 50 by default. Trimmed FASTQS is only used for cross-correlation analysis. FASTQ mapping is not affected by this parameter.
+    * `"chip.trim_bp"` : For paired end dataset only. Number of basepairs after trimming FASTQ. It’s 50 by default. Trimmed FASTQS is only used for cross-correlation analysis. FASTQ mapping is not affected by this parameter.
 
 3. Filter/dedup (post-alignment) settings (remove a prefix `chip.` for DNANexus CLI).
 
-    * `"chip.filter.dup_marker"` : (optional) Dup marker. Choose between `picard` (default) and `sambamba`.
-    * `"chip.filter.mapq_thresh"` : (optional) Threshold for low MAPQ reads removal (default: 30).
-    * `"chip.filter.no_dup_removal"` : (optional) No dup reads removal when filtering BAM.
+    * `"chip.dup_marker"` : (optional) Dup marker. Choose between `picard` (default) and `sambamba`.
+    * `"chip.mapq_thresh"` : (optional) Threshold for low MAPQ reads removal (default: 30).
+    * `"chip.no_dup_removal"` : (optional) No dup reads removal when filtering BAM.
 
 4. BAM-2-TAGALIGN settings (remove a prefix `chip.` for DNANexus CLI).
 
     Pipeline filters out chrM reads by default.
 
-    * `"chip.bam2ta.regex_grep_v_ta"` : (optional) Perl-style regular expression pattern to remove matching reads from TAGALIGN (default: `chrM`).
-    * `"chip.bam2ta.subsample"` : (optional) Number of reads to subsample TAGALIGN. Subsampled TAGALIGN will be used for all downstream analysis (MACS2, IDR, naive-overlap).
+    * `"chip.regex_filter_reads"` : (optional) Perl-style regular expression pattern to remove matching reads from TAGALIGN (default: `chrM`).
+    * `"chip.subsample_reads"` : (optional) Number of reads to subsample TAGALIGN. Subsampled TAGALIGN will be used for all downstream analysis (MACS2, IDR, naive-overlap).
 
 5. Choose control settings.
 
-    * `"chip.choose_ctl.ctl_depth_ratio"` : (optional) if ratio between controls is higher than this then always use pooled control for all exp rep (default: 1.2).
-    * `"chip.choose_ctl.always_use_pooled_ctl"` : (optional) Always use pooled control for all exp replicates (ignoring ctl_depth_ratio).
+    * `"chip.ctl_depth_ratio"` : (optional) if ratio between controls is higher than this then always use pooled control for all exp rep (default: 1.2).
+    * `"chip.always_use_pooled_ctl"` : (optional) Always use pooled control for all exp replicates (ignoring ctl_depth_ratio).
 
 6. Cross correlation analysis settings (remove a prefix `chip.` for DNANexus CLI).
 
     For paired end FASTQ data set, only one read end (R1) will be trimmed and used for this analysis.
 
-    * `"chip.xcor.subsample"` : (optional) Number of reads to subsample TAGALIGN. This will not affect downstream analysis.
+    * `"chip.xcor_subsample_reads"` : (optional) Number of reads to subsample TAGALIGN. This will not affect downstream analysis.
 
 7. MACS2 settings
 
@@ -176,34 +172,31 @@ else:
 
 CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
 
-* `"chip.merge_fastq.cpu"` : (optional) umber of cores for merge_fastq (default: 2).
-* `"chip.bwa.cpu"` : (optional) Number of cores for `bwa` (default: 4).
-* `"chip.filter.cpu"` : (optional) Number of cores for `filter` (default: 2).
-* `"chip.bam2ta.cpu"` : (optional) Number of cores for `bam2ta` (default: 2).
-* `"chip.xcor.cpu"` : (optional) Number of cores for `xcor` (default: 2).
-* `"chip.trim_adapter.mem_mb"` : (optional) Max. memory limit in MB for `trim_adapter` (default: 10000).
-* `"chip.bwa.mem_mb"` : (optional) Max. memory limit in MB for `bwa` (default: 20000).
-* `"chip.filter.mem_mb"` : (optional) Max. memory limit in MB for `filter` (default: 20000).
-* `"chip.bam2ta.mem_mb"` : (optional) Max. memory limit in MB for `bam2ta` (default: 10000).
-* `"chip.spr.mem_mb"` : (optional) Max. memory limit in MB for `spr` (default: 12000).
-* `"chip.xcor.mem_mb"` : (optional) Max. memory limit in MB for `xcor` (default: 10000).
+* `"chip.bwa_cpu"` : (optional) Number of cores for `bwa` (default: 4).
+* `"chip.filter_cpu"` : (optional) Number of cores for `filter` (default: 2).
+* `"chip.bam2ta_cpu"` : (optional) Number of cores for `bam2ta` (default: 2).
+* `"chip.xcor_cpu"` : (optional) Number of cores for `xcor` (default: 2).
+* `"chip.trim_adapter_mem_mb"` : (optional) Max. memory limit in MB for `trim_adapter` (default: 10000).
+* `"chip.bwa_mem_mb"` : (optional) Max. memory limit in MB for `bwa` (default: 20000).
+* `"chip.filter_mem_mb"` : (optional) Max. memory limit in MB for `filter` (default: 20000).
+* `"chip.bam2ta_mem_mb"` : (optional) Max. memory limit in MB for `bam2ta` (default: 10000).
+* `"chip.spr_mem_mb"` : (optional) Max. memory limit in MB for `spr` (default: 12000).
+* `"chip.xcor_mem_mb"` : (optional) Max. memory limit in MB for `xcor` (default: 10000).
 * `"chip.macs2_mem_mb"` : (optional) Max. memory limit in MB for `macs2` (default: 16000).
 
 Disks (`disks`) is used for Cloud platforms (Google Cloud Platforms, AWS, ...).
 
-* `"chip.merge_fastq.disks"` : (optional) Disks for `merge_fastq` (default: "local-disk 100 HDD").
-* `"chip.bwa.disks"` : (optional) Disks for `bwa` (default: "local-disk 100 HDD").
-* `"chip.filter.disks"` : (optional) Disks for `filter` (default: "local-disk 100 HDD").
-* `"chip.bam2ta.disks"` : (optional) Disks for `bam2ta` (default: "local-disk 100 HDD").
-* `"chip.xcor.disks"` : (optional) Disks for `xcor` (default: "local-disk 100 HDD").
+* `"chip.bwa_disks"` : (optional) Disks for `bwa` (default: "local-disk 100 HDD").
+* `"chip.filter_disks"` : (optional) Disks for `filter` (default: "local-disk 100 HDD").
+* `"chip.bam2ta_disks"` : (optional) Disks for `bam2ta` (default: "local-disk 100 HDD").
+* `"chip.xcor_disks"` : (optional) Disks for `xcor` (default: "local-disk 100 HDD").
 * `"chip.macs2_disks"` : (optional) Disks for `macs2` (default: "local-disk 100 HDD").
 
 Walltime (`time`) settings (for SGE and SLURM only).
 
-* `"chip.merge_fastq.time_hr"` : (optional) Walltime for `merge_fastq` (default: 6).
-* `"chip.bwa.time_hr"` : (optional) Walltime for `bwa` (default: 48).
-* `"chip.filter.time_hr"` : (optional) Walltime for `filter` (default: 24).
-* `"chip.bam2ta.time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
-* `"chip.xcor.time_hr"` : (optional) Walltime for `xcor` (default: 24).
+* `"chip.bwa_time_hr"` : (optional) Walltime for `bwa` (default: 48).
+* `"chip.filter_time_hr"` : (optional) Walltime for `filter` (default: 24).
+* `"chip.bam2ta_time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
+* `"chip.xcor_time_hr"` : (optional) Walltime for `xcor` (default: 24).
 * `"chip.macs2_time_hr"` : (optional) Walltime for `macs2` (default: 24).
 

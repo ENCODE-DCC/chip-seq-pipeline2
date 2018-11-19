@@ -1,0 +1,14 @@
+{
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "hg38/hg38.tsv",
+    "chip.fastqs_rep1_R1" : ["rep1.fastq.gz"],
+    "chip.fastqs_rep2_R1" : ["rep2.fastq.gz"],
+    "chip.ctl_fastqs_rep1_R1" : ["ctl1.fastq.gz"],
+    "chip.ctl_fastqs_rep2_R1" : ["ctl2.fastq.gz"],
+
+    "chip.paired_end" : false,
+    "chip.always_use_pooled_ctl" : true,
+
+    "chip.title" : "ENCSR000DYI",
+    "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
+}

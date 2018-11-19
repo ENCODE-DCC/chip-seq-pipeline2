@@ -2,6 +2,92 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow chip {
+	### sample name, description
+	String title = 'Untitled'
+	String description = 'No description'
+
+	### pipeline type
+	String pipeline_type  		# tf or histone chip-eq
+	String? peak_caller 		# default: (spp for tf) and (macs2 for histone)
+
+	### mandatory genome param
+	File genome_tsv 			# reference genome data TSV file including
+								# all important genome specific data file paths and parameters
+	Boolean paired_end
+
+	### optional but important
+	Boolean align_only = false 		# disable all post-align analysis (peak-calling, overlap, idr, ...)
+	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
+									# overlap and idr will also be disabled
+	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
+
+	Int trim_bp = 50 				# for cross-correlation analysis only
+
+	String dup_marker = 'picard'	# picard.jar MarkDuplicates (picard) or 
+									# sambamba markdup (sambamba)
+	Int mapq_thresh = 30			# threshold for low MAPQ reads removal
+	Boolean no_dup_removal = false	# no dupe reads removal when filtering BAM
+									# dup.qc and pbc.qc will be empty files
+									# and nodup_bam in the output is 
+									# filtered bam with dupes	
+
+	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
+                        			# to remove matching reads from TAGALIGN
+	Int subsample_reads = 0			# number of reads to subsample TAGALIGN
+									# 0 for no subsampling. this affects all downstream analysis
+	Int ctl_subsample_reads = 0		# number of reads to subsample control TAGALIGN
+
+	Int xcor_subsample_reads = 15000000	# number of reads to subsample TAGALIGN
+									# this will be used for xcor only
+									# will not affect any downstream analysis
+
+	Boolean always_use_pooled_ctl = false # always use pooled control for all exp rep.
+	Float ctl_depth_ratio = 1.2 	# if ratio between controls is higher than this
+									# then always use pooled control for all exp rep.
+
+	### task-specific variables but defined in workflow level (limit of WDL)
+	Int macs2_cap_num_peak = 500000	# cap number of raw peaks called from MACS2
+	Float pval_thresh = 0.01		# p.value threshold
+	Float idr_thresh = 0.05			# IDR threshold
+	Int spp_cap_num_peak = 300000	# cap number of raw peaks called from SPP
+
+	### resources
+	Int bwa_cpu = 4
+	Int bwa_mem_mb = 20000
+	Int bwa_time_hr = 48
+	String bwa_disks = "local-disk 100 HDD"
+
+	Int filter_cpu = 2
+	Int filter_mem_mb = 20000
+	Int filter_time_hr = 24
+	String filter_disks = "local-disk 100 HDD"
+
+	Int bam2ta_cpu = 2
+	Int bam2ta_mem_mb = 10000
+	Int bam2ta_time_hr = 6
+	String bam2ta_disks = "local-disk 100 HDD"
+
+	Int spr_mem_mb = 16000
+
+	Int fingerprint_cpu = 2
+	Int fingerprint_mem_mb = 12000
+	Int fingerprint_time_hr = 6
+	String fingerprint_disks = "local-disk 100 HDD"
+
+	Int xcor_cpu = 2
+	Int xcor_mem_mb = 16000	
+	Int xcor_time_hr = 24
+	String xcor_disks = "local-disk 100 HDD"
+
+	Int macs2_mem_mb = 16000
+	Int macs2_time_hr = 24
+	String macs2_disks = "local-disk 100 HDD"
+
+	Int spp_cpu = 2
+	Int spp_mem_mb = 16000
+	Int spp_time_hr = 72
+	String spp_disks = "local-disk 100 HDD"
+
 	#### input file definition
 	# pipeline can start from any type of inputs and then leave all other types undefined
 	# supported types: fastq, bam, nodup_bam (filtered bam), ta (tagAlign), peak
@@ -58,41 +144,9 @@ workflow chip {
 	File? peak_ppr2				# do not define if you have a single replicate or true_rep=true
 	File? peak_pooled			# do not define if you have a single replicate or true_rep=true
 
-	### pipeline type
-	String pipeline_type  		# tf or histone chip-eq
-	String peak_caller = '' 	# default: spp for tf and macs2 for histone 
-
-	### mandatory genome param
-	File genome_tsv 			# reference genome data TSV file including
-								# all important genome specific data file paths and parameters
-	Boolean paired_end
-
-	### optional but important
-	Boolean align_only = false 		# disable all post-align analysis (peak-calling, overlap, idr, ...)
-	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
-									# overlap and idr will also be disabled
-	Boolean no_jsd = false 			# no JSD plot generation (deeptools fingerprint)
-
-	### task-specific variables but defined in workflow level (limit of WDL)
-	## optional for MACS2
-	Int macs2_cap_num_peak = 500000	# cap number of raw peaks called from MACS2
-	Float pval_thresh = 0.01		# p.value threshold
-	Int? macs2_mem_mb 				# resource (memory in MB)
-	Int? macs2_time_hr				# resource (walltime in hour)
-	String? macs2_disks 			# resource disks for cloud platforms
-	## optional for IDR
-	Float idr_thresh = 0.05			# IDR threshold
-	## optional for SPP
-	Int spp_cap_num_peak = 300000	# cap number of raw peaks called from SPP
-	Int? spp_cpu	 				# resource (cpu)
-	Int? spp_mem_mb 				# resource (memory in MB)
-	Int? spp_time_hr				# resource (walltime in hour)
-	String? spp_disks 				# resource disks for cloud platforms
-
 	### temp vars (do not define these)
-	String peak_caller_ = if peak_caller!='' then peak_caller 
-						else if pipeline_type=='tf' then 'spp'
-						else 'macs2'
+	String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller,'spp'])
+						else select_first([peak_caller,'macs2'])
 	String peak_type = if peak_caller_=='spp' then 'regionPeak'
 						else if peak_caller_=='macs2' then 'narrowPeak'
 						else 'narrowPeak'
@@ -141,6 +195,10 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = merge_fastq.merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
+			cpu = bwa_cpu,
+			mem_mb = bwa_mem_mb,
+			time_hr = bwa_time_hr,
+			disks = bwa_disks,
 		}
 	}
 
@@ -150,6 +208,7 @@ workflow chip {
 		# for paired end dataset, map R1 only as SE for xcor analysis
 		call trim_fastq { input :
 			fastq = fastq_set[0],
+			trim_bp = trim_bp,
 		}
 	}
 	Array[Array[File]] trimmed_fastqs_R1 = if length(trim_fastq.trimmed_fastq)<1 then []
@@ -159,12 +218,22 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = fastq_set,
 			paired_end = false,
+			cpu = bwa_cpu,
+			mem_mb = bwa_mem_mb,
+			time_hr = bwa_time_hr,
+			disks = bwa_disks,
 		}
 		# no bam filtering for xcor
 		call bam2ta as bam2ta_no_filt_R1 { input :
 			bam = bwa_R1.bam,
-			disable_tn5_shift = true,
 			paired_end = false,
+			subsample = 0,
+			regex_grep_v_ta = regex_filter_reads,
+
+			cpu = bam2ta_cpu,
+			mem_mb = bam2ta_mem_mb,
+			time_hr = bam2ta_time_hr,
+			disks = bam2ta_disks,
 		}
 	}
 
@@ -174,12 +243,26 @@ workflow chip {
 		call filter { input :
 			bam = bam,
 			paired_end = paired_end,
+			dup_marker = dup_marker,
+			mapq_thresh = mapq_thresh,
+			no_dup_removal = no_dup_removal,
+
+			cpu = filter_cpu,
+			mem_mb = filter_mem_mb,
+			time_hr = filter_time_hr,
+			disks = filter_disks,
 		}
 		# make unfiltered bam for xcor
 		call bam2ta as bam2ta_no_filt { input :
 			bam = bam,
-			disable_tn5_shift = true,
 			paired_end = paired_end,
+			subsample = 0,
+			regex_grep_v_ta = regex_filter_reads,
+
+			cpu = bam2ta_cpu,
+			mem_mb = bam2ta_mem_mb,
+			time_hr = bam2ta_time_hr,
+			disks = bam2ta_disks,
 		}
 	}
 
@@ -188,8 +271,14 @@ workflow chip {
 		# convert bam to tagalign and subsample it if necessary
 		call bam2ta { input :
 			bam = bam,
-			disable_tn5_shift = true,
 			paired_end = paired_end,
+			subsample = subsample_reads,
+			regex_grep_v_ta = regex_filter_reads,
+
+			cpu = bam2ta_cpu,
+			mem_mb = bam2ta_mem_mb,
+			time_hr = bam2ta_time_hr,
+			disks = bam2ta_disks,
 		}
 	}
 
@@ -205,6 +294,12 @@ workflow chip {
 		call xcor { input :
 			ta = ta,
 			paired_end = paired_end_xcor,
+			subsample = xcor_subsample_reads,
+
+			cpu = xcor_cpu,
+			mem_mb = xcor_mem_mb,
+			time_hr = xcor_time_hr,
+			disks = xcor_disks,
 		}
 	}
 
@@ -222,6 +317,7 @@ workflow chip {
 			call spr { input :
 				ta = ta,
 				paired_end = paired_end,
+				mem_mb = spr_mem_mb,
 			}
 		}
 	}
@@ -267,6 +363,10 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = merge_fastq_ctl.merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
+			cpu = bwa_cpu,
+			mem_mb = bwa_mem_mb,
+			time_hr = bwa_time_hr,
+			disks = bwa_disks,
 		}
 	}
 
@@ -276,6 +376,14 @@ workflow chip {
 		call filter as filter_ctl { input :
 			bam = bam,
 			paired_end = paired_end,
+			dup_marker = dup_marker,
+			mapq_thresh = mapq_thresh,
+			no_dup_removal = no_dup_removal,
+
+			cpu = filter_cpu,
+			mem_mb = filter_mem_mb,
+			time_hr = filter_time_hr,
+			disks = filter_disks,
 		}
 	}
 
@@ -284,8 +392,14 @@ workflow chip {
 		# convert bam to tagalign and subsample it if necessary
 		call bam2ta as bam2ta_ctl { input :
 			bam = bam,
-			disable_tn5_shift = true,
 			paired_end = paired_end,
+			subsample = ctl_subsample_reads,
+			regex_grep_v_ta = regex_filter_reads,
+
+			cpu = bam2ta_cpu,
+			mem_mb = bam2ta_mem_mb,
+			time_hr = bam2ta_time_hr,
+			disks = bam2ta_disks,
 		}
 	}
 
@@ -297,12 +411,17 @@ workflow chip {
 		}
 	}
 
-	if ( !no_jsd && length(nodup_bams_)>0 && length(ctl_nodup_bams_)>0 && basename(blacklist)!='null' ) {
+	if ( !disable_fingerprint && length(nodup_bams_)>0 && length(ctl_nodup_bams_)>0 && basename(blacklist)!='null' ) {
 		# fingerprint and JS-distance plot
 		call fingerprint { input :
 			nodup_bams = nodup_bams_,
 			ctl_bam = ctl_nodup_bams_[0], # use first control only
 			blacklist = blacklist,
+
+			cpu = fingerprint_cpu,
+			mem_mb = fingerprint_mem_mb,
+			time_hr = fingerprint_time_hr,
+			disks = fingerprint_disks,
 		}
 	}
 
@@ -316,6 +435,8 @@ workflow chip {
 			ctl_tas = ctl_tas_,
 			ta_pooled = pool_ta.ta_pooled,
 			ctl_ta_pooled = pool_ta_ctl.ta_pooled,
+			always_use_pooled_ctl = always_use_pooled_ctl,
+			ctl_depth_ratio = ctl_depth_ratio,
 		}
 	}
 	# before peak calling, get fragment length from xcor analysis or given input
@@ -341,7 +462,7 @@ workflow chip {
 			make_signal = true,
 			fraglen = fraglen_[i],
 			blacklist = blacklist,
-			# resource
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -358,7 +479,7 @@ workflow chip {
 				cap_num_peak = spp_cap_num_peak,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
-				# resource
+	
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
 				disks = spp_disks,
@@ -378,7 +499,8 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
-				# resource
+				make_signal = false,
+	
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -391,7 +513,8 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
-				# resource
+				make_signal = false,
+	
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
 				time_hr = macs2_time_hr,
@@ -408,7 +531,7 @@ workflow chip {
 				cap_num_peak = spp_cap_num_peak,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
-				# resource
+	
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
 				disks = spp_disks,
@@ -421,7 +544,7 @@ workflow chip {
 				cap_num_peak = spp_cap_num_peak,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
-				# resource
+	
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
 				disks = spp_disks,
@@ -454,7 +577,7 @@ workflow chip {
 			make_signal = true,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			# resource
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -468,7 +591,7 @@ workflow chip {
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			# resource
+
 			cpu = spp_cpu,
 			mem_mb = spp_mem_mb,
 			disks = spp_disks,
@@ -486,7 +609,8 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			# resource
+			make_signal = false,
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -502,7 +626,8 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			# resource
+			make_signal = false,
+
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
 			time_hr = macs2_time_hr,
@@ -516,7 +641,7 @@ workflow chip {
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			# resource
+
 			cpu = spp_cpu,
 			mem_mb = spp_mem_mb,
 			disks = spp_disks,
@@ -531,7 +656,7 @@ workflow chip {
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			# resource
+
 			cpu = spp_cpu,
 			mem_mb = spp_mem_mb,
 			disks = spp_disks,
@@ -688,6 +813,8 @@ workflow chip {
 	}
 	# Generate final QC report and JSON
 	call qc_report { input :
+		title = title,
+		description = description,
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
 		peak_caller = peak_caller_,
@@ -742,20 +869,14 @@ workflow chip {
 }
 
 task merge_fastq { # merge trimmed fastqs
-	# parameters from workflow
 	Array[Array[File]] fastqs 		# [merge_id][read_end_id]
 	Boolean paired_end
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
 
 	command {
 		python $(which encode_merge_fastq.py) \
 			${write_tsv(fastqs)} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--nth " + select_first([cpu,2])}
+			${"--nth " + 1}
 	}
 	output {
 		# WDL glob() globs in an alphabetical order
@@ -767,22 +888,21 @@ task merge_fastq { # merge trimmed fastqs
 		Array[File] merged_fastqs = glob("merge_fastqs_R?_*.fastq.gz")
 	}
 	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'12000'])} MB"
-		time : select_first([time_hr,6])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : 1
+		memory : "8000 MB"
+		time : 2
+		disks : "local-disk 100 HDD"
 	}
 }
 
 task trim_fastq { # trim fastq (for PE R1 only)
-	# parameters from workflow
 	File fastq
-	Int? trim_bp
+	Int trim_bp
 
 	command {
 		python $(which encode_trim_fastq.py) \
 			${fastq} \
-			--trim-bp ${select_first([trim_bp,50])}
+			--trim-bp ${trim_bp}
 	}
 	output {
 		File trimmed_fastq = glob("*.fastq.gz")[0]
@@ -796,23 +916,21 @@ task trim_fastq { # trim fastq (for PE R1 only)
 }
 
 task bwa {
-	# parameters from workflow
 	File idx_tar 		# reference bwa index tar
 	Array[File] fastqs 	# [read_end_id]
 	Boolean paired_end
 
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_bwa.py) \
 			${idx_tar} \
 			${sep=' ' fastqs} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--nth " + select_first([cpu,4])}
+			${"--nth " + cpu}
 	}
 	output {
 		File bam = glob("*.bam")[0]
@@ -820,105 +938,94 @@ task bwa {
 		File flagstat_qc = glob("*.flagstat.qc")[0]
 	}
 	runtime {
-		cpu : select_first([cpu,4])
-		memory : "${select_first([mem_mb,'20000'])} MB"
-		time : select_first([time_hr,48])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 		preemptible: 0
 	}
 }
 
 task filter {
-	# parameters from workflow
 	File bam
 	Boolean paired_end
-	Int? multimapping
-	# optional
-	String? dup_marker 				# picard.jar MarkDuplicates (picard) or 
+	String dup_marker 				# picard.jar MarkDuplicates (picard) or 
 									# sambamba markdup (sambamba)
-	Int? mapq_thresh				# threshold for low MAPQ reads removal
-	Boolean? no_dup_removal 		# no dupe reads removal when filtering BAM
+	Int mapq_thresh				# threshold for low MAPQ reads removal
+	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
 									# dup.qc and pbc.qc will be empty files
 									# and nodup_bam in the output is 
-	# resource						# filtered bam with dupes	
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+									# filtered bam with dupes	
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--multimapping " + multimapping} \
-			${"--dup-marker " + select_first([dup_marker,'picard'])} \
-			${"--mapq-thresh " + select_first([mapq_thresh,30])} \
-			${if select_first([no_dup_removal,false]) then "--no-dup-removal" else ""} \
+			${"--multimapping " + 0} \
+			${"--dup-marker " + dup_marker} \
+			${"--mapq-thresh " + mapq_thresh} \
+			${if no_dup_removal then "--no-dup-removal" else ""} \
 			${"--nth " + cpu}
 		# ugly part to deal with optional outputs with Google JES backend
-		${if select_first([no_dup_removal,false]) then "touch null.dup.qc null.pbc.qc; " else ""}
+		${if no_dup_removal then "touch null.dup.qc null.pbc.qc; " else ""}
 		touch null
 	}
 	output {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
-		File dup_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.dup.qc")[0]
-		File pbc_qc = if select_first([no_dup_removal,false]) then glob("null")[0] else glob("*.pbc.qc")[0]
+		File dup_qc = if no_dup_removal then glob("null")[0] else glob("*.dup.qc")[0]
+		File pbc_qc = if no_dup_removal then glob("null")[0] else glob("*.pbc.qc")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'20000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task bam2ta {
-	# parameters from workflow
 	File bam
 	Boolean paired_end
-	Boolean disable_tn5_shift 	# no tn5 shifting (it's for dnase-seq)
-	# optional
-	String? regex_grep_v_ta   	# Perl-style regular expression pattern 
+	String regex_grep_v_ta   	# Perl-style regular expression pattern 
                         		# to remove matching reads from TAGALIGN
-	Int? subsample 				# number of reads to subsample TAGALIGN
+	Int subsample 				# number of reads to subsample TAGALIGN
 								# this affects all downstream analysis
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_bam2ta.py) \
 			${bam} \
+			--disable-tn5-shift \
 			${if paired_end then "--paired-end" else ""} \
-			${if disable_tn5_shift then "--disable-tn5-shift" else ""} \
-			${"--regex-grep-v-ta " +"'"+select_first([regex_grep_v_ta,'chrM'])+"'"} \
-			${"--subsample " + select_first([subsample,0])} \
+			${if regex_grep_v_ta!="" then "--regex-grep-v-ta '"+regex_grep_v_ta+"'" else ""} \
+			${"--subsample " + subsample} \
 			${"--nth " + cpu}
 	}
 	output {
 		File ta = glob("*.tagAlign.gz")[0]
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'10000'])} MB"
-		time : select_first([time_hr,6])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task spr { # make two self pseudo replicates
-	# parameters from workflow
 	File ta
 	Boolean paired_end
 
-	# resource
-	Int? mem_mb
+	Int mem_mb
 
 	command {
 		python $(which encode_spr.py) \
@@ -931,14 +1038,13 @@ task spr { # make two self pseudo replicates
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'16000'])} MB"
+		memory : "${mem_mb} MB"
 		time : 1
 		disks : "local-disk 50 HDD"
 	}
 }
 
 task pool_ta {
-	# parameters from workflow
 	Array[File] tas
 
 	command {
@@ -957,25 +1063,22 @@ task pool_ta {
 }
 
 task xcor {
-	# parameters from workflow
 	File ta
 	Boolean paired_end
-	# optional
-	Int? subsample  # number of reads to subsample TAGALIGN
+	Int subsample  # number of reads to subsample TAGALIGN
 					# this will be used for xcor only
 					# will not affect any downstream analysis
-	# resource
-	Int? cpu
-	Int? mem_mb	
-	Int? time_hr
-	String? disks
+	Int cpu
+	Int mem_mb	
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--subsample " + select_first([subsample,15000000])} \
-			${"--nth " + select_first([cpu,2])}
+			${"--subsample " + subsample} \
+			${"--nth " + cpu}
 	}
 	output {
 		File plot_pdf = glob("*.cc.plot.pdf")[0]
@@ -984,54 +1087,49 @@ task xcor {
 		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
 	}
 	runtime {
-		#@docker : "quay.io/encode-dcc/atac-seq-pipeline:v1"
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task fingerprint {
-	# parameters from workflow
 	Array[File] nodup_bams
 	File ctl_bam	 		# one control bam is required
 	File blacklist
 
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_fingerprint.py) \
 			${sep=' ' nodup_bams} \
 			--ctl-bam ${ctl_bam} \
 			${"--blacklist "+ blacklist} \
-			${"--nth " + select_first([cpu,2])}
+			${"--nth " + cpu}
 	}
 	output {
 		File plot = glob("*.png")[0]
 		Array[File] jsd_qcs = glob("*.jsd.qc")
 	}
 	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'12000'])} MB"
-		time : select_first([time_hr,6])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task choose_ctl {
-	# parameters from workflow
 	Array[File] tas
 	Array[File] ctl_tas
 	File? ta_pooled
 	File? ctl_ta_pooled
-	# optional
-	Boolean? always_use_pooled_ctl # always use pooled control for all exp rep.
-	Float? ctl_depth_ratio 		# if ratio between controls is higher than this
+	Boolean always_use_pooled_ctl # always use pooled control for all exp rep.
+	Float ctl_depth_ratio 		# if ratio between controls is higher than this
 								# then always use pooled control for all exp rep.
 	command {
 		python $(which encode_choose_ctl.py) \
@@ -1039,11 +1137,10 @@ task choose_ctl {
 			--ctl-tas ${sep=' ' ctl_tas} \
 			${"--ta-pooled " + ta_pooled} \
 			${"--ctl-ta-pooled " + ctl_ta_pooled} \
-			${if select_first([always_use_pooled_ctl,false]) then "--always-use-pooled-ctl" else ""} \
-			${"--ctl-depth-ratio " + select_first([ctl_depth_ratio,'1.2'])}
+			${if always_use_pooled_ctl then "--always-use-pooled-ctl" else ""} \
+			${"--ctl-depth-ratio " + ctl_depth_ratio}
 	}
 	output {
-		#Array[Int] idx = read_lines("idx.txt")
 		Array[File] chosen_ctl_tas = glob("ctl_for_rep*.tagAlign.gz")
 	}
 	runtime {
@@ -1055,20 +1152,19 @@ task choose_ctl {
 }
 
 task macs2 {
-	# parameters from workflow
 	Array[File] tas		# [ta, control_ta]. control_ta is optional
 	Int fraglen 		# fragment length from xcor
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
-	Int? cap_num_peak	# cap number of raw peaks called from MACS2
-	Float? pval_thresh 	# p.value threshold
-	Boolean? make_signal
+	Int cap_num_peak	# cap number of raw peaks called from MACS2
+	Float pval_thresh 	# p.value threshold
+	Boolean make_signal
 	File blacklist 		# blacklist BED to filter raw peaks
-	# resource
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_macs2_chip.py) \
@@ -1076,12 +1172,12 @@ task macs2 {
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
 			${"--fraglen " + fraglen} \
-			${"--cap-num-peak " + select_first([cap_num_peak,500000])} \
-			${"--pval-thresh "+ select_first([pval_thresh,'0.01'])} \
-			${if select_first([make_signal,false]) then "--make-signal" else ""} \
+			${"--cap-num-peak " + cap_num_peak} \
+			${"--pval-thresh "+ pval_thresh} \
+			${if make_signal then "--make-signal" else ""} \
 			${"--blacklist "+ blacklist}
 
-		${if select_first([make_signal,false]) then "" 
+		${if make_signal then "" 
 			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
 		touch null # ugly part to deal with optional outputs
 	}
@@ -1090,38 +1186,37 @@ task macs2 {
 		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
 		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
 		Array[File] bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")
-		File sig_pval = if select_first([make_signal,false]) then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
-		File sig_fc = if select_first([make_signal,false]) then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
+		File sig_pval = if make_signal then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
+		File sig_fc = if make_signal then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,24])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 	}
 }
 
 task spp {
-	# parameters from workflow
 	Array[File] tas		# [ta, control_ta]. control_ta is always required
 	Int fraglen 		# fragment length from xcor
 	File chrsz			# 2-col chromosome sizes file
-	Int? cap_num_peak 	# cap number of raw peaks called from MACS2
+	Int cap_num_peak 	# cap number of raw peaks called from MACS2
 	File blacklist 		# blacklist BED to filter raw peaks
-	# resource
-	Int? cpu
-	Int? mem_mb
-	Int? time_hr
-	String? disks
+
+	Int cpu
+	Int mem_mb
+	Int time_hr
+	String disks
 
 	command {
 		python $(which encode_spp.py) \
 			${sep=' ' tas} \
 			${"--chrsz " + chrsz} \
 			${"--fraglen " + fraglen} \
-			${"--cap-num-peak " + select_first([cap_num_peak,300000])} \
-			${"--nth " + select_first([cpu,2])} \
+			${"--cap-num-peak " + cap_num_peak} \
+			${"--nth " + cpu} \
 			${"--blacklist "+ blacklist}
 	}
 	output {
@@ -1132,21 +1227,20 @@ task spp {
 		File frip_qc = glob("*.frip.qc")[0]
 	}
 	runtime {
-		cpu : select_first([cpu,2])
-		memory : "${select_first([mem_mb,'16000'])} MB"
-		time : select_first([time_hr,72])
-		disks : select_first([disks,"local-disk 100 HDD"])
+		cpu : cpu
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
 		preemptible: 0
 	}
 }
 
 task idr {
-	# parameters from workflow
-	String? prefix 		# prefix for IDR output file
+	String prefix 		# prefix for IDR output file
 	File peak1 			
 	File peak2
 	File peak_pooled
-	Float? idr_thresh
+	Float idr_thresh
 	File blacklist 		# blacklist BED to filter raw peaks
 	# parameters to compute FRiP
 	File? ta			# to calculate FRiP
@@ -1159,14 +1253,13 @@ task idr {
 		python $(which encode_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
-			${"--idr-thresh " + select_first([idr_thresh,'0.05'])} \
+			${"--idr-thresh " + idr_thresh} \
 			${"--peak-type " + peak_type} \
 			--idr-rank ${rank} \
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
 			${"--ta " + ta}
-
 		# ugly part to deal with optional outputs with Google backend
 		${if defined(ta) then "" else "touch null.frip.qc"}			
 		touch null 
@@ -1190,7 +1283,6 @@ task idr {
 }
 
 task overlap {
-	# parameters from workflow
 	String prefix 		# prefix for IDR output file
 	File peak1
 	File peak2
@@ -1232,7 +1324,6 @@ task overlap {
 }
 
 task reproducibility {
-	# parameters from workflow
 	String prefix
 	Array[File] peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
@@ -1274,11 +1365,10 @@ task reproducibility {
 # - qc.json		: all QCs
 task qc_report {
 	# optional metadata
- 	String? name # name of sample
-	String? desc # description for sample
+ 	String title # name of sample
+	String description # description for sample
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
-	Int? multimapping
 	Boolean paired_end
 	String pipeline_type
 	String peak_caller
@@ -1326,9 +1416,9 @@ task qc_report {
 
 	command {
 		python $(which encode_qc_report.py) \
-			${"--name '" + sub(select_first([name,""]),"'","_") + "'"} \
-			${"--desc '" + sub(select_first([desc,""]),"'","_") + "'"} \
-			${"--multimapping " + multimapping} \
+			${"--name '" + sub(title,"'","_") + "'"} \
+			${"--desc '" + sub(description,"'","_") + "'"} \
+			${"--multimapping " + 0} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \

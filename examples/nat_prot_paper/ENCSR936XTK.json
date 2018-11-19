@@ -1,0 +1,18 @@
+{
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "hg38/hg38.tsv",
+    "chip.fastqs_rep1_R1" : ["rep1-R1.fastq.gz"],
+    "chip.fastqs_rep1_R2" : ["rep1-R2.fastq.gz"],
+    "chip.fastqs_rep2_R1" : ["rep2-R1.fastq.gz"],
+    "chip.fastqs_rep2_R2" : ["rep2-R2.fastq.gz"],
+    "chip.ctl_fastqs_rep1_R1" : ["ctl1-R1.fastq.gz"],
+    "chip.ctl_fastqs_rep1_R2" : ["ctl1-R2.fastq.gz"],
+    "chip.ctl_fastqs_rep2_R1" : ["ctl2-R1.fastq.gz"],
+    "chip.ctl_fastqs_rep2_R2" : ["ctl2-R2.fastq.gz"],
+
+    "chip.paired_end" : true,
+    "chip.always_use_pooled_ctl" : true,
+    
+    "chip.title" : "ENCSR936XTK",
+    "chip.description" : "ZNF143 ChIP-seq on human GM12878"
+}

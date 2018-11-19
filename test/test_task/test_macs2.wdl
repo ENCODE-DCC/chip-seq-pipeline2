@@ -20,6 +20,10 @@ workflow test_macs2 {
 	String se_chrsz
 	String se_gensz
 
+	Int macs2_mem_mb = 16000
+	Int macs2_time_hr = 24
+	String macs2_disks = "local-disk 100 HDD"	
+
 	call chip.macs2 as se_macs2 { input :
 		tas = [se_ta, se_ctl_ta],
 		gensz = se_gensz,
@@ -29,6 +33,10 @@ workflow test_macs2 {
 		pval_thresh = pval_thresh,
 		make_signal = true,
 		blacklist = se_blacklist,
+
+		mem_mb = macs2_mem_mb,
+		time_hr = macs2_time_hr,
+		disks = macs2_disks,		
 	}
 
 	call chip.compare_md5sum { input :

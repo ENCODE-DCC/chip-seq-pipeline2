@@ -11,13 +11,19 @@ workflow test_spr {
 	String ref_se_ta_pr1
 	String ref_se_ta_pr2
 
+	Int spr_mem_mb = 16000
+
 	call chip.spr as pe_spr { input :
 		ta = pe_ta,
 		paired_end = true,
+
+		mem_mb = spr_mem_mb,
 	}	
 	call chip.spr as se_spr { input :
 		ta = se_ta,
 		paired_end = false,
+
+		mem_mb = spr_mem_mb,
 	}
 
 	call chip.compare_md5sum { input :
