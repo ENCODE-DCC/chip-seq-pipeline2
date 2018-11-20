@@ -57,6 +57,8 @@
     "chip.ctl_subsample_reads" : 0,
     "chip.xcor_subsample_reads" : 15000000,
 
+    "chip.keep_irregular_chr_in_bfilt_peak" : false,
+    
     "chip.always_use_pooled_ctl" : false,
     "chip.ctl_depth_ratio" : 1.2,
 

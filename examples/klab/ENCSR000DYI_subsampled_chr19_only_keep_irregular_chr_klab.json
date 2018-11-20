@@ -1,0 +1,19 @@
+{
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "/mnt/data/pipeline_genome_data/hg38_chr19_chrM/hg38_chr19_chrM_klab.tsv",
+    "chip.fastqs" : [
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/rep1.subsampled.25.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/rep2.subsampled.20.fastq.gz"]]
+    ],
+    "chip.ctl_fastqs" : [
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/ctl1.subsampled.25.fastq.gz"]],
+        [["/mnt/data/pipeline_test_samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/ctl2.subsampled.25.fastq.gz"]]
+    ],
+
+    "chip.paired_end" : false,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.keep_irregular_chr_in_bfilt_peak" : true,
+
+    "chip.title" : "ENCSR000DYI (subsampled 1/25, chr19 and chrM only)",
+    "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
+}

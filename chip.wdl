@@ -40,7 +40,11 @@ workflow chip {
 	Int xcor_subsample_reads = 15000000	# number of reads to subsample TAGALIGN
 									# this will be used for xcor only
 									# will not affect any downstream analysis
-
+	Boolean keep_irregular_chr_in_bfilt_peak = false # when filtering with blacklist
+								# do not filter peaks with irregular chr name
+								# and just keep them in bfilt_peak file
+								# (e.g. keep chr1_AABBCC, AABR07024382.1, ...)
+								# reg-ex pattern for regular chr names: /chr[\dXY]+[ \t]/
 	Boolean always_use_pooled_ctl = false # always use pooled control for all exp rep.
 	Float ctl_depth_ratio = 1.2 	# if ratio between controls is higher than this
 									# then always use pooled control for all exp rep.
@@ -462,6 +466,7 @@ workflow chip {
 			make_signal = true,
 			fraglen = fraglen_[i],
 			blacklist = blacklist,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -479,6 +484,7 @@ workflow chip {
 				cap_num_peak = spp_cap_num_peak,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
@@ -500,6 +506,7 @@ workflow chip {
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
 				make_signal = false,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
@@ -514,6 +521,7 @@ workflow chip {
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
 				make_signal = false,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
@@ -531,6 +539,7 @@ workflow chip {
 				cap_num_peak = spp_cap_num_peak,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
@@ -544,6 +553,7 @@ workflow chip {
 				cap_num_peak = spp_cap_num_peak,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
 				cpu = spp_cpu,
 				mem_mb = spp_mem_mb,
@@ -577,6 +587,7 @@ workflow chip {
 			make_signal = true,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -591,6 +602,7 @@ workflow chip {
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			cpu = spp_cpu,
 			mem_mb = spp_mem_mb,
@@ -610,6 +622,7 @@ workflow chip {
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
 			make_signal = false,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -627,6 +640,7 @@ workflow chip {
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
 			make_signal = false,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -641,6 +655,7 @@ workflow chip {
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			cpu = spp_cpu,
 			mem_mb = spp_mem_mb,
@@ -656,6 +671,7 @@ workflow chip {
 			cap_num_peak = spp_cap_num_peak,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			cpu = spp_cpu,
 			mem_mb = spp_mem_mb,
@@ -701,6 +717,7 @@ workflow chip {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -718,6 +735,7 @@ workflow chip {
 				rank = idr_rank,
 				blacklist = blacklist,
 				chrsz = chrsz,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -736,6 +754,7 @@ workflow chip {
 			peak_type = peak_type,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
 		}
 	}
@@ -753,6 +772,7 @@ workflow chip {
 				rank = idr_rank,
 				blacklist = blacklist,
 				chrsz = chrsz,
+				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 				ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
 			}
 		}
@@ -769,6 +789,7 @@ workflow chip {
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -785,6 +806,7 @@ workflow chip {
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -798,6 +820,7 @@ workflow chip {
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
 			peak_type = peak_type,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 	if ( !align_only && !true_rep_only && enable_idr ) {
@@ -809,6 +832,7 @@ workflow chip {
 			peak_ppr = idr_ppr.bfilt_idr_peak,
 			peak_type = peak_type,
 			chrsz = chrsz,
+			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 	# Generate final QC report and JSON
@@ -1161,6 +1185,7 @@ task macs2 {
 	Float pval_thresh 	# p.value threshold
 	Boolean make_signal
 	File blacklist 		# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	Int mem_mb
 	Int time_hr
@@ -1175,6 +1200,7 @@ task macs2 {
 			${"--cap-num-peak " + cap_num_peak} \
 			${"--pval-thresh "+ pval_thresh} \
 			${if make_signal then "--make-signal" else ""} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--blacklist "+ blacklist}
 
 		${if make_signal then "" 
@@ -1204,6 +1230,7 @@ task spp {
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak 	# cap number of raw peaks called from MACS2
 	File blacklist 		# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	Int cpu
 	Int mem_mb
@@ -1217,6 +1244,7 @@ task spp {
 			${"--fraglen " + fraglen} \
 			${"--cap-num-peak " + cap_num_peak} \
 			${"--nth " + cpu} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--blacklist "+ blacklist}
 	}
 	output {
@@ -1242,6 +1270,7 @@ task idr {
 	File peak_pooled
 	Float idr_thresh
 	File blacklist 		# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta			# to calculate FRiP
 	Int fraglen 		# fragment length from xcor
@@ -1259,6 +1288,7 @@ task idr {
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
 		# ugly part to deal with optional outputs with Google backend
 		${if defined(ta) then "" else "touch null.frip.qc"}			
@@ -1288,6 +1318,7 @@ task overlap {
 	File peak2
 	File peak_pooled
 	File blacklist 	# blacklist BED to filter raw peaks
+	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta		# to calculate FRiP
 	Int fraglen 	# fragment length from xcor (for FRIP)
@@ -1302,6 +1333,8 @@ task overlap {
 			${"--fraglen " + fraglen} \
 			${"--chrsz " + chrsz} \
 			${"--blacklist "+ blacklist} \
+			--nonamecheck \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--ta " + ta}
 
 		# ugly part to deal with optional outputs with Google backend
@@ -1333,6 +1366,7 @@ task reproducibility {
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
 	String peak_type
 	File chrsz			# 2-col chromosome sizes file
+	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
 		python $(which encode_reproducibility_qc.py) \
@@ -1341,6 +1375,7 @@ task reproducibility {
 			${"--peak-ppr "+ peak_ppr} \
 			--prefix ${prefix} \
 			${"--peak-type " + peak_type} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--chrsz " + chrsz}
 	}
 	output {
