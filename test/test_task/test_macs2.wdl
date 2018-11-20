@@ -33,6 +33,7 @@ workflow test_macs2 {
 		pval_thresh = pval_thresh,
 		make_signal = true,
 		blacklist = se_blacklist,
+		keep_irregular_chr_in_bfilt_peak = false,
 
 		mem_mb = macs2_mem_mb,
 		time_hr = macs2_time_hr,

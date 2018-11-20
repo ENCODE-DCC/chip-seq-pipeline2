@@ -28,6 +28,7 @@ workflow test_spp {
 		fraglen = fraglen,
 		cap_num_peak = cap_num_peak,
 		blacklist = se_blacklist,
+		keep_irregular_chr_in_bfilt_peak = false,
 
 		cpu = spp_cpu,
 		mem_mb = spp_mem_mb,

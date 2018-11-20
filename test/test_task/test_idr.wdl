@@ -30,6 +30,7 @@ workflow test_idr {
 		chrsz = se_chrsz,
 		fraglen = fraglen,
 		blacklist = se_blacklist,
+		keep_irregular_chr_in_bfilt_peak = false,
 		ta = se_ta_pooled,
 	}
 
