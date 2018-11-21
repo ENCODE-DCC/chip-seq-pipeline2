@@ -45,7 +45,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```
       $ source activate encode-chip-seq-pipeline # IMPORTANT!
       $ INPUT=examples/sherlock/ENCSR936XTK_subsampled_sherlock.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm -Dbackend.providers.slurm.config.concurrent-job-limit=1 cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm -Dbackend.providers.slurm.config.concurrent-job-limit=1 cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
 8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -62,7 +62,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`. Stanford Sherlock does not allow building a container on login nodes. Wait until you get a command prompt after `sdev`.
     ```
       $ sdev    # sherlock cluster does not allow building a container on login node
-      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.2
+      $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.2.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.2
       $ exit    # exit from an interactive node
     ```
 
@@ -70,7 +70,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```
       $ source activate encode-chip-seq-pipeline # IMPORTANT!
       $ INPUT=examples/sherlock/ENCSR936XTK_subsampled_sherlock.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity -Dbackend.providers.slurm_singularity.config.concurrent-job-limit=1 cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity -Dbackend.providers.slurm_singularity.config.concurrent-job-limit=1 cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
 8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.

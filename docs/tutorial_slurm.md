@@ -51,7 +51,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```
       $ source activate encode-chip-seq-pipeline # IMPORTANT!
       $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
     ```
 
 9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -67,14 +67,14 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```
-      $ SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.2
+      $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.2.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.2
     ```
 
 8. Run a pipeline for the test sample.
     ```
       $ source activate encode-chip-seq-pipeline # IMPORTANT!
       $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-      $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
+      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
     ```
 
 9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
