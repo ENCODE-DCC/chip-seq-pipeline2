@@ -93,9 +93,9 @@ jobs:
             cd test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip_local.sh ENCSR000DYI_subsampled_chr19_only.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
             ./test_chip_local.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
 
 # Define workflow here
 workflows:
