@@ -87,14 +87,13 @@ jobs:
       - run:
           command: |
             source ${BASH_ENV}
-            echo ${GCLOUD_SERVICE_KEY} | gcloud auth activate-service-account --key-file=-
-            unset GOOGLE_APPLICATION_CREDENTIALS
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             cd test/test_workflow/
-            ./test_atac_local.sh ENCSR000DYI_subsampled_chr19_only.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
-            ./test_atac_local.sh ENCSR936XTK_subsampled_chr19_only.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'atac.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_chip_local.sh ENCSR000DYI_subsampled_chr19_only.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
+            ./test_chip_local.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR356KRQ_subsampled.result.json
 
 # Define workflow here
 workflows:

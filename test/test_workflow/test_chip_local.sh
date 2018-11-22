@@ -1,16 +1,17 @@
 #!/bin/bash
 set -e # exit on error
 
-if [ $# -lt 1 ]; then
-  echo "Usage: ./test_chip_local.sh [INPUT_JSON] [DOCKER_IMAGE](optional)"
+if [ $# -lt 2 ]; then
+  echo "Usage: ./test_chip_local.sh [INPUT_JSON] [GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE] [DOCKER_IMAGE](optional)"
   exit 1
 fi
-if [ $# -gt 1 ]; then
-  DOCKER_IMAGE=$2
+if [ $# -gt 2 ]; then
+  DOCKER_IMAGE=$3
 else
   DOCKER_IMAGE=quay.io/encode-dcc/chip-seq-pipeline:v1.1.2
 fi
 INPUT=$1
+GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE=$2
 PREFIX=$(basename $INPUT .json)
 
 CROMWELL_JAR="cromwell-34.jar"
@@ -30,24 +31,25 @@ cat > $TMP_WF_OPT << EOM
 }
 EOM
 
-WDL=../../chip.wdl
-BACKEND_CONF=../../backends/backend.conf
-BACKEND=google
-PROJECT="encode-dcc-1016"
-BUCKET="gs://encode-pipeline-test-runs/circleci"
-PREFIX=$(basename ${INPUT} .json)
 METADATA=${PREFIX}.metadata.json # metadata
 RESULT=${PREFIX}.result.json # output
 
-java -Dconfig.file=${BACKEND_CONF} -Dbackend.default=${BACKEND} \
--Dbackend.providers.google.config.project=${PROJECT} \
--Dbackend.providers.google.config.root=${BUCKET} \
--jar ${CROMWELL_JAR} run ${WDL} \
+cp $GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE tmp_secret_key.json
+
+java -Dconfig.file=backend_gcp_service_account.conf \
+-Dbackend.default=google \
+-Dbackend.providers.google.config.project=encode-dcc-1016 \
+-Dbackend.providers.google.config.root="gs://encode-pipeline-test-runs/circleci" \
+-Dbackend.providers.google.config.genomics.auth=service-account \
+-Dbackend.providers.google.config.filesystems.gcs.auth=service-account \
+-jar ${CROMWELL_JAR} run \
+../../chip.wdl \
 -i ${INPUT} -o ${TMP_WF_OPT} -m ${METADATA}
+ 
+rm -f tmp_secret_key
 
 # parse output metadata json
 cat ${METADATA} | python -c "import json,sys;obj=json.load(sys.stdin);print(obj['outputs']['${PREFIX}.compare_md5sum.json_str'])" > ${RESULT}
 cat ${RESULT}
 
 rm -f ${METADATA} ${TMP_WF_OPT}
-
