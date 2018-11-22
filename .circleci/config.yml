@@ -80,7 +80,7 @@ jobs:
               rm -f ${result}
             done
             
-  test_workflow:
+  test_workflow_se:
     <<: *machine_defaults
     steps:
       - checkout
@@ -93,9 +93,22 @@ jobs:
             cd test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip_local.sh ENCSR000DYI_subsampled_chr19_only.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
+
+  test_workflow_pe:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 30m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip_local.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_report.qc_json_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
 
 # Define workflow here
 workflows:
@@ -106,6 +119,9 @@ workflows:
       - test_tasks:
           requires:
             - build
-      - test_workflow:
+      - test_workflow_se:
+          requires:
+            - build
+      - test_workflow_pe:
           requires:
             - build
