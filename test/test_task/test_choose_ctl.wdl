@@ -2,7 +2,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../chip.wdl" as chip
 
-workflow test_choose_ctl {
+workflow test_choose_ctl {	
 	String se_ta_rep1
 	String se_ta_rep2
 	String se_ta_pooled
@@ -26,6 +26,7 @@ workflow test_choose_ctl {
 		tas = [se_ta_rep1, se_ta_rep2],
 		ctl_tas = [se_ctl_ta_rep1, se_ctl_ta_rep2],
 		ta_pooled = se_ta_pooled,
+		always_use_pooled_ctl = false,
 		ctl_ta_pooled = se_ctl_ta_pooled,
 		ctl_depth_ratio = ctl_depth_ratio,
 	}
@@ -41,6 +42,7 @@ workflow test_choose_ctl {
 		tas = [se_ta_rep1],
 		ctl_tas = [se_ctl_ta_rep2, se_ctl_ta_rep1],
 		ta_pooled = null,
+		always_use_pooled_ctl = false,
 		ctl_ta_pooled = se_ctl_ta_pooled,
 		ctl_depth_ratio = ctl_depth_ratio,
 	}
@@ -48,6 +50,7 @@ workflow test_choose_ctl {
 		tas = [se_ta_rep1, se_ta_rep2],
 		ctl_tas = [se_ctl_ta_rep1],
 		ta_pooled = se_ta_pooled,
+		always_use_pooled_ctl = false,
 		ctl_ta_pooled = null,
 		ctl_depth_ratio = ctl_depth_ratio,
 	}

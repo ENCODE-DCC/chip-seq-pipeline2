@@ -3,12 +3,14 @@
 import "../../chip.wdl" as chip
 
 workflow test_trim_fastq {
+	Int trim_bp = 50 				# for cross-correlation analysis only
 	String pe_fastq_rep1_R1
 
 	String ref_pe_trimmed_fastq_rep1_R1
 
 	call chip.trim_fastq as pe_trim_fastq { input :
 		fastq = pe_fastq_rep1_R1,
+		trim_bp = trim_bp,
 	}
 
 	call chip.compare_md5sum { input :

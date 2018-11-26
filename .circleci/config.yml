@@ -1,0 +1,127 @@
+# Define action tags here
+
+defaults: &defaults
+  docker:
+    - image: google/cloud-sdk:latest #circleci/buildpack-deps:xenial-scm
+  working_directory: ~/chip-seq-pipeline2
+
+python_defaults: &python_defaults
+  docker:
+    - image: quay.io/encode-dcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}
+  working_directory: ~/chip-seq-pipeline2
+
+machine_defaults: &machine_defaults
+  machine: 
+    image: circleci/classic:latest
+  working_directory: ~/chip-seq-pipeline2
+
+make_tag: &make_tag
+  name: make docker image tag
+  command: |
+    echo "export TAG=quay.io/encode-dcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
+
+install_singularity: &install_singularity
+  name: install singularity
+  command: |
+    sudo apt-get update
+    sudo apt-get install \
+    python \
+    dh-autoreconf \
+    build-essential \
+    libarchive-dev \
+    squashfs-tools
+    wget https://github.com/singularityware/singularity/releases/download/2.6.0/singularity-2.6.0.tar.gz
+    tar xvf singularity-2.6.0.tar.gz
+    cd singularity-2.6.0
+    ./configure --prefix=/usr/local --sysconfdir=/etc
+    make
+    sudo make install
+    singularity --version
+
+# Define jobs here
+version: 2
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: *make_tag
+      - run:
+          name: build image
+          command: |
+            source ${BASH_ENV}
+            export DOCKER_CACHE_TAG=v1.1.2
+            echo "pulling ${DOCKER_CACHE_TAG}!"
+            docker pull quay.io/encode-dcc/chip-seq-pipeline:${DOCKER_CACHE_TAG}
+            docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
+            docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f docker_image/Dockerfile .
+            docker push ${TAG}
+            # docker push quay.io/encode-dcc/chip-seq-pipeline:template
+            docker logout
+  test_tasks:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 30m
+          command: |
+            source ${BASH_ENV}
+            cd test/test_task/
+            rm -rf chip-seq-pipeline-test-data
+            git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data
+            for wdl in test_*.wdl
+            do
+              json=${wdl%.*}.json
+              result=${wdl%.*}.result.json
+              ./test.sh ${wdl} ${json} ${TAG}
+              python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
+              rm -f ${result}
+            done
+            
+  test_workflow_se:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 30m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_chip_local.sh ENCSR000DYI_subsampled_chr19_only.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
+
+  test_workflow_pe:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 30m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_chip_local.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
+
+# Define workflow here
+workflows:
+  version: 2
+  build_workflow:
+    jobs:
+      - build
+      - test_tasks:
+          requires:
+            - build
+      - test_workflow_se:
+          requires:
+            - build
+      - test_workflow_pe:
+          requires:
+            - build

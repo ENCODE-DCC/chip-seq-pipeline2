@@ -14,17 +14,30 @@ workflow test_bwa {
 	String pe_bwa_idx_tar
 	String se_bwa_idx_tar
 
+	Int bwa_cpu = 1
+	Int bwa_mem_mb = 20000
+	Int bwa_time_hr = 48
+	String bwa_disks = "local-disk 100 HDD"
+
 	call chip.bwa as pe_bwa { input :
 		idx_tar = pe_bwa_idx_tar,
 		fastqs = pe_fastqs,
 		paired_end = true,
-		cpu = 1,
+
+		cpu = bwa_cpu,
+		mem_mb = bwa_mem_mb,
+		time_hr = bwa_time_hr,
+		disks = bwa_disks,
 	}
 	call chip.bwa as se_bwa { input :
 		idx_tar = se_bwa_idx_tar,
 		fastqs = se_fastqs,
 		paired_end = false,
-		cpu = 1,
+
+		cpu = bwa_cpu,
+		mem_mb = bwa_mem_mb,
+		time_hr = bwa_time_hr,
+		disks = bwa_disks,
 	}
 
 	call chip.compare_md5sum { input :

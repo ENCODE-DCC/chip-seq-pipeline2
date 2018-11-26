@@ -105,6 +105,86 @@
             "diff_chroms_qc_failed": 0
         }
     ], 
+    "dup_qc": [
+        {
+            "unpaired_reads": 0, 
+            "paired_reads": 30291259, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 3664057, 
+            "paired_opt_dupes": 8743, 
+            "dupes_pct": 0.120961
+        }, 
+        {
+            "unpaired_reads": 0, 
+            "paired_reads": 37072602, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 2833119, 
+            "paired_opt_dupes": 24855, 
+            "dupes_pct": 0.076421
+        }
+    ], 
+    "ctl_dup_qc": [
+        {
+            "unpaired_reads": 0, 
+            "paired_reads": 39854681, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 4092825, 
+            "paired_opt_dupes": 8937, 
+            "dupes_pct": 0.102694
+        }, 
+        {
+            "unpaired_reads": 0, 
+            "paired_reads": 38118550, 
+            "unmapped_reads": 0, 
+            "unpaired_dupes": 0, 
+            "paired_dupes": 4128511, 
+            "paired_opt_dupes": 8553, 
+            "dupes_pct": 0.108307
+        }
+    ], 
+    "pbc_qc": [
+        {
+            "total_read_pairs": 30099108, 
+            "distinct_read_pairs": 26466206, 
+            "one_read_pair": 23226034, 
+            "two_read_pair": 2888067, 
+            "NRF": 0.879302, 
+            "PBC1": 0.877573, 
+            "PBC2": 8.042069
+        }, 
+        {
+            "total_read_pairs": 36950601, 
+            "distinct_read_pairs": 34130627, 
+            "one_read_pair": 31510426, 
+            "two_read_pair": 2434584, 
+            "NRF": 0.923683, 
+            "PBC1": 0.92323, 
+            "PBC2": 12.942838
+        }
+    ], 
+    "ctl_pbc_qc": [
+        {
+            "total_read_pairs": 39400720, 
+            "distinct_read_pairs": 35389661, 
+            "one_read_pair": 31987615, 
+            "two_read_pair": 2993615, 
+            "NRF": 0.898198, 
+            "PBC1": 0.903869, 
+            "PBC2": 10.68528
+        }, 
+        {
+            "total_read_pairs": 37604471, 
+            "distinct_read_pairs": 33580171, 
+            "one_read_pair": 29976868, 
+            "two_read_pair": 3230526, 
+            "NRF": 0.892983, 
+            "PBC1": 0.892696, 
+            "PBC2": 9.279253
+        }
+    ], 
     "nodup_flagstat_qc": [
         {
             "total": 53254404, 
@@ -209,86 +289,32 @@
             "diff_chroms_qc_failed": 0
         }
     ], 
-    "dup_qc": [
-        {
-            "unpaired_reads": 0, 
-            "paired_reads": 30291259, 
-            "unmapped_reads": 0, 
-            "unpaired_dupes": 0, 
-            "paired_dupes": 3664057, 
-            "paired_opt_dupes": 8743, 
-            "dupes_pct": 0.120961
-        }, 
-        {
-            "unpaired_reads": 0, 
-            "paired_reads": 37072602, 
-            "unmapped_reads": 0, 
-            "unpaired_dupes": 0, 
-            "paired_dupes": 2833119, 
-            "paired_opt_dupes": 24855, 
-            "dupes_pct": 0.076421
-        }
-    ], 
-    "ctl_dup_qc": [
-        {
-            "unpaired_reads": 0, 
-            "paired_reads": 39854681, 
-            "unmapped_reads": 0, 
-            "unpaired_dupes": 0, 
-            "paired_dupes": 4092825, 
-            "paired_opt_dupes": 8937, 
-            "dupes_pct": 0.102694
-        }, 
-        {
-            "unpaired_reads": 0, 
-            "paired_reads": 38118550, 
-            "unmapped_reads": 0, 
-            "unpaired_dupes": 0, 
-            "paired_dupes": 4128511, 
-            "paired_opt_dupes": 8553, 
-            "dupes_pct": 0.108307
-        }
-    ], 
-    "pbc_qc": [
-        {
-            "total_read_pairs": 30099108, 
-            "distinct_read_pairs": 26466206, 
-            "one_read_pair": 23226034, 
-            "two_read_pair": 2888067, 
-            "NRF": 0.879302, 
-            "PBC1": 0.877573, 
-            "PBC2": 8.042069
-        }, 
-        {
-            "total_read_pairs": 36950601, 
-            "distinct_read_pairs": 34130627, 
-            "one_read_pair": 31510426, 
-            "two_read_pair": 2434584, 
-            "NRF": 0.923683, 
-            "PBC1": 0.92323, 
-            "PBC2": 12.942838
-        }
-    ], 
-    "ctl_pbc_qc": [
-        {
-            "total_read_pairs": 39400720, 
-            "distinct_read_pairs": 35389661, 
-            "one_read_pair": 31987615, 
-            "two_read_pair": 2993615, 
-            "NRF": 0.898198, 
-            "PBC1": 0.903869, 
-            "PBC2": 10.68528
-        }, 
-        {
-            "total_read_pairs": 37604471, 
-            "distinct_read_pairs": 33580171, 
-            "one_read_pair": 29976868, 
-            "two_read_pair": 3230526, 
-            "NRF": 0.892983, 
-            "PBC1": 0.892696, 
-            "PBC2": 9.279253
-        }
-    ], 
+    "overlap_reproducibility_qc": {
+        "Nt": 94395, 
+        "N1": 83370, 
+        "N2": 66706, 
+        "Np": 97950, 
+        "N_opt": 97950, 
+        "N_consv": 94395, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.03766089306, 
+        "self_consistency_ratio": 1.24981261056, 
+        "reproducibility": "pass"
+    }, 
+    "idr_reproducibility_qc": {
+        "Nt": 27396, 
+        "N1": 20968, 
+        "N2": 13849, 
+        "Np": 29253, 
+        "N_opt": 29253, 
+        "N_consv": 27396, 
+        "opt_set": "ppr", 
+        "consv_set": "rep1-rep2", 
+        "rescue_ratio": 1.06778361805, 
+        "self_consistency_ratio": 1.51404433533, 
+        "reproducibility": "pass"
+    }, 
     "xcor_score": [
         {
             "num_reads": 15000000, 
@@ -311,28 +337,6 @@
             "min_corr": 0.1698985, 
             "NSC": 1.400895, 
             "RSC": 1.590003
-        }
-    ], 
-    "jsd_qc": [
-        {
-            "pct_gen_enrich": 0.253084537232, 
-            "auc": 0.495213192034, 
-            "ch_div": 0.109013409253, 
-            "elbow_pt": 0.0, 
-            "jsd": 0.658133020911, 
-            "syn_auc": 0.507396253608, 
-            "syn_elbow_pt": 0.218110068613, 
-            "syn_jsd": 0.351742728062
-        }, 
-        {
-            "pct_gen_enrich": 0.28284376826, 
-            "auc": 0.495774226111, 
-            "ch_div": 0.100348476639, 
-            "elbow_pt": 0.0, 
-            "jsd": 0.616301829152, 
-            "syn_auc": 0.504944745786, 
-            "syn_elbow_pt": 0.171867247167, 
-            "syn_jsd": 0.303263760136
         }
     ], 
     "frip_macs2_qc": {
@@ -375,32 +379,6 @@
             "FRiP": 0.209594533629
         }
     }, 
-    "overlap_reproducibility_qc": {
-        "Nt": 94395, 
-        "N1": 83370, 
-        "N2": 66706, 
-        "Np": 97950, 
-        "N_opt": 97950, 
-        "N_consv": 94395, 
-        "opt_set": "ppr", 
-        "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.03766089306, 
-        "self_consistency_ratio": 1.24981261056, 
-        "reproducibility": "pass"
-    }, 
-    "idr_reproducibility_qc": {
-        "Nt": 27396, 
-        "N1": 20968, 
-        "N2": 13849, 
-        "Np": 29253, 
-        "N_opt": 29253, 
-        "N_consv": 27396, 
-        "opt_set": "ppr", 
-        "consv_set": "rep1-rep2", 
-        "rescue_ratio": 1.06778361805, 
-        "self_consistency_ratio": 1.51404433533, 
-        "reproducibility": "pass"
-    }, 
     "overlap_frip_qc": {
         "rep1-rep2": {
             "FRiP": 0.131240096534
@@ -428,5 +406,27 @@
         "ppr": {
             "FRiP": 0.0946995519024
         }
-    }
+    }, 
+    "jsd_qc": [
+        {
+            "pct_gen_enrich": 0.253084537232, 
+            "auc": 0.495213192034, 
+            "ch_div": 0.109013409253, 
+            "elbow_pt": 0.0, 
+            "jsd": 0.658133020911, 
+            "syn_auc": 0.507396253608, 
+            "syn_elbow_pt": 0.218110068613, 
+            "syn_jsd": 0.351742728062
+        }, 
+        {
+            "pct_gen_enrich": 0.28284376826, 
+            "auc": 0.495774226111, 
+            "ch_div": 0.100348476639, 
+            "elbow_pt": 0.0, 
+            "jsd": 0.616301829152, 
+            "syn_auc": 0.504944745786, 
+            "syn_elbow_pt": 0.171867247167, 
+            "syn_jsd": 0.303263760136
+        }
+    ]
 }

@@ -11,9 +11,9 @@
     ],
 
     "chip.paired_end" : false,
-    "chip.choose_ctl.always_use_pooled_ctl" : true,
+    "chip.always_use_pooled_ctl" : true,
     "chip.spp_cpu" : 2,
 
-    "chip.qc_report.name" : "ENCSR000DYI",
-    "chip.qc_report.desc" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
+    "chip.title" : "ENCSR000DYI",
+    "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
 }

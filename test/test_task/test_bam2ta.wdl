@@ -4,7 +4,8 @@ import "../../chip.wdl" as chip
 
 workflow test_bam2ta {
 	Int bam2ta_subsample
-
+	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
+                        		# to remove matching reads from TAGALIGN
 	String pe_nodup_bam
 	String se_nodup_bam
 
@@ -13,27 +14,54 @@ workflow test_bam2ta {
 	String ref_se_ta
 	String ref_se_ta_subsample
 
+	Int bam2ta_cpu = 1
+	Int bam2ta_mem_mb = 10000
+	Int bam2ta_time_hr = 6
+	String bam2ta_disks = "local-disk 100 HDD"
+
 	call chip.bam2ta as pe_bam2ta { input :
 		bam = pe_nodup_bam,
-		disable_tn5_shift = true,
+		subsample = 0,
+		regex_grep_v_ta = regex_filter_reads,
 		paired_end = true,
+
+		cpu = bam2ta_cpu,
+		mem_mb = bam2ta_mem_mb,
+		time_hr = bam2ta_time_hr,
+		disks = bam2ta_disks,
 	}
 	call chip.bam2ta as pe_bam2ta_subsample { input :
 		bam = pe_nodup_bam,
-		disable_tn5_shift = true,
 		subsample = bam2ta_subsample,
+		regex_grep_v_ta = regex_filter_reads,
 		paired_end = true,
+
+		cpu = bam2ta_cpu,
+		mem_mb = bam2ta_mem_mb,
+		time_hr = bam2ta_time_hr,
+		disks = bam2ta_disks,
 	}
 	call chip.bam2ta as se_bam2ta { input :
 		bam = se_nodup_bam,
-		disable_tn5_shift = true,
+		subsample = 0,
+		regex_grep_v_ta = regex_filter_reads,
 		paired_end = false,
+
+		cpu = bam2ta_cpu,
+		mem_mb = bam2ta_mem_mb,
+		time_hr = bam2ta_time_hr,
+		disks = bam2ta_disks,
 	}
 	call chip.bam2ta as se_bam2ta_subsample { input :
 		bam = se_nodup_bam,
-		disable_tn5_shift = true,
 		subsample = bam2ta_subsample,
+		regex_grep_v_ta = regex_filter_reads,
 		paired_end = false,
+
+		cpu = bam2ta_cpu,
+		mem_mb = bam2ta_mem_mb,
+		time_hr = bam2ta_time_hr,
+		disks = bam2ta_disks,
 	}
 
 	call chip.compare_md5sum { input :

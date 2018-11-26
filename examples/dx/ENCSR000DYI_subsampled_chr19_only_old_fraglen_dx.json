@@ -12,8 +12,8 @@
     "chip.fraglen" : [95,105],
 
     "chip.paired_end" : false,
-    "choose_ctl.always_use_pooled_ctl" : true,
+    "chip.always_use_pooled_ctl" : true,
 
-    "qc_report.name" : "ENCSR000DYI (subsampled 1/25, chr19 and chrM only)",
-    "qc_report.desc" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
+    "chip.title" : "ENCSR000DYI (subsampled 1/25, chr19 and chrM only)",
+    "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
 }

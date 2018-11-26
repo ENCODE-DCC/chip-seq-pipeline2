@@ -30,8 +30,8 @@
     "chip.paired_end" : true,
     "chip.fraglen" : [210,235],
 
-    "choose_ctl.always_use_pooled_ctl" : true,
-    "qc_report.name" : "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only)",
-    "qc_report.desc" : "ZNF143 ChIP-seq on human GM12878"
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only)",
+    "chip.description" : "ZNF143 ChIP-seq on human GM12878"
 
 }

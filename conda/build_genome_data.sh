@@ -9,8 +9,8 @@ if [[ "$#" -lt 2 ]]; then
   echo
   echo "Supported genomes: hg19, mm9, hg38 and mm10"
   echo
-  echo "Usage: ./install_genome_data.sh [GENOME] [DEST_DIR]"
-  echo "  Example: ./install_genome_data.sh hg38 /your/genome/data/path/hg38"
+  echo "Usage: ./build_genome_data.sh [GENOME] [DEST_DIR]"
+  echo "  Example: ./build_genome_data.sh hg38 /your/genome/data/path/hg38"
   echo
   exit 2
 fi
