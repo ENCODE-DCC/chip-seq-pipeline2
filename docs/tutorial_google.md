@@ -51,7 +51,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
       $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=google -Dbackend.providers.google.config.project=${PROJECT} -Dbackend.providers.google.config.root=${BUCKET} cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/docker.json
     ```
 
-11. It will take about an hour. You will be able to find all outputs on your Google Cloud bucket. Final QC report/JSON will be written on `gs://[YOUR_BUCKET_NAME]/ENCSR936XTK_subsampled/chip/[SOME_HASH_STRING]/call-qc_report/execution/glob*/qc.html` or `qc.json`. See [output directory structure](output.md) for details.
+11. It will take about 6 hours. You will be able to find all outputs on your Google Cloud bucket. Final QC report/JSON will be written on `gs://[YOUR_BUCKET_NAME]/ENCSR936XTK_subsampled/chip/[SOME_HASH_STRING]/call-qc_report/execution/glob*/qc.html` or `qc.json`. See [output directory structure](output.md) for details.
 
 12. See full specification for [input JSON file](input.md).
 

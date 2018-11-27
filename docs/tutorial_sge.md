@@ -54,7 +54,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
       $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
-9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 10. See full specification for [input JSON file](input.md).
 
@@ -76,7 +76,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
       $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
-9. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 10. See full specification for [input JSON file](input.md).
 

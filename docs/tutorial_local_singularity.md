@@ -41,7 +41,7 @@ Tutorial for general UNIX computers with singularity
       $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/singularity.json
     ```
 
-8. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+8. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 9. See full specification for [input JSON file](input.md).
 

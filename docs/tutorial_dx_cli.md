@@ -58,6 +58,6 @@ This document describes instruction for the item 1).
 
 12. Click on "Run as Analysis..." and you will be automatically redirected to the "Monitor" tab.
 
-13. It will take about an hour. You will be able to find all outputs on your output folder. Final QC report (`qc.html`)/JSON (`qc.json`) will be found on it.
+13. It will take about 6 hours. You will be able to find all outputs on your output folder. Final QC report (`qc.html`)/JSON (`qc.json`) will be found on it.
 
 14. See full specification for [input JSON file](input.md).
