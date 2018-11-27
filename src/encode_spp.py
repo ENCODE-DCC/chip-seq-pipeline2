@@ -46,6 +46,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
     basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
     if len(basename_prefix) > 200: # UNIX cannot have filename > 255
         basename_prefix = '{}_x_control'.format(basename_ta)
+    nth_param = '-p={}'.format(nth) if nth<2 else ''
     prefix = os.path.join(out_dir, basename_prefix)
     rpeak = '{}.{}.regionPeak.gz'.format(
         prefix,
@@ -54,7 +55,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
     rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
 
     cmd0 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
-    cmd0 += '-npeak={} -odir={} -speak={} -savr={} -rf -p={}'
+    cmd0 += '-npeak={} -odir={} -speak={} -savr={} -rf {}'
     cmd0 = cmd0.format(
         ta,
         ctl_ta,
@@ -62,7 +63,7 @@ def spp(ta, ctl_ta, fraglen, cap_num_peak, nth, out_dir):
         os.path.abspath(out_dir),
         fraglen,
         rpeak_tmp,
-        nth)
+        nth_param)
     run_shell_cmd(cmd0)
 
     # if we have scientific representation of chr coord. then convert it to int
