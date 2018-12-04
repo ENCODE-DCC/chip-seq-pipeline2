@@ -1518,10 +1518,10 @@ task qc_report {
 task read_genome_tsv {
 	File genome_tsv
 	command {
-		cat ${genome_tsv}
+		cat ${genome_tsv} > 'tmp.tsv'
 	}
 	output {
-		Map[String,String] genome = read_map(stdout())
+		Map[String,String] genome = read_map('tmp.tsv')
 	}
 	runtime {
 		cpu : 1
@@ -1536,16 +1536,17 @@ task rounded_mean {
 	command <<<
 		python <<CODE
 		arr = [${sep=',' ints}]
-		if len(arr):
-		    sum_ = sum(arr)
-		    mean_ = sum(arr)/float(len(arr))
-		    print(int(round(mean_)))
-		else:
-		    print(0)
+		with open('tmp.txt','w') as fp:
+			if len(arr):
+			    sum_ = sum(arr)
+			    mean_ = sum(arr)/float(len(arr))
+			    fp.write('{}'.format(int(round(mean_))))
+			else:
+			    fp.write('0')
 		CODE
 	>>>
 	output {
-		Int rounded_mean = read_int(stdout())
+		Int rounded_mean = read_int('tmp.txt')
 	}
 	runtime {
 		cpu : 1

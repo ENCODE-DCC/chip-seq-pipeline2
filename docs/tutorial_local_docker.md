@@ -31,6 +31,6 @@ Tutorial for general UNIX computers with docker
       $ java -jar -Dconfig.file=backends/backend.conf cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/docker.json
     ```
 
-6. It will take about an hour. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+6. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 7. See full specification for [input JSON file](input.md).
