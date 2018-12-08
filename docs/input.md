@@ -1,12 +1,207 @@
 Input JSON
 ==========
 
-An input JSON file includes all input parameters and metadata for running pipelines:
+We provide two template JSON files for both single ended and paired-end samples. We recommend to use one of these input JSON files instead of that used in the tutorial section. These template JSON files include all parameters of the pipeline with default values defined.
 
-1) Reference genome (hg38, mm10, hg19, ...) and genome specific parameters (indices, ...).
-2) Input data file paths/URIs (FASTQs, BAMs, TAG-ALIGNs, ...).
-3) Pipeline parameters.
-4) Resource for instances/jobs.
+* [template](../examples/template_se.json) for single ended sample
+* [template](../examples/template_pe.json) for paired-end sample
+
+An input JSON file includes all input parameters and metadata for running pipelines. Items 1) and 2) are mandatory. Items 3) and 4) are optional so that our pipeline will use default values if they are not defined. However, 
+
+* Mandatory
+
+1. Reference genome.
+2. Input data file paths/URIs.
+
+* Optional
+
+3. Pipeline parameters.
+4. Resource settings for jobs.
+
+Let us take a quick look at the following template JSON. A JSON file does not allow comments in it but we added some to help you understand each parameter.
+```javascript
+{
+    ////////// 1) Reference genome //////////
+
+    // Download or build reference genome database and pick a TSV from it.
+    // Download: /genome/download_genome_data.sh
+    // Builder: /conda/build_genome_data.sh (Conda required)
+    "chip.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
+
+    ////////// 2) Input data files paths/URIs //////////
+
+    // Read endedness
+    "chip.paired_end" : true,
+
+    // If you start from FASTQs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates.
+    // FASTQs in an array will be merged after trimming adapters.
+    // For example, 
+    // "rep1_R1_L1.fastq.gz", "rep1_R1_L2.fastq.gz" and "rep1_R1_L3.fastq.gz" will be merged together.
+    "chip.fastqs_rep1_R1" : [ "rep1_R1_L1.fastq.gz", "rep1_R1_L2.fastq.gz", "rep1_R1_L3.fastq.gz" ],
+    "chip.fastqs_rep1_R2" : [ "rep1_R2_L1.fastq.gz", "rep1_R2_L2.fastq.gz", "rep1_R2_L3.fastq.gz" ],
+    "chip.fastqs_rep2_R1" : [ "rep2_R1_L1.fastq.gz", "rep2_R1_L2.fastq.gz" ],
+    "chip.fastqs_rep2_R2" : [ "rep2_R2_L1.fastq.gz", "rep2_R2_L2.fastq.gz" ],
+
+    // Control FASTQs
+    "chip.ctl_fastqs_rep1_R1" : [ "ctl1_R1.fastq.gz" ],
+    "chip.ctl_fastqs_rep1_R2" : [ "ctl1_R2.fastq.gz" ],
+    "chip.ctl_fastqs_rep2_R1" : [ "ctl2_R1.fastq.gz" ],
+    "chip.ctl_fastqs_rep2_R2" : [ "ctl2_R2.fastq.gz" ],
+
+    // If you start from BAMs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates. The following example array has two replicates.
+    "chip.bams" : [
+        "raw_rep1.bam",
+        "raw_rep2.bam"
+    ],
+    // Control BAMs
+    "chip.ctl_bams" : [
+        "raw_ctl1.bam",
+        "raw_ctl2.bam"
+    ],
+
+    // If you start from filtered/deduped BAMs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates. The following example array has two replicates.
+    "chip.nodup_bams" : [
+        "nodup_rep1.bam",
+        "nodup_rep2.bam"
+    ],
+    // Control filtered/deduped BAMs
+    "chip.ctl_nodup_bams" : [
+        "nodup_ctl1.bam",
+        "nodup_ctl2.bam"
+    ],
+
+    // If you start from TAG-ALIGNs then define these, otherwise remove from this file.
+    // You can define up to 6 replicates. The following example array has two replicates.
+    "chip.tas" : [
+        "rep1.tagAlign.gz",
+        "rep2.tagAlign.gz"
+    ],
+    // Control TAG-ALIGNs
+    "chip.ctl_tas" : [
+        "ctl1.tagAlign.gz",
+        "ctl2.tagAlign.gz"
+    ],
+
+    ////////// 3) Pipeline parameters //////////
+
+    // Pipeline title and description
+    "chip.title" : "Example (single-ended)",
+    "chip.description" : "This is an template input JSON for single-ended sample.",
+
+    // Pipeline type (tf or histone).
+    // default peak_caller: spp for tf, macs2 for histone
+    "chip.pipeline_type" : "tf",
+    // You can also manually specify a peak_caller
+    "chip.peak_caller" : "spp",
+
+    // Pipeline will not proceed to post alignment steps (peak-calling, ...).
+    // You will get QC report for alignment only.
+    "chip.align_only" : false,
+    "chip.true_rep_only" : false,
+
+    // Disable deeptools fingerprint (JS distance)
+    "chip.disable_fingerprint" : false,
+
+    // Trim paired ended fastqs for cross-correlation analysis only
+    // Trimmed fastqs will not be used for any other analyses
+    "chip.trim_bp" : 50,
+
+    // Choose a dup marker between picard and sambamba
+    // picard is recommended, use sambamba only when picard fails.
+    "chip.dup_marker" : "picard",
+
+    // Threshold for mapped reads quality (samtools view -q)
+    "chip.mapq_thresh" : 30,
+
+    // Skip dup removal in a BAM filtering stage.
+    "chip.no_dup_removal" : false,
+
+    // Regular expression to filter out reads
+    // Any read that matches with this reg-ex pattern will be removed from outputs
+    "chip.regex_filter_reads" : "chrM",
+
+    // Subsample reads (0: no subsampling)
+    // Subsampled reads will be used for all downsteam analyses including peak-calling
+    "chip.subsample_reads" : 0,
+    "chip.ctl_subsample_reads" : 0,
+
+    // Cross-correlation analysis
+    // Subsample reads for cross-corr. analysis only (0: no subsampling)
+    // Subsampled reads will be used for cross-corr. analysis only
+    "chip.xcor_subsample_reads" : 15000000,
+
+    // Keep irregular chromosome names
+    // Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
+    "chip.keep_irregular_chr_in_bfilt_peak" : false,
+
+    // Choosing an appropriate control for each replicate
+    // Always use a pooled control to compare with each replicate.
+    // If a single control is given then use it.
+    "chip.always_use_pooled_ctl" : false,
+    // If ratio of depth between controls is higher than this
+    // then always use a pooled control for all replicates.
+    "chip.ctl_depth_ratio" : 1.2,
+
+    // Cap number of peaks called from a peak-caller (MACS2)
+    "chip.macs2_cap_num_peak" : 500000,
+    // P-value threshold for MACS2 (macs2 callpeak -p)
+    "chip.pval_thresh" : 0.01,
+
+    // IDR (irreproducible discovery rate)
+    // Threshold for IDR
+    "chip.idr_thresh" : 0.05,
+
+    // Cap number of peaks called from a peak-caller (SPP)
+    "chip.spp_cap_num_peak" : 300000,
+
+    ////////// 5) Resource settings //////////
+
+    // Set of resources defined here is PER REPLICATE.
+    // Therefore, total number of cores used will "atac.bowtie2_cpu" x [NUMBER_OF_REPLICATES]
+    // because bowtie2 is a bottlenecking job of the pipeline.
+    // Use this total number of cores if you manually qsub or sbatch your job (using local mode of our pipeline).
+    // "disks" is used for Google Cloud and DNANexus only.
+
+    "chip.bwa_cpu" : 4,
+    "chip.bwa_mem_mb" : 20000,
+    "chip.bwa_time_hr" : 48,
+    "chip.bwa_disks" : "local-disk 100 HDD",
+
+    "chip.filter_cpu" : 2,
+    "chip.filter_mem_mb" : 20000,
+    "chip.filter_time_hr" : 24,
+    "chip.filter_disks" : "local-disk 100 HDD",
+
+    "chip.bam2ta_cpu" : 2,
+    "chip.bam2ta_mem_mb" : 10000,
+    "chip.bam2ta_time_hr" : 6,
+    "chip.bam2ta_disks" : "local-disk 100 HDD",
+
+    "chip.spr_mem_mb" : 16000,
+
+    "chip.fingerprint_cpu" : 2,
+    "chip.fingerprint_mem_mb" : 12000,
+    "chip.fingerprint_time_hr" : 6,
+    "chip.fingerprint_disks" : "local-disk 100 HDD",
+
+    "chip.xcor_cpu" : 2,
+    "chip.xcor_mem_mb" : 16000,
+    "chip.xcor_time_hr" : 24,
+    "chip.xcor_disks" : "local-disk 100 HDD",
+
+    "chip.macs2_mem_mb" : 16000,
+    "chip.macs2_time_hr" : 24,
+    "chip.macs2_disks" : "local-disk 100 HDD",
+
+    "chip.spp_cpu" : 2,
+    "chip.spp_mem_mb" : 16000,
+    "chip.spp_time_hr" : 72,
+    "chip.spp_disks" : "local-disk 100 HDD",
+}
+```
 
 ## Reference genome
 
@@ -31,172 +226,3 @@ Choose one TSV file for `"chip.genome_tsv"` in your input JSON. `[GENOME]` shoul
 |Stanford Sherlock|`genome/scg/[GENOME]_scg.tsv`|
 |Stanford SCG|`genome/sherlock/[GENOME]_sherlock.tsv`|
 |Local/SLURM/SGE|You need to [build a genome database](build_genome_database.md). |
-
-## Input data file (IP experiment data)
-
-Choose any data type (FASTQ, BAM, nodup/filtered BAM, TAG-ALIGN and PEAK) you want and DO NOT define arrays for other types. For FASTQs we provide two ways to define them since DNANexus web UI supports up to an 1-dim array. Choose between 3-dim `fastqs` or 1-dim `fastqs_rep[REP_ID]_R[READ_END_ID]` according to your preference. The pipeline supports up to 6 replicates.
-
-* `"chip.fastqs"` : 3-dimensional array with FASTQ file path/URI.
-    - 1st dimension: replicate ID
-    - 2nd dimension: merge ID (this dimension will be reduced after merging FASTQs)
-    - 3rd dimension: endedness ID (0 for SE and 0,1 for PE)
-* `"chip.fastqs_rep1_R1"` : Array of FASTQ file to be merged for rep1-R1.
-* `"chip.fastqs_rep1_R2"` : Array of FASTQ file to be merged for rep1-R2. Do not define if your FASTQ is single ended.
-* `"chip.fastqs_rep2_R1"` : Array of FASTQ file to be merged for rep2-R1. Do not define if you don't have replicate 2.
-* `"chip.fastqs_rep2_R2"` : Array of FASTQ file to be merged for rep2-R2. Do not define if you don't have replicate 2.
-* `"chip.fastqs_rep3_R1"` : Array of FASTQ file to be merged for rep3-R1. Do not define if you don't have replicate 3.
-* `"chip.fastqs_rep3_R2"` : Array of FASTQ file to be merged for rep3-R2. Do not define if you don't have replicate 3.
-* `"chip.fastqs_rep4_R1"` : Array of FASTQ file to be merged for rep4-R1. Do not define if you don't have replicate 4.
-* `"chip.fastqs_rep4_R2"` : Array of FASTQ file to be merged for rep4-R2. Do not define if you don't have replicate 4.
-* `"chip.bams"` : Array of raw (unfiltered) BAM file path/URI.
-    - 1st dimension: replicate ID
-* `"chip.nodup_bams"` : Array of filtered (deduped) BAM file path/URI.
-    - 1st dimension: replicate ID
-* `"chip.tas"` : Array of TAG-ALIGN file path/URI.
-    - 1st dimension: replicate ID
-* `"chip.peaks"` : Array of NARROWPEAK file path/URI.
-    - 1st dimension: replicate ID
-* `"chip.peaks_pr1"` : Array of NARROWPEAK file path/URI for 1st self pseudo replicate of replicate ID.
-    - 1st dimension: replicate ID
-* `"chip.peaks_pr2"` : Array of NARROWPEAK file path/URI for 2nd self pseudo replicate of replicate ID.
-    - 1st dimension: replicate ID
-* `"chip.peak_ppr1"` : NARROWPEAK file path/URI for pooled 1st pseudo replicates.
-* `"chip.peak_ppr2"` : NARROWPEAK file path/URI for pooled 2nd pseudo replicates.
-* `"chip.peak_pooled"` : NARROWPEAK file path/URI for pooled replicate.
-
-If starting from peaks then always define `"chip.peaks"`. Define `"chip.peaks_pr1"`, `"chip.peaks_pr2"`, `"chip.peak_pooled"`, `"chip.peak_ppr1"` and `"chip.peak_ppr2"` according to the following rules:
-
-```
-if num_rep>1:
-    if true_rep_only: peak_pooled, 
-    else: peaks_pr1[], peaks_pr2[], peak_pooled, peak_ppr1, peak_ppr2
-else:
-    if true_rep_only: "not the case!"
-    else: peaks_pr1[], peaks_pr2[]
-```
-
-## Input data file (Control data)
-
-* `"chip.ctl_fastqs"` : 3-dimensional array with FASTQ file path/URI.
-    - 1st dimension: replicate ID
-    - 2nd dimension: merge ID (this dimension will be reduced after merging FASTQs)
-    - 3rd dimension: endedness ID (0 for SE and 0,1 for PE)
-* `"chip.ctl_fastqs_rep1_R1"` : Array of FASTQ file to be merged for rep1-R1.
-* `"chip.ctl_fastqs_rep1_R2"` : Array of FASTQ file to be merged for rep1-R2. Do not define if your FASTQ is single ended.
-* `"chip.ctl_fastqs_rep2_R1"` : Array of FASTQ file to be merged for rep2-R1. Do not define if you don't have replicate 2.
-* `"chip.ctl_fastqs_rep2_R2"` : Array of FASTQ file to be merged for rep2-R2. Do not define if you don't have replicate 2.
-* `"chip.ctl_fastqs_rep3_R1"` : Array of FASTQ file to be merged for rep3-R1. Do not define if you don't have replicate 3.
-* `"chip.ctl_fastqs_rep3_R2"` : Array of FASTQ file to be merged for rep3-R2. Do not define if you don't have replicate 3.
-* `"chip.ctl_fastqs_rep4_R1"` : Array of FASTQ file to be merged for rep4-R1. Do not define if you don't have replicate 4.
-* `"chip.ctl_fastqs_rep4_R2"` : Array of FASTQ file to be merged for rep4-R2. Do not define if you don't have replicate 4.
-* `"chip.ctl_bams"` : Array of raw (unfiltered) BAM file path/URI.
-    - 1st dimension: replicate ID
-* `"chip.ctl_nodup_bams"` : Array of filtered (deduped) BAM file path/URI.
-    - 1st dimension: replicate ID
-* `"chip.ctl_tas"` : Array of TAG-ALIGN file path/URI.
-    - 1st dimension: replicate ID
-
-## Pipeline parameters
-
-1. General
-
-    Choose pipeline type: TF (`tf`) or Histone (`histone`) ChIP-Seq. Default peak caller for TF and Histone ChIP-Seq pipelines are `spp` and `macs2`, respectively. However you can also manually specify a peak caller for these pipeline types. MACS2 can work without controls but SPP cannot. Therefore, if a peak caller is chosen as `spp` then make sure to define control data.
-
-    * `"chip.pipeline_type` : `tf` for TF ChIP-Seq. `histone` for Histone ChIP-Seq.
-    * `"chip.peak_caller` (optional) : Choose between `macs2` or `spp` if you don't want to use a default peak caller for `pipeline_type` chosen.
-
-    Input data endedness.
-
-    * `"chip.paired_end"` : Set it as `true` if input data are paired end, otherwise `false`.
-
-    Other optional settings.
-
-    * `"chip.align_only"` : (optional) Disable all downstream analysis (peak calling, ...) after mapping.
-    * `"chip.true_rep_only"` : (optional) Set it as `true` to disable all analyses (including IDR, naive-overlap and reproducibility QC) related to pseudo replicates. This flag suppresses `"chip.enable_idr"`.
-    * `"chip.disable_xcor` : (optional) Disable cross-correlation analysis.
-
-    * `"chip.title"` : (optional) Name of sample.
-    * `"chip.description"` : (optional) Description for sample.
-
-2. Trim FASTQ settings (for paired end dataset only).
-
-    * `"chip.trim_bp"` : For paired end dataset only. Number of basepairs after trimming FASTQ. It’s 50 by default. Trimmed FASTQS is only used for cross-correlation analysis. FASTQ mapping is not affected by this parameter.
-
-3. Filter/dedup (post-alignment) settings (remove a prefix `chip.` for DNANexus CLI).
-
-    * `"chip.dup_marker"` : (optional) Dup marker. Choose between `picard` (default) and `sambamba`.
-    * `"chip.mapq_thresh"` : (optional) Threshold for low MAPQ reads removal (default: 30).
-    * `"chip.no_dup_removal"` : (optional) No dup reads removal when filtering BAM.
-
-4. BAM-2-TAGALIGN settings (remove a prefix `chip.` for DNANexus CLI).
-
-    Pipeline filters out chrM reads by default.
-
-    * `"chip.regex_filter_reads"` : (optional) Perl-style regular expression pattern to remove matching reads from TAGALIGN (default: `chrM`).
-    * `"chip.subsample_reads"` : (optional) Number of reads to subsample TAGALIGN. Subsampled TAGALIGN will be used for all downstream analysis (MACS2, IDR, naive-overlap).
-
-5. Choose control settings.
-
-    * `"chip.ctl_depth_ratio"` : (optional) if ratio between controls is higher than this then always use pooled control for all exp rep (default: 1.2).
-    * `"chip.always_use_pooled_ctl"` : (optional) Always use pooled control for all exp replicates (ignoring ctl_depth_ratio).
-
-6. Cross correlation analysis settings (remove a prefix `chip.` for DNANexus CLI).
-
-    For paired end FASTQ data set, only one read end (R1) will be trimmed and used for this analysis.
-
-    * `"chip.xcor_subsample_reads"` : (optional) Number of reads to subsample TAGALIGN. This will not affect downstream analysis.
-
-7. MACS2 settings
-
-    **DO NOT DEFINE MACS2 PARAMETERS IN `"chip.macs2"` SCOPE**. All MACS2 parameters must be defined in `"chip"` scope.
-
-    * `"chip.macs2_cap_num_peak"` : (optional) Cap number of raw peaks called from MACS2 (default: 500000).
-    * `"chip.pval_thresh"` : (optional) P-value threshold (default: 0.01).
-
-8. SPP settings
-
-    **DO NOT DEFINE SPP PARAMETERS IN `"chip.spp"` SCOPE**. All SPP parameters must be defined in `"chip"` scope.
-
-    * `"chip.spp_cap_num_peak"` : (optional) Cap number of raw peaks called from SPP (default: 300000).
-
-9. IDR settings
-
-    **DO NOT DEFINE IDR PARAMETERS IN `"chip.idr"` SCOPE**. All IDR parameters must be defined in `"chip"` scope.
-
-    * `"chip.enable_idr"` : (optional) Set it as `true` to enable IDR on raw peaks.
-    * `"chip.idr_thresh"` : (optional) IDR threshold (default: 0.05).
-
-## Resource
-
-**RESOURCES DEFINED IN AN INPUT JSON ARE PER TASK**. For example, if you have FASTQs for 2 replicates (2 tasks) and set `cpu` for `bwa` task as 4 then total number of cpu cores to map FASTQs is 2 x 4 = 8.
-
-CPU (`cpu`), memory (`mem_mb`) settings are used for submitting jobs to cluster engines (SGE and SLURM) and Cloud platforms (Google Cloud Platform, AWS, ...). VM instance type on cloud platforms will be automatically chosen according to each task's `cpu` and `mem_mb`. Number of cores for tasks without `cpu` parameter is fixed at 1.
-
-* `"chip.bwa_cpu"` : (optional) Number of cores for `bwa` (default: 4).
-* `"chip.filter_cpu"` : (optional) Number of cores for `filter` (default: 2).
-* `"chip.bam2ta_cpu"` : (optional) Number of cores for `bam2ta` (default: 2).
-* `"chip.xcor_cpu"` : (optional) Number of cores for `xcor` (default: 2).
-* `"chip.trim_adapter_mem_mb"` : (optional) Max. memory limit in MB for `trim_adapter` (default: 10000).
-* `"chip.bwa_mem_mb"` : (optional) Max. memory limit in MB for `bwa` (default: 20000).
-* `"chip.filter_mem_mb"` : (optional) Max. memory limit in MB for `filter` (default: 20000).
-* `"chip.bam2ta_mem_mb"` : (optional) Max. memory limit in MB for `bam2ta` (default: 10000).
-* `"chip.spr_mem_mb"` : (optional) Max. memory limit in MB for `spr` (default: 12000).
-* `"chip.xcor_mem_mb"` : (optional) Max. memory limit in MB for `xcor` (default: 10000).
-* `"chip.macs2_mem_mb"` : (optional) Max. memory limit in MB for `macs2` (default: 16000).
-
-Disks (`disks`) is used for Cloud platforms (Google Cloud Platforms, AWS, ...).
-
-* `"chip.bwa_disks"` : (optional) Disks for `bwa` (default: "local-disk 100 HDD").
-* `"chip.filter_disks"` : (optional) Disks for `filter` (default: "local-disk 100 HDD").
-* `"chip.bam2ta_disks"` : (optional) Disks for `bam2ta` (default: "local-disk 100 HDD").
-* `"chip.xcor_disks"` : (optional) Disks for `xcor` (default: "local-disk 100 HDD").
-* `"chip.macs2_disks"` : (optional) Disks for `macs2` (default: "local-disk 100 HDD").
-
-Walltime (`time`) settings (for SGE and SLURM only).
-
-* `"chip.bwa_time_hr"` : (optional) Walltime for `bwa` (default: 48).
-* `"chip.filter_time_hr"` : (optional) Walltime for `filter` (default: 24).
-* `"chip.bam2ta_time_hr"` : (optional) Walltime for `bam2ta` (default: 6).
-* `"chip.xcor_time_hr"` : (optional) Walltime for `xcor` (default: 24).
-* `"chip.macs2_time_hr"` : (optional) Walltime for `macs2` (default: 24).
-

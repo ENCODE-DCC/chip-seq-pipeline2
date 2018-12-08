@@ -15,33 +15,33 @@ This document describes instruction for the item 1).
 2. Create a new [DX project](https://platform.dnanexus.com/projects) with name `[YOUR_PROJECT_NAME]` by clicking on "+New Project" on the top left.
 
 3. Git clone this pipeline.
-    ```
+    ```bash
       $ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
     ```
 
 4. Move to pipeline's directory.
-    ```
+    ```bash
       $ cd chip-seq-pipeline2
     ```
 
 5. Download dxWDL.
-    ```
+    ```bash
       $ wget https://github.com/dnanexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar
       $ chmod +rx dxWDL-0.77.jar
     ```
 
 6. Choose an appropriate input for your project (AWS or Azure):
     * AWS
-      ```
+      ```bash
         $ INPUT=examples/dx/ENCSR936XTK_subsampled_dx.json
       ```
     * Azure
-      ```
+      ```bash
         $ INPUT=examples/dx_azure/ENCSR936XTK_subsampled_dx_azure.json
       ```
 
 7. Compile `chip.wdl` with an input JSON for the SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
-    ```
+    ```bash
       $ PROJECT=[YOUR_PROJECT_NAME]
       $ OUT_FOLDER=/test_sample_chip_ENCSR936XTK_subsampled
 
