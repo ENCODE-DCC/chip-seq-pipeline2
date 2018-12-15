@@ -8,8 +8,8 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 ### Features
 
 * **Flexibility**: Support for `docker`, `singularity` and `Conda`.
-* **Portability**: Support for many cloud platforms (Google/DNANexus) and cluster engines (SLURM/SGE/PBS).
-* **Beatiful HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
+* **Portability**: Support for many cloud platforms (Google/DNAnexus) and cluster engines (SLURM/SGE/PBS).
+* **User-friendly HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
   - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/example_output/qc.html), [JSON](docs/example_output/qc.json)
 * **Genomes**: Pre-built database for GRCh38, hg19, mm10, mm9 and additional support for custom genomes.
 
@@ -19,10 +19,10 @@ This pipeline supports many cloud platforms and cluster engines. It also support
 
 * Cloud platforms
   * Web interface
-    * [DNANexus Platform](docs/tutorial_dx_web.md)
+    * [DNAnexus Platform](docs/tutorial_dx_web.md)
   * CLI (command line interface)
     * [Google Cloud Platform](docs/tutorial_google.md)
-    * [DNANexus Platform](docs/tutorial_dx_cli.md)
+    * [DNAnexus Platform](docs/tutorial_dx_cli.md)
 * Stanford HPC servers (CLI)
   * [Stanford SCG4](docs/tutorial_scg.md)
   * [Stanford Sherlock 2.0](docs/tutorial_sherlock.md)
