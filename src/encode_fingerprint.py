@@ -56,7 +56,7 @@ def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
     labels.append('ctl1')
     bam_paths.append(ctl_bam)
 
-    cmd = 'plotFingerprint -b {} --JSDsample {} '
+    cmd = 'LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 plotFingerprint -b {} --JSDsample {} '
     cmd += '--labels {} '
     cmd += '--outQualityMetrics {} '
     cmd += '--minMappingQuality {} '
