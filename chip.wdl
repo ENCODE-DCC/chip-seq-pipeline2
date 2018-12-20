@@ -22,7 +22,7 @@ workflow chip {
 									# overlap and idr will also be disabled
 	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
 
-	Int trim_bp = 50 				# for cross-correlation analysis only
+	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
 
 	String dup_marker = 'picard'	# picard.jar MarkDuplicates (picard) or 
 									# sambamba markdup (sambamba)
@@ -213,7 +213,7 @@ workflow chip {
 		# for paired end dataset, map R1 only as SE for xcor analysis
 		call trim_fastq { input :
 			fastq = fastq_set[0],
-			trim_bp = trim_bp,
+			trim_bp = xcor_pe_trim_bp,
 		}
 	}
 	Array[Array[File]] trimmed_fastqs_R1 = if length(trim_fastq.trimmed_fastq)<1 then []
