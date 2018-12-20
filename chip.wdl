@@ -891,7 +891,7 @@ workflow chip {
 	output {
 		File report = qc_report.report
 		File qc_json = qc_report.qc_json
-		Boolean qc_json_match = qc_report.qc_json_match
+		Boolean qc_json_ref_match = qc_report.qc_json_ref_match
 	}	
 }
 
@@ -1498,16 +1498,13 @@ task qc_report {
 			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
 			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
 			--out-qc-html qc.html \
-			--out-qc-json qc.json
-
-		diff <(cat qc.json | grep -vE '\"pipeline_ver\"|\"date\"') \
-			<(cat ${if defined(qc_json_ref) then qc_json_ref else "/dev/null"} | grep -vE '\"pipeline_ver\"|\"date\"') \
-			| wc -l > qc_json_match.txt
+			--out-qc-json qc.json \
+			${"--qc-json-ref " + qc_json_ref}
 	}
 	output {
 		File report = glob('*qc.html')[0]
 		File qc_json = glob('*qc.json')[0]
-		Boolean qc_json_match = read_int("qc_json_match.txt")==0
+		Boolean qc_json_ref_match = read_string("qc_json_ref_match.txt")=="True"
 	}
 	runtime {
 		cpu : 1
