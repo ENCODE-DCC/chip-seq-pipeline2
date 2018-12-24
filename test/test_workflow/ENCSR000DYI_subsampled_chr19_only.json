@@ -1,5 +1,5 @@
 {
-    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/ref_output_v1.1.1_PIP-399/ENCSR000DYI_subsampled_chr19_only_qc.json",
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/ref_output_v1.1.5/ENCSR000DYI_subsampled_chr19_only/qc.json",
     "chip.pipeline_type" : "tf",
     "chip.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_chr19_chrM_google.tsv",
     "chip.fastqs" : [
