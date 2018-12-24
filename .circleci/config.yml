@@ -92,7 +92,7 @@ jobs:
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             cd test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
-            ./test_chip_local.sh ENCSR000DYI_subsampled_chr19_only.json tmp_key.json ${TAG}
+            ./test_chip.sh ENCSR000DYI_subsampled_chr19_only.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
 
   test_workflow_pe:
@@ -107,7 +107,7 @@ jobs:
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             cd test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
-            ./test_chip_local.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
+            ./test_chip.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
 
 # Define workflow here
