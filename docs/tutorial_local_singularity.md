@@ -49,7 +49,7 @@ Tutorial for general UNIX computers with singularity
     ```javascript
       {
           "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/atac-seq-pipeline-v1.1.5.simg",
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.5.simg",
               "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR2,..."
           }
       }
