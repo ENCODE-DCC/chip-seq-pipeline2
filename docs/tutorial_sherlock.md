@@ -36,7 +36,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     $ bash conda/install_dependencies.sh
     ```
 
-6. Run a pipeline for the test sample. You must have a paid account on Sherlock.
+6. Run a pipeline for the test sample.
     ```bash
     $ sbatch --partition normal examples/sherlock/ENCSR936XTK_subsampled_sherlock_conda.sh
     ```
@@ -46,11 +46,11 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 5. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
     $ sdev    # Sherlock cluster does not allow building a container on login node
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.5.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.5
+    $ rm -rf ~/.singularity && mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.5.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.5
     $ exit
     ```
 
-6. Run a pipeline for the test sample. You must have a paid account on Sherlock.
+6. Run a pipeline for the test sample.
     ```bash
     $ sbatch --partition normal examples/sherlock/ENCSR936XTK_subsampled_sherlock_singularity.sh
     ```
