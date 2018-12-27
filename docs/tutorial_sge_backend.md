@@ -1,28 +1,29 @@
-Tutorial for Sun GridEngine (SGE) clusters
-==========================================
+# Tutorial for Sun GridEngine (SGE) clusters
 
-1. Git clone this pipeline and move into it.
+1. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```bash
-      $ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
-      $ cd chip-seq-pipeline2
+    $ cd
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
+    $ chmod +rx cromwell-34.jar
     ```
 
-2. Download [cromwell](https://github.com/broadinstitute/cromwell).
+2. Git clone this pipeline and move into it.
     ```bash
-      $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-      $ chmod +rx cromwell-34.jar
+    $ cd
+    $ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
+    $ cd chip-seq-pipeline2
     ```
 
 3. Download a SUBSAMPLED (1/400) paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
     ```bash
-      $ wget https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ENCSR936XTK_fastq_subsampled.tar
-      $ tar xvf ENCSR936XTK_fastq_subsampled.tar
+    $ wget https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/ENCSR936XTK_fastq_subsampled.tar
+    $ tar xvf ENCSR936XTK_fastq_subsampled.tar
     ```
 
 4. Download pre-built genome database for hg38.
     ```bash
-      $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_chip.tar
-      $ tar xvf test_genome_database_hg38_chip.tar
+    $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_chip.tar
+    $ tar xvf test_genome_database_hg38_chip.tar
     ```
 
 5. Set your parallel environment (PE) and queue in `workflow_opts/sge.json`. If your SGE cluster does not have any PE, ask your admin to add one for our pipeline. If you don't want to specify any queue then remove `, "sge_queue" : "YOUR_SGE_QUEUE"` from the file. See [here](how_to_config_sge.md) to find details about how to configure SGE for the pipeline.
@@ -43,15 +44,15 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Install Conda dependencies.
     ```bash
-      $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
-      $ bash conda/install_dependencies.sh
+    $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
+    $ bash conda/install_dependencies.sh
     ```
 
 8. Run a pipeline for the test sample.
     ```bash
-      $ source activate encode-chip-seq-pipeline # IMPORTANT!
-      $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
+    $ source activate encode-chip-seq-pipeline # IMPORTANT!
+    $ INPUT=examples/local/ENCSR936XTK_subsampled.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
 9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -62,18 +63,18 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 6. CHECK YOUR SINGULARITY VERSION FIRST AND UPGRADE IT TO A VERSION `>=2.5.2` OR PIPELINE WILL NOT WORK CORRECTLY.
     ```bash
-      $ singularity --version
+    $ singularity --version
     ```
 
 7. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
-      $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.5.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.5.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1
     ```
 
 8. Run a pipeline for the test sample.
     ```bash
-      $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-      $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
+    $ INPUT=examples/local/ENCSR936XTK_subsampled.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
 9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -94,26 +95,26 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 1. If you want to run multiple (>10) pipelines, then run a cromwell server on an interactive node. We recommend to use `screen` or `tmux` to keep your session alive and note that all running pipelines will be killed after walltime. Run a Cromwell server with the following commands.
     ```bash
-      $ qlogin -h_vmem=5G -h_rt=72:00:00 # long walltime      
-      $ hostname -f    # to get [CROMWELL_SVR_IP]
+    $ qlogin -h_vmem=5G -h_rt=72:00:00 # long walltime      
+    $ hostname -f    # to get [CROMWELL_SVR_IP]
     ```
 
     For Conda users,
     ```bash
-      $ source activate encode-chip-seq-pipeline
-      $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar server
+    $ source activate encode-chip-seq-pipeline
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar server
     ```
     For singularity users,
     ```bash
-      $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar server
     ```
 
 2. You can modify `backend.providers.sge.concurrent-job-limit` or `backend.providers.sge_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
 
 3. On a login node, submit jobs to the cromwell server. You will get `[WORKFLOW_ID]` as a return value. Keep these workflow IDs for monitoring pipelines and finding outputs for a specific sample later.  
     ```bash  
-      $ INPUT=YOUR_INPUT.json
-      $ curl -X POST --header "Accept: application/json" -v "[CROMWELL_SVR_IP]:8000/api/workflows/v1" \
+    $ INPUT=YOUR_INPUT.json
+    $ curl -X POST --header "Accept: application/json" -v "[CROMWELL_SVR_IP]:8000/api/workflows/v1" \
         -F workflowSource=@chip.wdl \
         -F workflowInputs=@${INPUT} \
         -F workflowOptions=@workflow_opts/sge.json
@@ -121,5 +122,5 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
   To monitor pipelines, see [cromwell server REST API description](http://cromwell.readthedocs.io/en/develop/api/RESTAPI/#cromwell-server-rest-api>) for more details. `squeue` will not give you enough information for monitoring jobs per sample.
     ```bash
-      $ curl -X GET --header "Accept: application/json" -v "[CROMWELL_SVR_IP]:8000/api/workflows/v1/[WORKFLOW_ID]/status"
+    $ curl -X GET --header "Accept: application/json" -v "[CROMWELL_SVR_IP]:8000/api/workflows/v1/[WORKFLOW_ID]/status"
     ```

@@ -1,5 +1,4 @@
-Tutorial for DNAnexus Platform (CLI)
-====================================
+# Tutorial for DNAnexus Platform (CLI)
 
 All test samples and genome data are shared on our public DNAnexus project. You don't have to download any data for testing our pipeline on DNAnexus platform.
 
@@ -14,38 +13,40 @@ This document describes instruction for the item 1).
 
 2. Create a new [DX project](https://platform.DNAnexus.com/projects) with name `[YOUR_PROJECT_NAME]` by clicking on "+New Project" on the top left.
 
-3. Git clone this pipeline.
+3. Download dxWDL.
     ```bash
-      $ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
+    $ cd
+    $ wget https://github.com/DNAnexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar
+    $ chmod +rx dxWDL-0.77.jar
     ```
 
-4. Move to pipeline's directory.
+4. Git clone this pipeline.
     ```bash
-      $ cd chip-seq-pipeline2
+    $ cd
+    $ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
     ```
 
-5. Download dxWDL.
+5. Move to pipeline's directory.
     ```bash
-      $ wget https://github.com/DNAnexus/dxWDL/releases/download/0.77/dxWDL-0.77.jar
-      $ chmod +rx dxWDL-0.77.jar
+    $ cd chip-seq-pipeline2
     ```
 
 6. Choose an appropriate input for your project (AWS or Azure):
     * AWS
       ```bash
-        $ INPUT=examples/dx/ENCSR936XTK_subsampled_dx.json
+      $ INPUT=examples/dx/ENCSR936XTK_subsampled_dx.json
       ```
     * Azure
       ```bash
-        $ INPUT=examples/dx_azure/ENCSR936XTK_subsampled_dx_azure.json
+      $ INPUT=examples/dx_azure/ENCSR936XTK_subsampled_dx_azure.json
       ```
 
 7. Compile `chip.wdl` with an input JSON for the SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
     ```bash
-      $ PROJECT=[YOUR_PROJECT_NAME]
-      $ OUT_FOLDER=/test_sample_chip_ENCSR936XTK_subsampled
+    $ PROJECT=[YOUR_PROJECT_NAME]
+    $ OUT_FOLDER=/test_sample_chip_ENCSR936XTK_subsampled
 
-      $ java -jar dxWDL-0.77.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras workflow_opts/docker.json
+    $ java -jar dxWDL-0.77.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras workflow_opts/docker.json
     ```
 
 8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.
