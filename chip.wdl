@@ -2,6 +2,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow chip {
+	String pipeline_ver = 'v1.1.5'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -21,7 +22,7 @@ workflow chip {
 									# overlap and idr will also be disabled
 	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
 
-	Int trim_bp = 50 				# for cross-correlation analysis only
+	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
 
 	String dup_marker = 'picard'	# picard.jar MarkDuplicates (picard) or 
 									# sambamba markdup (sambamba)
@@ -212,7 +213,7 @@ workflow chip {
 		# for paired end dataset, map R1 only as SE for xcor analysis
 		call trim_fastq { input :
 			fastq = fastq_set[0],
-			trim_bp = trim_bp,
+			trim_bp = xcor_pe_trim_bp,
 		}
 	}
 	Array[Array[File]] trimmed_fastqs_R1 = if length(trim_fastq.trimmed_fastq)<1 then []
@@ -837,8 +838,10 @@ workflow chip {
 	}
 	# Generate final QC report and JSON
 	call qc_report { input :
+		pipeline_ver = pipeline_ver,
 		title = title,
 		description = description,
+		genome = basename(genome_tsv),
 		paired_end = paired_end,
 		pipeline_type = pipeline_type,
 		peak_caller = peak_caller_,
@@ -888,7 +891,7 @@ workflow chip {
 	output {
 		File report = qc_report.report
 		File qc_json = qc_report.qc_json
-		Boolean qc_json_match = qc_report.qc_json_match
+		Boolean qc_json_ref_match = qc_report.qc_json_ref_match
 	}	
 }
 
@@ -1395,8 +1398,10 @@ task reproducibility {
 # - qc.json		: all QCs
 task qc_report {
 	# optional metadata
+	String pipeline_ver
  	String title # name of sample
 	String description # description for sample
+	String? genome
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
 	Boolean paired_end
@@ -1446,8 +1451,10 @@ task qc_report {
 
 	command {
 		python $(which encode_qc_report.py) \
-			${"--name '" + sub(title,"'","_") + "'"} \
+			${"--pipeline-ver " + pipeline_ver} \
+			${"--title '" + sub(title,"'","_") + "'"} \
 			${"--desc '" + sub(description,"'","_") + "'"} \
+			${"--genome " + genome} \
 			${"--multimapping " + 0} \
 			${if paired_end then "--paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
@@ -1491,14 +1498,13 @@ task qc_report {
 			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
 			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
 			--out-qc-html qc.html \
-			--out-qc-json qc.json
-
-		diff qc.json ${if defined(qc_json_ref) then qc_json_ref else "/dev/null"} | wc -l > qc_json_match.txt
+			--out-qc-json qc.json \
+			${"--qc-json-ref " + qc_json_ref}
 	}
 	output {
 		File report = glob('*qc.html')[0]
 		File qc_json = glob('*qc.json')[0]
-		Boolean qc_json_match = read_int("qc_json_match.txt")==0
+		Boolean qc_json_ref_match = read_string("qc_json_ref_match.txt")=="True"
 	}
 	runtime {
 		cpu : 1

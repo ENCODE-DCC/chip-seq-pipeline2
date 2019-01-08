@@ -50,7 +50,7 @@
 
     "chip.disable_fingerprint" : false,
 
-    "chip.trim_bp" : 50,
+    "chip.xcor_pe_trim_bp" : 50,
 
     "chip.dup_marker" : "picard",
 

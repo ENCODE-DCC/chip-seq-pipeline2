@@ -1,5 +1,4 @@
-Tutorial for DNAnexus Platform (web)
-====================================
+# Tutorial for DNAnexus Platform (web)
 
 All test samples and genome data are shared on our public DNAnexus project. You don't have to download any data for testing our pipeline on DNAnexus platform.
 
@@ -41,16 +40,16 @@ This document describes instruction for the item 2).
 1. DNAnexus allows only one copy of a workflow per project. The example workflow in the previous section is pre-built for the subsampled test sample [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/) with all parameters defined already.
 
 2. Copy one of the following workflows according to the platform you have chosen for your project (AWS or Azure).
-* [AWS general](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.4/general) without pre-defined reference genome.
-* [AWS hg38](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.4/hg38) with pre-defined hg38 reference genome.
-* [AWS hg19](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.4/hg19) with pre-defined hg38 reference genome.
-* [AWS mm10](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.4/mm10) with pre-defined mm10 reference genome.
-* [AWS mm9](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.4/mm9) with pre-defined mm9 reference genome.
-* [Azure general](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.4/general) without pre-defined reference genome.
-* [Azure hg38](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.4/hg38) with pre-defined hg38 reference genome.
-* [Azure hg19](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.4/hg19) with pre-defined hg38 reference genome.
-* [Azure mm10](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.4/mm10) with pre-defined mm10 reference genome.
-* [Azure mm9](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.4/mm9) with pre-defined mm9 reference genome.
+* [AWS general](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.5/general) without pre-defined reference genome.
+* [AWS hg38](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.5/hg38) with pre-defined hg38 reference genome.
+* [AWS hg19](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.5/hg19) with pre-defined hg19 reference genome.
+* [AWS mm10](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.5/mm10) with pre-defined mm10 reference genome.
+* [AWS mm9](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.5/mm9) with pre-defined mm9 reference genome.
+* [Azure general](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.5/general) without pre-defined reference genome.
+* [Azure hg38](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.5/hg38) with pre-defined hg38 reference genome.
+* [Azure hg19](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.5/hg19) with pre-defined hg19 reference genome.
+* [Azure mm10](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.5/mm10) with pre-defined mm10 reference genome.
+* [Azure mm9](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.5/mm9) with pre-defined mm9 reference genome.
 
 3. Click on the DX workflow `chip`.
 
