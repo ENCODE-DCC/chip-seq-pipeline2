@@ -2,7 +2,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow chip {
-	String pipeline_ver = 'v1.1.5'
+	String pipeline_ver = 'v1.1.6'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
