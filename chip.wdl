@@ -149,6 +149,35 @@ workflow chip {
 	File? peak_ppr2				# do not define if you have a single replicate or true_rep=true
 	File? peak_pooled			# do not define if you have a single replicate or true_rep=true
 
+	### other inputs used for resuming pipelines (QC/txt/log/png files, ...)
+	File? ta_pooled
+	File? ctl_ta_pooled
+	Array[File] flagstat_qcs = []
+	Array[File] pbc_qcs = []
+	Array[File] dup_qcs = []
+	Array[File] nodup_flagstat_qcs = []
+	Array[File] ctl_flagstat_qcs = []
+	Array[File] ctl_pbc_qcs = []
+	Array[File] ctl_dup_qcs = []
+	Array[File] ctl_nodup_flagstat_qcs = []
+	Array[File] sig_pvals = []
+	Array[File] xcor_plots = []
+	Array[File] xcor_scores = []
+	Array[File] macs2_frip_qcs = []
+	Array[File] macs2_pr1_frip_qcs = []
+	Array[File] macs2_pr2_frip_qcs = []
+	File? macs2_pooled_frip_qc
+	File? macs2_ppr1_frip_qc
+	File? macs2_ppr2_frip_qc
+	Array[File] spp_frip_qcs = []
+	Array[File] spp_pr1_frip_qcs = []
+	Array[File] spp_pr2_frip_qcs = []
+	File? spp_pooled_frip_qc
+	File? spp_ppr1_frip_qc
+	File? spp_ppr2_frip_qc
+	Array[File] jsd_qcs = []
+	File? jsd_plot
+
 	### temp vars (do not define these)
 	String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller,'spp'])
 						else select_first([peak_caller,'macs2'])
@@ -189,7 +218,13 @@ workflow chip {
 		else if length(fastqs_rep6)<1 then [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4,fastqs_rep5]
 		else [fastqs_rep1,fastqs_rep2,fastqs_rep3,fastqs_rep4,fastqs_rep5,fastqs_rep6]
 
-	scatter(fastq_set in fastqs_) {
+	## temp vars for resuming pipelines
+	Boolean need_to_process_ta = length(peaks_pr1)==0 && length(peaks)==0
+	Boolean need_to_process_nodup_bam = need_to_process_ta && length(tas)==0
+	Boolean need_to_process_bam = need_to_process_nodup_bam && length(nodup_bams)==0
+	Boolean need_to_process_fastq = need_to_process_bam && length(bams)==0
+
+	scatter(fastq_set in if need_to_process_fastq then fastqs_ else []) {
 		# merge fastqs
 		call merge_fastq { input :
 			fastqs = fastq_set,
@@ -243,7 +278,7 @@ workflow chip {
 	}
 
 	Array[File] bams_ = flatten([bwa.bam, bams])
-	scatter(bam in bams_) {
+	scatter(bam in if need_to_process_bam then bams_ else []) {
 		# filter/dedup bam
 		call filter { input :
 			bam = bam,
@@ -272,7 +307,7 @@ workflow chip {
 	}
 
 	Array[File] nodup_bams_ = flatten([filter.nodup_bam, nodup_bams])
-	scatter(bam in nodup_bams_) {
+	scatter(bam in if need_to_process_nodup_bam then nodup_bams_ else []) {
 		# convert bam to tagalign and subsample it if necessary
 		call bam2ta { input :
 			bam = bam,
@@ -287,9 +322,38 @@ workflow chip {
 		}
 	}
 
+	Array[File] tas_ = if align_only then [] else flatten([bam2ta.ta, tas])	
+	Array[File] tas__ = if need_to_process_nodup_bam then tas_ else []
+	if ( length(tas__)>1 )  {
+		# pool tagaligns from true replicates
+		call pool_ta { input :
+			tas = tas__,
+		}
+	}
+
+	if ( !true_rep_only ) {
+		scatter( ta in tas__ ) {
+			# make two self pseudo replicates per true replicate
+			call spr { input :
+				ta = ta,
+				paired_end = paired_end,
+				mem_mb = spr_mem_mb,
+			}
+		}
+	}
+	if ( !true_rep_only && length(tas__)>1 ) {
+		# pool tagaligns from pseudo replicates
+		call pool_ta as pool_ta_pr1 { input :
+			tas = spr.ta_pr1,
+		}
+		call pool_ta as pool_ta_pr2 { input :
+			tas = spr.ta_pr2,
+		}
+	}
+
 	Array[File] tas_xcor = if length(bam2ta_no_filt_R1.ta)>0 then bam2ta_no_filt_R1.ta
 		else if length(bam2ta_no_filt.ta)>0 then bam2ta_no_filt.ta
-		else flatten([bam2ta.ta, tas])
+		else flatten([bam2ta.ta, tas__])
 	Boolean paired_end_xcor = paired_end && length(bam2ta_no_filt_R1.ta)<1
 	scatter(ta in tas_xcor) {
 		# use trimmed/unfilitered R1 tagAlign for paired end dataset 		
@@ -305,34 +369,6 @@ workflow chip {
 			mem_mb = xcor_mem_mb,
 			time_hr = xcor_time_hr,
 			disks = xcor_disks,
-		}
-	}
-
-	Array[File] tas_ = if align_only then [] else flatten([bam2ta.ta, tas])	
-	if ( length(tas_)>1 )  {
-		# pool tagaligns from true replicates
-		call pool_ta { input :
-			tas = tas_,
-		}
-	}
-
-	if ( !true_rep_only ) {
-		scatter( ta in tas_ ) {
-			# make two self pseudo replicates per true replicate
-			call spr { input :
-				ta = ta,
-				paired_end = paired_end,
-				mem_mb = spr_mem_mb,
-			}
-		}
-	}
-	if ( !true_rep_only && length(tas_)>1 ) {
-		# pool tagaligns from pseudo replicates
-		call pool_ta as pool_ta_pr1 { input :
-			tas = spr.ta_pr1,
-		}
-		call pool_ta as pool_ta_pr2 { input :
-			tas = spr.ta_pr2,
 		}
 	}
 
@@ -357,7 +393,12 @@ workflow chip {
 		else if length(ctl_fastqs_rep6)<1 then [ctl_fastqs_rep1,ctl_fastqs_rep2,ctl_fastqs_rep3,ctl_fastqs_rep4,ctl_fastqs_rep5]
 		else [ctl_fastqs_rep1,ctl_fastqs_rep2,ctl_fastqs_rep3,ctl_fastqs_rep4,ctl_fastqs_rep5,ctl_fastqs_rep6]
 
-	scatter(fastq_set in ctl_fastqs_) {
+	## temp vars for resuming pipelines
+	Boolean need_to_process_ctl_nodup_bam = length(ctl_tas)==0
+	Boolean need_to_process_ctl_bam = need_to_process_ctl_nodup_bam && length(ctl_nodup_bams)==0
+	Boolean need_to_process_ctl_fastq = need_to_process_ctl_bam && length(ctl_bams)==0
+
+	scatter(fastq_set in if need_to_process_ctl_fastq then ctl_fastqs_ else []) {
 		# merge fastqs
 		call merge_fastq as merge_fastq_ctl { input :
 			fastqs = fastq_set,
@@ -376,7 +417,7 @@ workflow chip {
 	}
 
 	Array[File] ctl_bams_ = flatten([bwa_ctl.bam, ctl_bams])
-	scatter(bam in ctl_bams_) {
+	scatter(bam in if need_to_process_ctl_bam then ctl_bams_ else []) {
 		# filter/dedup bam
 		call filter as filter_ctl { input :
 			bam = bam,
@@ -393,7 +434,7 @@ workflow chip {
 	}
 
 	Array[File] ctl_nodup_bams_ = flatten([filter_ctl.nodup_bam, ctl_nodup_bams])
-	scatter(bam in ctl_nodup_bams_) {
+	scatter(bam in if need_to_process_ctl_nodup_bam then ctl_nodup_bams_ else []) {
 		# convert bam to tagalign and subsample it if necessary
 		call bam2ta as bam2ta_ctl { input :
 			bam = bam,
@@ -408,15 +449,15 @@ workflow chip {
 		}
 	}
 
-	Array[String] ctl_tas_ = if align_only then [] else flatten([bam2ta_ctl.ta, ctl_tas])
-	if ( length(ctl_tas_)>0 ) {	
+	Array[String] ctl_tas_ = if align_only then [] else flatten([bam2ta_ctl.ta, ctl_tas])	
+	if ( length(ctl_tas_)>0 && !defined(ctl_ta_pooled) ) {
 		# pool tagaligns from true replicates
 		call pool_ta as pool_ta_ctl { input :
 			tas = ctl_tas_,
 		}
 	}
 
-	if ( !disable_fingerprint && length(nodup_bams_)>0 && length(ctl_nodup_bams_)>0 && basename(blacklist)!='null' ) {
+	if ( !disable_fingerprint && length(nodup_bams_)>0 && length(ctl_nodup_bams_)>0 && basename(blacklist)!='null' && length(jsd_qcs)<1 ) {
 		# fingerprint and JS-distance plot
 		call fingerprint { input :
 			nodup_bams = nodup_bams_,
@@ -430,16 +471,16 @@ workflow chip {
 		}
 	}
 
-	if ( length(tas_)>0 && length(ctl_tas_)>0 ) {
+	if ( length(tas__)>0 && length(ctl_tas_)>0 ) {
 		# choose appropriate control for each exp IP replicate
 		# outputs:
 		# 	choose_ctl.idx : control replicate index for each exp replicate 
 		#					-1 means pooled ctl replicate
 		call choose_ctl { input:
-			tas = tas_,
+			tas = tas__,
 			ctl_tas = ctl_tas_,
 			ta_pooled = pool_ta.ta_pooled,
-			ctl_ta_pooled = pool_ta_ctl.ta_pooled,
+			ctl_ta_pooled = if !defined(ctl_ta_pooled) then pool_ta_ctl.ta_pooled else ctl_ta_pooled,
 			always_use_pooled_ctl = always_use_pooled_ctl,
 			ctl_depth_ratio = ctl_depth_ratio,
 		}
@@ -451,15 +492,15 @@ workflow chip {
 		else xcor.fraglen
 
 	# make control ta array [[1,2,3,4]] -> [[1],[2],[3],[4]], will be zipped with exp ta array latter
-	Array[Array[File]] chosen_ctl_tas =	if length(tas_)<1 || length(ctl_tas_)<1 then [[],[],[],[],[],[]]
+	Array[Array[File]] chosen_ctl_tas =	if length(tas__)<1 || length(ctl_tas_)<1 then [[],[],[],[],[],[]]
 		else transpose(select_all([choose_ctl.chosen_ctl_tas]))
 
 	# we have all tas and ctl_tas (optional for histone chipseq) ready, let's call peaks
-	scatter(i in range(length(tas_))) {
+	scatter(i in range(length(tas__))) {
 		# always call MACS2 peaks for true replicates to get signal tracks
 		# call peaks on tagalign
 		call macs2 { input :
-			tas = flatten([[tas_[i]], chosen_ctl_tas[i]]),
+			tas = flatten([[tas__[i]], chosen_ctl_tas[i]]),
 			gensz = gensz,
 			chrsz = chrsz,
 			cap_num_peak = macs2_cap_num_peak,
@@ -477,10 +518,10 @@ workflow chip {
 
 	# SPP cannot call peaks without controls
 	if ( peak_caller_=='spp' ) {
-		scatter(i in range(length(tas_))) {
+		scatter(i in range(length(tas__))) {
 			# call peaks on tagalign
 			call spp { input :
-				tas = flatten([[tas_[i]], chosen_ctl_tas[i]]),
+				tas = flatten([[tas__[i]], chosen_ctl_tas[i]]),
 				chrsz = chrsz,
 				cap_num_peak = spp_cap_num_peak,
 				fraglen = fraglen_[i],
@@ -496,7 +537,7 @@ workflow chip {
 	}
 
 	if ( peak_caller_=='macs2' ) {
-		scatter(i in range(length(tas_))) {
+		scatter(i in range(length(tas__))) {
 			# call peaks on 1st pseudo replicated tagalign 
 			call macs2 as macs2_pr1 { input :
 				tas = flatten([[select_first([spr.ta_pr1])[i]], chosen_ctl_tas[i]]),
@@ -532,7 +573,7 @@ workflow chip {
 	}
 
 	if ( peak_caller_=='spp' ) {
-		scatter(i in range(length(tas_))) {
+		scatter(i in range(length(tas__))) {
 			# call peaks on 1st pseudo replicated tagalign 
 			call spp as spp_pr1 { input :
 				tas = flatten([[select_first([spr.ta_pr1])[i]], chosen_ctl_tas[i]]),
@@ -572,11 +613,12 @@ workflow chip {
 	}
 
 	# actually not an array
-	Array[File] chosen_ctl_ta_pooled = if length(tas_)<2 || length(ctl_tas_)<1 then []
+	Array[File] chosen_ctl_ta_pooled = if length(tas__)<2 || length(ctl_tas_)<1 then []
 		else if length(ctl_tas_)<2 then [ctl_tas_[0]] # choose first (only) control
+		else if defined(ctl_ta_pooled) then select_all([ctl_ta_pooled]) # choose pooled control
 		else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
 
-	if ( length(tas_)>1 ) {
+	if ( length(tas__)>1 ) {
 		# call peaks on pooled replicate
 		# always call MACS2 peaks for pooled replicate to get signal tracks
 		call macs2 as macs2_pooled { input :
@@ -595,7 +637,7 @@ workflow chip {
 			time_hr = macs2_time_hr,
 		}
 	}
-	if ( length(tas_)>1 && peak_caller_=='spp' ) {
+	if ( length(tas__)>1 && peak_caller_=='spp' ) {
 		# call peaks on pooled replicate
 		call spp as spp_pooled { input :
 			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
@@ -612,7 +654,7 @@ workflow chip {
 		}
 	}
 
-	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='macs2' ) {
+	if ( !true_rep_only && length(tas__)>1 && peak_caller_=='macs2' ) {
 		# call peaks on 1st pooled pseudo replicates
 		call macs2 as macs2_ppr1 { input :
 			tas = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled]),
@@ -630,7 +672,7 @@ workflow chip {
 			time_hr = macs2_time_hr,
 		}
 	}
-	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='macs2' ) {
+	if ( !true_rep_only && length(tas__)>1 && peak_caller_=='macs2' ) {
 		# call peaks on 2nd pooled pseudo replicates
 		call macs2 as macs2_ppr2 { input :
 			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
@@ -648,7 +690,7 @@ workflow chip {
 			time_hr = macs2_time_hr,
 		}
 	}
-	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='spp' ) {
+	if ( !true_rep_only && length(tas__)>1 && peak_caller_=='spp' ) {
 		# call peaks on 1st pooled pseudo replicates
 		call spp as spp_ppr1 { input :
 			tas = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled]),
@@ -664,7 +706,7 @@ workflow chip {
 			time_hr = spp_time_hr,
 		}
 	}
-	if ( !true_rep_only && length(tas_)>1 && peak_caller_=='spp' ) {
+	if ( !true_rep_only && length(tas__)>1 && peak_caller_=='spp' ) {
 		# call peaks on 2nd pooled pseudo replicates
 		call spp as spp_ppr2 { input :
 			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
@@ -682,7 +724,10 @@ workflow chip {
 	}
 
 	# make peak arrays
-	Array[File] peaks_ = if align_only then [] else select_first([spp.rpeak ,flatten([macs2.npeak, peaks])])
+	Array[File] peaks_ = if align_only then [] 
+		else if peak_caller_=='spp' then flatten(select_all([spp.rpeak, peaks]))
+		else if peak_caller_=='macs2' then flatten([macs2.npeak, peaks])
+		else []
 
 	# generate all possible pairs of true replicates (pair: left=prefix, right=[peak1,peak2])
 	Array[Pair[String,Array[File]]] peak_pairs =  
@@ -719,7 +764,7 @@ workflow chip {
 			blacklist = blacklist,
 			chrsz = chrsz,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = pool_ta.ta_pooled,
+			ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
 		}
 	}
 	if ( enable_idr ) {
@@ -737,13 +782,23 @@ workflow chip {
 				blacklist = blacklist,
 				chrsz = chrsz,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-				ta = pool_ta.ta_pooled,
+				ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
 			}
 		}
 	}
 
-	Array[File] peaks_pr1_ = select_first([spp_pr1.rpeak, macs2_pr1.npeak, peaks_pr1])
-	Array[File] peaks_pr2_ = select_first([spp_pr2.rpeak, macs2_pr2.npeak, peaks_pr2])
+	Array[File] peaks_pr1_ = flatten(select_all([spp_pr1.rpeak, macs2_pr1.npeak, peaks_pr1]))
+	Array[File] peaks_pr2_ = flatten(select_all([spp_pr2.rpeak, macs2_pr2.npeak, peaks_pr2]))
+
+	#Array[File] peaks_pr1_ = if align_only then [] 
+	#	else if peak_caller=='spp' then flatten(select_all([spp_pr1.rpeak, peaks_pr1]))
+	#	else if peak_caller=='macs2' then flatten(select_all([macs2_pr1.npeak, peaks_pr1]))
+	#	else []
+	#Array[File] peaks_pr2_ = if align_only then [] 
+	#	else if peak_caller=='spp' then flatten(select_all([spp_pr2.rpeak, peaks_pr2]))
+	#	else if peak_caller=='macs2' then flatten(select_all([macs2_pr2.npeak, peaks_pr2]))
+	#	else []
+
 	scatter( i in range(length(peaks_pr1_)) ) {
 		# Naive overlap on pseduo replicates
 		call overlap as overlap_pr { input : 
@@ -756,7 +811,7 @@ workflow chip {
 			blacklist = blacklist,
 			chrsz = chrsz,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
+			ta = if length(tas_)>0 then tas_[i] else if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
 		}
 	}
 	if ( enable_idr ) {
@@ -774,11 +829,10 @@ workflow chip {
 				blacklist = blacklist,
 				chrsz = chrsz,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-				ta = if length(tas_)>0 then tas_[i] else pool_ta.ta_pooled,
+				ta = if length(tas_)>0 then tas_[i] else if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
 			}
 		}
 	}
-
 	if ( length(peaks_pr1_)>1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input : 
@@ -791,7 +845,7 @@ workflow chip {
 			blacklist = blacklist,
 			chrsz = chrsz,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = pool_ta.ta_pooled,
+			ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
 		}
 	}
 	if ( enable_idr && length(peaks_pr1_)>1 ) {
@@ -808,7 +862,7 @@ workflow chip {
 			blacklist = blacklist,
 			chrsz = chrsz,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-			ta = pool_ta.ta_pooled,
+			ta = if defined(ta_pooled) then ta_pooled else pool_ta.ta_pooled,
 		}
 	}
 
@@ -836,6 +890,28 @@ workflow chip {
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
+
+	Array[File] flagstat_qcs_ = flatten([flagstat_qcs, bwa.flagstat_qc])
+	Array[File] pbc_qcs_ = flatten([pbc_qcs, filter.pbc_qc])
+	Array[File] dup_qcs_ = flatten([dup_qcs, filter.dup_qc])
+	Array[File] nodup_flagstat_qcs_ = flatten([nodup_flagstat_qcs, filter.flagstat_qc])
+
+	Array[File] ctl_flagstat_qcs_ = flatten([ctl_flagstat_qcs, bwa_ctl.flagstat_qc])
+	Array[File] ctl_pbc_qcs_ = flatten([ctl_pbc_qcs, filter_ctl.pbc_qc])
+	Array[File] ctl_dup_qcs_ = flatten([ctl_dup_qcs, filter_ctl.dup_qc])
+	Array[File] ctl_nodup_flagstat_qcs_ = flatten([ctl_nodup_flagstat_qcs, filter_ctl.flagstat_qc])
+
+	Array[File] xcor_plots_ = flatten([xcor_plots, xcor.plot_png])
+	Array[File] xcor_scores_ = flatten([xcor_scores, xcor.score])
+	Array[File] sig_pvals_ = flatten([sig_pvals, macs2.sig_pval])
+	
+	Array[File] macs2_frip_qcs_ = flatten([macs2_frip_qcs, macs2.frip_qc])
+	Array[File] macs2_pr1_frip_qcs_ = flatten(select_all([macs2_pr1_frip_qcs, macs2_pr1.frip_qc]))
+	Array[File] macs2_pr2_frip_qcs_ = flatten(select_all([macs2_pr2_frip_qcs, macs2_pr2.frip_qc]))
+	Array[File] spp_frip_qcs_ = flatten(select_all([spp_frip_qcs, spp.frip_qc]))
+	Array[File] spp_pr1_frip_qcs_ = flatten(select_all([spp_pr1_frip_qcs, spp_pr1.frip_qc]))
+	Array[File] spp_pr2_frip_qcs_ = flatten(select_all([spp_pr2_frip_qcs, spp_pr2.frip_qc]))
+
 	# Generate final QC report and JSON
 	call qc_report { input :
 		pipeline_ver = pipeline_ver,
@@ -848,32 +924,34 @@ workflow chip {
 		macs2_cap_num_peak = macs2_cap_num_peak,
 		macs2_cap_num_peak = spp_cap_num_peak,		
 		idr_thresh = idr_thresh,
-		flagstat_qcs = bwa.flagstat_qc,
-		nodup_flagstat_qcs = filter.flagstat_qc,
-		dup_qcs = filter.dup_qc,
-		pbc_qcs = filter.pbc_qc,
-		ctl_flagstat_qcs = bwa_ctl.flagstat_qc,
-		ctl_nodup_flagstat_qcs = filter_ctl.flagstat_qc,
-		ctl_dup_qcs = filter_ctl.dup_qc,
-		ctl_pbc_qcs = filter_ctl.pbc_qc,
-		xcor_plots = xcor.plot_png,
-		xcor_scores = xcor.score,
 
-		jsd_plot = fingerprint.plot,
-		jsd_qcs = select_first([fingerprint.jsd_qcs,[]]),
+		flagstat_qcs = flagstat_qcs_,
+		nodup_flagstat_qcs = nodup_flagstat_qcs_,
+		dup_qcs = dup_qcs_,
+		pbc_qcs = pbc_qcs_,
+		ctl_flagstat_qcs = ctl_flagstat_qcs_,
+		ctl_nodup_flagstat_qcs = ctl_nodup_flagstat_qcs_,
+		ctl_dup_qcs = ctl_dup_qcs_,
+		ctl_pbc_qcs = ctl_pbc_qcs_,
+		xcor_plots = xcor_plots_,
+		xcor_scores = xcor_scores_,
 
-		frip_macs2_qcs = macs2.frip_qc,
-		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
-		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
-		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
-		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
-		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
-		frip_spp_qcs = spp.frip_qc,
-		frip_spp_qcs_pr1 = spp_pr1.frip_qc,
-		frip_spp_qcs_pr2 = spp_pr2.frip_qc,
-		frip_spp_qc_pooled = spp_pooled.frip_qc,
-		frip_spp_qc_ppr1 = spp_ppr1.frip_qc,
-		frip_spp_qc_ppr2 = spp_ppr2.frip_qc,
+		jsd_plot = if length(jsd_qcs)>0 then jsd_plot else fingerprint.plot,
+		jsd_qcs = if length(jsd_qcs)>0 then jsd_qcs else select_first([fingerprint.jsd_qcs,[]]),
+
+		frip_macs2_qcs = macs2_frip_qcs_,
+		frip_macs2_qcs_pr1 = macs2_pr1_frip_qcs_,
+		frip_macs2_qcs_pr2 = macs2_pr2_frip_qcs_,
+		frip_macs2_qc_pooled = if defined(macs2_pooled_frip_qc) then macs2_pooled_frip_qc else macs2_pooled.frip_qc,
+		frip_macs2_qc_ppr1 = if defined(macs2_ppr1_frip_qc) then macs2_ppr1_frip_qc else macs2_ppr1.frip_qc,
+		frip_macs2_qc_ppr2 = if defined(macs2_ppr2_frip_qc) then macs2_ppr2_frip_qc else macs2_ppr2.frip_qc,
+
+		frip_spp_qcs = spp_frip_qcs_,
+		frip_spp_qcs_pr1 = spp_pr1_frip_qcs_,
+		frip_spp_qcs_pr2 = spp_pr2_frip_qcs_,
+		frip_spp_qc_pooled = if defined(spp_pooled_frip_qc) then spp_pooled_frip_qc else spp_pooled.frip_qc,
+		frip_spp_qc_ppr1 = if defined(spp_ppr1_frip_qc) then spp_ppr1_frip_qc else spp_ppr1.frip_qc,
+		frip_spp_qc_ppr2 = if defined(spp_ppr2_frip_qc) then spp_ppr2_frip_qc else spp_ppr2.frip_qc,
 
 		idr_plots = idr.idr_plot,
 		idr_plots_pr = idr_pr.idr_plot,
