@@ -323,7 +323,7 @@ workflow chip {
 	}
 
 	Array[File] tas_ = if align_only then [] else flatten([bam2ta.ta, tas])	
-	Array[File] tas__ = if need_to_process_nodup_bam then tas_ else []
+	Array[File] tas__ = if need_to_process_ta then tas_ else []
 	if ( length(tas__)>1 )  {
 		# pool tagaligns from true replicates
 		call pool_ta { input :
@@ -351,7 +351,8 @@ workflow chip {
 		}
 	}
 
-	Array[File] tas_xcor = if length(bam2ta_no_filt_R1.ta)>0 then bam2ta_no_filt_R1.ta
+	Array[File] tas_xcor = if length(xcor_scores)>0 then []
+		else if length(bam2ta_no_filt_R1.ta)>0 then bam2ta_no_filt_R1.ta
 		else if length(bam2ta_no_filt.ta)>0 then bam2ta_no_filt.ta
 		else flatten([bam2ta.ta, tas__])
 	Boolean paired_end_xcor = paired_end && length(bam2ta_no_filt_R1.ta)<1
