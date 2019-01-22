@@ -17,6 +17,7 @@ workflow test_filter {
 	String ref_pe_filt_bam
 	String ref_se_nodup_bam
 	String ref_se_filt_bam
+	String mito_chr_name = 'chrM'
 
 	Int filter_cpu = 1
 	Int filter_mem_mb = 20000
@@ -29,6 +30,7 @@ workflow test_filter {
 		paired_end = true,
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
+		mito_chr_name = mito_chr_name,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
@@ -41,6 +43,7 @@ workflow test_filter {
 		paired_end = true,
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
+		mito_chr_name = mito_chr_name,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
@@ -53,6 +56,7 @@ workflow test_filter {
 		paired_end = false,
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
+		mito_chr_name = mito_chr_name,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
@@ -65,6 +69,7 @@ workflow test_filter {
 		paired_end = false,
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
+		mito_chr_name = mito_chr_name,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,

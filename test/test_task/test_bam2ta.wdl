@@ -13,6 +13,7 @@ workflow test_bam2ta {
 	String ref_pe_ta_subsample
 	String ref_se_ta
 	String ref_se_ta_subsample
+	String mito_chr_name = 'chrM'
 
 	Int bam2ta_cpu = 1
 	Int bam2ta_mem_mb = 10000
@@ -24,6 +25,7 @@ workflow test_bam2ta {
 		subsample = 0,
 		regex_grep_v_ta = regex_filter_reads,
 		paired_end = true,
+		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
 		mem_mb = bam2ta_mem_mb,
@@ -35,6 +37,7 @@ workflow test_bam2ta {
 		subsample = bam2ta_subsample,
 		regex_grep_v_ta = regex_filter_reads,
 		paired_end = true,
+		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
 		mem_mb = bam2ta_mem_mb,
@@ -46,6 +49,7 @@ workflow test_bam2ta {
 		subsample = 0,
 		regex_grep_v_ta = regex_filter_reads,
 		paired_end = false,
+		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
 		mem_mb = bam2ta_mem_mb,
@@ -57,6 +61,7 @@ workflow test_bam2ta {
 		subsample = bam2ta_subsample,
 		regex_grep_v_ta = regex_filter_reads,
 		paired_end = false,
+		mito_chr_name = mito_chr_name,
 
 		cpu = bam2ta_cpu,
 		mem_mb = bam2ta_mem_mb,
