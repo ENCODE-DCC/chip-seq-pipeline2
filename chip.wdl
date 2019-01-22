@@ -30,10 +30,11 @@ workflow chip {
 	Boolean no_dup_removal = false	# no dupe reads removal when filtering BAM
 									# dup.qc and pbc.qc will be empty files
 									# and nodup_bam in the output is 
-									# filtered bam with dupes	
+									# filtered bam with dupes
 
+	String mito_chr_name = 'chrM' 	# name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
 	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
-                        			# to remove matching reads from TAGALIGN
+                        			# those reads will be excluded from peak calling
 	Int subsample_reads = 0			# number of reads to subsample TAGALIGN
 									# 0 for no subsampling. this affects all downstream analysis
 	Int ctl_subsample_reads = 0		# number of reads to subsample control TAGALIGN
@@ -269,6 +270,7 @@ workflow chip {
 			paired_end = false,
 			subsample = 0,
 			regex_grep_v_ta = regex_filter_reads,
+			mito_chr_name = mito_chr_name,
 
 			cpu = bam2ta_cpu,
 			mem_mb = bam2ta_mem_mb,
@@ -286,6 +288,7 @@ workflow chip {
 			dup_marker = dup_marker,
 			mapq_thresh = mapq_thresh,
 			no_dup_removal = no_dup_removal,
+			mito_chr_name = mito_chr_name,
 
 			cpu = filter_cpu,
 			mem_mb = filter_mem_mb,
@@ -298,6 +301,7 @@ workflow chip {
 			paired_end = paired_end,
 			subsample = 0,
 			regex_grep_v_ta = regex_filter_reads,
+			mito_chr_name = mito_chr_name,
 
 			cpu = bam2ta_cpu,
 			mem_mb = bam2ta_mem_mb,
@@ -314,6 +318,7 @@ workflow chip {
 			paired_end = paired_end,
 			subsample = subsample_reads,
 			regex_grep_v_ta = regex_filter_reads,
+			mito_chr_name = mito_chr_name,
 
 			cpu = bam2ta_cpu,
 			mem_mb = bam2ta_mem_mb,
@@ -365,6 +370,7 @@ workflow chip {
 			ta = ta,
 			paired_end = paired_end_xcor,
 			subsample = xcor_subsample_reads,
+			mito_chr_name = mito_chr_name,
 
 			cpu = xcor_cpu,
 			mem_mb = xcor_mem_mb,
@@ -426,6 +432,7 @@ workflow chip {
 			dup_marker = dup_marker,
 			mapq_thresh = mapq_thresh,
 			no_dup_removal = no_dup_removal,
+			mito_chr_name = mito_chr_name,
 
 			cpu = filter_cpu,
 			mem_mb = filter_mem_mb,
@@ -442,6 +449,7 @@ workflow chip {
 			paired_end = paired_end,
 			subsample = ctl_subsample_reads,
 			regex_grep_v_ta = regex_filter_reads,
+			mito_chr_name = mito_chr_name,
 
 			cpu = bam2ta_cpu,
 			mem_mb = bam2ta_mem_mb,
@@ -1062,6 +1070,7 @@ task filter {
 									# dup.qc and pbc.qc will be empty files
 									# and nodup_bam in the output is 
 									# filtered bam with dupes	
+	String mito_chr_name
 	Int cpu
 	Int mem_mb
 	Int time_hr
@@ -1077,6 +1086,7 @@ task filter {
 			${"--dup-marker " + dup_marker} \
 			${"--mapq-thresh " + mapq_thresh} \
 			${if no_dup_removal then "--no-dup-removal" else ""} \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--nth " + cpu}
 	}
 	output {
@@ -1099,6 +1109,7 @@ task bam2ta {
 	Boolean paired_end
 	String regex_grep_v_ta   	# Perl-style regular expression pattern 
                         		# to remove matching reads from TAGALIGN
+	String mito_chr_name 		# mito chromosome name
 	Int subsample 				# number of reads to subsample TAGALIGN
 								# this affects all downstream analysis
 	Int cpu
@@ -1112,6 +1123,7 @@ task bam2ta {
 			--disable-tn5-shift \
 			${if paired_end then "--paired-end" else ""} \
 			${if regex_grep_v_ta!="" then "--regex-grep-v-ta '"+regex_grep_v_ta+"'" else ""} \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--subsample " + subsample} \
 			${"--nth " + cpu}
 	}
@@ -1170,6 +1182,7 @@ task pool_ta {
 task xcor {
 	File ta
 	Boolean paired_end
+	String mito_chr_name
 	Int subsample  # number of reads to subsample TAGALIGN
 					# this will be used for xcor only
 					# will not affect any downstream analysis
@@ -1182,6 +1195,7 @@ task xcor {
 		python $(which encode_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--subsample " + subsample} \
 			${"--nth " + cpu}
 	}

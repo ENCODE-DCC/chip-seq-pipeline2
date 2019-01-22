@@ -53,6 +53,7 @@
     "chip.mapq_thresh" : 30,
     "chip.no_dup_removal" : false,
 
+    "chip.mito_chr_name" : "chrM",
     "chip.regex_filter_reads" : "chrM",
     "chip.subsample_reads" : 0,
     "chip.ctl_subsample_reads" : 0,
