@@ -164,18 +164,20 @@ workflow chip {
 	Array[File] sig_pvals = []
 	Array[File] xcor_plots = []
 	Array[File] xcor_scores = []
+
 	Array[File] macs2_frip_qcs = []
 	Array[File] macs2_pr1_frip_qcs = []
 	Array[File] macs2_pr2_frip_qcs = []
-	File? macs2_pooled_frip_qc
-	File? macs2_ppr1_frip_qc
-	File? macs2_ppr2_frip_qc
+	File? macs2_pooled_frip_qc_
+	File? macs2_ppr1_frip_qc_
+	File? macs2_ppr2_frip_qc_
 	Array[File] spp_frip_qcs = []
 	Array[File] spp_pr1_frip_qcs = []
 	Array[File] spp_pr2_frip_qcs = []
-	File? spp_pooled_frip_qc
-	File? spp_ppr1_frip_qc
-	File? spp_ppr2_frip_qc
+	File? spp_pooled_frip_qc_
+	File? spp_ppr1_frip_qc_
+	File? spp_ppr2_frip_qc_
+
 	Array[File] jsd_qcs = []
 	File? jsd_plot
 
@@ -951,16 +953,16 @@ workflow chip {
 		frip_macs2_qcs = macs2_frip_qcs_,
 		frip_macs2_qcs_pr1 = macs2_pr1_frip_qcs_,
 		frip_macs2_qcs_pr2 = macs2_pr2_frip_qcs_,
-		frip_macs2_qc_pooled = if defined(macs2_pooled_frip_qc) then macs2_pooled_frip_qc else macs2_pooled.frip_qc,
-		frip_macs2_qc_ppr1 = if defined(macs2_ppr1_frip_qc) then macs2_ppr1_frip_qc else macs2_ppr1.frip_qc,
-		frip_macs2_qc_ppr2 = if defined(macs2_ppr2_frip_qc) then macs2_ppr2_frip_qc else macs2_ppr2.frip_qc,
+		frip_macs2_qc_pooled = if defined(macs2_pooled_frip_qc_) then macs2_pooled_frip_qc_ else macs2_pooled.frip_qc,
+		frip_macs2_qc_ppr1 = if defined(macs2_ppr1_frip_qc_) then macs2_ppr1_frip_qc_ else macs2_ppr1.frip_qc,
+		frip_macs2_qc_ppr2 = if defined(macs2_ppr2_frip_qc_) then macs2_ppr2_frip_qc_ else macs2_ppr2.frip_qc,
 
 		frip_spp_qcs = spp_frip_qcs_,
 		frip_spp_qcs_pr1 = spp_pr1_frip_qcs_,
 		frip_spp_qcs_pr2 = spp_pr2_frip_qcs_,
-		frip_spp_qc_pooled = if defined(spp_pooled_frip_qc) then spp_pooled_frip_qc else spp_pooled.frip_qc,
-		frip_spp_qc_ppr1 = if defined(spp_ppr1_frip_qc) then spp_ppr1_frip_qc else spp_ppr1.frip_qc,
-		frip_spp_qc_ppr2 = if defined(spp_ppr2_frip_qc) then spp_ppr2_frip_qc else spp_ppr2.frip_qc,
+		frip_spp_qc_pooled = if defined(spp_pooled_frip_qc_) then spp_pooled_frip_qc_ else spp_pooled.frip_qc,
+		frip_spp_qc_ppr1 = if defined(spp_ppr1_frip_qc_) then spp_ppr1_frip_qc_ else spp_ppr1.frip_qc,
+		frip_spp_qc_ppr2 = if defined(spp_ppr2_frip_qc_) then spp_ppr2_frip_qc_ else spp_ppr2.frip_qc,
 
 		idr_plots = idr.idr_plot,
 		idr_plots_pr = idr_pr.idr_plot,

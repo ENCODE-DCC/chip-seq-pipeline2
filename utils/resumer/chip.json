@@ -67,27 +67,27 @@
         },
         "chip.macs2_pooled" : {
             "npeak" : "chip.peak_pooled",
-            "frip_qc" : "chip.macs2_pooled_frip_qc"
+            "frip_qc" : "chip.macs2_pooled_frip_qc_"
         },
         "chip.macs2_ppr1" : {
             "npeak" : "chip.peak_ppr1",
-            "frip_qc" : "chip.macs2_ppr1_frip_qc"
+            "frip_qc" : "chip.macs2_ppr1_frip_qc_"
         },
         "chip.macs2_ppr2" : {
             "npeak" : "chip.peak_ppr2",
-            "frip_qc" : "chip.macs2_ppr2_frip_qc"
+            "frip_qc" : "chip.macs2_ppr2_frip_qc_"
         },
         "chip.spp_pooled" : {
             "rpeak" : "chip.peak_pooled",
-            "frip_qc" : "chip.spp_pooled_frip_qc"
+            "frip_qc" : "chip.spp_pooled_frip_qc_"
         },
         "chip.spp_ppr1" : {
             "rpeak" : "chip.peak_ppr1",
-            "frip_qc" : "chip.spp_ppr1_frip_qc"
+            "frip_qc" : "chip.spp_ppr1_frip_qc_"
         },
         "chip.spp_ppr2" : {
             "rpeak" : "chip.peak_ppr2",
-            "frip_qc" : "chip.spp_ppr2_frip_qc"
+            "frip_qc" : "chip.spp_ppr2_frip_qc_"
         },
         "chip.fingerprint" : {
             "jsd_qcs" : "chip.jsd_qcs",
