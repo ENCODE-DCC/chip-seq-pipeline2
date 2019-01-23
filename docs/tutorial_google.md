@@ -47,7 +47,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     ```bash
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ BUCKET=gs://[YOUR_BUCKET_NAME]/ENCSR936XTK_subsampled
-    $ INPUT=examples/google/ENCSR936XTK_subsampled.json
+    $ INPUT=examples/google/ENCSR936XTK_subsampled_chr19_only.json
 
     $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=google -Dbackend.providers.google.config.project=${PROJECT} -Dbackend.providers.google.config.root=${BUCKET} cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/docker.json
     ```
@@ -56,7 +56,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
 
 12. See full specification for [input JSON file](input.md).
 
-13. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/google/ENCSR936XTK_subsampled.json`.
+13. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/google/ENCSR936XTK_subsampled_chr19_only.json`.
 
 ## Extras for advanced users
 

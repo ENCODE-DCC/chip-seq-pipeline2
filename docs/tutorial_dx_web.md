@@ -15,8 +15,8 @@ This document describes instruction for the item 2).
 
 3. Move to one of the following workflow directories according to the platform you have chosen for your project (AWS or Azure). These DX workflows are pre-built with all parameters defined.
 
-* [AWS test workflow](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/test_ENCSR936XTK_subsampled)
-* [Azure test workflow](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/test_ENCSR936XTK_subsampled)
+* [AWS test workflow](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/ChIP-seq2/workflows/v1.1.6/test_ENCSR936XTK_subsampled_chr19_only)
+* [Azure test workflow](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/ChIP-seq2/workflows/v1.1.6/test_ENCSR936XTK_subsampled_chr19_only)
 
 4. Copy it to your project by right-clicking on the DX workflow `chip` and choose "Copy". 
 

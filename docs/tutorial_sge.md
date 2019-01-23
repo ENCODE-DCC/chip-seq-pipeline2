@@ -20,9 +20,9 @@
     $ tar xvf ENCSR936XTK_fastq_subsampled.tar
     ```
 
-4. Download pre-built genome database for hg38.
+4. Download pre-built chr19/chrM-only genome database for hg38.
     ```bash
-    $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_chip.tar
+    $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_chr19_chrM_chip.tar
     $ tar xvf test_genome_database_hg38_chip.tar
     ```
 
@@ -49,7 +49,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 8. Run a pipeline for the test sample. If your parallel environment (PE) found from step 5) has a different name from `shm` then edit the following shell script to change the PE name.
     ```bash
-    $ qsub examples/local/ENCSR936XTK_subsampled_sge_conda.sh
+    $ qsub examples/local/ENCSR936XTK_subsampled_chr19_only_sge_conda.sh
     ```
 
 ## For singularity users
@@ -75,7 +75,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 10. See full specification for [input JSON file](input.md).
 
-11. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`examples/local/ENCSR936XTK_subsampled_sge_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/...`.
+11. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`examples/local/ENCSR936XTK_subsampled_chr19_only_sge_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/...`.
 
 ## For singularity users
 

@@ -41,14 +41,14 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 6. Run a pipeline for the test sample.
     ```bash
-    $ sbatch --partition normal examples/sherlock/ENCSR936XTK_subsampled_sherlock_conda.sh
+    $ sbatch --partition normal examples/sherlock/ENCSR936XTK_subsampled_chr19_only_sherlock_conda.sh
     ```
 
 ## For singularity users
 
 6. Run a pipeline for the test sample.
     ```bash
-    $ sbatch --partition normal examples/sherlock/ENCSR936XTK_subsampled_sherlock_singularity.sh
+    $ sbatch --partition normal examples/sherlock/ENCSR936XTK_subsampled_chr19_only_sherlock_singularity.sh
     ```
 
 ## For all users
@@ -60,7 +60,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 8. See full specification for [input JSON file](input.md).
 
-9. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`examples/sherlock/ENCSR936XTK_subsampled_sherlock_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/...`.
+9. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, then edit your shell script (`examples/sherlock/ENCSR936XTK_subsampled_chr19_only_sherlock_*.sh`) to use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/...`.
 
 ## For singularity users
 
