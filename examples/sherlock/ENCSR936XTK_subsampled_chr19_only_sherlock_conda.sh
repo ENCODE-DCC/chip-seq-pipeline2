@@ -13,7 +13,7 @@
 #  give long time enough to finish your pipeline
 #  <12 hr: small/test samples
 #  >24 hr: large samples
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 
 # total amount of memory
 #  depends on the size of your FASTQs
