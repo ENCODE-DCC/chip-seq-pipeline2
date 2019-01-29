@@ -547,7 +547,7 @@ workflow chip {
 		}
 	}
 
-	if ( peak_caller_=='macs2' ) {
+	if ( peak_caller_=='macs2' && !true_rep_only ) {
 		scatter(i in range(length(tas__))) {
 			# call peaks on 1st pseudo replicated tagalign 
 			call macs2 as macs2_pr1 { input :
@@ -583,7 +583,7 @@ workflow chip {
 		}
 	}
 
-	if ( peak_caller_=='spp' ) {
+	if ( peak_caller_=='spp' && !true_rep_only  ) {
 		scatter(i in range(length(tas__))) {
 			# call peaks on 1st pseudo replicated tagalign 
 			call spp as spp_pr1 { input :
