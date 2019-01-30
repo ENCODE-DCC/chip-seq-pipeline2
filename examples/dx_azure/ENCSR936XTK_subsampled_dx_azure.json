@@ -30,6 +30,6 @@
     "chip.paired_end" : true,
 
     "chip.always_use_pooled_ctl" : true,
-    "chip.title" : "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only)",
+    "chip.title" : "ENCSR936XTK (subsampled 1/67)",
     "chip.description" : "ZNF143 ChIP-seq on human GM12878"
 }

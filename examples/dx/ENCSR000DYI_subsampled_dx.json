@@ -1,6 +1,6 @@
 {
     "chip.pipeline_type" : "tf",
-    "chip.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/hg38_chr19_only_dx.tsv",
+    "chip.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/hg38_dx.tsv",
     "chip.fastqs" : [
         [["dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled/rep1.subsampled.25.fastq.gz"]],
         [["dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled/rep2.subsampled.15.fastq.gz"]]

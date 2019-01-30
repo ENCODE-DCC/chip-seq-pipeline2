@@ -2,12 +2,18 @@
 
 ## Command line for version change
 ```bash
-PREV_VER=v1.1.4
-NEW_VER=v1.1.5
-for f in $(grep -rl ${PREV_VER} --include=*.{wdl,json,md,sh,yml})
+PREV_VER=v1.1.5
+NEW_VER=v1.1.6
+for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh,yml})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
 done
+cd workflow_opts
+for f in $(grep -rl ${PREV_VER} --include=*.json)
+do
+  sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
+done
+cd ..
 ```
 
 ## Building templates on DX for each genome
@@ -18,7 +24,7 @@ Run the following command line locally to build out DX workflows for this pipeli
 
 ```bash
 # version
-VER=v1.1.5
+VER=v1.1.6
 
 # general
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/general -defaults examples/dx/template_general.json
@@ -41,11 +47,11 @@ java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing 
 # test sample SE ENCSR000DYI (full)
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults examples/dx/ENCSR000DYI_dx.json
 
-# test sample PE ENCSR936XTK (subsampled)
-java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled -defaults examples/dx/ENCSR936XTK_subsampled_dx.json
+# test sample PE ENCSR936XTK (subsampled, chr19/chrM only)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled_chr19_only -defaults examples/dx/ENCSR936XTK_subsampled_chr19_only_dx.json
 
-# test sample SE ENCSR000DYI (subsampled)
-java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled -defaults examples/dx/ENCSR000DYI_subsampled_dx.json
+# test sample SE ENCSR000DYI (subsampled, chr19/chrM only)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only -defaults examples/dx/ENCSR000DYI_subsampled_chr19_only_dx.json
 
 ## DX Azure
 
@@ -70,9 +76,9 @@ java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing 
 # test sample SE ENCSR000DYI (full)
 java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults examples/dx_azure/ENCSR000DYI_dx_azure.json
 
-# test sample PE ENCSR936XTK (subsampled)
-java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled -defaults examples/dx_azure/ENCSR936XTK_subsampled_dx_azure.json
+# test sample PE ENCSR936XTK (subsampled, chr19/chrM only)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled_chr19_only -defaults examples/dx_azure/ENCSR936XTK_subsampled_chr19_only_dx_azure.json
 
-# test sample SE ENCSR000DYI (subsampled)
-java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled -defaults examples/dx_azure/ENCSR000DYI_subsampled_dx_azure.json
+# test sample SE ENCSR000DYI (subsampled, chr19/chrM only)
+java -jar ~/dxWDL-0.77.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only -defaults examples/dx_azure/ENCSR000DYI_subsampled_chr19_only_dx_azure.json
 ```

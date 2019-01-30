@@ -1,0 +1,51 @@
+{
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "test_genome_database/hg38_chr19_chrM_local.tsv",
+    "chip.fastqs" : [
+        [["test_sample/ENCSR936XTK/fastq_subsampled/rep1-R1.subsampled.67.fastq.gz",
+          "test_sample/ENCSR936XTK/fastq_subsampled/rep1-R2.subsampled.67.fastq.gz"]],
+        [["test_sample/ENCSR936XTK/fastq_subsampled/rep2-R1.subsampled.67.fastq.gz",
+          "test_sample/ENCSR936XTK/fastq_subsampled/rep2-R2.subsampled.67.fastq.gz"]]
+    ],
+    "chip.ctl_fastqs" : [
+        [["test_sample/ENCSR936XTK/fastq_subsampled/ctl1-R1.subsampled.80.fastq.gz",
+          "test_sample/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz"]],
+        [["test_sample/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz",
+          "test_sample/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz"]]
+    ],
+
+    "chip.paired_end" : true,
+
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR936XTK (subsampled 1/67, chr19_chrM only)",
+    "chip.description" : "ZNF143 ChIP-seq on human GM12878",
+
+    "chip.bwa_cpu" : 1,
+    "chip.bwa_mem_mb" : 4000,
+    "chip.bwa_time_hr" : 4,
+
+    "chip.filter_cpu" : 1,
+    "chip.filter_mem_mb" : 4000,
+    "chip.filter_time_hr" : 4,
+
+    "chip.bam2ta_cpu" : 1,
+    "chip.bam2ta_mem_mb" : 4000,
+    "chip.bam2ta_time_hr" : 4,
+
+    "chip.spr_mem_mb" : 4000,
+
+    "chip.fingerprint_cpu" : 1,
+    "chip.fingerprint_mem_mb" : 4000,
+    "chip.fingerprint_time_hr" : 6,
+
+    "chip.xcor_cpu" : 1,
+    "chip.xcor_mem_mb" : 4000,
+    "chip.xcor_time_hr" : 4,
+
+    "chip.macs2_mem_mb" : 4000,
+    "chip.macs2_time_hr" : 4,
+
+    "chip.spp_cpu" : 1,
+    "chip.spp_mem_mb" : 4000,
+    "chip.spp_time_hr" : 4
+}

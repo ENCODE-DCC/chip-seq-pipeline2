@@ -39,8 +39,8 @@
         "ctl2.tagAlign.gz"
     ],
 
-    "chip.title" : "Example (single-ended)",
-    "chip.description" : "This is an template input JSON for single-ended sample.",
+    "chip.title" : "Example (paired-end)",
+    "chip.description" : "This is an template input JSON for paired-end sample.",
 
     "chip.pipeline_type" : "tf",
     "chip.peak_caller" : "spp",
@@ -57,6 +57,7 @@
     "chip.mapq_thresh" : 30,
     "chip.no_dup_removal" : false,
 
+    "chip.mito_chr_name" : "chrM",
     "chip.regex_filter_reads" : "chrM",
     "chip.subsample_reads" : 0,
     "chip.ctl_subsample_reads" : 0,
@@ -106,5 +107,5 @@
     "chip.spp_cpu" : 2,
     "chip.spp_mem_mb" : 16000,
     "chip.spp_time_hr" : 72,
-    "chip.spp_disks" : "local-disk 100 HDD",
+    "chip.spp_disks" : "local-disk 100 HDD"
 }
