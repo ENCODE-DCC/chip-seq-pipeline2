@@ -361,7 +361,7 @@ workflow chip {
 	Array[File] tas_xcor = if length(xcor_scores)>0 then []
 		else if length(bam2ta_no_filt_R1.ta)>0 then bam2ta_no_filt_R1.ta
 		else if length(bam2ta_no_filt.ta)>0 then bam2ta_no_filt.ta
-		else flatten([bam2ta.ta, tas__])
+		else tas__
 	Boolean paired_end_xcor = paired_end && length(bam2ta_no_filt_R1.ta)<1
 	scatter(ta in tas_xcor) {
 		# use trimmed/unfilitered R1 tagAlign for paired end dataset 		
