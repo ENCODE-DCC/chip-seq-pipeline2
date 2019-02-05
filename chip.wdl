@@ -358,7 +358,8 @@ workflow chip {
 		}
 	}
 
-	Array[File] tas_xcor = if length(xcor_scores)>0 then []
+	Array[File] tas_xcor = if length(fraglen)>0 then []
+		else if length(xcor_scores)>0 then []
 		else if length(bam2ta_no_filt_R1.ta)>0 then bam2ta_no_filt_R1.ta
 		else if length(bam2ta_no_filt.ta)>0 then bam2ta_no_filt.ta
 		else tas__
