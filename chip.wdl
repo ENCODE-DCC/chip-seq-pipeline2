@@ -936,7 +936,7 @@ workflow chip {
 		pipeline_type = pipeline_type,
 		peak_caller = peak_caller_,
 		macs2_cap_num_peak = macs2_cap_num_peak,
-		macs2_cap_num_peak = spp_cap_num_peak,		
+		spp_cap_num_peak = spp_cap_num_peak,		
 		idr_thresh = idr_thresh,
 
 		flagstat_qcs = flagstat_qcs_,
