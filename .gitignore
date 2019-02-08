@@ -116,3 +116,6 @@ test_sample*
 tmp
 hg38
 *.fastq.gz
+
+metadata.json
+resume.*.json
