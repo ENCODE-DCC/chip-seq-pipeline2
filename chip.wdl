@@ -21,6 +21,7 @@ workflow chip {
 	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
 									# overlap and idr will also be disabled
 	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
+	Boolean enable_count_signal_track = false 		# generate count signal track
 
 	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
 
@@ -180,6 +181,11 @@ workflow chip {
 
 	Array[File] jsd_qcs = []
 	File? jsd_plot
+
+	Array[File] count_signal_track_pos_bws = []
+	Array[File] count_signal_track_neg_bws = []
+	File? count_signal_track_pooled_pos_bw_ 
+	File? count_signal_track_pooled_neg_bw_ 
 
 	### temp vars (do not define these)
 	String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller,'spp'])
@@ -378,6 +384,24 @@ workflow chip {
 			mem_mb = xcor_mem_mb,
 			time_hr = xcor_time_hr,
 			disks = xcor_disks,
+		}
+	}
+
+	# generate count signal track
+	Array[File] tas_count_signal_track = if length(count_signal_track_pos_bws)>0 then []
+		else if enable_count_signal_track then tas_
+		else []
+	scatter(i in range(length(tas_count_signal_track))) {
+		call count_signal_track { input :
+			ta = tas_count_signal_track[i],
+			chrsz = chrsz,
+		}
+	}
+
+	if ( !defined(count_signal_track_pooled_pos_bw_) && enable_count_signal_track && length(tas_)>0 ) {
+		call count_signal_track as count_signal_track_pooled { input :
+			ta = select_first([pool_ta.ta_pooled, ta_pooled]),
+			chrsz = chrsz,
 		}
 	}
 
@@ -1272,6 +1296,27 @@ task choose_ctl {
 		time : 1
 		disks : "local-disk 50 HDD"
 	}	
+}
+
+task count_signal_track {
+	File ta 			# tag-align
+	File chrsz			# 2-col chromosome sizes file
+
+	command {
+		python $(which encode_count_signal_track.py) \
+			${ta} \
+			${"--chrsz " + chrsz}
+	}
+	output {
+		File pos_bw = glob("*.positive.bigwig")[0]
+		File neg_bw = glob("*.negative.bigwig")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 4
+		disks : "local-disk 50 HDD"
+	}
 }
 
 task macs2 {
