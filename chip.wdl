@@ -22,6 +22,8 @@ workflow chip {
 									# overlap and idr will also be disabled
 	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
 	Boolean enable_count_signal_track = false 		# generate count signal track
+	Boolean use_bwa_mem_for_pe = false # use bwa mem instead of bwa aln + bwa sampe
+									#for PE dataset with read len>=70bp
 
 	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
 
@@ -244,6 +246,7 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = merge_fastq.merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
+			use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 			cpu = bwa_cpu,
 			mem_mb = bwa_mem_mb,
 			time_hr = bwa_time_hr,
@@ -267,6 +270,7 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = fastq_set,
 			paired_end = false,
+			use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 			cpu = bwa_cpu,
 			mem_mb = bwa_mem_mb,
 			time_hr = bwa_time_hr,
@@ -442,6 +446,7 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = merge_fastq_ctl.merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
+			use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 			cpu = bwa_cpu,
 			mem_mb = bwa_mem_mb,
 			time_hr = bwa_time_hr,
@@ -1061,6 +1066,7 @@ task bwa {
 	File idx_tar 		# reference bwa index tar
 	Array[File] fastqs 	# [read_end_id]
 	Boolean paired_end
+	Boolean use_bwa_mem_for_pe
 
 	Int cpu
 	Int mem_mb
@@ -1072,6 +1078,7 @@ task bwa {
 			${idx_tar} \
 			${sep=' ' fastqs} \
 			${if paired_end then "--paired-end" else ""} \
+			${if use_bwa_mem_for_pe then "--use-bwa-mem-for-pe" else ""} \
 			${"--nth " + cpu}
 	}
 	output {

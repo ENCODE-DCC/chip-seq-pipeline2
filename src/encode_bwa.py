@@ -23,6 +23,8 @@ def parse_arguments():
     parser.add_argument('fastqs', nargs='+', type=str,
                         help='List of FASTQs (R1 and R2). \
                             FASTQs must be compressed with gzip (with .gz).')
+    parser.add_argument('--use-bwa-mem-for-pe', action="store_true",
+                        help='Use "bwa mem" for paired end dataset with read length >=70bp.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
@@ -98,7 +100,7 @@ def bwa_se(fastq, ref_index_prefix, nth, out_dir):
     rm_f(sai)
     return bam
 
-def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, out_dir):
+def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, use_bwa_mem_for_pe, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir,
         strip_merge_fastqs_prefix(basename))
@@ -106,24 +108,32 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, out_dir):
     badcigar = '{}.badReads'.format(prefix)
     bam = '{}.bam'.format(prefix)
 
-    # multiprocessing for bwa_aln
-    pool = multiprocessing.Pool(2)
-    ret_val1 = pool.apply_async(
-        bwa_aln, (fastq1, ref_index_prefix, max(1,nth/2), out_dir))
-    ret_val2 = pool.apply_async(
-        bwa_aln, (fastq2, ref_index_prefix, max(1,nth/2), out_dir))
-    sai1 = ret_val1.get(BIG_INT)
-    sai2 = ret_val2.get(BIG_INT)
-    pool.close()
-    pool.join()
-    
-    cmd = 'bwa sampe {} {} {} {} {} | gzip -nc > {}'.format(
-        ref_index_prefix,
-        sai1,
-        sai2,
-        fastq1,
-        fastq2,
-        sam)
+    temp_files = []
+    read_len = get_read_length(fastq1)
+    if use_bwa_mem_for_pe and read_len>=70:
+        cmd = 'bwa mem -M -t {} {} {} {} | gzip -nc > {}'
+        cmd = cmd.format(nth, ref_index_prefix, fastq1, fastq2, sam)
+        temp_files.append(sam)
+    else:
+        # multiprocessing for bwa_aln
+        pool = multiprocessing.Pool(2)
+        ret_val1 = pool.apply_async(
+            bwa_aln, (fastq1, ref_index_prefix, max(1,nth/2), out_dir))
+        ret_val2 = pool.apply_async(
+            bwa_aln, (fastq2, ref_index_prefix, max(1,nth/2), out_dir))
+        sai1 = ret_val1.get(BIG_INT)
+        sai2 = ret_val2.get(BIG_INT)
+        pool.close()
+        pool.join()
+        
+        cmd = 'bwa sampe {} {} {} {} {} | gzip -nc > {}'.format(
+            ref_index_prefix,
+            sai1,
+            sai2,
+            fastq1,
+            fastq2,
+            sam)
+        temp_files.extend([sai1, sai2, sam])
     run_shell_cmd(cmd)
 
     cmd2 = 'zcat -f {} | awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
@@ -151,7 +161,7 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, out_dir):
             prefix)
     run_shell_cmd(cmd3)
 
-    rm_f([sai1, sai2, sam])
+    rm_f(temp_files)
     return bam
 
 def chk_bwa_index(prefix):    
@@ -198,7 +208,7 @@ def main():
     log.info('Running bwa...')
     if args.paired_end:
         bam = bwa_pe(args.fastqs[0], args.fastqs[1], 
-            bwa_index_prefix, args.nth, args.out_dir)
+            bwa_index_prefix, args.nth, args.use_bwa_mem_for_pe, args.out_dir)
     else:
         bam = bwa_se(args.fastqs[0], 
             bwa_index_prefix, args.nth, args.out_dir)
