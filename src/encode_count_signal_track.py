@@ -36,15 +36,13 @@ def count_signal_track(ta, chrsz, out_dir):
 
     temp_files = []
 
-    cmd1 = 'zcat -f {} | '
-    cmd1 += 'bedtools genomecov -5 -bg -strand + -g {} -i stdin | '
-    cmd1 += 'sort -k1,1 -k2,2n > {}'
+    cmd1 = 'zcat -f {} | sort -k1,1 -k2,2n | '
+    cmd1 += 'bedtools genomecov -5 -bg -strand + -g {} -i stdin > {}'
     cmd1 = cmd1.format(ta, chrsz, pos_bedgraph)
     run_shell_cmd(cmd1)
 
-    cmd2 = 'zcat -f {} | '
-    cmd2 += 'bedtools genomecov -5 -bg -strand - -g {} -i stdin | '
-    cmd2 += 'sort -k1,1 -k2,2n > {}'
+    cmd2 = 'zcat -f {} | sort -k1,1 -k2,2n | '
+    cmd2 += 'bedtools genomecov -5 -bg -strand - -g {} -i stdin > {}'
     cmd2 = cmd2.format(ta, chrsz, neg_bedgraph)
     run_shell_cmd(cmd2)
 
@@ -61,7 +59,7 @@ def count_signal_track(ta, chrsz, out_dir):
     temp_files.append(neg_bedgraph)
     rm_f(temp_files)
 
-    return pos_bw, neg_bws
+    return pos_bw, neg_bw
 
 def main():
     # read params
@@ -80,3 +78,4 @@ def main():
 
 if __name__=='__main__':
     main()
+
