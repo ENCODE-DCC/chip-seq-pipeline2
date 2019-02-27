@@ -115,9 +115,15 @@ Let us take a close look at the following template JSON. Comments are not allowe
     // Disable deeptools fingerprint (JS distance)
     "chip.disable_fingerprint" : false,
 
+    // Enable count signal track generation
+    "chip.enable_count_signal_track" : false,
+
     // Trim R1 of paired ended fastqs for cross-correlation analysis only
     // Trimmed fastqs will not be used for any other analyses
     "chip.xcor_pe_trim_bp" : 50,
+
+    // Use filtered PE BAM/TAG-ALIGN for cross-correlation analysis ignoring the above trimmed R1 fastq
+    "chip.use_filt_pe_ta_for_xcor" : false,
 
     // Choose a dup marker between picard and sambamba
     // picard is recommended, use sambamba only when picard fails.

@@ -22,10 +22,12 @@ workflow chip {
 									# overlap and idr will also be disabled
 	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
 	Boolean enable_count_signal_track = false 		# generate count signal track
-	Boolean use_bwa_mem_for_pe = false # use bwa mem instead of bwa aln + bwa sampe
+	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL
+									# use bwa mem instead of bwa aln + bwa sampe
 									#for PE dataset with read len>=70bp
 
 	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
+	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
 
 	String dup_marker = 'picard'	# picard.jar MarkDuplicates (picard) or 
 									# sambamba markdup (sambamba)
@@ -369,6 +371,7 @@ workflow chip {
 	}
 
 	Array[File] tas_xcor = if length(xcor_scores)>0 then []
+		else if use_filt_pe_ta_for_xcor then flatten([bam2ta.ta, tas__])
 		else if length(bam2ta_no_filt_R1.ta)>0 then bam2ta_no_filt_R1.ta
 		else if length(bam2ta_no_filt.ta)>0 then bam2ta_no_filt.ta
 		else flatten([bam2ta.ta, tas__])
