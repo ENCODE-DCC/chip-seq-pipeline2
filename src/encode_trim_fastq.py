@@ -37,7 +37,7 @@ def trim_fastq(fastq, trim_bp, out_dir):
     run_shell_cmd(cmd)
 
     # if shorter than trim_bp
-    cmd2 = 'zcat -f {} | grep \'sequences shorter than desired length\' | wc -l'.format(
+    cmd2 = 'zcat -f {} | (grep \'sequences shorter than desired length\' || true) | wc -l'.format(
         trimmed)
     if int(run_shell_cmd(cmd2))>0:
         copy_f_to_f(fastq, trimmed)
