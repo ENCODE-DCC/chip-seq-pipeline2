@@ -100,7 +100,7 @@ def main():
     peak_to_bigbed(bfilt_rpeak, 'regionPeak', args.chrsz, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_rpeak, args.out_dir)
+    peak_to_hammock(bfilt_rpeak, args.keep_irregular_chr, args.out_dir)
 
     log.info('Shifted FRiP with fragment length...')
     frip_qc = frip_shifted( args.tas[0], bfilt_rpeak,
