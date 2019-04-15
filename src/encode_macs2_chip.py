@@ -18,6 +18,8 @@ def parse_arguments():
                         help='Path for TAGALIGN file (first) and control TAGALIGN file (second; optional).')
     parser.add_argument('--fraglen', type=int, required=True,
                         help='Fragment length.')
+    parser.add_argument('--shift', type=int, default=0,
+                        help='macs2 callpeak --shift.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
     parser.add_argument('--gensz', type=str,
@@ -46,7 +48,7 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, fraglen, cap_num_peak, 
+def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
         make_signal, out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
     if ctl_ta:
@@ -194,7 +196,7 @@ def main():
     log.info('Calling peaks and generating signal tracks with MACS2...')
     npeak, fc_bigwig, pval_bigwig = macs2(
         args.tas[0], args.tas[1], args.chrsz, args.gensz, args.pval_thresh,
-        args.fraglen, args.cap_num_peak, args.make_signal, 
+        args.shift, args.fraglen, args.cap_num_peak, args.make_signal,
         args.out_dir)
 
     log.info('Blacklist-filtering peaks...')
@@ -208,7 +210,7 @@ def main():
     peak_to_bigbed(bfilt_npeak, 'narrowPeak', args.chrsz, args.keep_irregular_chr, args.out_dir)
 
     log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_npeak, args.out_dir)
+    peak_to_hammock(bfilt_npeak, args.keep_irregular_chr, args.out_dir)
 
     log.info('Shifted FRiP with fragment length...')
     frip_qc = frip_shifted( args.tas[0], bfilt_npeak,

@@ -41,7 +41,7 @@ def parse_arguments():
     args = parser.parse_args()
     if len(args.peaks_pr)!=infer_n_from_nC2(len(args.peaks)):
         raise argparse.ArgumentTypeError(
-            'Invalid number of peak files or --peak-pr.')
+            'Invalid number of peak files or --peaks-pr.')
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -117,8 +117,8 @@ def main():
         peak_to_bigbed(conservative_peak_file, args.peak_type, args.chrsz, args.keep_irregular_chr, args.out_dir)
 
         log.info('Converting peak to hammock...')
-        peak_to_hammock(optimal_peak_file, args.out_dir)
-        peak_to_hammock(conservative_peak_file, args.out_dir)
+        peak_to_hammock(optimal_peak_file, args.keep_irregular_chr, args.out_dir)
+        peak_to_hammock(conservative_peak_file, args.keep_irregular_chr, args.out_dir)
 
     log.info('Writing reproducibility QC log...')
     if args.prefix:

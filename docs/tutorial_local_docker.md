@@ -21,7 +21,7 @@
 4. Download pre-built chr19/chrM-only genome database for hg38.
     ```bash
     $ wget https://storage.googleapis.com/encode-pipeline-genome-data/test_genome_database_hg38_chr19_chrM_chip.tar
-    $ tar xvf test_genome_database_hg38_chip.tar
+    $ tar xvf test_genome_database_hg38_chr19_chrM_chip.tar
     ```
     
 5. Run a pipeline for the test sample.
