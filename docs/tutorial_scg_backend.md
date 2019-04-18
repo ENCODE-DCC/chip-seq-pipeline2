@@ -35,24 +35,23 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 ## For Conda users
 
-5. [Install Conda](https://conda.io/miniconda.html)
-
-6. Install Conda dependencies.
+5. Install Conda dependencies.
     ```bash
     $ bash conda/uninstall_dependencies.sh  # to remove any existing pipeline env
     $ bash conda/install_dependencies.sh
     ```
 
-7. Run a pipeline for a SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
+6. Run a pipeline for a SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
     ```bash
+    $ module load java miniconda/3
     $ source activate encode-chip-seq-pipeline # IMPORTANT!
     $ INPUT=examples/scg/ENCSR936XTK_subsampled_scg.json
     $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/scg.json
     ```
 
-8. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
+7. It will take about 2 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
-9. See full specification for [input JSON file](input.md).
+8. See full specification for [input JSON file](input.md).
 
 ## For singularity users
 
