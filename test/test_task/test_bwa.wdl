@@ -23,6 +23,7 @@ workflow test_bwa {
 		idx_tar = pe_bwa_idx_tar,
 		fastqs = pe_fastqs,
 		paired_end = true,
+		use_bwa_mem_for_pe = false,
 
 		cpu = bwa_cpu,
 		mem_mb = bwa_mem_mb,
@@ -33,6 +34,7 @@ workflow test_bwa {
 		idx_tar = se_bwa_idx_tar,
 		fastqs = se_fastqs,
 		paired_end = false,
+		use_bwa_mem_for_pe = false,
 
 		cpu = bwa_cpu,
 		mem_mb = bwa_mem_mb,

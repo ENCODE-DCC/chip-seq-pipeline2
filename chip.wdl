@@ -2,7 +2,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 workflow chip {
-	String pipeline_ver = 'v1.1.6.1'
+	String pipeline_ver = 'v1.1.7'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -21,8 +21,13 @@ workflow chip {
 	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
 									# overlap and idr will also be disabled
 	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
+	Boolean enable_count_signal_track = false 		# generate count signal track
+	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL
+									# use bwa mem instead of bwa aln + bwa sampe
+									#for PE dataset with read len>=70bp
 
 	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
+	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
 
 	String dup_marker = 'picard'	# picard.jar MarkDuplicates (picard) or 
 									# sambamba markdup (sambamba)
@@ -181,6 +186,11 @@ workflow chip {
 	Array[File] jsd_qcs = []
 	File? jsd_plot
 
+	Array[File] count_signal_track_pos_bws = []
+	Array[File] count_signal_track_neg_bws = []
+	File? count_signal_track_pooled_pos_bw_ 
+	File? count_signal_track_pooled_neg_bw_ 
+
 	### temp vars (do not define these)
 	String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller,'spp'])
 						else select_first([peak_caller,'macs2'])
@@ -238,6 +248,7 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = merge_fastq.merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
+			use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 			cpu = bwa_cpu,
 			mem_mb = bwa_mem_mb,
 			time_hr = bwa_time_hr,
@@ -261,6 +272,7 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = fastq_set,
 			paired_end = false,
+			use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 			cpu = bwa_cpu,
 			mem_mb = bwa_mem_mb,
 			time_hr = bwa_time_hr,
@@ -382,6 +394,24 @@ workflow chip {
 		}
 	}
 
+	# generate count signal track
+	Array[File] tas_count_signal_track = if length(count_signal_track_pos_bws)>0 then []
+		else if enable_count_signal_track then tas_
+		else []
+	scatter(i in range(length(tas_count_signal_track))) {
+		call count_signal_track { input :
+			ta = tas_count_signal_track[i],
+			chrsz = chrsz,
+		}
+	}
+
+	if ( !defined(count_signal_track_pooled_pos_bw_) && enable_count_signal_track && length(tas_)>0 ) {
+		call count_signal_track as count_signal_track_pooled { input :
+			ta = select_first([pool_ta.ta_pooled, ta_pooled]),
+			chrsz = chrsz,
+		}
+	}
+
 	# align controls
 	Array[Array[File]] ctl_fastqs_rep1 = if length(ctl_fastqs_rep1_R2)>0 then transpose([ctl_fastqs_rep1_R1,ctl_fastqs_rep1_R2])
 									else transpose([ctl_fastqs_rep1_R1])
@@ -419,6 +449,7 @@ workflow chip {
 			idx_tar = bwa_idx_tar,
 			fastqs = merge_fastq_ctl.merged_fastqs, #[R1,R2]
 			paired_end = paired_end,
+			use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 			cpu = bwa_cpu,
 			mem_mb = bwa_mem_mb,
 			time_hr = bwa_time_hr,
@@ -1038,6 +1069,7 @@ task bwa {
 	File idx_tar 		# reference bwa index tar
 	Array[File] fastqs 	# [read_end_id]
 	Boolean paired_end
+	Boolean use_bwa_mem_for_pe
 
 	Int cpu
 	Int mem_mb
@@ -1049,6 +1081,7 @@ task bwa {
 			${idx_tar} \
 			${sep=' ' fastqs} \
 			${if paired_end then "--paired-end" else ""} \
+			${if use_bwa_mem_for_pe then "--use-bwa-mem-for-pe" else ""} \
 			${"--nth " + cpu}
 	}
 	output {
@@ -1275,6 +1308,27 @@ task choose_ctl {
 	}	
 }
 
+task count_signal_track {
+	File ta 			# tag-align
+	File chrsz			# 2-col chromosome sizes file
+
+	command {
+		python $(which encode_count_signal_track.py) \
+			${ta} \
+			${"--chrsz " + chrsz}
+	}
+	output {
+		File pos_bw = glob("*.positive.bigwig")[0]
+		File neg_bw = glob("*.negative.bigwig")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 4
+		disks : "local-disk 50 HDD"
+	}
+}
+
 task macs2 {
 	Array[File] tas		# [ta, control_ta]. control_ta is optional
 	Int fraglen 		# fragment length from xcor
@@ -1399,7 +1453,7 @@ task idr {
 		Array[File] bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")
 		File idr_plot = glob("*.txt.png")[0]
 		File idr_unthresholded_peak = glob("*.txt.gz")[0]
-		File idr_log = glob("*.log")[0]
+		File idr_log = glob("*.idr*.log")[0]
 		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
 	}
 	runtime {

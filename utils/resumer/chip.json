@@ -55,6 +55,10 @@
         "chip.spp_pr2" : {
             "rpeak" : "chip.peaks_pr2",
             "frip_qc" : "chip.spp_pr2_frip_qcs"
+        },
+        "chip.count_signal_track" : {
+            "pos_bw" : "chip.count_signal_track_pos_bws",
+            "neg_bw" : "chip.count_signal_track_neg_bws"
         }
     },
     
@@ -92,6 +96,10 @@
         "chip.fingerprint" : {
             "jsd_qcs" : "chip.jsd_qcs",
             "plot" : "chip.jsd_plot"
+        },
+        "chip.count_signal_track_pooled" : {
+            "pos_bw" : "chip.count_signal_track_pooled_pos_bw_",
+            "neg_bw" : "chip.count_signal_track_pooled_neg_bw_"
         }
     }
 }

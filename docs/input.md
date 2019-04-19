@@ -29,8 +29,8 @@ Let us take a close look at the following template JSON. Comments are not allowe
 
     // Cloud platforms (Google Cloud, DNAnexus): [GENOME]=hg38,hg19,mm10,mm9
     //   Google Cloud: gs://encode-pipeline-genome-data/[GENOME]_google.tsv
-    //   DNAnexus: dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv
-    //   DNAnexus(Azure): dx://project-F6K911Q9xyfgJ36JFzv03Z5J:data/pipeline-genome-data/[GENOME]_dx_azure.tsv
+    //   DNAnexus: dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/[GENOME]_dx.tsv
+    //   DNAnexus(Azure): dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/[GENOME]_dx_azure.tsv
 
     // On other computers download or build reference genome database and pick a TSV from [DEST_DIR].
     //   Downloader: ./genome/download_genome_data.sh [GENOME] [DEST_DIR]
@@ -115,9 +115,15 @@ Let us take a close look at the following template JSON. Comments are not allowe
     // Disable deeptools fingerprint (JS distance)
     "chip.disable_fingerprint" : false,
 
+    // Enable count signal track generation
+    "chip.enable_count_signal_track" : false,
+
     // Trim R1 of paired ended fastqs for cross-correlation analysis only
     // Trimmed fastqs will not be used for any other analyses
     "chip.xcor_pe_trim_bp" : 50,
+
+    // Use filtered PE BAM/TAG-ALIGN for cross-correlation analysis ignoring the above trimmed R1 fastq
+    "chip.use_filt_pe_ta_for_xcor" : false,
 
     // Choose a dup marker between picard and sambamba
     // picard is recommended, use sambamba only when picard fails.
@@ -234,8 +240,8 @@ Choose one TSV file for `"chip.genome_tsv"` in your input JSON. `[GENOME]` shoul
 |platform|path/URI|
 |-|-|
 |Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`|
-|DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:data/pipeline-genome-data/[GENOME]_dx.tsv`|
-|DNAnexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:data/pipeline-genome-data/[GENOME]_dx_azure.tsv`|
+|DNAnexus (CLI)|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/[GENOME]_dx.tsv`|
+|DNAnexus (CLI, Azure)|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/[GENOME]_dx_azure.tsv`|
 |DNAnexus (Web)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data)|
 |DNAnexus (Web, Azure)|Choose `[GENOME]_dx.tsv` from [here](https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data)|
 |Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`|

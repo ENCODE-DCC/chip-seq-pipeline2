@@ -1,0 +1,8 @@
+{
+    "test_count_signal_track.se_chrsz" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes",
+
+    "test_count_signal_track.se_ta" : "chip-seq-pipeline-test-data/input/se/tas/rep1/rep1.subsampled.25.merged.nodup.tagAlign.gz",
+
+    "test_count_signal_track.ref_se_count_signal_track_pos_bw" : "chip-seq-pipeline-test-data/ref_output/test_count_signal_track/rep1.subsampled.25.merged.nodup.positive.bigwig",
+    "test_count_signal_track.ref_se_count_signal_track_neg_bw" : "chip-seq-pipeline-test-data/ref_output/test_count_signal_track/rep1.subsampled.25.merged.nodup.negative.bigwig"
+}

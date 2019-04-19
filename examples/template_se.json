@@ -45,6 +45,7 @@
     "chip.true_rep_only" : false,
 
     "chip.disable_fingerprint" : false,
+    "chip.enable_count_signal_track" : false,
 
     "chip.xcor_pe_trim_bp" : 50,
 
