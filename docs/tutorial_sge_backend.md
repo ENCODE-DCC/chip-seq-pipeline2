@@ -3,8 +3,8 @@
 1. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```bash
     $ cd
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 2. Git clone this pipeline and move into it.
@@ -52,7 +52,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```bash
     $ source activate encode-chip-seq-pipeline # IMPORTANT!
     $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
 9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -74,7 +74,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 8. Run a pipeline for the test sample.
     ```bash
     $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/sge.json
     ```
 
 9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -102,11 +102,11 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     For Conda users,
     ```bash
     $ source activate encode-chip-seq-pipeline
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-34.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge cromwell-38.jar server
     ```
     For singularity users,
     ```bash
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-34.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=sge_singularity cromwell-38.jar server
     ```
 
 2. You can modify `backend.providers.sge.concurrent-job-limit` or `backend.providers.sge_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
