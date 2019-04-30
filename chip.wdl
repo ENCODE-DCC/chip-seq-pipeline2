@@ -66,12 +66,12 @@ workflow chip {
 	Int bwa_cpu = 4
 	Int bwa_mem_mb = 20000
 	Int bwa_time_hr = 48
-	String bwa_disks = "local-disk 100 HDD"
+	String bwa_disks = "local-disk 200 HDD"
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 100 HDD"
+	String filter_disks = "local-disk 200 HDD"
 
 	Int bam2ta_cpu = 2
 	Int bam2ta_mem_mb = 10000
@@ -83,7 +83,7 @@ workflow chip {
 	Int fingerprint_cpu = 2
 	Int fingerprint_mem_mb = 12000
 	Int fingerprint_time_hr = 6
-	String fingerprint_disks = "local-disk 100 HDD"
+	String fingerprint_disks = "local-disk 200 HDD"
 
 	Int xcor_cpu = 2
 	Int xcor_mem_mb = 16000	
@@ -92,12 +92,12 @@ workflow chip {
 
 	Int macs2_mem_mb = 16000
 	Int macs2_time_hr = 24
-	String macs2_disks = "local-disk 100 HDD"
+	String macs2_disks = "local-disk 200 HDD"
 
 	Int spp_cpu = 2
 	Int spp_mem_mb = 16000
 	Int spp_time_hr = 72
-	String spp_disks = "local-disk 100 HDD"
+	String spp_disks = "local-disk 200 HDD"
 
 	#### input file definition
 	# pipeline can start from any type of inputs and then leave all other types undefined

@@ -128,6 +128,7 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
             fc_bedgraph,
             fc_bedgraph_srt)
         run_shell_cmd(cmd5)
+        rm_f(fc_bedgraph)
 
         cmd6 = 'bedGraphToBigWig {} {} {}'
         cmd6 = cmd6.format(
@@ -135,6 +136,7 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
             chrsz,
             fc_bigwig)
         run_shell_cmd(cmd6)
+        rm_f(fc_bedgraph_srt)
 
         # sval counts the number of tags per million in the (compressed) BED file
         sval = float(get_num_lines(ta))/1000000.0
@@ -166,6 +168,7 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
             pval_bedgraph,
             pval_bedgraph_srt)
         run_shell_cmd(cmd9)
+        rm_f(pval_bedgraph)
 
         cmd10 = 'bedGraphToBigWig {} {} {}'
         cmd10 = cmd10.format(
@@ -173,14 +176,13 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
             chrsz,
             pval_bigwig)
         run_shell_cmd(cmd10)
+        rm_f(pval_bedgraph_srt)
     else:
         # make empty signal bigwigs (WDL wants it in output{})
         fc_bigwig = '/dev/null'
         pval_bigwig = '/dev/null'
-
+    
     # remove temporary files
-    temp_files.extend([fc_bedgraph,fc_bedgraph_srt,
-                        pval_bedgraph,pval_bedgraph_srt])
     temp_files.append("{}_*".format(prefix))
     rm_f(temp_files)
 
