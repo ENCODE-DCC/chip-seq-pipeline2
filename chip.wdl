@@ -1403,7 +1403,7 @@ task spp {
 	output {
 		File rpeak = glob("*[!.][!b][!f][!i][!l][!t].regionPeak.gz")[0]
 		File bfilt_rpeak = glob("*.bfilt.regionPeak.gz")[0]
-		File bfilt_rpeak_peak_bb = glob("*.bfilt.regionPeak.bb")[0]
+		File bfilt_rpeak_bb = glob("*.bfilt.regionPeak.bb")[0]
 		Array[File] bfilt_rpeak_hammock = glob("*.bfilt.regionPeak.hammock.gz*")
 		File frip_qc = glob("*.frip.qc")[0]
 	}
