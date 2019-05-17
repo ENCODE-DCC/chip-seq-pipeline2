@@ -1,6 +1,9 @@
 # ENCODE DCC TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.1.8
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.8
+
 workflow chip {
 	String pipeline_ver = 'v1.1.8'
 	### sample name, description
