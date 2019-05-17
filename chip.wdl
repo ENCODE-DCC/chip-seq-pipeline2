@@ -1118,8 +1118,6 @@ task filter {
 	String disks
 
 	command {
-		${if no_dup_removal then "touch null.dup.qc null.pbc.qc; " else ""}
-		touch null
 		python $(which encode_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
@@ -1134,8 +1132,8 @@ task filter {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
 		File flagstat_qc = glob("*.flagstat.qc")[0]
-		File dup_qc = if no_dup_removal then glob("null")[0] else glob("*.dup.qc")[0]
-		File pbc_qc = if no_dup_removal then glob("null")[0] else glob("*.pbc.qc")[0]
+		File dup_qc = glob("*.dup.qc")[0]
+		File pbc_qc = glob("*.pbc.qc")[0]
 	}
 	runtime {
 		cpu : cpu
