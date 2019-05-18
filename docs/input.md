@@ -42,6 +42,10 @@ Let us take a close look at the following template JSON. Comments are not allowe
 
     // Read endedness
     "chip.paired_end" : true,
+    
+    // Read endedness for controls
+    // If not defined, "chip.paired_end" will be used for controls too
+    "chip.ctl_paired_end" : true,
 
     // If you start from FASTQs then define these, otherwise remove from this file.
     // You can define up to 6 replicates.

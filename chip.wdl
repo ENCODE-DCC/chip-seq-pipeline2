@@ -18,6 +18,7 @@ workflow chip {
 	File genome_tsv 			# reference genome data TSV file including
 								# all important genome specific data file paths and parameters
 	Boolean paired_end
+	Boolean? ctl_paired_end
 
 	### optional but important
 	Boolean align_only = false 		# disable all post-align analysis (peak-calling, overlap, idr, ...)
@@ -445,7 +446,7 @@ workflow chip {
 		# merge fastqs
 		call merge_fastq as merge_fastq_ctl { input :
 			fastqs = fastq_set,
-			paired_end = paired_end,
+			paired_end = if defined(ctl_paired_end) then ctl_paired_end else paired_end,
 		}
 		# align merged fastqs with bwa
 		call bwa as bwa_ctl { input :
@@ -465,7 +466,7 @@ workflow chip {
 		# filter/dedup bam
 		call filter as filter_ctl { input :
 			bam = bam,
-			paired_end = paired_end,
+			paired_end = if defined(ctl_paired_end) then ctl_paired_end else paired_end,
 			dup_marker = dup_marker,
 			mapq_thresh = mapq_thresh,
 			no_dup_removal = no_dup_removal,
@@ -483,7 +484,7 @@ workflow chip {
 		# convert bam to tagalign and subsample it if necessary
 		call bam2ta as bam2ta_ctl { input :
 			bam = bam,
-			paired_end = paired_end,
+			paired_end = if defined(ctl_paired_end) then ctl_paired_end else paired_end,
 			subsample = ctl_subsample_reads,
 			regex_grep_v_ta = regex_filter_reads,
 			mito_chr_name = mito_chr_name,
@@ -967,6 +968,7 @@ workflow chip {
 		description = description,
 		genome = basename(genome_tsv),
 		paired_end = paired_end,
+		ctl_paired_end = if defined(ctl_paired_end) then ctl_paired_end else paired_end,
 		pipeline_type = pipeline_type,
 		peak_caller = peak_caller_,
 		macs2_cap_num_peak = macs2_cap_num_peak,
@@ -1558,6 +1560,7 @@ task qc_report {
 	#String? encode_accession_id	# ENCODE accession ID of sample
 	# workflow params
 	Boolean paired_end
+	Boolean ctl_paired_end
 	String pipeline_type
 	String peak_caller
 	Int? macs2_cap_num_peak
@@ -1610,6 +1613,7 @@ task qc_report {
 			${"--genome " + genome} \
 			${"--multimapping " + 0} \
 			${if paired_end then "--paired-end" else ""} \
+			${if ctl_paired_end then "--ctl-paired-end" else ""} \
 			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \
 			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
