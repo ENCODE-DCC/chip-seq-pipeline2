@@ -74,8 +74,8 @@ RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
 # Install UCSC tools (Kent utils) latest
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedClip && chmod +x bedClip
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedGraphToBigWig && chmod +x bedGraphToBigWig
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedClip && chmod +x bedClip
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedGraphToBigWig && chmod +x bedGraphToBigWig
 
 # Install samtools 1.2
 RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.git && \
@@ -126,7 +126,7 @@ RUN pip install --no-cache-dir --no-dependencies deeptools==2.5.4
 RUN pip install --no-cache-dir pyfaidx==0.4.7.1
 
 # Install UCSC tools (Kent utils) latest for peak2bigbed conversion
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed && chmod +x bedToBigBed
+RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedToBigBed && chmod +x bedToBigBed
 
 # Install bgzip/tabix for Wash U browser track (hammock type)
 #RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
