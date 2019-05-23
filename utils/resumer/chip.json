@@ -34,7 +34,10 @@
         "chip.macs2" : {
             "npeak" : "chip.peaks",
             "frip_qc" : "chip.macs2_frip_qcs",
-            "sig_pval" : "chip.sig_pvals"
+            "sig_pval" : "chip.pval_bws"
+        },
+        "chip.macs2_signal_track" : {
+            "pval_bw" : "chip.pval_bws"
         },
         "chip.macs2_pr1" : {
             "npeak" : "chip.peaks_pr1",

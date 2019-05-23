@@ -3,6 +3,7 @@
 
 #CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.1.8
 #CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.8
+#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.out_def.json
 
 workflow chip {
 	String pipeline_ver = 'v1.1.8'
@@ -170,7 +171,7 @@ workflow chip {
 	Array[File] ctl_pbc_qcs = []
 	Array[File] ctl_dup_qcs = []
 	Array[File] ctl_nodup_flagstat_qcs = []
-	Array[File] sig_pvals = []
+	Array[File] pval_bws = []
 	Array[File] xcor_plots = []
 	Array[File] xcor_scores = []
 
@@ -552,10 +553,20 @@ workflow chip {
 			chrsz = chrsz,
 			cap_num_peak = macs2_cap_num_peak,
 			pval_thresh = pval_thresh,
-			make_signal = true,
 			fraglen = fraglen_[i],
 			blacklist = blacklist,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
+			mem_mb = macs2_mem_mb,
+			disks = macs2_disks,
+			time_hr = macs2_time_hr,
+		}
+		call macs2_signal_track { input :
+			tas = flatten([[tas__[i]], chosen_ctl_tas[i]]),
+			gensz = gensz,
+			chrsz = chrsz,
+			pval_thresh = pval_thresh,
+			fraglen = fraglen_[i],
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -594,7 +605,6 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
-				make_signal = false,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
 				mem_mb = macs2_mem_mb,
@@ -609,7 +619,6 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_[i],
 				blacklist = blacklist,
-				make_signal = false,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
 				mem_mb = macs2_mem_mb,
@@ -674,10 +683,20 @@ workflow chip {
 			chrsz = chrsz,
 			cap_num_peak = macs2_cap_num_peak,
 			pval_thresh = pval_thresh,
-			make_signal = true,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+
+			mem_mb = macs2_mem_mb,
+			disks = macs2_disks,
+			time_hr = macs2_time_hr,
+		}
+		call macs2_signal_track as macs2_signal_track_pooled { input :
+			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
+			gensz = gensz,
+			chrsz = chrsz,
+			pval_thresh = pval_thresh,
+			fraglen = fraglen_mean.rounded_mean,
 
 			mem_mb = macs2_mem_mb,
 			disks = macs2_disks,
@@ -711,7 +730,6 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			make_signal = false,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
@@ -729,7 +747,6 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist,
-			make_signal = false,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
 			mem_mb = macs2_mem_mb,
@@ -780,25 +797,25 @@ workflow chip {
 	Array[Pair[String,Array[File]]] peak_pairs =  
 		if length(peaks_)<=1 then [] # 1 rep
 		else if length(peaks_)<=2 then # 2 reps
-			 [('rep1-rep2',[peaks_[0],peaks_[1]])]
+			 [('rep1_rep2',[peaks_[0],peaks_[1]])]
 		else if length(peaks_)<=3 then # 3 reps
-			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]),
-			  ('rep2-rep3',[peaks_[1],peaks_[2]])]
+			 [('rep1_rep2',[peaks_[0],peaks_[1]]), ('rep1_rep3',[peaks_[0],peaks_[2]]),
+			  ('rep2_rep3',[peaks_[1],peaks_[2]])]
 		else if length(peaks_)<=4 then # 4 reps
-			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]), ('rep1-rep4',[peaks_[0],peaks_[3]]),
-			  ('rep2-rep3',[peaks_[1],peaks_[2]]), ('rep2-rep4',[peaks_[1],peaks_[3]]),
-			  ('rep3-rep4',[peaks_[2],peaks_[3]])]
+			 [('rep1_rep2',[peaks_[0],peaks_[1]]), ('rep1_rep3',[peaks_[0],peaks_[2]]), ('rep1_rep4',[peaks_[0],peaks_[3]]),
+			  ('rep2_rep3',[peaks_[1],peaks_[2]]), ('rep2_rep4',[peaks_[1],peaks_[3]]),
+			  ('rep3_rep4',[peaks_[2],peaks_[3]])]
 		else if length(peaks_)<=5 then # 5 reps
-			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]), ('rep1-rep4',[peaks_[0],peaks_[3]]), ('rep1-rep5',[peaks_[0],peaks_[4]]),
-			  ('rep2-rep3',[peaks_[1],peaks_[2]]), ('rep2-rep4',[peaks_[1],peaks_[3]]), ('rep2-rep5',[peaks_[1],peaks_[4]]),
-			  ('rep3-rep4',[peaks_[2],peaks_[3]]), ('rep3-rep5',[peaks_[2],peaks_[4]]),
-			  ('rep4-rep5',[peaks_[3],peaks_[4]])]
+			 [('rep1_rep2',[peaks_[0],peaks_[1]]), ('rep1_rep3',[peaks_[0],peaks_[2]]), ('rep1_rep4',[peaks_[0],peaks_[3]]), ('rep1_rep5',[peaks_[0],peaks_[4]]),
+			  ('rep2_rep3',[peaks_[1],peaks_[2]]), ('rep2_rep4',[peaks_[1],peaks_[3]]), ('rep2_rep5',[peaks_[1],peaks_[4]]),
+			  ('rep3_rep4',[peaks_[2],peaks_[3]]), ('rep3_rep5',[peaks_[2],peaks_[4]]),
+			  ('rep4_rep5',[peaks_[3],peaks_[4]])]
 		else # 6 reps
-			 [('rep1-rep2',[peaks_[0],peaks_[1]]), ('rep1-rep3',[peaks_[0],peaks_[2]]), ('rep1-rep4',[peaks_[0],peaks_[3]]), ('rep1-rep5',[peaks_[0],peaks_[4]]), ('rep1-rep6',[peaks_[0],peaks_[5]]),
-			  ('rep2-rep3',[peaks_[1],peaks_[2]]), ('rep2-rep4',[peaks_[1],peaks_[3]]), ('rep2-rep5',[peaks_[1],peaks_[4]]), ('rep2-rep6',[peaks_[1],peaks_[5]]),
-			  ('rep3-rep4',[peaks_[2],peaks_[3]]), ('rep3-rep5',[peaks_[2],peaks_[4]]), ('rep3-rep6',[peaks_[2],peaks_[5]]),
-			  ('rep4-rep5',[peaks_[3],peaks_[4]]), ('rep4-rep6',[peaks_[3],peaks_[5]]),
-			  ('rep5-rep6',[peaks_[4],peaks_[5]])]
+			 [('rep1_rep2',[peaks_[0],peaks_[1]]), ('rep1_rep3',[peaks_[0],peaks_[2]]), ('rep1_rep4',[peaks_[0],peaks_[3]]), ('rep1_rep5',[peaks_[0],peaks_[4]]), ('rep1_rep6',[peaks_[0],peaks_[5]]),
+			  ('rep2_rep3',[peaks_[1],peaks_[2]]), ('rep2_rep4',[peaks_[1],peaks_[3]]), ('rep2_rep5',[peaks_[1],peaks_[4]]), ('rep2_rep6',[peaks_[1],peaks_[5]]),
+			  ('rep3_rep4',[peaks_[2],peaks_[3]]), ('rep3_rep5',[peaks_[2],peaks_[4]]), ('rep3_rep6',[peaks_[2],peaks_[5]]),
+			  ('rep4_rep5',[peaks_[3],peaks_[4]]), ('rep4_rep6',[peaks_[3],peaks_[5]]),
+			  ('rep5_rep6',[peaks_[4],peaks_[5]])]
 	if ( length(peaks_)>0 ) {
 		scatter( pair in peak_pairs ) {
 			# Naive overlap on every pair of true replicates
@@ -952,7 +969,6 @@ workflow chip {
 
 	Array[File] xcor_plots_ = flatten([xcor_plots, xcor.plot_png])
 	Array[File] xcor_scores_ = flatten([xcor_scores, xcor.score])
-	Array[File] sig_pvals_ = flatten([sig_pvals, macs2.sig_pval])
 	
 	Array[File] macs2_frip_qcs_ = flatten([macs2_frip_qcs, macs2.frip_qc])
 	Array[File] macs2_pr1_frip_qcs_ = flatten(select_all([macs2_pr1_frip_qcs, macs2_pr1.frip_qc]))
@@ -1340,7 +1356,6 @@ task macs2 {
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
 	Float pval_thresh 	# p.value threshold
-	Boolean make_signal
 	File blacklist 		# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
@@ -1349,9 +1364,6 @@ task macs2 {
 	String disks
 
 	command {
-		${if make_signal then "" 
-			else "touch null.pval.signal.bigwig null.fc.signal.bigwig"}
-		touch null
 		python $(which encode_macs2_chip.py) \
 			${sep=' ' tas} \
 			${"--gensz "+ gensz} \
@@ -1359,7 +1371,6 @@ task macs2 {
 			${"--fraglen " + fraglen} \
 			${"--cap-num-peak " + cap_num_peak} \
 			${"--pval-thresh "+ pval_thresh} \
-			${if make_signal then "--make-signal" else ""} \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
 			${"--blacklist "+ blacklist}
 	}
@@ -1368,9 +1379,39 @@ task macs2 {
 		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
 		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
 		Array[File] bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")
-		File sig_pval = if make_signal then glob("*.pval.signal.bigwig")[0] else glob("null")[0]
-		File sig_fc = if make_signal then glob("*.fc.signal.bigwig")[0] else glob("null")[0]
 		File frip_qc = glob("*.frip.qc")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "${mem_mb} MB"
+		time : time_hr
+		disks : disks
+	}
+}
+
+task macs2_signal_track {
+	Array[File] tas		# [ta, control_ta]. control_ta is optional
+	Int fraglen 		# fragment length from xcor
+	String gensz		# Genome size (sum of entries in 2nd column of 
+                        # chr. sizes file, or hs for human, ms for mouse)
+	File chrsz			# 2-col chromosome sizes file
+	Float pval_thresh 	# p.value threshold
+
+	Int mem_mb
+	Int time_hr
+	String disks
+
+	command {
+		python $(which encode_macs2_signal_track_chip.py) \
+			${sep=' ' tas} \
+			${"--gensz "+ gensz} \
+			${"--chrsz " + chrsz} \
+			${"--fraglen " + fraglen} \
+			${"--pval-thresh "+ pval_thresh}
+	}
+	output {
+		File pval_bw = glob("*.pval.signal.bigwig")[0]
+		File fc_bw = glob("*.fc.signal.bigwig")[0]
 	}
 	runtime {
 		cpu : 1
