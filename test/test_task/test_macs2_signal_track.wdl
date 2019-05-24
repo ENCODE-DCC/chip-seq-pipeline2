@@ -2,8 +2,7 @@
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../chip.wdl" as chip
 
-workflow test_macs2 {
-	Int cap_num_peak
+workflow test_macs2_signal_track {
 	Float pval_thresh
 
 	Int fraglen
@@ -11,11 +10,7 @@ workflow test_macs2 {
 	String se_ta
 	String se_ctl_ta
 
-	String ref_se_macs2_npeak # raw narrow-peak
-	String ref_se_macs2_bfilt_npeak # blacklist filtered narrow-peak
-	String ref_se_macs2_frip_qc 
-
-	String se_blacklist
+	String ref_se_macs2_pval_bw # p-val signal
 	String se_chrsz
 	String se_gensz
 
@@ -23,15 +18,12 @@ workflow test_macs2 {
 	Int macs2_time_hr = 24
 	String macs2_disks = "local-disk 100 HDD"	
 
-	call chip.macs2 as se_macs2 { input :
+	call chip.macs2_signal_track as se_macs2_signal_track { input :
 		tas = [se_ta, se_ctl_ta],
 		gensz = se_gensz,
 		chrsz = se_chrsz,
 		fraglen = fraglen,
-		cap_num_peak = cap_num_peak,
 		pval_thresh = pval_thresh,
-		blacklist = se_blacklist,
-		keep_irregular_chr_in_bfilt_peak = false,
 
 		mem_mb = macs2_mem_mb,
 		time_hr = macs2_time_hr,
@@ -40,19 +32,13 @@ workflow test_macs2 {
 
 	call chip.compare_md5sum { input :
 		labels = [
-			'se_macs2_npeak',
-			'se_macs2_bfilt_npeak',
-			'se_macs2_frip_qc',
+			'se_macs2_pval_bw',
 		],
 		files = [
-			se_macs2.npeak,
-			se_macs2.bfilt_npeak,
-			se_macs2.frip_qc,
+			se_macs2_signal_track.pval_bw,
 		],
 		ref_files = [
-			ref_se_macs2_npeak,
-			ref_se_macs2_bfilt_npeak,
-			ref_se_macs2_frip_qc,
+			ref_se_macs2_pval_bw,
 		],
 	}
 }
