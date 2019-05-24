@@ -52,6 +52,9 @@ workflow chip {
 	Int xcor_subsample_reads = 15000000	# number of reads to subsample TAGALIGN
 									# this will be used for xcor only
 									# will not affect any downstream analysis
+	Int xcor_exclusion_range_min = -500
+	Int? xcor_exclusion_range_max
+
 	Boolean keep_irregular_chr_in_bfilt_peak = false # when filtering with blacklist
 								# do not filter peaks with irregular chr name
 								# and just keep them in bfilt_peak file
@@ -391,7 +394,9 @@ workflow chip {
 			paired_end = paired_end_xcor,
 			subsample = xcor_subsample_reads,
 			mito_chr_name = mito_chr_name,
-
+			chip_seq_type = pipeline_type,
+			exclusion_range_min = xcor_exclusion_range_min,
+			exclusion_range_max = xcor_exclusion_range_max,
 			cpu = xcor_cpu,
 			mem_mb = xcor_mem_mb,
 			time_hr = xcor_time_hr,
@@ -1243,6 +1248,10 @@ task xcor {
 	Int subsample  # number of reads to subsample TAGALIGN
 					# this will be used for xcor only
 					# will not affect any downstream analysis
+	String chip_seq_type
+	Int exclusion_range_min
+	Int? exclusion_range_max
+
 	Int cpu
 	Int mem_mb	
 	Int time_hr
@@ -1253,6 +1262,10 @@ task xcor {
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
+			${"--subsample " + subsample} \
+			${"--chip-seq-type " + chip_seq_type} \
+			${"--exclusion-range-min " + exclusion_range_min} \
+			${"--exclusion-range-max " + exclusion_range_max} \
 			${"--subsample " + subsample} \
 			${"--nth " + cpu}
 	}
