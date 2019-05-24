@@ -36,6 +36,9 @@ conda create -n ${CONDA_ENV_PY3} --file ${REQ_TXT_PY3} -y -c bioconda -c conda-f
 echo "=== Installing packages for python2 env..."
 conda create -n ${CONDA_ENV} --file ${REQ_TXT} -y -c bioconda -c conda-forge -c defaults -c r
 
+echo "=== Wait 30 secs..."
+sleep 30
+
 echo "=== Installing additional packages for python2 env..."
 source activate ${CONDA_ENV}
   # all numpy packages in the conda-forge repo are linked to OpenBLAS,
@@ -93,7 +96,7 @@ source deactivate
 
 # transfer pipeline's python scripts (src/*.py) to conda env's bin directory
 # so that these pythons scripts can be accessible with UNIX which.
-cd ${SH_SCRIPT_DIR}
-bash update_conda_env.sh
+#cd ${SH_SCRIPT_DIR}
+#bash update_conda_env.sh
 
 echo "=== All done."
