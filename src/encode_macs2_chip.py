@@ -47,7 +47,7 @@ def parse_arguments():
     return args
 
 def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
-        make_signal, out_dir):
+        out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
     if ctl_ta:
         basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
