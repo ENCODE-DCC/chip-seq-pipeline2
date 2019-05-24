@@ -10,8 +10,8 @@ All test samples and genome data are shared on Stanford Sherlock cluster. You do
 2. Download [cromwell](https://github.com/broadinstitute/cromwell).
     ```bash
     $ cd
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 3. Git clone this pipeline and move into it.
@@ -46,7 +46,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```bash
     $ source activate encode-chip-seq-pipeline # IMPORTANT!
     $ INPUT=examples/sherlock/ENCSR936XTK_subsampled_sherlock.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm -Dbackend.providers.slurm.config.concurrent-job-limit=1 cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm -Dbackend.providers.slurm.config.concurrent-job-limit=1 cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
 8. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -63,7 +63,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 6. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`. Stanford Sherlock does not allow building a container on login nodes. Wait until you get a command prompt after `sdev`.
     ```bash
     $ sdev    # sherlock cluster does not allow building a container on login node
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.7.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.7
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.2.0.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.2.0
     $ exit    # exit from an interactive node
     ```
 
@@ -71,7 +71,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```bash
     $ source activate encode-chip-seq-pipeline # IMPORTANT!
     $ INPUT=examples/sherlock/ENCSR936XTK_subsampled_sherlock.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity -Dbackend.providers.slurm_singularity.config.concurrent-job-limit=1 cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity -Dbackend.providers.slurm_singularity.config.concurrent-job-limit=1 cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/sherlock.json
     ```
 
 8. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -82,7 +82,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```javascript
     {
         "default_runtime_attributes" : {
-            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.7.simg",
+            "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.2.0.simg",
             "singularity_bindpath" : "/scratch,/oak/stanford,/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR1,..."
         }
     }
@@ -100,11 +100,11 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     For Conda users,
     ```bash
     $ source activate encode-chip-seq-pipeline
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-38.jar server
     ```
     For singularity users,
     ```bash
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar server
     ```
 
 2. You can modify `backend.providers.slurm.concurrent-job-limit` or `backend.providers.slurm_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.

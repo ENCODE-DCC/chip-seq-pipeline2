@@ -3,8 +3,8 @@
 1. Download [cromwell](https://github.com/broadinstitute/cromwell) on your `$HOME` directory.
     ```bash
     $ cd
-    $ wget https://github.com/broadinstitute/cromwell/releases/download/34/cromwell-34.jar
-    $ chmod +rx cromwell-34.jar
+    $ wget https://github.com/broadinstitute/cromwell/releases/download/38/cromwell-38.jar
+    $ chmod +rx cromwell-38.jar
     ```
 
 2. Git clone this pipeline and move into it.
@@ -52,7 +52,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```bash
     $ source activate encode-chip-seq-pipeline # IMPORTANT!
     $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
     ```
 
 9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -68,14 +68,14 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
 
 7. Pull a singularity container for the pipeline. This will pull pipeline's docker container first and build a singularity one on `~/.singularity`.
     ```bash
-    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.1.7.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.1.7
+    $ mkdir -p ~/.singularity && cd ~/.singularity && SINGULARITY_CACHEDIR=~/.singularity SINGULARITY_PULLFOLDER=~/.singularity singularity pull --name chip-seq-pipeline-v1.2.0.simg -F docker://quay.io/encode-dcc/chip-seq-pipeline:v1.2.0
     ```
 
 8. Run a pipeline for the test sample.
     ```bash
     $ source activate encode-chip-seq-pipeline # IMPORTANT!
     $ INPUT=examples/local/ENCSR936XTK_subsampled.json
-    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
+    $ java -jar -Xmx1G -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/slurm.json
     ```
 
 9. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
@@ -86,7 +86,7 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     ```javascript
       {
           "default_runtime_attributes" : {
-              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.1.7.simg",
+              "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.2.0.simg",
               "singularity_bindpath" : "/your/,YOUR_OWN_DATA_DIR1,YOUR_OWN_DATA_DIR2,..."
           }
       }
@@ -104,11 +104,11 @@ Our pipeline supports both [Conda](https://conda.io/docs/) and [Singularity](htt
     For Conda users,
     ```bash
     $ source activate encode-chip-seq-pipeline
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-34.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm cromwell-38.jar server
     ```
     For singularity users,
     ```bash
-    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-34.jar server
+    $ _JAVA_OPTIONS="-Xmx5G" java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=slurm_singularity cromwell-38.jar server
     ```
 
 2. You can modify `backend.providers.slurm.concurrent-job-limit` or `backend.providers.slurm_singularity.concurrent-job-limit` in `backends/backend.conf` to increase maximum concurrent jobs. This limit is **not per sample**. It's for all sub-tasks of all submitted samples.
