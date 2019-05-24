@@ -1248,8 +1248,8 @@ task xcor {
 	Int subsample  # number of reads to subsample TAGALIGN
 					# this will be used for xcor only
 					# will not affect any downstream analysis
-	String chip_seq_type
-	Int exclusion_range_min
+	String? chip_seq_type
+	Int? exclusion_range_min
 	Int? exclusion_range_max
 
 	Int cpu
