@@ -26,7 +26,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 ## Conda
 
-We don't recommend Conda for software dependency resolver. Use Docker or Singularity instead. We will not take any issues about Conda. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
+We don't recommend Conda for resolving software dependencies. Use Docker or Singularity instead. We will not take any issues about Conda. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
 
 1) Install [Conda](https://docs.conda.io/en/latest/miniconda.html).
 
@@ -59,7 +59,9 @@ We don't recommend Conda for software dependency resolver. Use Docker or Singula
 ## Tutorial
 
 Make sure that you have configured Caper correctly.
+> **WARNING**: DO NOT RUN THIS ON HPC LOGIN NODES. YOUR JOBS WILL BE KILLED.
 
+Run it. Due to `--deepcopy` all files in `examples/caper/ENCSR936XTK_subsampled_chr19_only.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
 ```bash
 $ caper run chip.wdl -i examples/caper/ENCSR936XTK_subsampled_chr19_only.json --deepcopy --use-singularity
 ```
@@ -67,7 +69,10 @@ $ caper run chip.wdl -i examples/caper/ENCSR936XTK_subsampled_chr19_only.json --
 If you use Conda or Docker (on cloud platforms) then remove `--use-singularity` from the command line and activate it before running a pipeline.
 ```bash
 $ conda activate encode-chip-seq-pipeline
+$ caper run chip.wdl -i examples/caper/ENCSR936XTK_subsampled_chr19_only.json --deepcopy
 ```
+
+To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
 
 ## How to organize outputs
 
