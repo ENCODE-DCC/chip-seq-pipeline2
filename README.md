@@ -24,6 +24,10 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 3) Run a pipeline with Caper.
 
+## Running pipelines without Caper
+
+> **WARNING** : It's not recommended to run this pipeline without Caper but if you are still interested then refer to [this document](docs/deprecated/OLD_METHOD.md).
+
 ## DNAnexus
 
 You can also run our pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
