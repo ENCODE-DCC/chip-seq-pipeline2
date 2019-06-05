@@ -73,10 +73,6 @@ RUN pip install --no-cache-dir --no-dependencies macs2==2.1.1.20160309
 RUN git clone --branch 2.0.4.2 --single-branch https://github.com/kundajelab/idr && \
     cd idr && python3 setup.py install && cd ../ && rm -rf idr*
 
-# Install UCSC tools (Kent utils) latest
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedClip && chmod +x bedClip
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedGraphToBigWig && chmod +x bedGraphToBigWig
-
 # Install samtools 1.2
 RUN git clone --branch 1.2 --single-branch https://github.com/samtools/samtools.git && \
     git clone --branch 1.2 --single-branch https://github.com/samtools/htslib.git && \
@@ -125,11 +121,13 @@ RUN pip install --no-cache-dir --no-dependencies deeptools==2.5.4
 # Install pyfaidx (for building genome data)
 RUN pip install --no-cache-dir pyfaidx==0.4.7.1
 
-# Install UCSC tools (Kent utils) latest for peak2bigbed conversion
-RUN wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v369/bedToBigBed && chmod +x bedToBigBed
-
 # Install bgzip/tabix for Wash U browser track (hammock type)
 #RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
+
+# Install UCSC tools (v377)
+RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
+ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
