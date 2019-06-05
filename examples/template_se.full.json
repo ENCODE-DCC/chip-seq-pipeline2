@@ -79,7 +79,7 @@
     "chip.filter_cpu" : 2,
     "chip.filter_mem_mb" : 20000,
     "chip.filter_time_hr" : 24,
-    "chip.filter_disks" : "local-disk 200 HDD",
+    "chip.filter_disks" : "local-disk 400 HDD",
 
     "chip.bam2ta_cpu" : 2,
     "chip.bam2ta_mem_mb" : 10000,
