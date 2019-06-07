@@ -80,7 +80,7 @@ Let us take a close look at a full template JSON. Comments are not allowed in a 
 
     // If you start from FASTQs then define these, otherwise remove from this file.
     // You can define up to 6 replicates.
-    // FASTQs in an array will be merged after trimming adapters.
+    // FASTQs in an array will be merged.
     // For example, 
     // "rep1_R1_L1.fastq.gz", "rep1_R1_L2.fastq.gz" and "rep1_R1_L3.fastq.gz" will be merged together.
     "chip.fastqs_rep1_R1" : [ "rep1_R1_L1.fastq.gz", "rep1_R1_L2.fastq.gz", "rep1_R1_L3.fastq.gz" ],
