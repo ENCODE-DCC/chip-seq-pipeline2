@@ -44,7 +44,7 @@
     "chip.description" : "This is an template input JSON for paired-end sample.",
 
     "chip.pipeline_type" : "tf",
-    "chip.peak_caller" : "spp",
+    "chip.peak_caller" : null,
 
     "chip.align_only" : false,
     "chip.true_rep_only" : false,
