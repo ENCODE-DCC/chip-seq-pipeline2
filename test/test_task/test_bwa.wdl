@@ -20,8 +20,9 @@ workflow test_bwa {
 	String bwa_disks = "local-disk 100 HDD"
 
 	call chip.bwa as pe_bwa { input :
-		idx_tar = pe_bwa_idx_tar,
-		fastqs = pe_fastqs,
+		bwa_idx_tar = pe_bwa_idx_tar,
+		fastq_R1 = pe_fastqs[0],
+		fastq_R2 = pe_fastqs[1],
 		paired_end = true,
 		use_bwa_mem_for_pe = false,
 
@@ -31,8 +32,8 @@ workflow test_bwa {
 		disks = bwa_disks,
 	}
 	call chip.bwa as se_bwa { input :
-		idx_tar = se_bwa_idx_tar,
-		fastqs = se_fastqs,
+		bwa_idx_tar = se_bwa_idx_tar,
+		fastq_R1 = se_fastqs[0],
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
 
