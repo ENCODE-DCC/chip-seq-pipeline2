@@ -163,7 +163,7 @@ Parameter|Default|Description
 
 ## Resource parameters
 
-> **WARNING*: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
+> **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
 Resources defined here are PER REPLICATE. Therefore, total number of cores will be MAX(`chip.bwa_cpu` x `NUMBER_OF_REPLICATES`, `chip.spp_cpu` x 2 x `NUMBER_OF_REPLICATES`) because bwa and spp are bottlenecking tasks of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
 
