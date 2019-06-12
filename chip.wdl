@@ -486,7 +486,7 @@ workflow chip {
 
 		# before peak calling, get fragment length from xcor analysis or given input
 		# if fraglen [] is defined in the input JSON, fraglen from xcor will be ignored
-		Int? fraglen_ = if length(fraglen)>0 then fraglen[i]
+		Int? fraglen_ = if i<length(fraglen) && defined(fraglen[i]) then fraglen[i]
 			else xcor.fraglen
 	}
 
@@ -654,8 +654,10 @@ workflow chip {
 		if has_all_input_of_choose_ctl then transpose(select_all([choose_ctl.chosen_ctl_tas]))
 		else [[],[],[],[],[],[],[],[],[],[]]
 
+	# workaround for dx error (Unsupported combination: womType: Int womValue: ([225], Array[Int]))
+	Array[Int] fraglen_tmp = select_all(fraglen_)
+
 	# we have all tas and ctl_tas (optional for histone chipseq) ready, let's call peaks
-	#scatter(i in range(length(tas__))) {
 	scatter(i in range(num_rep)) {
 		Boolean has_input_of_peak_call = defined(ta_[i])
 		Boolean has_output_of_peak_call = i<length(peaks) && defined(peaks[i])
@@ -665,7 +667,7 @@ workflow chip {
 				tas = flatten([[ta_[i]], chosen_ctl_tas[i]]),
 				chrsz = chrsz_,
 				cap_num_peak = spp_cap_num_peak,
-				fraglen = fraglen_[i],
+				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
@@ -683,7 +685,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = macs2_cap_num_peak,
 				pval_thresh = pval_thresh,
-				fraglen = fraglen_[i],
+				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
@@ -703,7 +705,7 @@ workflow chip {
 				gensz = gensz_,
 				chrsz = chrsz_,
 				pval_thresh = pval_thresh,
-				fraglen = fraglen_[i],
+				fraglen = fraglen_tmp[i],
 
 				mem_mb = macs2_mem_mb,
 				disks = macs2_disks,
@@ -722,7 +724,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = macs2_cap_num_peak,
 				pval_thresh = pval_thresh,
-				fraglen = fraglen_[i],
+				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
@@ -738,7 +740,7 @@ workflow chip {
 				tas = flatten([[spr.ta_pr1[i]], chosen_ctl_tas[i]]),
 				chrsz = chrsz_,
 				cap_num_peak = spp_cap_num_peak,
-				fraglen = fraglen_[i],
+				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
@@ -763,7 +765,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = macs2_cap_num_peak,
 				pval_thresh = pval_thresh,
-				fraglen = fraglen_[i],
+				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
@@ -779,7 +781,7 @@ workflow chip {
 				tas = flatten([[spr.ta_pr2[i]], chosen_ctl_tas[i]]),
 				chrsz = chrsz_,
 				cap_num_peak = spp_cap_num_peak,
-				fraglen = fraglen_[i],
+				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
@@ -794,14 +796,14 @@ workflow chip {
 			else macs2_pr2.npeak
 	}
 
-	if ( !align_only && num_rep > 1 ) {
-		# rounded mean of fragment length, which will be used for 
-		#  1) calling peaks for pooled true/pseudo replicates
-		#  2) calculating FRiP
-		call rounded_mean as fraglen_mean { input :
-			ints = fraglen_,
-		}
+	# if ( !align_only && num_rep > 1 ) {
+	# rounded mean of fragment length, which will be used for 
+	#  1) calling peaks for pooled true/pseudo replicates
+	#  2) calculating FRiP
+	call rounded_mean as fraglen_mean { input :
+		ints = fraglen_tmp,
 	}
+	# }
 
 	# actually not an array
 	Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl then []
@@ -956,8 +958,8 @@ workflow chip {
 	}
 	Array[Pair[Int, Int]] pairs = select_all(pairs__)
 
-	scatter( pair in pairs ) {
-		if ( !align_only ) {
+	if ( !align_only ) {
+		scatter( pair in pairs ) {
 			# pair.left = 0-based index of 1st replicate
 			# pair.right = 0-based index of 2nd replicate
 			# Naive overlap on every pair of true replicates
@@ -976,8 +978,8 @@ workflow chip {
 		}
 	}
 
-	scatter( pair in pairs ) {
-		if ( enable_idr && !align_only ) {
+	if ( enable_idr && !align_only ) {
+		scatter( pair in pairs ) {
 			# pair.left = 0-based index of 1st replicate
 			# pair.right = 0-based index of 2nd replicate
 			# IDR on every pair of true replicates
@@ -1685,7 +1687,7 @@ task overlap {
 
 task reproducibility {
 	String prefix
-	Array[File?] peaks # peak files from pair of true replicates
+	Array[File]? peaks # peak files from pair of true replicates
 						# in a sorted order. for example of 4 replicates,
 						# 1,2 1,3 1,4 2,3 2,4 3,4.
                         # x,y means peak file from rep-x vs rep-y
@@ -1755,7 +1757,7 @@ task qc_report {
 	Array[File?] xcor_scores
 	File? jsd_plot 
 	Array[File?] jsd_qcs
-	Array[File?] idr_plots
+	Array[File]? idr_plots
 	Array[File?] idr_plots_pr
 	File? idr_plot_ppr
 	Array[File?] frip_macs2_qcs
@@ -1770,7 +1772,7 @@ task qc_report {
 	File? frip_spp_qc_pooled
 	File? frip_spp_qc_ppr1 
 	File? frip_spp_qc_ppr2 
-	Array[File?] frip_idr_qcs
+	Array[File]? frip_idr_qcs
 	Array[File?] frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
 	Array[File?] frip_overlap_qcs
@@ -1883,7 +1885,7 @@ task read_genome_tsv {
 }
 
 task rounded_mean {
-	Array[Int?] ints
+	Array[Int] ints
 	command <<<
 		python <<CODE
 		arr = [${sep=',' ints}]
