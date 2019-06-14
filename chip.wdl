@@ -1856,7 +1856,7 @@ task read_genome_tsv {
 	String? null_s
 	command <<<
 		# create empty files for all entries
-		touch ref_fa bowtie2_idx_tar chrsz gensz blacklist
+		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist
 
 		python <<CODE
 		import os
