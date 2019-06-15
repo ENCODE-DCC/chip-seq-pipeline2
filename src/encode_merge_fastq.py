@@ -48,15 +48,12 @@ def parse_arguments(debug=False):
     log.info(sys.argv)
     return args
 
-# WDL glob() globs in an alphabetical order
-# so R1 and R2 can be switched, which results in an
-# unexpected behavior of a workflow
-# so we prepend merge_fastqs_'end'_ (R1 or R2)
-# to the basename of original filename
+# make merged fastqs on $out_dir/R1, $out_dir/R2
 def merge_fastqs(fastqs, end, out_dir):
-    basename = os.path.basename(strip_ext_fastq(fastqs[0]))
+    out_dir = os.path.join(out_dir, end)
+    mkdir_p(out_dir)
     prefix = os.path.join(out_dir,
-        'merge_fastqs_{}_{}'.format(end, basename))
+        os.path.basename(strip_ext_fastq(fastqs[0])))
     merged = '{}.merged.fastq.gz'.format(prefix)
 
     if len(fastqs)>1:

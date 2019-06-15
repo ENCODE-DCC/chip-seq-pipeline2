@@ -1,5 +1,18 @@
 {
+    "chip.title" : "Example (paired-end)",
+    "chip.description" : "This is an template input JSON for paired-end sample.",
+
+    "chip.pipeline_type" : "tf",
+    "chip.align_only" : false,
+    "chip.true_rep_only" : false,
+
     "chip.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
+    "chip.ref_fa" : null,
+    "chip.bowtie2_idx_tar" : null,
+    "chip.chrsz" : null,
+    "chip.blacklist" : null,
+    "chip.gensz" : null,
+
     "chip.paired_end" : true,
     "chip.ctl_paired_end" : true,
 
@@ -40,15 +53,11 @@
         "ctl2.tagAlign.gz"
     ],
 
-    "chip.title" : "Example (paired-end)",
-    "chip.description" : "This is an template input JSON for paired-end sample.",
-
-    "chip.pipeline_type" : "tf",
-
-    "chip.align_only" : false,
-    "chip.disable_fingerprint" : false,
-    "chip.enable_count_signal_track" : false,
     "chip.always_use_pooled_ctl" : false,
     "chip.ctl_depth_ratio" : 1.2,
-    "chip.idr_thresh" : 0.05
+
+    "chip.idr_thresh" : 0.05,
+    
+    "chip.disable_fingerprint" : false,
+    "chip.enable_count_signal_track" : false
 }

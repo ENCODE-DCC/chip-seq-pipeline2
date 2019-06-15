@@ -8,7 +8,7 @@ fi
 if [ $# -gt 2 ]; then
   DOCKER_IMAGE=$3
 else
-  DOCKER_IMAGE=quay.io/encode-dcc/chip-seq-pipeline:v1.2.1
+  DOCKER_IMAGE=quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
 fi
 INPUT=$1
 GCLOUD_SERVICE_ACCOUNT_SECRET_JSON_FILE=$2
