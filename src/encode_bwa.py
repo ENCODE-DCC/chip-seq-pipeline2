@@ -7,7 +7,6 @@ import sys
 import os
 import re
 import argparse
-import multiprocessing
 from encode_common_genomic import *
 
 def parse_arguments():
@@ -115,16 +114,8 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, use_bwa_mem_for_pe, out_dir):
         cmd = cmd.format(nth, ref_index_prefix, fastq1, fastq2, sam)
         temp_files.append(sam)
     else:
-        # multiprocessing for bwa_aln
-        pool = multiprocessing.Pool(2)
-        ret_val1 = pool.apply_async(
-            bwa_aln, (fastq1, ref_index_prefix, max(1,nth/2), out_dir))
-        ret_val2 = pool.apply_async(
-            bwa_aln, (fastq2, ref_index_prefix, max(1,nth/2), out_dir))
-        sai1 = ret_val1.get(BIG_INT)
-        sai2 = ret_val2.get(BIG_INT)
-        pool.close()
-        pool.join()
+        sai1 = bwa_aln(fastq1, ref_index_prefix, nth, out_dir)
+        sai2 = bwa_aln(fastq2, ref_index_prefix, nth, out_dir)
         
         cmd = 'bwa sampe {} {} {} {} {} | gzip -nc > {}'.format(
             ref_index_prefix,
@@ -213,26 +204,11 @@ def main():
         bam = bwa_se(args.fastqs[0], 
             bwa_index_prefix, args.nth, args.out_dir)
 
-    # initialize multithreading
-    log.info('Initializing multi-threading...')
-    num_process = min(2,args.nth)
-    log.info('Number of threads={}.'.format(num_process))
-    pool = multiprocessing.Pool(num_process)
-    
     log.info('Running samtools index...')
-    ret_val1 = pool.apply_async(
-        samtools_index, (bam, args.out_dir))
+    bai = samtools_index(bam, args.out_dir)
 
     log.info('Running samtools flagstat...')
-    ret_val2 = pool.apply_async(
-        samtools_flagstat, (bam, args.out_dir))
-
-    bai = ret_val1.get(BIG_INT)
-    flagstat_qc = ret_val2.get(BIG_INT)
-
-    log.info('Closing multi-threading...')
-    pool.close()
-    pool.join()
+    flagstat_qc = samtools_flagstat(bam, args.out_dir)
 
     log.info('Removing temporary files...')
     rm_f(temp_files)

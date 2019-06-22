@@ -6,7 +6,6 @@
 import sys
 import os
 import argparse
-import multiprocessing
 from encode_common import *
 
 def parse_arguments(debug=False):
@@ -72,14 +71,6 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    log.info('Initializing multi-threading...')
-    if args.paired_end:
-        num_process = min(2,args.nth)
-    else:
-        num_process = 1
-    log.info('Number of threads={}.'.format(num_process))
-    pool = multiprocessing.Pool(num_process)
-
     # update array with trimmed fastqs
     fastqs_R1 = []
     fastqs_R2 = []
@@ -90,20 +81,10 @@ def main():
 
     log.info('Merging fastqs...')
     log.info('R1 to be merged: {}'.format(fastqs_R1))
-    ret_val1 = pool.apply_async(merge_fastqs,
-                    (fastqs_R1, 'R1', args.out_dir,))
+    R1_merged = merge_fastqs(fastqs_R1, 'R1', args.out_dir)
     if args.paired_end:
         log.info('R2 to be merged: {}'.format(fastqs_R2))
-        ret_val2 = pool.apply_async(merge_fastqs,
-                        (fastqs_R2, 'R2', args.out_dir,))
-    # gather
-    R1_merged = ret_val1.get(BIG_INT)
-    if args.paired_end:
-        R2_merged = ret_val2.get(BIG_INT)
-
-    log.info('Closing multi-threading...')
-    pool.close()
-    pool.join()
+        R2_merged = merge_fastqs(fastqs_R2, 'R2', args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
