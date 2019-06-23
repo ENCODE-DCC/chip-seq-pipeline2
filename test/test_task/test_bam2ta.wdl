@@ -1,6 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task bam2ta
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../chip.wdl" as chip
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_bam2ta {
 	Int bam2ta_subsample
@@ -69,7 +70,7 @@ workflow test_bam2ta {
 		disks = bam2ta_disks,
 	}
 
-	call chip.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'pe_bam2ta',
 			'pe_bam2ta_subsample',

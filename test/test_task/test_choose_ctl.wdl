@@ -1,6 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../chip.wdl" as chip
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_choose_ctl {	
 	String se_ta_rep1
@@ -55,7 +56,7 @@ workflow test_choose_ctl {
 		ctl_depth_ratio = ctl_depth_ratio,
 	}
 
-	call chip.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'se_choose_ctl_idx1',
 			'se_choose_ctl_idx2',

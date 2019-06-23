@@ -1,6 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../chip.wdl" as chip
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_overlap {
 	String se_peak_rep1 # test overlap,idr for SE set only
@@ -30,7 +31,7 @@ workflow test_overlap {
 		ta = se_ta_pooled,
 	}
 
-	call chip.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'se_overlap_peak',
 			'se_overlap_bfilt_peak',

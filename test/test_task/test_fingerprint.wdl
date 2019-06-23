@@ -1,6 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task fingerprint
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../chip.wdl" as chip
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_fingerprint {
 	Array[File] se_nodup_bams
@@ -34,7 +35,7 @@ workflow test_fingerprint {
 		}
 	}
 
-	call chip.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'se_fingerprint_rep1',
 			'se_fingerprint_rep2',

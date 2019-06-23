@@ -1,6 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task macs2
 # Author: Jin Lee (leepc12@gmail.com)
 import "../../chip.wdl" as chip
+import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_macs2 {
 	Int cap_num_peak
@@ -38,7 +39,7 @@ workflow test_macs2 {
 		disks = macs2_disks,		
 	}
 
-	call chip.compare_md5sum { input :
+	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'se_macs2_npeak',
 			'se_macs2_bfilt_npeak',
