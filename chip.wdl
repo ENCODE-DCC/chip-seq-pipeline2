@@ -23,7 +23,8 @@ workflow chip {
 									# all genome-specific file paths and parameters
 	# individual genome parameters
 	File? ref_fa					# reference fasta (*.fa.gz)
-	File? bwa_idx_tar 				# bwa index tar (uncompressed)
+	File? bwa_idx_tar 				# bwa index tar (uncompressed .tar)
+	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed .tar)
 	File? chrsz 					# 2-col chromosome sizes file
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
@@ -38,6 +39,7 @@ workflow chip {
 									# overlap and idr will also be disabled
 	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
 	Boolean enable_count_signal_track = false 		# generate count signal track
+	String aligner = 'bwa'
 	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL
 									# use bwa mem instead of bwa aln + bwa sampe
 									#for PE dataset with read len>=70bp
@@ -82,10 +84,10 @@ workflow chip {
 	Int spp_cap_num_peak = 300000	# cap number of raw peaks called from SPP
 
 	### resources
-	Int bwa_cpu = 4
-	Int bwa_mem_mb = 20000
-	Int bwa_time_hr = 48
-	String bwa_disks = "local-disk 200 HDD"
+	Int align_cpu = 4
+	Int align_mem_mb = 20000
+	Int align_time_hr = 48
+	String align_disks = "local-disk 200 HDD"
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
@@ -201,6 +203,8 @@ workflow chip {
 		else read_genome_tsv.ref_fa
 	File? bwa_idx_tar_ = if defined(bwa_idx_tar) then bwa_idx_tar
 		else read_genome_tsv.bwa_idx_tar
+	File? bowtie2_idx_tar_ = if defined(bowtie2_idx_tar) then bowtie2_idx_tar
+		else read_genome_tsv.bowtie2_idx_tar
 	File? chrsz_ = if defined(chrsz) then chrsz
 		else read_genome_tsv.chrsz
 	String? gensz_ = if defined(gensz) then gensz
@@ -335,24 +339,27 @@ workflow chip {
 			defined(merged_fastqs_R2[i]) then merged_fastqs_R2[i]
 			else merge_fastq.merged_fastq_R2
 
-		Boolean has_input_of_bwa = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
-		Boolean has_output_of_bwa = i<length(bams) && defined(bams[i])
-		if ( has_input_of_bwa && !has_output_of_bwa ) {
-			call bwa { input :
-				bwa_idx_tar = bwa_idx_tar_,
+		Boolean has_input_of_align = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
+		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
+		if ( has_input_of_align && !has_output_of_align ) {
+			call align { input :
+				aligner = aligner,
+				idx_tar = if aligner=='bwa' then bwa_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_idx_tar_
+					else null_f,
 				fastq_R1 = merged_fastq_R1_,
 				fastq_R2 = merged_fastq_R2_,
 				paired_end = paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
-				cpu = bwa_cpu,
-				mem_mb = bwa_mem_mb,
-				time_hr = bwa_time_hr,
-				disks = bwa_disks,
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
 			}
 		}
-		File? bam_ = if has_output_of_bwa then bams[i] else bwa.bam
+		File? bam_ = if has_output_of_align then bams[i] else align.bam
 
-		Boolean has_input_of_filter = has_output_of_bwa || defined(bwa.bam)
+		Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
 		Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
 		# skip if we already have output of this step
 		if ( has_input_of_filter && !has_output_of_filter ) {
@@ -391,7 +398,7 @@ workflow chip {
 		File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
 
 		# convert unfiltered BAM to a special TAG-ALIGN for xcor 
-		Boolean has_input_of_bam2ta_no_filt = has_output_of_bwa || defined(bwa.bam)
+		Boolean has_input_of_bam2ta_no_filt = has_output_of_align || defined(align.bam)
 		if ( has_input_of_bam2ta_no_filt ) {
 			call bam2ta as bam2ta_no_filt { input :
 				bam = bam_,
@@ -432,19 +439,22 @@ workflow chip {
 				fastq = merged_fastq_R1_,
 				trim_bp = xcor_pe_trim_bp,
 			}
-			call bwa as bwa_R1 { input :
-				bwa_idx_tar = bwa_idx_tar_,
+			call align as align_R1 { input :
+				aligner = aligner,
+				idx_tar = if aligner=='bwa' then bwa_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_idx_tar_
+					else null_f,
 				fastq_R1 = trim_fastq.trimmed_fastq,
 				paired_end = false,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
-				cpu = bwa_cpu,
-				mem_mb = bwa_mem_mb,
-				time_hr = bwa_time_hr,
-				disks = bwa_disks,
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
 			}
 			# no bam filtering for xcor
 			call bam2ta as bam2ta_no_filt_R1 { input :
-				bam = bwa_R1.bam,
+				bam = align_R1.bam,
 				paired_end = false,
 				subsample = 0,
 				regex_grep_v_ta = regex_filter_reads,
@@ -515,24 +525,27 @@ workflow chip {
 			defined(ctl_merged_fastqs_R2[i]) then ctl_merged_fastqs_R2[i]
 			else merge_fastq_ctl.merged_fastq_R2
 
-		Boolean has_input_of_bwa_ctl = has_output_of_merge_fastq_ctl || defined(merge_fastq_ctl.merged_fastq_R1)
-		Boolean has_output_of_bwa_ctl = i<length(ctl_bams) && defined(ctl_bams[i])
-		if ( has_input_of_bwa_ctl && !has_output_of_bwa_ctl ) {
-			call bwa as bwa_ctl { input :
-				bwa_idx_tar = bwa_idx_tar_,
+		Boolean has_input_of_align_ctl = has_output_of_merge_fastq_ctl || defined(merge_fastq_ctl.merged_fastq_R1)
+		Boolean has_output_of_align_ctl = i<length(ctl_bams) && defined(ctl_bams[i])
+		if ( has_input_of_align_ctl && !has_output_of_align_ctl ) {
+			call align as align_ctl { input :
+				aligner = aligner,
+				idx_tar = if aligner=='bwa' then bwa_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_idx_tar_
+					else null_f,
 				fastq_R1 = ctl_merged_fastq_R1_,
 				fastq_R2 = ctl_merged_fastq_R2_,
 				paired_end = ctl_paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
-				cpu = bwa_cpu,
-				mem_mb = bwa_mem_mb,
-				time_hr = bwa_time_hr,
-				disks = bwa_disks,
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
 			}
 		}
-		File? ctl_bam_ = if has_output_of_bwa_ctl then ctl_bams[i] else bwa_ctl.bam
+		File? ctl_bam_ = if has_output_of_align_ctl then ctl_bams[i] else align_ctl.bam
 
-		Boolean has_input_of_filter_ctl = has_output_of_bwa_ctl || defined(bwa_ctl.bam)
+		Boolean has_input_of_filter_ctl = has_output_of_align_ctl || defined(align_ctl.bam)
 		Boolean has_output_of_filter_ctl = i<length(ctl_nodup_bams) && defined(ctl_nodup_bams[i])
 		# skip if we already have output of this step
 		if ( has_input_of_filter_ctl && !has_output_of_filter_ctl ) {
@@ -1108,19 +1121,20 @@ workflow chip {
 		paired_ends = paired_end_,
 		ctl_paired_ends = ctl_paired_end_,
 		pipeline_type = pipeline_type,
+		aligner = aligner,
 		peak_caller = peak_caller_,
 		macs2_cap_num_peak = macs2_cap_num_peak,
 		spp_cap_num_peak = spp_cap_num_peak,		
 		idr_thresh = idr_thresh,
 
-		flagstat_qcs = bwa.flagstat_qc,
+		flagstat_qcs = align.flagstat_qc,
 		nodup_flagstat_qcs = filter.flagstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
-		ctl_flagstat_qcs = bwa_ctl.flagstat_qc,
+		ctl_flagstat_qcs = align_ctl.flagstat_qc,
 		ctl_nodup_flagstat_qcs = filter_ctl.flagstat_qc,
 		ctl_dup_qcs = filter_ctl.dup_qc,
 		ctl_pbc_qcs = filter_ctl.pbc_qc,
@@ -1153,6 +1167,18 @@ workflow chip {
 		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
+
+		peak_region_size_qcs = macs2.peak_region_size_qc,
+		peak_region_size_plots = macs2.peak_region_size_plot,
+		num_peak_qcs = macs2.num_peak_qc,
+
+		idr_opt_peak_region_size_qc = reproducibility_idr.peak_region_size_qc,
+		idr_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
+		idr_opt_num_peak_qc = reproducibility_idr.num_peak_qc,
+
+		overlap_opt_peak_region_size_qc = reproducibility_overlap.peak_region_size_qc,
+		overlap_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
+		overlap_opt_num_peak_qc = reproducibility_overlap.num_peak_qc,
 	}
 
 	output {
@@ -1208,9 +1234,10 @@ task trim_fastq { # trim fastq (for PE R1 only)
 	}
 }
 
-task bwa {
-	File bwa_idx_tar	# reference bwa index tar
-	File? fastq_R1 		# [read_end_id]
+task align {
+	String aligner
+	File? idx_tar			# reference index tar
+	File? fastq_R1 			# [read_end_id]
 	File? fastq_R2
 	Boolean paired_end
 	Boolean use_bwa_mem_for_pe
@@ -1221,12 +1248,25 @@ task bwa {
 	String disks
 
 	command {
-		python $(which encode_bwa.py) \
-			${bwa_idx_tar} \
-			${fastq_R1} ${fastq_R2} \
-			${if paired_end then "--paired-end" else ""} \
-			${if use_bwa_mem_for_pe then "--use-bwa-mem-for-pe" else ""} \
-			${"--nth " + cpu}
+		if [ "${aligner}" == "bwa" ]; then
+		 	python $(which encode_bwa.py) \
+				${idx_tar} \
+				${fastq_R1} ${fastq_R2} \
+				${if paired_end then "--paired-end" else ""} \
+				${if use_bwa_mem_for_pe then "--use-bwa-mem-for-pe" else ""} \
+				${"--nth " + cpu}
+
+		elif [ "${aligner}" == "bowtie2" ]; then
+		 	python $(which encode_bowtie2.py) \
+				${idx_tar} \
+				${fastq_R1} ${fastq_R2} \
+				${if paired_end then "--paired-end" else ""} \
+				${"--nth " + cpu}
+		else
+			echo "[Error] Aligner not supported: ${aligner}"
+			echo "Currently supported aligner: bwa, bowtie2"
+			ERROR_ALIGNER_NOT_SUPPORTED
+		fi 
 	}
 	output {
 		File bam = glob("*.bam")[0]
@@ -1512,6 +1552,9 @@ task macs2 {
 		File bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")[0]
 		File bfilt_npeak_hammock_tbi = glob("*.bfilt.narrowPeak.hammock.gz*")[1]
 		File frip_qc = glob("*.frip.qc")[0]
+		File peak_region_size_qc = glob("*.peak_region_size.qc")[0]
+		File peak_region_size_plot = glob("*.peak_region_size.png")[0]
+		File num_peak_qc = glob("*.num_peak.qc")[0]
 	}
 	runtime {
 		cpu : 1
@@ -1708,15 +1751,19 @@ task reproducibility {
 			${"--chrsz " + chrsz}
 	}
 	output {
-		File optimal_peak = glob("optimal_peak.*.gz")[0]
-		File conservative_peak = glob("conservative_peak.*.gz")[0]
-		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
-		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
-		File optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")[0]
-		File optimal_peak_hammock_tbi = glob("optimal_peak.*.hammock.gz*")[1]
-		File conservative_peak_hammock = glob("conservative_peak.*.hammock.gz*")[0]
-		File conservative_peak_hammock_tbi = glob("conservative_peak.*.hammock.gz*")[1]
+		File optimal_peak = glob("*optimal_peak.*.gz")[0]
+		File optimal_peak_bb = glob("*optimal_peak.*.bb")[0]
+		File optimal_peak_hammock = glob("*optimal_peak.*.hammock.gz*")[0]
+		File optimal_peak_hammock_tbi = glob("*optimal_peak.*.hammock.gz*")[1]
+		File conservative_peak = glob("*conservative_peak.*.gz")[0]
+		File conservative_peak_bb = glob("*conservative_peak.*.bb")[0]
+		File conservative_peak_hammock = glob("*conservative_peak.*.hammock.gz*")[0]
+		File conservative_peak_hammock_tbi = glob("*conservative_peak.*.hammock.gz*")[1]
 		File reproducibility_qc = glob("*reproducibility.qc")[0]
+		# QC metrics for optimal peak
+		File peak_region_size_qc = glob("*.peak_region_size.qc")[0]
+		File peak_region_size_plot = glob("*.peak_region_size.png")[0]
+		File num_peak_qc = glob("*.num_peak.qc")[0]
 	}
 	runtime {
 		cpu : 1
@@ -1740,6 +1787,7 @@ task qc_report {
 	Array[Boolean?] paired_ends
 	Array[Boolean?] ctl_paired_ends
 	String pipeline_type
+	String aligner
 	String peak_caller
 	Int? macs2_cap_num_peak
 	Int? spp_cap_num_peak
@@ -1781,6 +1829,18 @@ task qc_report {
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
 
+	Array[File?] peak_region_size_qcs
+	Array[File?] peak_region_size_plots
+	Array[File?] num_peak_qcs
+
+	File? idr_opt_peak_region_size_qc
+	File? idr_opt_peak_region_size_plot
+	File? idr_opt_num_peak_qc
+
+	File? overlap_opt_peak_region_size_qc
+	File? overlap_opt_peak_region_size_plot
+	File? overlap_opt_num_peak_qc
+
 	File? qc_json_ref
 
 	command {
@@ -1792,6 +1852,7 @@ task qc_report {
 			${"--multimapping " + 0} \
 			--paired-ends ${sep=" " paired_ends} \
 			--pipeline-type ${pipeline_type} \
+			--aligner ${aligner} \
 			--peak-caller ${peak_caller} \
 			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
 			${"--spp-cap-num-peak " + spp_cap_num_peak} \
@@ -1831,6 +1892,15 @@ task qc_report {
 			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
 			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
 			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
+			--peak-region-size-qcs ${sep="_:_" peak_region_size_qcs} \
+			--peak-region-size-plots ${sep="_:_" peak_region_size_plots} \
+			--num-peak-qcs ${sep="_:_" num_peak_qcs} \
+			${"--idr-opt-peak-region-size-qc " + idr_opt_peak_region_size_qc} \
+			${"--idr-opt-peak-region-size-plot " + idr_opt_peak_region_size_plot} \
+			${"--idr-opt-num-peak-qc " + idr_opt_num_peak_qc} \
+			${"--overlap-opt-peak-region-size-qc " + overlap_opt_peak_region_size_qc} \
+			${"--overlap-opt-peak-region-size-plot " + overlap_opt_peak_region_size_plot} \
+			${"--overlap-opt-num-peak-qc " + overlap_opt_num_peak_qc} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json \
 			${"--qc-json-ref " + qc_json_ref}
@@ -1857,6 +1927,9 @@ task read_genome_tsv {
 	command <<<
 		# create empty files for all entries
 		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist
+		touch custom_aligner_idx_tar
+		touch tss tss_enrich # for backward compatibility
+		touch dnase prom enh reg2map reg2map_bed roadmap_meta
 
 		python <<CODE
 		import os
@@ -1872,9 +1945,20 @@ task read_genome_tsv {
 	output {
 		String? ref_fa = if size('ref_fa')==0 then null_s else read_string('ref_fa')
 		String? bwa_idx_tar = if size('bwa_idx_tar')==0 then null_s else read_string('bwa_idx_tar')
+		String? bowtie2_idx_tar = if size('bowtie2_idx_tar')==0 then null_s else read_string('bowtie2_idx_tar')
+		String? custom_aligner_idx_tar = if size('custom_aligner_idx_tar')==0 then null_s else read_string('custom_aligner_idx_tar')
 		String? chrsz = if size('chrsz')==0 then null_s else read_string('chrsz')
 		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
+		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
+		String? tss = if size('tss')!=0 then read_string('tss')
+			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
+		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')
+		String? prom = if size('prom')==0 then null_s else read_string('prom')
+		String? enh = if size('enh')==0 then null_s else read_string('enh')
+		String? reg2map = if size('reg2map')==0 then null_s else read_string('reg2map')
+		String? reg2map_bed = if size('reg2map_bed')==0 then null_s else read_string('reg2map_bed')
+		String? roadmap_meta = if size('roadmap_meta')==0 then null_s else read_string('roadmap_meta')
 	}
 	runtime {
 		cpu : 1

@@ -3,7 +3,6 @@
 diff ../../atac-seq-pipeline/src/encode_bam2ta.py encode_bam2ta.py 
 diff ../../atac-seq-pipeline/src/encode_blacklist_filter.py encode_blacklist_filter.py 
 diff ../../atac-seq-pipeline/src/encode_common_genomic.py encode_common_genomic.py 
-diff ../../atac-seq-pipeline/src/encode_common_html.py encode_common_html.py 
 diff ../../atac-seq-pipeline/src/encode_common_log_parser.py encode_common_log_parser.py 
 diff ../../atac-seq-pipeline/src/encode_common.py encode_common.py 
 diff ../../atac-seq-pipeline/src/encode_filter.py encode_filter.py 
