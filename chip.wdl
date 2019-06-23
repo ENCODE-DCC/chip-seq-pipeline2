@@ -27,6 +27,7 @@ workflow chip {
 	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed .tar)
 	File? chrsz 					# 2-col chromosome sizes file
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
+	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 
 	### pipeline type
@@ -211,6 +212,34 @@ workflow chip {
 		else read_genome_tsv.gensz
 	File? blacklist_ = if defined(blacklist) then blacklist
 		else read_genome_tsv.blacklist
+	File? blacklist2_ = if defined(blacklist2) then blacklist2
+		else read_genome_tsv.blacklist2
+	# merge multiple blacklists
+	File? blacklist = select_all([blacklist1_, blacklist2_])
+	if ( length(blacklists) > 1 ) {
+		call pool_ta as pool_blacklist { input:
+			tas = blacklists,
+		}
+	}
+	File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
+		else if length(blacklists) > 0 then blacklists[0]
+		else blacklist2_
+
+	# read additional annotation data
+	File? tss_ = if defined(tss) then tss
+		else read_genome_tsv.tss
+	File? dnase_ = if defined(dnase) then dnase
+		else read_genome_tsv.dnase
+	File? prom_ = if defined(prom) then prom
+		else read_genome_tsv.prom
+	File? enh_ = if defined(enh) then enh
+		else read_genome_tsv.enh
+	File? reg2map_ = if defined(reg2map) then reg2map
+		else read_genome_tsv.reg2map
+	File? reg2map_bed_ = if defined(reg2map_bed) then reg2map_bed
+		else read_genome_tsv.reg2map_bed
+	File? roadmap_meta_ = if defined(roadmap_meta) then roadmap_meta
+		else read_genome_tsv.roadmap_meta
 
 	### temp vars (do not define these)
 	String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller, 'spp'])
@@ -1520,14 +1549,14 @@ task count_signal_track {
 }
 
 task macs2 {
-	Array[File?] tas		# [ta, control_ta]. control_ta is optional
+	Array[File?] tas	# [ta, control_ta]. control_ta is optional
 	Int fraglen 		# fragment length from xcor
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
 	Float pval_thresh 	# p.value threshold
-	File blacklist 		# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	Int mem_mb
@@ -1597,11 +1626,11 @@ task macs2_signal_track {
 }
 
 task spp {
-	Array[File?] tas		# [ta, control_ta]. control_ta is always required
+	Array[File?] tas	# [ta, control_ta]. control_ta is always required
 	Int fraglen 		# fragment length from xcor
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak 	# cap number of raw peaks called from MACS2
-	File blacklist 		# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	Int cpu
@@ -1642,7 +1671,7 @@ task idr {
 	File peak2
 	File peak_pooled
 	Float idr_thresh
-	File blacklist 		# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta			# to calculate FRiP
@@ -1686,11 +1715,11 @@ task idr {
 }
 
 task overlap {
-	String prefix 		# prefix for IDR output file
+	String prefix 	# prefix for IDR output file
 	File peak1
 	File peak2
 	File peak_pooled
-	File blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist # blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta		# to calculate FRiP
@@ -1951,6 +1980,7 @@ task read_genome_tsv {
 		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
 		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
+		# annotation data
 		String? tss = if size('tss')!=0 then read_string('tss')
 			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
 		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')
