@@ -129,6 +129,10 @@ RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
 ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 
+# Install Bowtie2 2.2.6
+RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip && \
+    unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2*/bowtie2* . && rm -rf bowtie2-2.2.6*
+
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
 

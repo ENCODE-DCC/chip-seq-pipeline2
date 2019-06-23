@@ -45,3 +45,5 @@ phantompeakqualtools ==1.2
 tabix==0.2.6
 openssl==1.0.2p
 readline==6.2
+
+bowtie2 ==2.2.6
