@@ -307,7 +307,7 @@
                 "Np": 150, 
                 "N_opt": 150, 
                 "N_consv": 143, 
-                "opt_set": "ppr", 
+                "opt_set": "pooled-pr1_VS_pooled-pr2", 
                 "consv_set": "rep1_vs_rep2", 
                 "rescue_ratio": 1.04895104895, 
                 "self_consistency_ratio": 1.36842105263, 
@@ -320,7 +320,7 @@
                 "Np": 158, 
                 "N_opt": 158, 
                 "N_consv": 122, 
-                "opt_set": "ppr", 
+                "opt_set": "pooled-pr1_VS_pooled-pr2", 
                 "consv_set": "rep1_vs_rep2", 
                 "rescue_ratio": 1.29508196721, 
                 "self_consistency_ratio": 1.92857142857, 
@@ -402,10 +402,10 @@
                 "pooled": {
                     "frip": 0.106337721772
                 }, 
-                "ppr1": {
+                "pooled-pr1": {
                     "frip": 0.0733185084921
                 }, 
-                "ppr2": {
+                "pooled-pr2": {
                     "frip": 0.0755124403764
                 }
             }, 
@@ -419,7 +419,7 @@
                 "rep2-pr1_vs_rep2-pr2": {
                     "frip": 0.0227678137061
                 }, 
-                "ppr1_vs_ppr2": {
+                "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.0364020175
                 }
             }, 
@@ -433,7 +433,7 @@
                 "rep2-pr1_vs_rep2-pr2": {
                     "frip": 0.0229948431875
                 }, 
-                "ppr1_vs_ppr2": {
+                "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.0374977842951
                 }
             }

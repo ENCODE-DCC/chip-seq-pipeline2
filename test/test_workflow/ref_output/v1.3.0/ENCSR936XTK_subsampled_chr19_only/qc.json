@@ -402,10 +402,10 @@
                 "pooled": {
                     "frip": 0.400872389025
                 }, 
-                "ppr1": {
+                "pooled-pr1": {
                     "frip": 0.393857669657
                 }, 
-                "ppr2": {
+                "pooled-pr2": {
                     "frip": 0.393906869221
                 }
             }, 
@@ -419,7 +419,7 @@
                 "rep2-pr1_vs_rep2-pr2": {
                     "frip": 0.224089789214
                 }, 
-                "ppr1_vs_ppr2": {
+                "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.303258386768
                 }
             }, 
@@ -433,7 +433,7 @@
                 "rep2-pr1_vs_rep2-pr2": {
                     "frip": 0.150862304955
                 }, 
-                "ppr1_vs_ppr2": {
+                "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.275834548807
                 }
             }
