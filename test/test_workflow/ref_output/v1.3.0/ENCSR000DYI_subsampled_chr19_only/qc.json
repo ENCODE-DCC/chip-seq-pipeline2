@@ -1,12 +1,12 @@
 {
     "general": {
-        "date": "2019-06-23 19:50:27", 
+        "date": "2019-06-24 17:21:27", 
         "title": "ENCSR000DYI (subsampled 1/25, chr19 and chrM only)", 
         "description": "CEBPB ChIP-seq on human A549 produced by the Snyder lab", 
         "pipeline_ver": "v1.2.2", 
         "peak_caller": "spp", 
         "aligner": "bwa", 
-        "genome": "hg38_chr19_chrM_klab.tsv", 
+        "genome": "hg38_chr19_chrM_google.tsv", 
         "paired_end": [
             false, 
             false
@@ -307,7 +307,7 @@
                 "Np": 150, 
                 "N_opt": 150, 
                 "N_consv": 143, 
-                "opt_set": "pooled-pr1_VS_pooled-pr2", 
+                "opt_set": "pooled-pr1_vs_pooled-pr2", 
                 "consv_set": "rep1_vs_rep2", 
                 "rescue_ratio": 1.04895104895, 
                 "self_consistency_ratio": 1.36842105263, 
@@ -320,7 +320,7 @@
                 "Np": 158, 
                 "N_opt": 158, 
                 "N_consv": 122, 
-                "opt_set": "pooled-pr1_VS_pooled-pr2", 
+                "opt_set": "pooled-pr1_vs_pooled-pr2", 
                 "consv_set": "rep1_vs_rep2", 
                 "rescue_ratio": 1.29508196721, 
                 "self_consistency_ratio": 1.92857142857, 
