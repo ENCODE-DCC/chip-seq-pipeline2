@@ -1,0 +1,466 @@
+{
+    "general": {
+        "date": "2019-06-23 19:37:38", 
+        "title": "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only)", 
+        "description": "ZNF143 ChIP-seq on human GM12878", 
+        "pipeline_ver": "v1.2.2", 
+        "peak_caller": "spp", 
+        "aligner": "bwa", 
+        "genome": "hg38_chr19_chrM_klab.tsv", 
+        "paired_end": [
+            true, 
+            true
+        ], 
+        "ctl_paired_end": [
+            true, 
+            true
+        ]
+    }, 
+    "alignment": {
+        "flagstat": {
+            "rep1": {
+                "total": 1037412, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 85367, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 8.23, 
+                "paired": 1037412, 
+                "paired_qc_failed": 0, 
+                "read1": 518706, 
+                "read1_qc_failed": 0, 
+                "read2": 518706, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 69328, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 6.68, 
+                "with_itself": 73921, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 11446, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 1.1, 
+                "diff_chroms": 3, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "rep2": {
+                "total": 1299678, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 97977, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 7.54, 
+                "paired": 1299678, 
+                "paired_qc_failed": 0, 
+                "read1": 649839, 
+                "read1_qc_failed": 0, 
+                "read2": 649839, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 76347, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 5.87, 
+                "with_itself": 83141, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 14836, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 1.14, 
+                "diff_chroms": 1, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "ctl1": {
+                "total": 1135028, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 81021, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 7.14, 
+                "paired": 1135028, 
+                "paired_qc_failed": 0, 
+                "read1": 567514, 
+                "read1_qc_failed": 0, 
+                "read2": 567514, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 59460, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 5.24, 
+                "with_itself": 64102, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 16919, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 1.49, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "ctl2": {
+                "total": 1085984, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 81878, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 7.54, 
+                "paired": 1085984, 
+                "paired_qc_failed": 0, 
+                "read1": 542992, 
+                "read1_qc_failed": 0, 
+                "read2": 542992, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 60740, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 5.59, 
+                "with_itself": 65497, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 16381, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 1.51, 
+                "diff_chroms": 7, 
+                "diff_chroms_qc_failed": 0
+            }
+        }, 
+        "dup": {
+            "rep1": {
+                "unpaired_reads": 0, 
+                "paired_reads": 21408, 
+                "unmapped_reads": 0, 
+                "unpaired_dupes": 0, 
+                "paired_dupes": 57, 
+                "paired_opt_dupes": 0, 
+                "dupes_pct": 0.002663
+            }, 
+            "rep2": {
+                "unpaired_reads": 0, 
+                "paired_reads": 20395, 
+                "unmapped_reads": 0, 
+                "unpaired_dupes": 0, 
+                "paired_dupes": 39, 
+                "paired_opt_dupes": 0, 
+                "dupes_pct": 0.001912
+            }, 
+            "ctl1": {
+                "unpaired_reads": 0, 
+                "paired_reads": 15345, 
+                "unmapped_reads": 0, 
+                "unpaired_dupes": 0, 
+                "paired_dupes": 31, 
+                "paired_opt_dupes": 0, 
+                "dupes_pct": 0.00202
+            }, 
+            "ctl2": {
+                "unpaired_reads": 0, 
+                "paired_reads": 16451, 
+                "unmapped_reads": 0, 
+                "unpaired_dupes": 0, 
+                "paired_dupes": 44, 
+                "paired_opt_dupes": 0, 
+                "dupes_pct": 0.002675
+            }
+        }, 
+        "pbc": {
+            "rep1": {
+                "total_read_pairs": 18123, 
+                "distinct_read_pairs": 18072, 
+                "one_read_pair": 18021, 
+                "two_read_pair": 51, 
+                "NRF": 0.997186, 
+                "PBC1": 0.997178, 
+                "PBC2": 353.352941
+            }, 
+            "rep2": {
+                "total_read_pairs": 18300, 
+                "distinct_read_pairs": 18265, 
+                "one_read_pair": 18230, 
+                "two_read_pair": 35, 
+                "NRF": 0.998087, 
+                "PBC1": 0.998084, 
+                "PBC2": 520.857143
+            }, 
+            "ctl1": {
+                "total_read_pairs": 8674, 
+                "distinct_read_pairs": 8662, 
+                "one_read_pair": 8650, 
+                "two_read_pair": 12, 
+                "NRF": 0.998617, 
+                "PBC1": 0.998615, 
+                "PBC2": 720.833333
+            }, 
+            "ctl2": {
+                "total_read_pairs": 9003, 
+                "distinct_read_pairs": 8989, 
+                "one_read_pair": 8976, 
+                "two_read_pair": 12, 
+                "NRF": 0.998445, 
+                "PBC1": 0.998554, 
+                "PBC2": 748.0
+            }
+        }, 
+        "nodup_flagstat": {
+            "rep1": {
+                "total": 42702, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 42702, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 100.0, 
+                "paired": 42702, 
+                "paired_qc_failed": 0, 
+                "read1": 21351, 
+                "read1_qc_failed": 0, 
+                "read2": 21351, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 42702, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 100.0, 
+                "with_itself": 42702, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "rep2": {
+                "total": 40712, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 40712, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 100.0, 
+                "paired": 40712, 
+                "paired_qc_failed": 0, 
+                "read1": 20356, 
+                "read1_qc_failed": 0, 
+                "read2": 20356, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 40712, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 100.0, 
+                "with_itself": 40712, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "ctl1": {
+                "total": 30628, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 30628, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 100.0, 
+                "paired": 30628, 
+                "paired_qc_failed": 0, 
+                "read1": 15314, 
+                "read1_qc_failed": 0, 
+                "read2": 15314, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 30628, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 100.0, 
+                "with_itself": 30628, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "ctl2": {
+                "total": 32814, 
+                "total_qc_failed": 0, 
+                "duplicates": 0, 
+                "duplicates_qc_failed": 0, 
+                "mapped": 32814, 
+                "mapped_qc_failed": 0, 
+                "mapped_pct": 100.0, 
+                "paired": 32814, 
+                "paired_qc_failed": 0, 
+                "read1": 16407, 
+                "read1_qc_failed": 0, 
+                "read2": 16407, 
+                "read2_qc_failed": 0, 
+                "paired_properly": 32814, 
+                "paired_properly_qc_failed": 0, 
+                "paired_properly_pct": 100.0, 
+                "with_itself": 32814, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "singletons_pct": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }
+        }
+    }, 
+    "peak_calling": {
+        "reproducibility": {
+            "overlap": {
+                "Nt": 385, 
+                "N1": 282, 
+                "N2": 231, 
+                "Np": 379, 
+                "N_opt": 385, 
+                "N_consv": 385, 
+                "opt_set": "rep1_vs_rep2", 
+                "consv_set": "rep1_vs_rep2", 
+                "rescue_ratio": 1.01583113456, 
+                "self_consistency_ratio": 1.22077922078, 
+                "reproducibility": "pass"
+            }, 
+            "idr": {
+                "Nt": 251, 
+                "N1": 133, 
+                "N2": 86, 
+                "Np": 246, 
+                "N_opt": 251, 
+                "N_consv": 251, 
+                "opt_set": "rep1_vs_rep2", 
+                "consv_set": "rep1_vs_rep2", 
+                "rescue_ratio": 1.02032520325, 
+                "self_consistency_ratio": 1.54651162791, 
+                "reproducibility": "pass"
+            }
+        }, 
+        "num_peaks": {
+            "idr_opt": {
+                "num_peak": 251
+            }, 
+            "overlap_opt": {
+                "num_peak": 385
+            }
+        }, 
+        "peak_region_size": {
+            "idr_opt": {
+                "min_size": 98.0, 
+                "25_pct": 390.0, 
+                "50_pct": 390.0, 
+                "75_pct": 390.0, 
+                "max_size": 426.0, 
+                "mean": 354.38247012
+            }, 
+            "overlap_opt": {
+                "min_size": 98.0, 
+                "25_pct": 390.0, 
+                "50_pct": 390.0, 
+                "75_pct": 390.0, 
+                "max_size": 426.0, 
+                "mean": 366.779220779
+            }
+        }
+    }, 
+    "enrichment": {
+        "xcor_score": {
+            "rep1": {
+                "num_reads": 64872, 
+                "est_frag_len": 225, 
+                "corr_est_frag_len": 0.0913620885188839, 
+                "phantom_peak": 50, 
+                "corr_phantom_peak": 0.1247327, 
+                "argmin_corr": 1500, 
+                "min_corr": 0.04619374, 
+                "NSC": 1.977802, 
+                "RSC": 0.5751073
+            }, 
+            "rep2": {
+                "num_reads": 80996, 
+                "est_frag_len": 225, 
+                "corr_est_frag_len": 0.0875861093995843, 
+                "phantom_peak": 50, 
+                "corr_phantom_peak": 0.1560125, 
+                "argmin_corr": 1500, 
+                "min_corr": 0.06123838, 
+                "NSC": 1.430249, 
+                "RSC": 0.2780056
+            }
+        }, 
+        "frac_reads_in_peaks": {
+            "spp": {
+                "rep1": {
+                    "frip": 0.448788180611
+                }, 
+                "rep2": {
+                    "frip": 0.347057213249
+                }, 
+                "rep1-pr1": {
+                    "frip": 0.418880035414
+                }, 
+                "rep2-pr1": {
+                    "frip": 0.298368553597
+                }, 
+                "rep1-pr2": {
+                    "frip": 0.405931828243
+                }, 
+                "rep2-pr2": {
+                    "frip": 0.298948751643
+                }, 
+                "pooled": {
+                    "frip": 0.400872389025
+                }, 
+                "ppr1": {
+                    "frip": 0.393857669657
+                }, 
+                "ppr2": {
+                    "frip": 0.393906869221
+                }
+            }, 
+            "overlap": {
+                "rep1_vs_rep2": {
+                    "frip": 0.304730715249
+                }, 
+                "rep1-pr1_vs_rep1-pr2": {
+                    "frip": 0.345313191678
+                }, 
+                "rep2-pr1_vs_rep2-pr2": {
+                    "frip": 0.224089789214
+                }, 
+                "ppr1_vs_ppr2": {
+                    "frip": 0.303258386768
+                }
+            }, 
+            "idr": {
+                "rep1_vs_rep2": {
+                    "frip": 0.27875168561
+                }, 
+                "rep1-pr1_vs_rep1-pr2": {
+                    "frip": 0.263446215139
+                }, 
+                "rep2-pr1_vs_rep2-pr2": {
+                    "frip": 0.150862304955
+                }, 
+                "ppr1_vs_ppr2": {
+                    "frip": 0.275834548807
+                }
+            }
+        }
+    }, 
+    "etc": {
+        "jsd_qc": {
+            "rep1": {
+                "pct_gen_enrich": 0.0231332109413, 
+                "auc": 0.476593096418, 
+                "ch_div": 0.879908847099, 
+                "elbow_pt": 5.60264293001e-15, 
+                "jsd": 0.890440918234, 
+                "syn_auc": 0.515124919669, 
+                "syn_elbow_pt": 0.343103570969, 
+                "syn_jsd": 0.489524234445
+            }, 
+            "rep2": {
+                "pct_gen_enrich": 0.0347787001915, 
+                "auc": 0.47600880084, 
+                "ch_div": 0.855610053957, 
+                "elbow_pt": 3.06625328431e-14, 
+                "jsd": 0.867736502666, 
+                "syn_auc": 0.498414537885, 
+                "syn_elbow_pt": 0.333963215383, 
+                "syn_jsd": 0.405191834328
+            }
+        }
+    }
+}

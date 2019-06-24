@@ -103,13 +103,41 @@ RUN wget https://github.com/hms-dbmi/spp/archive/1.13.tar.gz && Rscript -e "inst
 RUN wget https://github.com/kundajelab/phantompeakqualtools/archive/1.2.tar.gz && tar -xvf 1.2.tar.gz && rm -f 1.2.tar.gz
 ENV PATH="/software/phantompeakqualtools-1.2:${PATH}"
 
-# Install Bwa 0.7.13
-RUN git clone --branch v0.7.13 --single-branch https://github.com/lh3/bwa.git && \
-    cd bwa && make && cp bwa /usr/local/bin/ && cd ../ && rm -rf bwa*
+# Install cutadapt 1.9.1
+RUN pip install --no-cache-dir --no-dependencies cutadapt==1.9.1 
 
-# Install pysam 0.9.0 (python2)
-RUN git clone --branch v0.9.0 --single-branch https://github.com/pysam-developers/pysam && \
-    cd pysam && python setup.py install && cd ../ && rm -rf pysam*
+# Install Bowtie2 2.2.6
+RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip && \
+    unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2*/bowtie2* . && rm -rf bowtie2-2.2.6*
+
+# Install pyfaidx (for building genome data)
+RUN pip install --no-cache-dir pyfaidx==0.4.7.1
+
+# Install some apt packages (liblzo2, libgsl2) for ATAQC
+RUN apt-get update && apt-get install -y \
+    liblzo2-dev \
+&& rm -rf /var/lib/apt/lists/*
+
+# Install python packages for ATAQC (pysam, pybedtools, metaseq, pandas, jinja2)
+RUN pip install --no-cache-dir pysam==0.8.2.1 pybedtools==0.6.9 pandas==0.21.1 scikit-learn==0.20 metaseq==0.5.6 jinja2==2.10
+
+# Install gsl 1.16
+RUN wget http://gnu.mirror.vexxhost.com/gsl/gsl-1.16.tar.gz && tar -zxvf gsl-1.16.tar.gz && cd gsl-1.16 && ./configure && make && make install && cd .. && rm -rf gsl-1.16 gsl-1.16.tar.gz
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+
+# Install preseq 2.0.3 for ATAQC (build from source)
+RUN git clone --branch v2.0.3 --single-branch --recursive https://github.com/smithlabcode/preseq preseq_2.0.3 && cd preseq_2.0.3 && make && cd ../ && mv preseq_2.0.3/preseq . && rm -rf preseq_2.0.3
+
+# Install bgzip/tabix for Wash U browser track (hammock type)
+#RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
+
+# Install python jsondiff
+RUN pip install --no-cache-dir jsondiff==1.1.1
+
+# Install UCSC tools (v377)
+RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
+ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
 
 # Install pyBigwig 0.2.8 (python2)
 RUN git clone --branch 0.2.8 --single-branch https://github.com/deeptools/pyBigWig && \
@@ -118,20 +146,9 @@ RUN git clone --branch 0.2.8 --single-branch https://github.com/deeptools/pyBigW
 # Install deeptools 2.5.4 (python2)
 RUN pip install --no-cache-dir --no-dependencies deeptools==2.5.4
 
-# Install pyfaidx (for building genome data)
-RUN pip install --no-cache-dir pyfaidx==0.4.7.1
-
-# Install bgzip/tabix for Wash U browser track (hammock type)
-#RUN apt-get update && apt-get install -y tabix && rm -rf /var/lib/apt/lists/*
-
-# Install UCSC tools (v377)
-RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377
-ENV PATH=${PATH}:/software/kentUtils_bin_v377/bin
-ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/software/kentUtils_bin_v377/lib
-
-# Install Bowtie2 2.2.6
-RUN wget https://github.com/BenLangmead/bowtie2/releases/download/v2.2.6/bowtie2-2.2.6-linux-x86_64.zip && \
-    unzip bowtie2-2.2.6-linux-x86_64.zip && mv bowtie2*/bowtie2* . && rm -rf bowtie2-2.2.6*
+# Install Bwa 0.7.13
+RUN git clone --branch v0.7.13 --single-branch https://github.com/lh3/bwa.git && \
+    cd bwa && make && cp bwa /usr/local/bin/ && cd ../ && rm -rf bwa*
 
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True

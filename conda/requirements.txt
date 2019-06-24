@@ -47,3 +47,13 @@ openssl==1.0.2p
 readline==6.2
 
 bowtie2 ==2.2.6
+
+ucsc-bigWigAverageOverBed
+gnuplot #==5.0.3
+scipy # ==0.17.0: to fix 'undefined symbol: PyUnicodeUCS2_DecodeUTF8'
+pandas #==0.18.0 #==0.16.1 # ataqc
+metaseq #==0.5.6 # ataqc
+jinja2 # ataqc
+gsl # for preseq
+pysam==0.8.4 # 0.8.3, 0.9 from bioconda has an issue with ATAQC (segmentation fault), need to use -c bcbio
+pybedtools==0.6.9 # same issue as in pysam
