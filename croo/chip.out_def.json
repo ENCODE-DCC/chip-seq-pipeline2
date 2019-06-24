@@ -15,6 +15,16 @@
       "table": "QC and logs/Control ${i+1}/Samtools flagstat for Raw BAM"
     }
   },
+  "chip.align_ctl": {
+    "bam": {
+      "path": "align/ctl${i+1}/${basename}",
+      "table": "Alignment/Control ${i+1}/Raw BAM from aligner"
+    },
+    "flagstat_qc": {
+      "path": "qc/ctl${i+1}/${basename}",
+      "table": "QC and logs/Control ${i+1}/Samtools flagstat for Raw BAM"
+    }
+  },
   "chip.filter_ctl": {
     "nodup_bam": {
       "path": "align/ctl${i+1}/${basename}",
@@ -53,6 +63,16 @@
     "bam": {
       "path": "align/rep${i+1}/${basename}",
       "table": "Alignment/Replicate ${i+1}/Raw BAM from bwa"
+    },
+    "flagstat_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat for Raw BAM"
+    }
+  },
+  "chip.align": {
+    "bam": {
+      "path": "align/rep${i+1}/${basename}",
+      "table": "Alignment/Replicate ${i+1}/Raw BAM from aligner"
     },
     "flagstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
