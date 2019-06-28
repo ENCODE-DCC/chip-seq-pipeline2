@@ -493,7 +493,7 @@ workflow chip {
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
-					else null_f,
+					else custom_aligner_idx_tar_,
 				fastq_R1 = trim_fastq.trimmed_fastq,
 				paired_end = false,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
@@ -583,7 +583,7 @@ workflow chip {
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
-					else null_f,
+					else custom_aligner_idx_tar_,
 				fastq_R1 = ctl_merged_fastq_R1_,
 				fastq_R2 = ctl_merged_fastq_R2_,
 				paired_end = ctl_paired_end_,
