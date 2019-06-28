@@ -1167,7 +1167,7 @@ task trim_fastq { # trim fastq (for PE R1 only)
 	Int trim_bp
 
 	command {
-		python $(which encode_trim_fastq.py) \
+		python $(which encode_task_trim_fastq.py) \
 			${fastq} \
 			--trim-bp ${trim_bp}
 	}
