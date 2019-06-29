@@ -7,12 +7,9 @@ import sys
 import os
 import argparse
 from encode_lib_common import *
-from encode_lib_genomic import peak_to_bigbed, peak_to_hammock, get_region_size_metrics, get_num_peaks
-from encode_lib_blacklist_filter import blacklist_filter
-from encode_lib_frip import frip_shifted
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC spp callpeak',
+    parser = argparse.ArgumentParser(prog='ENCODE spp call_peak',
                                         description='')
     parser.add_argument('tas', type=str, nargs=2,
                         help='Path for TAGALIGN file and control TAGALIGN file.')
@@ -22,10 +19,6 @@ def parse_arguments():
                         help='Fragment length.')
     parser.add_argument('--cap-num-peak', default=300000, type=int,
                         help='Capping number of peaks by taking top N peaks.')
-    parser.add_argument('--blacklist', type=str, required=True,
-                        help='Blacklist BED file.')
-    parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')    
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -85,32 +78,12 @@ def main():
     log.info('Initializing and making output directory...')
     mkdir_p(args.out_dir)
 
-    log.info('Calling peaks and generating signal tracks with spp...')
+    log.info('Calling peaks with spp...')
     rpeak = spp(args.tas[0], args.tas[1], 
         args.fraglen, args.cap_num_peak, args.nth, args.out_dir)
 
     log.info('Checking if output is empty...')
     assert_file_not_empty(rpeak)
-
-    log.info('Blacklist-filtering peaks...')
-    bfilt_rpeak = blacklist_filter(
-            rpeak, args.blacklist, args.keep_irregular_chr, args.out_dir)
-
-    log.info('Converting peak to bigbed...')
-    peak_to_bigbed(bfilt_rpeak, 'regionPeak', args.chrsz, args.keep_irregular_chr, args.out_dir)
-
-    log.info('Converting peak to hammock...')
-    peak_to_hammock(bfilt_rpeak, args.keep_irregular_chr, args.out_dir)
-
-    log.info('Shifted FRiP with fragment length...')
-    frip_qc = frip_shifted( args.tas[0], bfilt_rpeak,
-        args.chrsz, args.fraglen, args.out_dir)
-
-    log.info('Calculating (blacklist-filtered) peak region size QC/plot...')
-    region_size_qc, region_size_plot = get_region_size_metrics(bfilt_rpeak)
-
-    log.info('Calculating number of peaks (blacklist-filtered)...')
-    num_peak_qc = get_num_peaks(bfilt_rpeak)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

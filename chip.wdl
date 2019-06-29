@@ -1,4 +1,4 @@
-# ENCODE DCC TF/Histone ChIP-Seq pipeline
+# ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
 #CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
@@ -250,14 +250,15 @@ workflow chip {
 		else read_genome_tsv.roadmap_meta
 
 	### temp vars (do not define these)
-	String aligner_ = aligner
-	String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller, 'spp'])
+	String aligner_ = if defined(custom_align_py) then 'custom' else aligner
+	String peak_caller_ = if defined(custom_call_peak_py) then 'custom'
+						else if pipeline_type=='tf' then select_first([peak_caller, 'spp'])
 						else select_first([peak_caller, 'macs2'])
 	String peak_type_ = if peak_caller_=='spp' then select_first([peak_type, 'regionPeak'])
 						else if peak_caller_=='macs2' then select_first([peak_type, 'narrowPeak'])
 						else select_first([peak_type, 'narrowPeak'])
 	Boolean enable_idr = pipeline_type=='tf' # enable_idr for TF chipseq only
-	String idr_rank = if peak_caller_=='spp' then 'signal.value'
+	String idr_rank_ = if peak_caller_=='spp' then 'signal.value'
 						else if peak_caller_=='macs2' then 'p.value'
 						else 'p.value'
 	Int cap_num_peak_ = if peak_caller_ == 'spp' then select_first([cap_num_peak, cap_num_peak_spp])
@@ -357,7 +358,7 @@ workflow chip {
 	Int num_ctl = num_ctl_ta
 
 	# sanity check for inputs
-	if ( peak_caller == 'spp' && num_ctl == 0 && num_rep_peak == 0 ) {
+	if ( peak_caller_ == 'spp' && num_ctl == 0 && num_rep_peak == 0 ) {
 		call raise_exception { input:
 			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
 		}
@@ -728,6 +729,7 @@ workflow chip {
 		if ( has_input_of_peak_call && !has_output_of_peak_call && !align_only ) {
 			call call_peak { input :
 				peak_caller = peak_caller_,
+				peak_type = peak_type_,
 				custom_call_peak_py = custom_call_peak_py,
 				tas = flatten([[ta_[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
@@ -768,6 +770,7 @@ workflow chip {
 		if ( has_input_of_peak_call_pr1 && !has_output_of_peak_call_pr1 && !true_rep_only ) {
 			call call_peak as call_peak_pr1 { input :
 				peak_caller = peak_caller_,
+				peak_type = peak_type_,
 				custom_call_peak_py = custom_call_peak_py,
 				tas = flatten([[spr.ta_pr1[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
@@ -793,6 +796,7 @@ workflow chip {
 		if ( has_input_of_peak_call_pr2 && !has_output_of_peak_call_pr2 && !true_rep_only ) {
 			call call_peak as call_peak_pr2 { input :
 				peak_caller = peak_caller_,
+				peak_type = peak_type_,
 				custom_call_peak_py = custom_call_peak_py,
 				tas = flatten([[spr.ta_pr2[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
@@ -834,6 +838,7 @@ workflow chip {
 		# always call peaks for pooled replicate to get signal tracks
 		call call_peak as call_peak_pooled { input :
 			peak_caller = peak_caller_,
+			peak_type = peak_type_,
 			custom_call_peak_py = custom_call_peak_py,
 			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
@@ -874,6 +879,7 @@ workflow chip {
 		# call peaks on 1st pooled pseudo replicates
 		call call_peak as call_peak_ppr1 { input :
 			peak_caller = peak_caller_,
+			peak_type = peak_type_,
 			custom_call_peak_py = custom_call_peak_py,
 			tas = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
@@ -899,6 +905,7 @@ workflow chip {
 		# call peaks on 2nd pooled pseudo replicates
 		call call_peak as call_peak_ppr2 { input :
 			peak_caller = peak_caller_,
+			peak_type = peak_type_,
 			custom_call_peak_py = custom_call_peak_py,
 			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
@@ -960,7 +967,7 @@ workflow chip {
 				fraglen = fraglen_mean.rounded_mean,
 				idr_thresh = idr_thresh,
 				peak_type = peak_type_,
-				rank = idr_rank,
+				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -998,7 +1005,7 @@ workflow chip {
 				fraglen = fraglen_[i],
 				idr_thresh = idr_thresh,
 				peak_type = peak_type_,
-				rank = idr_rank,
+				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -1033,7 +1040,7 @@ workflow chip {
 			idr_thresh = idr_thresh,
 			peak_type = peak_type_,
 			fraglen = fraglen_mean.rounded_mean,
-			rank = idr_rank,
+			rank = idr_rank_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -1216,7 +1223,6 @@ task align {
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
 				${if paired_end then "--paired-end" else ""} \
-				${"--multimapping " + multimapping} \
 				${"--nth " + cpu}
 		fi 
 	}
@@ -1473,6 +1479,7 @@ task count_signal_track {
 
 task call_peak {
 	String peak_caller
+	String peak_type
 	File? custom_call_peak_py
 
 	Array[File?] tas	# [ta, control_ta]. control_ta is optional
@@ -1498,18 +1505,14 @@ task call_peak {
 				${"--chrsz " + chrsz} \
 				${"--fraglen " + fraglen} \
 				${"--cap-num-peak " + cap_num_peak} \
-				${"--pval-thresh "+ pval_thresh} \
-				${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-				${"--blacklist "+ blacklist}
+				${"--pval-thresh "+ pval_thresh}
 
 		elif [ "${peak_caller}" == "spp" ]; then
 			python $(which encode_task_spp.py) \
 				${sep=' ' tas} \
 				${"--fraglen " + fraglen} \
 				${"--cap-num-peak " + cap_num_peak} \
-				${"--nth " + cpu} \
-				${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-				${"--blacklist "+ blacklist}
+				${"--nth " + cpu}
 
 		else
 			python ${custom_call_peak_py} \
@@ -1518,13 +1521,23 @@ task call_peak {
 				${"--chrsz " + chrsz} \
 				${"--fraglen " + fraglen} \
 				${"--cap-num-peak " + cap_num_peak} \
-				${"--pval-thresh "+ pval_thresh} \
-				${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-				${"--blacklist "+ blacklist}
+				${"--pval-thresh "+ pval_thresh}
+				${"--nth " + cpu}
 		fi
+
+		python $(which encode_task_post_call_peak_chip.py) \
+			$(ls *Peak.gz) \
+			${"--ta " + tas[0]} \
+			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
+			${"--chrsz " + chrsz} \
+			${"--fraglen " + fraglen} \
+			${"--peak-type " + peak_type} \
+			${"--blacklist " + blacklist}		
 	}
 	output {
+		# generated by custom_call_peak_py
 		File peak = glob("*[!.][!b][!f][!i][!l][!t].*Peak.gz")[0]
+		# generated by post_call_peak py
 		File bfilt_peak = glob("*.bfilt.*Peak.gz")[0]
 		File bfilt_peak_bb = glob("*.bfilt.*Peak.bb")[0]
 		File bfilt_peak_hammock = glob("*.bfilt.*Peak.hammock.gz*")[0]

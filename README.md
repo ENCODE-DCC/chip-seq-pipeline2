@@ -44,6 +44,12 @@ We no longer recommend Conda for resolving dependencies and plan to phase out Co
 Make sure that you have configured Caper correctly.
 > **WARNING**: Do not run Caper on HPC login nodes. Your jobs can be killed.
 
+Git clone the pipeline repository to download WDL and example input JSON.
+```bash
+$ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
+$ cd chip-seq-pipeline2
+```
+
 Run it. Due to `--deepcopy` all files (HTTP URLs) in `examples/caper/ENCSR936XTK_subsampled_chr19_only.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
 ```bash
 $ caper run chip.wdl -i examples/caper/ENCSR936XTK_subsampled_chr19_only.json --deepcopy --use-singularity
