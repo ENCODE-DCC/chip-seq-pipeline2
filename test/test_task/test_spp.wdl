@@ -23,7 +23,10 @@ workflow test_spp {
 	Int spp_time_hr = 72
 	String spp_disks = "local-disk 100 HDD"
 
-	call chip.spp as se_spp { input :
+	call chip.call_peak as se_spp { input :
+		peak_caller = 'spp',
+		peak_type = 'regionPeak',
+		gensz = se_chrsz,
 		tas = [se_ta, se_ctl_ta],
 		chrsz = se_chrsz,
 		fraglen = fraglen,
@@ -44,8 +47,8 @@ workflow test_spp {
 			'se_spp_frip_qc',
 		],
 		files = [
-			se_spp.rpeak,
-			se_spp.bfilt_rpeak,
+			se_spp.peak,
+			se_spp.bfilt_peak,
 			se_spp.frip_qc,
 		],
 		ref_files = [

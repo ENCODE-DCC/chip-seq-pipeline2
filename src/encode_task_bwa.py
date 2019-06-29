@@ -46,29 +46,9 @@ def parse_arguments():
     log.info(sys.argv)    
     return args
 
-# WDL glob() globs in an alphabetical order
-# so R1 and R2 can be switched, which results in an
-# unexpected behavior of a workflow.
-# so we already prepended merge_fastqs_'end'_ (R1 or R2) 
-# to the basename of original filename in 'trim_adapter' task.
-# now it's time to strip it.
-def strip_merge_fastqs_prefix(fastq):
-    return re.sub(r'^merge\_fastqs\_R\d\_','',str(fastq))
-
-def make_read_length_file(fastq, out_dir):
-    basename = os.path.basename(strip_ext_fastq(fastq))
-    prefix = os.path.join(out_dir,
-        strip_merge_fastqs_prefix(basename))
-    txt = '{}.read_length.txt'.format(prefix)
-    read_length = get_read_length(fastq)
-    with open(txt,'w') as fp:
-        fp.write(str(read_length))
-    return txt
-
 def bwa_aln(fastq, ref_index_prefix, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
-    prefix = os.path.join(out_dir,
-        strip_merge_fastqs_prefix(basename))        
+    prefix = os.path.join(out_dir, basename)
     sai = '{}.sai'.format(prefix)
 
     cmd = 'bwa aln -q 5 -l 32 -k 2 -t {} {} {} > {}'.format(
@@ -81,8 +61,7 @@ def bwa_aln(fastq, ref_index_prefix, nth, out_dir):
 
 def bwa_se(fastq, ref_index_prefix, nth, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
-    prefix = os.path.join(out_dir,
-        strip_merge_fastqs_prefix(basename))        
+    prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
 
     sai = bwa_aln(fastq, ref_index_prefix, nth, out_dir)
@@ -101,8 +80,7 @@ def bwa_se(fastq, ref_index_prefix, nth, out_dir):
 
 def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, use_bwa_mem_for_pe, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
-    prefix = os.path.join(out_dir,
-        strip_merge_fastqs_prefix(basename))
+    prefix = os.path.join(out_dir, basename)
     sam = '{}.sam'.format(prefix)
     badcigar = '{}.badReads'.format(prefix)
     bam = '{}.bam'.format(prefix)
@@ -171,14 +149,6 @@ def main():
     # declare temp arrays
     temp_files = [] # files to deleted later at the end
 
-    # generate read length file
-    log.info('Generating read length file...')
-    R1_read_length_file = make_read_length_file(
-                            args.fastqs[0], args.out_dir)
-    if args.paired_end:
-        R2_read_length_file = make_read_length_file(
-                            args.fastqs[1], args.out_dir)
-    
     # if bwa index is tarball then unpack it
     if args.bwa_index_prefix_or_tar.endswith('.tar'):
         log.info('Unpacking bwa index tar...')
@@ -203,12 +173,6 @@ def main():
     else:
         bam = bwa_se(args.fastqs[0], 
             bwa_index_prefix, args.nth, args.out_dir)
-
-    log.info('Running samtools index...')
-    bai = samtools_index(bam, args.out_dir)
-
-    log.info('Running samtools flagstat...')
-    flagstat_qc = samtools_flagstat(bam, args.out_dir)
 
     log.info('Removing temporary files...')
     rm_f(temp_files)

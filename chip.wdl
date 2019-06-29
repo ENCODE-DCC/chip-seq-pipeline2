@@ -1225,6 +1225,9 @@ task align {
 				${if paired_end then "--paired-end" else ""} \
 				${"--nth " + cpu}
 		fi 
+
+		python $(which encode_task_post_align.py) \
+			${fastq_R1} $(ls *.bam)	
 	}
 	output {
 		File bam = glob("*.bam")[0]

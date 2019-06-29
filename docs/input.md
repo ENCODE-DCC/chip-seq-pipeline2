@@ -260,6 +260,8 @@ def parse_arguments():
                             FASTQs must be compressed with gzip (with .gz).')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
+    parser.add_argument('--multimapping', default=4, type=int,
+                        help='Multimapping reads')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -274,24 +276,15 @@ def parse_arguments():
 
     return args
 
-def align(fastq_R1, fastq_R2, ref_index_prefix, nth, out_dir):
+def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, out_dir):
     basename = os.path.basename(os.path.splitext(fastq_R1)[0])    
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
-    bai = '{}.bai'.format(bam)
-    flagstat = '{}.flagstat.qc'.format(prefix)
-    read_length = '{}.read_length.txt'.format(prefix)
 
     # map your fastqs somehow
     os.system('touch {}'.format(bam))
 
-    # get read length from your fastq somehow
-    os.system('touch {}'.format(read_length))
-
-    os.system('samtools index {}'.format(bam))
-    os.system('samtools flagstat {} > {}'.format(bam, flagstat))
-
-    return bam, bai, flagstat, read_length
+    return bam
 
 def main():
     # read params
@@ -300,23 +293,19 @@ def main():
     # unpack index somehow on CWD
     os.system('tar xvf {}'.format(args.index_prefix_or_tar))
 
-    bam, bai, flagstat, read_length = align(
-    	args.fastqs[0], args.fastqs[1], args.index_prefix_or_tar,
-        args.nth, args.out_dir)
+    bam = align(args.fastqs[0],
+                args.fastqs[1] if args.paired_end else None,
+                args.index_prefix_or_tar,
+                args.multimapping,
+                args.nth,
+                args.out_dir)
 
 if __name__=='__main__':
     main()
 
 ```
 
-> **IMPORTANT**: Your custom python script should generate the following set of files with appropriate extensions. Each output file can have a free filename but it should be an only file with a corresponding extension. For example, if there are two `.bam` files then pipeline will just pick the first one in an alphatical order.
-
-Output|Extension|Description
----------|-------|-----------
-`bam`| .bam | BAM file aligned from FASTQs
-`bai`| .bai | BAI generated from samtools index
-`flagstat_qc`| .flagstat.qc | Output of samtools flagstat
-`read_len_log`| .read_length.txt | Single-line text file with read length in it
+> **IMPORTANT**: Your custom python script should generate ONLY one `*.bam` file. For example, if there are two `.bam` files then pipeline will just pick the first one in an alphatical order.
 
 ## How to use a custom peak caller
 
@@ -388,8 +377,4 @@ if __name__=='__main__':
     main()
 ```
 
-> **IMPORTANT**: Your custom python script should generate the following set of files with appropriate extensions. Each output file can have a free filename but it should be an only file with a corresponding extension. For example, if there are `.narrowPeak.gz` and `.broadPeak.gz` then pipeline will just pick the first one in an alphatical order.
-
-Output|Extension|Description
----------|-------|-----------
-`peak` | .*Peak.gz | ENCODE peak file generates from your custom peak caller
+> **IMPORTANT**: Your custom python script should generate ONLY one `*.*Peak.gz` file. For example, if there are `*.narrowPeak.gz` and `*.broadPeak.gz` files pipeline will just pick the first one in an alphatical order.
