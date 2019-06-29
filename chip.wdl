@@ -1608,7 +1608,7 @@ task idr {
 	command {
 		${if defined(ta) then "" else "touch null.frip.qc"}
 		touch null 
-		python $(which encode_idr.py) \
+		python $(which encode_task_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
