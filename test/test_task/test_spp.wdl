@@ -27,6 +27,7 @@ workflow test_spp {
 		peak_caller = 'spp',
 		peak_type = 'regionPeak',
 		gensz = se_chrsz,
+		pval_thresh = 0.0,
 		tas = [se_ta, se_ctl_ta],
 		chrsz = se_chrsz,
 		fraglen = fraglen,

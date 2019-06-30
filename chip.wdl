@@ -1377,7 +1377,7 @@ task xcor {
 	String disks
 
 	command {
-		python $(which encode_xcor.py) \
+		python $(which encode_task_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
