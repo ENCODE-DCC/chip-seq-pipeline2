@@ -46,10 +46,10 @@
     "chip.xcor_mem_mb" : 4000,
     "chip.xcor_time_hr" : 4,
 
-    "chip.macs2_mem_mb" : 4000,
-    "chip.macs2_time_hr" : 4,
+    "chip.call_peak_mem_mb" : 4000,
+    "chip.call_peak_time_hr" : 4,
 
-    "chip.spp_cpu" : 1,
+    "chip.call_peak_cpu" : 1
     "chip.spp_mem_mb" : 4000,
     "chip.spp_time_hr" : 4
 }
