@@ -8,7 +8,7 @@
   "chip.bwa_ctl": {
     "bam": {
       "path": "align/ctl${i+1}/${basename}",
-      "table": "Alignment/Control ${i+1}/Raw BAM from bwa"
+      "table": "Alignment/Control ${i+1}/Raw BAM from BWA"
     },
     "flagstat_qc": {
       "path": "qc/ctl${i+1}/${basename}",

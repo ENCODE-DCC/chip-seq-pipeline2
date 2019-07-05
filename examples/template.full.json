@@ -77,10 +77,10 @@
     "chip.mito_chr_name" : "chrM",
     "chip.regex_filter_reads" : "chrM",
 
-    "chip.bwa_cpu" : 4,
-    "chip.bwa_mem_mb" : 20000,
-    "chip.bwa_time_hr" : 48,
-    "chip.bwa_disks" : "local-disk 200 HDD",
+    "chip.align_cpu" : 4,
+    "chip.align_mem_mb" : 20000,
+    "chip.align_time_hr" : 48,
+    "chip.align_disks" : "local-disk 200 HDD",
 
     "chip.filter_cpu" : 2,
     "chip.filter_mem_mb" : 20000,
