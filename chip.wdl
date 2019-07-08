@@ -1089,15 +1089,15 @@ workflow chip {
 		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
 
-		flagstat_qcs = align.flagstat_qc,
-		nodup_flagstat_qcs = filter.flagstat_qc,
+		samstat_qcs = align.samstat_qc,
+		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
-		ctl_flagstat_qcs = align_ctl.flagstat_qc,
-		ctl_nodup_flagstat_qcs = filter_ctl.flagstat_qc,
+		ctl_samstat_qcs = align_ctl.samstat_qc,
+		ctl_nodup_samstat_qcs = filter_ctl.samstat_qc,
 		ctl_dup_qcs = filter_ctl.dup_qc,
 		ctl_pbc_qcs = filter_ctl.pbc_qc,
 
@@ -1232,7 +1232,7 @@ task align {
 	output {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
-		File flagstat_qc = glob("*.flagstat.qc")[0]
+		File samstat_qc = glob("*.samstat.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1273,7 +1273,7 @@ task filter {
 	output {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
-		File flagstat_qc = glob("*.flagstat.qc")[0]
+		File samstat_qc = glob("*.samstat.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
 	}
@@ -1746,12 +1746,12 @@ task qc_report {
 	Int cap_num_peak
 	Float idr_thresh
 	# QCs
-	Array[File?] flagstat_qcs
-	Array[File?] nodup_flagstat_qcs
+	Array[File?] samstat_qcs
+	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
 	Array[File?] pbc_qcs
-	Array[File?] ctl_flagstat_qcs
-	Array[File?] ctl_nodup_flagstat_qcs
+	Array[File?] ctl_samstat_qcs
+	Array[File?] ctl_nodup_samstat_qcs
 	Array[File?] ctl_dup_qcs
 	Array[File?] ctl_pbc_qcs
 	Array[File?] xcor_plots
@@ -1803,16 +1803,16 @@ task qc_report {
 			--peak-caller ${peak_caller} \
 			${"--cap-num-peak " + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
-			--flagstat-qcs ${sep="_:_" flagstat_qcs} \
-			--nodup-flagstat-qcs ${sep="_:_" nodup_flagstat_qcs} \
+			--samstat-qcs ${sep="_:_" samstat_qcs} \
+			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
 			--pbc-qcs ${sep="_:_" pbc_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
 			--idr-plots-pr ${sep="_:_" idr_plots_pr} \
-			--ctl-flagstat-qcs ${sep='_:_' ctl_flagstat_qcs} \
-			--ctl-nodup-flagstat-qcs ${sep='_:_' ctl_nodup_flagstat_qcs} \
+			--ctl-samstat-qcs ${sep='_:_' ctl_samstat_qcs} \
+			--ctl-nodup-samstat-qcs ${sep='_:_' ctl_nodup_samstat_qcs} \
 			--ctl-dup-qcs ${sep='_:_' ctl_dup_qcs} \
 			--ctl-pbc-qcs ${sep='_:_' ctl_pbc_qcs} \
 			${"--jsd-plot " + jsd_plot} \
