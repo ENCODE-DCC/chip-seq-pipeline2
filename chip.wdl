@@ -1227,7 +1227,8 @@ task align {
 		fi 
 
 		python $(which encode_task_post_align.py) \
-			${fastq_R1} $(ls *.bam)	
+			${fastq_R1} $(ls *.bam) \
+			${"--nth " + cpu}
 	}
 	output {
 		File bam = glob("*.bam")[0]
@@ -1756,8 +1757,8 @@ task qc_report {
 	Array[File?] ctl_pbc_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
-	File? jsd_plot 
-	Array[File?] jsd_qcs
+	File? jsd_plot
+	Array[File]? jsd_qcs
 	Array[File]? idr_plots
 	Array[File?] idr_plots_pr
 	File? idr_plot_ppr
