@@ -5,6 +5,7 @@ diff ../../atac-seq-pipeline/src/encode_lib_blacklist_filter.py encode_lib_black
 diff ../../atac-seq-pipeline/src/encode_lib_genomic.py encode_lib_genomic.py 
 diff ../../atac-seq-pipeline/src/encode_lib_log_parser.py encode_lib_log_parser.py 
 diff ../../atac-seq-pipeline/src/encode_lib_common.py encode_lib_common.py 
+diff ../../atac-seq-pipeline/src/encode_task_bowtie2.py encode_task_bowtie2.py 
 diff ../../atac-seq-pipeline/src/encode_task_filter.py encode_task_filter.py 
 diff ../../atac-seq-pipeline/src/encode_task_post_align.py encode_task_post_align.py 
 diff ../../atac-seq-pipeline/src/encode_lib_frip.py encode_lib_frip.py 
