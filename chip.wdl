@@ -41,7 +41,7 @@ workflow chip {
 	### pipeline type
 	String pipeline_type  			# tf or histone chip-seq
 
-	String aligner = 'bwa'
+	String aligner = 'bowtie2'
 	File? custom_align_py 			# custom align python script
 
 	String? peak_caller 			# default: (spp for tf) and (macs2 for histone)
@@ -1233,7 +1233,7 @@ task align {
 	output {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
-		File samstat_qc = glob("*.samstat.qc")[0]
+		File samstat_qc = glob("*.samstats.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1274,7 +1274,7 @@ task filter {
 	output {
 		File nodup_bam = glob("*.bam")[0]
 		File nodup_bai = glob("*.bai")[0]
-		File samstat_qc = glob("*.samstat.qc")[0]
+		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
 	}

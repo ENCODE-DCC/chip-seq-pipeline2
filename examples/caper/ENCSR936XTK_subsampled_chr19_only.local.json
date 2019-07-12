@@ -1,0 +1,32 @@
+{
+    "chip.pipeline_type": "tf",
+    "chip.genome_tsv": "/mnt/lab_data/leepc12/caper_out/.caper_tmp/0522e0bda1b80e259d592c4130246a92/hg38_chr19_chrM_caper.local.tsv",
+    "chip.fastqs_rep1_R1": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/bbee4572886dd82651567add3792f51f/rep1-R1.subsampled.67.fastq.gz"
+    ],
+    "chip.fastqs_rep1_R2": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/ef353ead905b14491932461045fca975/rep1-R2.subsampled.67.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R1": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/997748d622e5a49870c295d082051779/rep2-R1.subsampled.67.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R2": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/cfbfbd8923cb45035c618222f39d655f/rep2-R2.subsampled.67.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep1_R1": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/ff351e8fcff30220f5692710d95f4099/ctl1-R1.subsampled.80.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep1_R2": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/f3d2760d6fc3641b1a754ee86728d460/ctl1-R2.subsampled.80.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep2_R1": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/bcb5d062bb7892ed83adafb1c1bc569a/ctl2-R1.subsampled.80.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep2_R2": [
+        "/mnt/lab_data/leepc12/caper_out/.caper_tmp/cba2fe60a4ebf2e26c9034541ff801ec/ctl2-R2.subsampled.80.fastq.gz"
+    ],
+    "chip.paired_end": true,
+    "chip.always_use_pooled_ctl": true,
+    "chip.title": "ENCSR936XTK (subsampled 1/67, chr19 and chrM Only)",
+    "chip.description": "ZNF143 ChIP-seq on human GM12878"
+}
