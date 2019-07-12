@@ -67,12 +67,13 @@ def bwa_se(fastq, ref_index_prefix, nth, out_dir):
     sai = bwa_aln(fastq, ref_index_prefix, nth, out_dir)
 
     cmd = 'bwa samse {} {} {} | '
-    cmd += 'samtools view -Su - | samtools sort - -o {}'
+    cmd += 'samtools view -Su - | samtools sort - -o {} -T {}'
     cmd = cmd.format(
         ref_index_prefix,
         sai,
         fastq,
-        bam)
+        bam,
+        prefix)
     run_shell_cmd(cmd)
 
     rm_f(sai)
@@ -118,16 +119,18 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, use_bwa_mem_for_pe, out_dir):
     # Remove bad CIGAR read pairs
     if get_num_lines(badcigar)>0:
         cmd3 = 'zcat -f {} | grep -v -F -f {} | '
-        cmd3 += 'samtools view -Su - | samtools sort - -o {}'
+        cmd3 += 'samtools view -Su - | samtools sort - -o {} -T {}'
         cmd3 = cmd3.format(
             sam,
             badcigar,
-            bam)
+            bam,
+            prefix)
     else:
-        cmd3 = 'samtools view -Su {} | samtools sort - -o {}'
+        cmd3 = 'samtools view -Su {} | samtools sort - -o {} -T {}'
         cmd3 = cmd3.format(
             sam,
-            bam)
+            bam,
+            prefix)
     run_shell_cmd(cmd3)
 
     rm_f(temp_files)

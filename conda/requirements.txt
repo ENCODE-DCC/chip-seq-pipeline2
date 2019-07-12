@@ -1,6 +1,6 @@
 # repos: biconda, conda-forge, defaults, r
 
-samtools ==1.7
+samtools ==1.2
 htslib ==1.4 # 1.5 in bioconda needed libbz2.so.1.0
 bedtools ==2.26.0 #2.22 # 2.21.0
 picard ==2.10.6
