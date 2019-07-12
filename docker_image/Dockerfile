@@ -146,14 +146,12 @@ RUN git clone --branch 0.2.8 --single-branch https://github.com/deeptools/pyBigW
 # Install deeptools 2.5.4 (python2)
 RUN pip install --no-cache-dir --no-dependencies deeptools==2.5.4
 
+# Install SAMstats 0.1.0 (Kundaje lab)
+RUN pip install --no-cache-dir SAMstats==0.1.0
+
 # Install Bwa 0.7.13
 RUN git clone --branch v0.7.13 --single-branch https://github.com/lh3/bwa.git && \
     cd bwa && make && cp bwa /usr/local/bin/ && cd ../ && rm -rf bwa*
-
-# Install SAMstats (Kundaje lab)
-RUN git clone --branch v0.1.0 https://github.com/kundajelab/SAMstats
-RUN cd SAMstats && chmod +x *.py *.sh && cd ../
-RUN ln -s SAMstats/SAMstats.sort.stat.filter.py
 
 # Prevent conflict with locally installed python outside of singularity container
 ENV PYTHONNOUSERSITE=True
