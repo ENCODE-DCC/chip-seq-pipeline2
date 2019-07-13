@@ -1093,6 +1093,7 @@ workflow chip {
 		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
+		frac_mito_qcs = filter.frac_mito_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
@@ -1100,6 +1101,7 @@ workflow chip {
 		ctl_nodup_samstat_qcs = filter_ctl.samstat_qc,
 		ctl_dup_qcs = filter_ctl.dup_qc,
 		ctl_pbc_qcs = filter_ctl.pbc_qc,
+		ctl_frac_mito_qcs = filter_ctl.frac_mito_qc,
 
 		jsd_plot = fingerprint.plot,
 		jsd_qcs = fingerprint.jsd_qcs,
@@ -1234,6 +1236,7 @@ task align {
 		File bam = glob("*.bam")[0]
 		File bai = glob("*.bai")[0]
 		File samstat_qc = glob("*.samstats.qc")[0]
+		File read_len_log = glob("*.read_length.txt")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1277,6 +1280,7 @@ task filter {
 		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
+		File frac_mito_qc = glob("*.frac_mito.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1751,10 +1755,12 @@ task qc_report {
 	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
 	Array[File?] pbc_qcs
+	Array[File?] frac_mito_qcs
 	Array[File?] ctl_samstat_qcs
 	Array[File?] ctl_nodup_samstat_qcs
 	Array[File?] ctl_dup_qcs
 	Array[File?] ctl_pbc_qcs
+	Array[File?] ctl_frac_mito_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
 	File? jsd_plot
@@ -1808,6 +1814,7 @@ task qc_report {
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
 			--pbc-qcs ${sep="_:_" pbc_qcs} \
+			--frac-mito-qcs ${sep="_:_" frac_mito_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
@@ -1816,6 +1823,7 @@ task qc_report {
 			--ctl-nodup-samstat-qcs ${sep='_:_' ctl_nodup_samstat_qcs} \
 			--ctl-dup-qcs ${sep='_:_' ctl_dup_qcs} \
 			--ctl-pbc-qcs ${sep='_:_' ctl_pbc_qcs} \
+			--ctl-frac-mito-qcs ${sep="_:_" ctl_frac_mito_qcs} \
 			${"--jsd-plot " + jsd_plot} \
 			--jsd-qcs ${sep='_:_' jsd_qcs} \
 			${"--idr-plot-ppr " + idr_plot_ppr} \
