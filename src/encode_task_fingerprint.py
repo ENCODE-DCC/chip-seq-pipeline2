@@ -34,8 +34,8 @@ def parse_arguments():
 def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
     # make bam index (.bai) first
     for bam in bams:
-        sambamba_index(bam, nth)
-    sambamba_index(ctl_bam, nth)
+        samtools_index(bam, nth)
+    samtools_index(ctl_bam, nth)
 
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bams[0])))
