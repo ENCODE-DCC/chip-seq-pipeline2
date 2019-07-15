@@ -2,8 +2,8 @@
     "test_bam2ta.pe_nodup_bam" : "chip-seq-pipeline-test-data/input/pe/nodup_bams/rep1/rep1-R1.subsampled.67.merged.nodup.bam",
     "test_bam2ta.se_nodup_bam" : "chip-seq-pipeline-test-data/input/se/nodup_bams/rep1/rep1.subsampled.25.merged.nodup.bam",
 
-    "test_bam2ta.ref_pe_ta" : "chip-seq-pipeline-test-data/ref_output/test_bam2ta/pe/rep1-R1.subsampled.67.merged.nodup.tagAlign.gz",
-    "test_bam2ta.ref_pe_ta_subsample" : "ref_output/test_bam2ta/pe/subsample/rep1-R1.subsampled.67.merged.nodup.17K.tagAlign.gz",
+    "test_bam2ta.ref_pe_ta" : "chip-seq-pipeline-test-data/ref_output/test_bam2ta/pe/v1.3.0/rep1-R1.subsampled.67.merged.nodup.tagAlign.gz",
+    "test_bam2ta.ref_pe_ta_subsample" : "ref_output/test_bam2ta/pe/v1.3.0/subsample/rep1-R1.subsampled.67.merged.nodup.17K.tagAlign.gz",
 
     "test_bam2ta.ref_se_ta" : "chip-seq-pipeline-test-data/ref_output/test_bam2ta/se/rep1.subsampled.25.merged.nodup.tagAlign.gz",
     "test_bam2ta.ref_se_ta_subsample" : "ref_output/test_bam2ta/se/subsample/rep1.subsampled.25.merged.nodup.17K.tagAlign.gz",

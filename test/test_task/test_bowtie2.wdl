@@ -52,8 +52,8 @@ workflow test_bowtie2 {
 			'se_bowtie2',
 		],
 		files = [
-			pe_bowtie2.flagstat_qc,
-			se_bowtie2.flagstat_qc,
+			pe_bowtie2.samstat_qc,
+			se_bowtie2.samstat_qc,
 		],
 		ref_files = [
 			ref_pe_flagstat,
