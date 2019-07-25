@@ -54,7 +54,7 @@ workflow chip {
 	Boolean align_only = false 		# disable all post-align analysis (peak-calling, overlap, idr, ...)
 	Boolean true_rep_only = false 	# disable all analyses involving pseudo replicates (including overlap/idr)
 	Boolean enable_count_signal_track = false 		# generate count signal track
-	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
+	Boolean enable_fingerprint = true # no JSD plot generation (deeptools fingerprint)
 
 	# parameters for aligner and filter
 	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL (use bwa mem instead of bwa aln/sam)
@@ -709,7 +709,7 @@ workflow chip {
 	Boolean has_input_of_fingerprint = defined(blacklist_) && #basename(blacklist_) != 'null' &&
 		length(select_all(nodup_bam_))==num_rep &&
 		num_ctl>0 && defined(ctl_nodup_bam_[0])
-	if ( has_input_of_fingerprint && !disable_fingerprint ) {
+	if ( has_input_of_fingerprint && enable_fingerprint ) {
 		# fingerprint and JS-distance plot
 		call fingerprint { input :
 			nodup_bams = nodup_bam_,

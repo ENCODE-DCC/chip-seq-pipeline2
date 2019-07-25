@@ -161,7 +161,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.disable_fingerprint` | false | Disable deeptools fingerprint (JS distance)
+`chip.enable_fingerprint` | true | Enable deeptools fingerprint (JS distance)
 `chip.enable_count_signal_track` | false | Enable count signal track generation
 `chip.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 

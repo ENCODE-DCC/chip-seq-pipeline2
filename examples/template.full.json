@@ -79,7 +79,7 @@
     "chip.idr_thresh" : 0.05,
     "chip.spp_cap_num_peak" : 300000,
 
-    "chip.disable_fingerprint" : false,
+    "chip.enable_fingerprint" : true,
     "chip.enable_count_signal_track" : false,
     "chip.keep_irregular_chr_in_bfilt_peak" : false,
 
@@ -116,5 +116,9 @@
     "chip.call_peak_cpu" : 2,
     "chip.call_peak_mem_mb" : 16000,
     "chip.call_peak_time_hr" : 72,
-    "chip.call_peak_disks" : "local-disk 200 HDD"
+    "chip.call_peak_disks" : "local-disk 200 HDD",
+
+    "chip.macs2_signal_track_mem_mb" : 16000,
+    "chip.macs2_signal_track_time_hr" : 24,
+    "chip.macs2_signal_track_disks" : "local-disk 200 HDD"
 }
