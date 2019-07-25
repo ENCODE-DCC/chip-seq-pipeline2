@@ -448,10 +448,23 @@ workflow chip {
 		File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
 
 		# convert unfiltered BAM to a special TAG-ALIGN for xcor 
-		Boolean has_input_of_bam2ta_no_filt = has_output_of_align || defined(align.bam)
-		if ( has_input_of_bam2ta_no_filt ) {
-			call bam2ta as bam2ta_no_filt { input :
+		Boolean has_input_of_bam2ta_no_dedup = has_output_of_align || defined(align.bam)
+		if ( has_input_of_bam2ta_no_dedup ) {
+			call filter as filter_no_dedup { input :
 				bam = bam_,
+				paired_end = paired_end_,
+				dup_marker = dup_marker,
+				mapq_thresh = mapq_thresh,
+				no_dup_removal = true,
+				mito_chr_name = mito_chr_name,
+
+				cpu = filter_cpu,
+				mem_mb = filter_mem_mb,
+				time_hr = filter_time_hr,
+				disks = filter_disks,
+			}
+			call bam2ta as bam2ta_no_dedup { input :
+				bam = filter.nodup_bam,  # output name is nodup but it's not deduped
 				paired_end = paired_end_,
 				subsample = 0,
 				regex_grep_v_ta = regex_filter_reads,
@@ -503,9 +516,22 @@ workflow chip {
 				time_hr = align_time_hr,
 				disks = align_disks,
 			}
-			# no bam filtering for xcor
-			call bam2ta as bam2ta_no_filt_R1 { input :
+			# no bam deduping for xcor
+			call filter as filter_R1 { input :
 				bam = align_R1.bam,
+				paired_end = false,
+				dup_marker = dup_marker,
+				mapq_thresh = mapq_thresh,
+				no_dup_removal = true,
+				mito_chr_name = mito_chr_name,
+
+				cpu = filter_cpu,
+				mem_mb = filter_mem_mb,
+				time_hr = filter_time_hr,
+				disks = filter_disks,
+			}
+			call bam2ta as bam2ta_no_dedup_R1 { input :
+				bam = filter_R1.nodup_bam,  # it's named as nodup bam but it's not deduped but just filtered
 				paired_end = false,
 				subsample = 0,
 				regex_grep_v_ta = regex_filter_reads,
@@ -522,10 +548,10 @@ workflow chip {
 		# if not starting from fastqs, keep using old method
 		#  (mapping with both ends for tag-aligns to be used for xcor)
 		# subsample tagalign (non-mito) and cross-correlation analysis
-		File? ta_xcor = if defined(bam2ta_no_filt_R1.ta) then bam2ta_no_filt_R1.ta
-			else if defined(bam2ta_no_filt.ta) then bam2ta_no_filt.ta
+		File? ta_xcor = if defined(bam2ta_no_dedup_R1.ta) then bam2ta_no_dedup_R1.ta
+			else if defined(bam2ta_no_dedup.ta) then bam2ta_no_dedup.ta
 			else ta_
-		Boolean? paired_end_xcor = if defined(bam2ta_no_filt_R1.ta) then false
+		Boolean? paired_end_xcor = if defined(bam2ta_no_dedup_R1.ta) then false
 			else paired_end_
 
 		Boolean has_input_of_xcor = defined(ta_xcor)
@@ -1093,7 +1119,6 @@ workflow chip {
 		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
 		pbc_qcs = filter.pbc_qc,
-		frac_mito_qcs = filter.frac_mito_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
@@ -1101,7 +1126,6 @@ workflow chip {
 		ctl_nodup_samstat_qcs = filter_ctl.samstat_qc,
 		ctl_dup_qcs = filter_ctl.dup_qc,
 		ctl_pbc_qcs = filter_ctl.pbc_qc,
-		ctl_frac_mito_qcs = filter_ctl.frac_mito_qc,
 
 		jsd_plot = fingerprint.plot,
 		jsd_qcs = fingerprint.jsd_qcs,
@@ -1280,7 +1304,6 @@ task filter {
 		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
 		File pbc_qc = glob("*.pbc.qc")[0]
-		File frac_mito_qc = glob("*.frac_mito.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1755,12 +1778,10 @@ task qc_report {
 	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
 	Array[File?] pbc_qcs
-	Array[File?] frac_mito_qcs
 	Array[File?] ctl_samstat_qcs
 	Array[File?] ctl_nodup_samstat_qcs
 	Array[File?] ctl_dup_qcs
 	Array[File?] ctl_pbc_qcs
-	Array[File?] ctl_frac_mito_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
 	File? jsd_plot
@@ -1814,7 +1835,6 @@ task qc_report {
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
 			--pbc-qcs ${sep="_:_" pbc_qcs} \
-			--frac-mito-qcs ${sep="_:_" frac_mito_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
@@ -1823,7 +1843,6 @@ task qc_report {
 			--ctl-nodup-samstat-qcs ${sep='_:_' ctl_nodup_samstat_qcs} \
 			--ctl-dup-qcs ${sep='_:_' ctl_dup_qcs} \
 			--ctl-pbc-qcs ${sep='_:_' ctl_pbc_qcs} \
-			--ctl-frac-mito-qcs ${sep="_:_" ctl_frac_mito_qcs} \
 			${"--jsd-plot " + jsd_plot} \
 			--jsd-qcs ${sep='_:_' jsd_qcs} \
 			${"--idr-plot-ppr " + idr_plot_ppr} \
