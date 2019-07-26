@@ -63,7 +63,9 @@ workflow chip {
 	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
 	String dup_marker = 'picard'	# picard, sambamba
 	Boolean no_dup_removal = false	# keep all dups in final BAM
-	Int mapq_thresh = 30			# threshold for low MAPQ reads removal
+	Int? mapq_thresh 				# threshold for low MAPQ reads removal
+	Int mapq_thresh_bwa = 30
+	Int mapq_thresh_bowtie2 = 255	
 	String mito_chr_name = 'chrM' 	# name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
 	String regex_filter_reads = '' 	# Perl-style regular expression pattern for chr name to filter out reads
 									# those reads will be excluded from peak calling
@@ -232,6 +234,8 @@ workflow chip {
 	File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
 		else if length(blacklists) > 0 then blacklists[0]
 		else blacklist2_
+	String? mito_chr_name_ = if defined(mito_chr_name) then mito_chr_name
+		else read_genome_tsv.mito_chr_name		
 
 	# read additional annotation data
 	File? tss_ = if defined(tss) then tss
@@ -263,6 +267,8 @@ workflow chip {
 						else 'p.value'
 	Int cap_num_peak_ = if peak_caller_ == 'spp' then select_first([cap_num_peak, cap_num_peak_spp])
 		else select_first([cap_num_peak, cap_num_peak_macs2])
+	Int mapq_thresh_ = if aligner=='bowtie2' then select_first([mapq_thresh, mapq_thresh_bowtie2])
+						else select_first([mapq_thresh, mapq_thresh_bwa])
 
 	# temporary 2-dim fastqs array [rep_id][merge_id]
 	Array[Array[File]] fastqs_R1 = 
@@ -393,6 +399,7 @@ workflow chip {
 		if ( has_input_of_align && !has_output_of_align ) {
 			call align { input :
 				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
@@ -417,9 +424,9 @@ workflow chip {
 				bam = bam_,
 				paired_end = paired_end_,
 				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh,
+				mapq_thresh = mapq_thresh_,
 				no_dup_removal = no_dup_removal,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
@@ -437,7 +444,7 @@ workflow chip {
 				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = paired_end_,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -454,9 +461,9 @@ workflow chip {
 				bam = bam_,
 				paired_end = paired_end_,
 				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh,
+				mapq_thresh = mapq_thresh_,
 				no_dup_removal = true,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
@@ -468,7 +475,7 @@ workflow chip {
 				paired_end = paired_end_,
 				subsample = 0,
 				regex_grep_v_ta = regex_filter_reads,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -504,6 +511,7 @@ workflow chip {
 			}
 			call align as align_R1 { input :
 				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
@@ -521,9 +529,9 @@ workflow chip {
 				bam = align_R1.bam,
 				paired_end = false,
 				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh,
+				mapq_thresh = mapq_thresh_,
 				no_dup_removal = true,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
@@ -535,7 +543,7 @@ workflow chip {
 				paired_end = false,
 				subsample = 0,
 				regex_grep_v_ta = regex_filter_reads,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -560,7 +568,7 @@ workflow chip {
 				ta = ta_xcor,
 				paired_end = paired_end_xcor,
 				subsample = xcor_subsample_reads,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 				chip_seq_type = pipeline_type,
 				exclusion_range_min = xcor_exclusion_range_min,
 				exclusion_range_max = xcor_exclusion_range_max,
@@ -607,6 +615,7 @@ workflow chip {
 		if ( has_input_of_align_ctl && !has_output_of_align_ctl ) {
 			call align as align_ctl { input :
 				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
@@ -631,9 +640,9 @@ workflow chip {
 				bam = ctl_bam_,
 				paired_end = ctl_paired_end_,
 				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh,
+				mapq_thresh = mapq_thresh_,
 				no_dup_removal = no_dup_removal,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
@@ -651,7 +660,7 @@ workflow chip {
 				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = ctl_paired_end_,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -1217,6 +1226,7 @@ task trim_fastq { # trim fastq (for PE R1 only)
 
 task align {
 	String aligner
+	String mito_chr_name
 	File? custom_align_py	
 	File? idx_tar			# reference index tar
 	File? fastq_R1 			# [read_end_id]
@@ -1254,6 +1264,7 @@ task align {
 
 		python $(which encode_task_post_align.py) \
 			${fastq_R1} $(ls *.bam) \
+			${"--mito-chr-name " + mito_chr_name} \
 			${"--nth " + cpu}
 	}
 	output {
@@ -1898,6 +1909,7 @@ task read_genome_tsv {
 		touch custom_aligner_idx_tar
 		touch tss tss_enrich # for backward compatibility
 		touch dnase prom enh reg2map reg2map_bed roadmap_meta
+		touch mito_chr_name
 
 		python <<CODE
 		import os
@@ -1919,7 +1931,8 @@ task read_genome_tsv {
 		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
 		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
-		# annotation data
+		String? mito_chr_name = if size('mito_chr_name')==0 then null_s else read_string('mito_chr_name')
+		# optional data
 		String? tss = if size('tss')!=0 then read_string('tss')
 			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
 		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')
