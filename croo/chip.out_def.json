@@ -2,7 +2,13 @@
   "chip.fingerprint": {
     "plot": {
       "path": "qc/${basename}",
-      "table": "QC and logs/Deeptools fingerprint plot"
+      "table": "QC and logs/jensen-Shannon distance plot"
+    }
+  },
+  "chip.jsd": {
+    "plot": {
+      "path": "qc/${basename}",
+      "table": "QC and logs/jensen-Shannon distance plot"
     }
   },
   "chip.bwa_ctl": {
@@ -20,9 +26,9 @@
       "path": "align/ctl${i+1}/${basename}",
       "table": "Alignment/Control ${i+1}/Raw BAM from aligner"
     },
-    "flagstat_qc": {
+    "samstat_qc": {
       "path": "qc/ctl${i+1}/${basename}",
-      "table": "QC and logs/Control ${i+1}/Samtools flagstat for Raw BAM"
+      "table": "QC and logs/Control ${i+1}/SAMstats log for Raw BAM"
     }
   },
   "chip.filter_ctl": {
@@ -32,7 +38,11 @@
     },
     "flagstat_qc": {
       "path": "qc/ctl${i+1}/${basename}",
-      "table": "QC and logs/Control ${i+1}/Samtools flagstat log for filtered BAM"
+      "table": "QC and logs/Control ${i+1}/Samtools flagstat for filtered BAM"
+    },
+    "samstat_qc": {
+      "path": "qc/ctl${i+1}/${basename}",
+      "table": "QC and logs/Control ${i+1}/SAMstats log for filtered BAM"
     },
     "dup_qc": {
       "path": "qc/ctl${i+1}/${basename}",
@@ -41,6 +51,10 @@
     "pbc_qc": {
       "path": "qc/ctl${i+1}/${basename}",
       "table": "QC and logs/Control ${i+1}/PBC QC for filtered BAM"
+    },
+    "lib_complexity_qc": {
+      "path": "qc/ctl${i+1}/${basename}",
+      "table": "QC and logs/Control ${i+1}/Library complexity QC for filtered BAM"
     },
     "mito_dup_log": {
       "path": "qc/ctl${i+1}/${basename}",
@@ -74,9 +88,9 @@
       "path": "align/rep${i+1}/${basename}",
       "table": "Alignment/Replicate ${i+1}/Raw BAM from aligner"
     },
-    "flagstat_qc": {
+    "samstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat for Raw BAM"
+      "table": "QC and logs/Replicate ${i+1}/SAMstats log for Raw BAM"
     }
   },
   "chip.filter": {
@@ -86,7 +100,11 @@
     },
     "flagstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
-      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat log for filtered BAM"
+      "table": "QC and logs/Replicate ${i+1}/Samtools flagstat for filtered BAM"
+    },
+    "samstat_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/SAMstats log for filtered BAM"
     },
     "dup_qc": {
       "path": "qc/rep${i+1}/${basename}",
@@ -95,6 +113,10 @@
     "pbc_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/PBC QC for filtered BAM"
+    },
+    "lib_complexity_qc": {
+      "path": "qc/rep${i+1}/${basename}",
+      "table": "QC and logs/Replicate ${i+1}/Library complexity QC for filtered BAM"
     },
     "mito_dup_log": {
       "path": "qc/rep${i+1}/${basename}",
