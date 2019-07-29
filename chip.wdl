@@ -55,6 +55,7 @@ workflow chip {
 	Boolean true_rep_only = false 	# disable all analyses involving pseudo replicates (including overlap/idr)
 	Boolean enable_count_signal_track = false 		# generate count signal track
 	Boolean enable_fingerprint = true # no JSD plot generation (deeptools fingerprint)
+	Boolean enable_gc_bias = true
 
 	# parameters for aligner and filter
 	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL (use bwa mem instead of bwa aln/sam)
@@ -499,6 +500,14 @@ workflow chip {
 			call count_signal_track { input :
 				ta = ta_,
 				chrsz = chrsz_,
+			}
+		}
+
+		if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) && defined(align.read_len_log) ) {
+			call gc_bias { input :
+				read_len_log = align.read_len_log,
+				nodup_bam = nodup_bam_,
+				ref_fa = ref_fa_,
 			}
 		}
 
@@ -1012,8 +1021,8 @@ workflow chip {
 	}
 
 	# overlap on pseudo-replicates (pr1, pr2) for each true replicate
-	scatter( i in range(num_rep) ) {
-		if ( !align_only && !true_rep_only ) {
+	if ( !align_only && !true_rep_only ) {
+		scatter( i in range(num_rep) ) {
 			call overlap as overlap_pr { input :
 				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
 				peak1 = peak_pr1_[i],
@@ -1029,8 +1038,8 @@ workflow chip {
 		}
 	}
 
-	scatter( i in range(num_rep) ) {
-		if ( !align_only && !true_rep_only && enable_idr ) {
+	if ( !align_only && !true_rep_only && enable_idr ) {
+		scatter( i in range(num_rep) ) {
 			# IDR on pseduo replicates
 			call idr as idr_pr { input :
 				prefix = "rep"+(i+1)+"-pr1_vs_rep"+(i+1)+"-pr2",
@@ -1127,14 +1136,14 @@ workflow chip {
 		samstat_qcs = align.samstat_qc,
 		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
-		pbc_qcs = filter.pbc_qc,
+		lib_complexity_qcs = filter.lib_complexity_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
 		ctl_samstat_qcs = align_ctl.samstat_qc,
 		ctl_nodup_samstat_qcs = filter_ctl.samstat_qc,
 		ctl_dup_qcs = filter_ctl.dup_qc,
-		ctl_pbc_qcs = filter_ctl.pbc_qc,
+		ctl_lib_complexity_qcs = filter_ctl.lib_complexity_qc,
 
 		jsd_plot = fingerprint.plot,
 		jsd_qcs = fingerprint.jsd_qcs,
@@ -1157,6 +1166,8 @@ workflow chip {
 		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
+
+		gc_plots = gc_bias.gc_plot,
 
 		peak_region_size_qcs = call_peak.peak_region_size_qc,
 		peak_region_size_plots = call_peak.peak_region_size_plot,
@@ -1289,7 +1300,7 @@ task filter {
 									# sambamba markdup (sambamba)
 	Int mapq_thresh				# threshold for low MAPQ reads removal
 	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
-									# dup.qc and pbc.qc will be empty files
+									# dup.qc and lib_complexity.qc will be empty files
 									# and nodup_bam in the output is 
 									# filtered bam with dupes	
 	String mito_chr_name
@@ -1314,7 +1325,7 @@ task filter {
 		File nodup_bai = glob("*.bai")[0]
 		File samstat_qc = glob("*.samstats.qc")[0]
 		File dup_qc = glob("*.dup.qc")[0]
-		File pbc_qc = glob("*.pbc.qc")[0]
+		File lib_complexity_qc = glob("*.lib_complexity.qc")[0]
 	}
 	runtime {
 		cpu : cpu
@@ -1766,6 +1777,29 @@ task reproducibility {
 	}	
 }
 
+task gc_bias {
+	File read_len_log
+	File nodup_bam
+	File ref_fa
+
+	command {
+		python $(which encode_task_gc_bias.py) \
+			${"--read-len-log " + read_len_log} \
+			${"--nodup-bam " + nodup_bam} \
+			${"--ref-fa " + ref_fa}
+	}
+	output {
+		File gc_plot = glob("*.gc_plot.png")[0]
+		File gc_log = glob("*.gc.txt")[0]
+	}
+	runtime {
+		cpu : 1
+		memory : "8000 MB"
+		time : 1
+		disks : "local-disk 100 HDD"
+	}
+}
+
 # gather all outputs and generate 
 # - qc.html		: organized final HTML report
 # - qc.json		: all QCs
@@ -1788,17 +1822,17 @@ task qc_report {
 	Array[File?] samstat_qcs
 	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
-	Array[File?] pbc_qcs
+	Array[File?] lib_complexity_qcs
 	Array[File?] ctl_samstat_qcs
 	Array[File?] ctl_nodup_samstat_qcs
 	Array[File?] ctl_dup_qcs
-	Array[File?] ctl_pbc_qcs
+	Array[File?] ctl_lib_complexity_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
 	File? jsd_plot
 	Array[File]? jsd_qcs
 	Array[File]? idr_plots
-	Array[File?] idr_plots_pr
+	Array[File]? idr_plots_pr
 	File? idr_plot_ppr
 	Array[File?] frip_qcs
 	Array[File?] frip_qcs_pr1
@@ -1807,13 +1841,15 @@ task qc_report {
 	File? frip_qc_ppr1 
 	File? frip_qc_ppr2 
 	Array[File]? frip_idr_qcs
-	Array[File?] frip_idr_qcs_pr
+	Array[File]? frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
 	Array[File]? frip_overlap_qcs
-	Array[File?] frip_overlap_qcs_pr
+	Array[File]? frip_overlap_qcs_pr
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
+
+	Array[File?] gc_plots
 
 	Array[File?] peak_region_size_qcs
 	Array[File?] peak_region_size_plots
@@ -1845,7 +1881,7 @@ task qc_report {
 			--samstat-qcs ${sep="_:_" samstat_qcs} \
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
-			--pbc-qcs ${sep="_:_" pbc_qcs} \
+			--lib_complexity-qcs ${sep="_:_" lib_complexity_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
@@ -1853,7 +1889,7 @@ task qc_report {
 			--ctl-samstat-qcs ${sep='_:_' ctl_samstat_qcs} \
 			--ctl-nodup-samstat-qcs ${sep='_:_' ctl_nodup_samstat_qcs} \
 			--ctl-dup-qcs ${sep='_:_' ctl_dup_qcs} \
-			--ctl-pbc-qcs ${sep='_:_' ctl_pbc_qcs} \
+			--ctl-lib_complexity-qcs ${sep='_:_' ctl_lib_complexity_qcs} \
 			${"--jsd-plot " + jsd_plot} \
 			--jsd-qcs ${sep='_:_' jsd_qcs} \
 			${"--idr-plot-ppr " + idr_plot_ppr} \
@@ -1871,6 +1907,7 @@ task qc_report {
 			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
 			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
 			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
+			--gc-plots ${sep="_:_" gc_plots} \
 			--peak-region-size-qcs ${sep="_:_" peak_region_size_qcs} \
 			--peak-region-size-plots ${sep="_:_" peak_region_size_plots} \
 			--num-peak-qcs ${sep="_:_" num_peak_qcs} \
