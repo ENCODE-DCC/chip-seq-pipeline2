@@ -122,4 +122,5 @@ resume.*.json
 
 tmp_db*
 *.local.json
+temp_db*
 
