@@ -1132,6 +1132,7 @@ workflow chip {
 		peak_caller = peak_caller_,
 		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
+		pval_thresh = pval_thresh,
 
 		samstat_qcs = align.samstat_qc,
 		nodup_samstat_qcs = filter.samstat_qc,
@@ -1878,10 +1879,11 @@ task qc_report {
 			--peak-caller ${peak_caller} \
 			${"--cap-num-peak " + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
+			--pval-thresh ${pval_thresh} \
 			--samstat-qcs ${sep="_:_" samstat_qcs} \
 			--nodup-samstat-qcs ${sep="_:_" nodup_samstat_qcs} \
 			--dup-qcs ${sep="_:_" dup_qcs} \
-			--lib_complexity-qcs ${sep="_:_" lib_complexity_qcs} \
+			--lib-complexity-qcs ${sep="_:_" lib_complexity_qcs} \
 			--xcor-plots ${sep="_:_" xcor_plots} \
 			--xcor-scores ${sep="_:_" xcor_scores} \
 			--idr-plots ${sep="_:_" idr_plots} \
@@ -1889,7 +1891,7 @@ task qc_report {
 			--ctl-samstat-qcs ${sep='_:_' ctl_samstat_qcs} \
 			--ctl-nodup-samstat-qcs ${sep='_:_' ctl_nodup_samstat_qcs} \
 			--ctl-dup-qcs ${sep='_:_' ctl_dup_qcs} \
-			--ctl-lib_complexity-qcs ${sep='_:_' ctl_lib_complexity_qcs} \
+			--ctl-lib-complexity-qcs ${sep='_:_' ctl_lib_complexity_qcs} \
 			${"--jsd-plot " + jsd_plot} \
 			--jsd-qcs ${sep='_:_' jsd_qcs} \
 			${"--idr-plot-ppr " + idr_plot_ppr} \
