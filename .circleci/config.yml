@@ -55,7 +55,7 @@ jobs:
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull quay.io/encode-dcc/chip-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
-            docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f docker_image/Dockerfile .
+            docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f dev/docker_image/Dockerfile .
             docker push ${TAG}
             # docker push quay.io/encode-dcc/chip-seq-pipeline:template
             docker logout
@@ -68,7 +68,7 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-            cd test/test_task/
+            cd dev/test/test_task/
             rm -rf chip-seq-pipeline-test-data
             git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data
             for wdl in test_*.wdl
@@ -90,7 +90,7 @@ jobs:
           command: |
             source ${BASH_ENV}
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            cd test/test_workflow/
+            cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip.sh ENCSR000DYI_subsampled_chr19_only.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
@@ -105,7 +105,7 @@ jobs:
           command: |
             source ${BASH_ENV}
             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            cd test/test_workflow/
+            cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
