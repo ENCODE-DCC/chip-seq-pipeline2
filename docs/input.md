@@ -138,6 +138,8 @@ Parameter|Default|Description
 ---------|-------|-----------
 `chip.xcor_pe_trim_bp` | 50 | Trim R1 of paired ended fastqs for cross-correlation analysis only. Trimmed fastqs will not be used for any other analyses
 `chip.use_filt_pe_ta_for_xcor` | false | Use filtered PE BAM/TAG-ALIGN for cross-correlation analysis ignoring the above trimmed R1 fastq
+`chip.xcor_exclusion_range_min` | -500 | Exclusion minimum for cross-corr. analysis. See [description for `-x=<min>:<max>`](https://github.com/kundajelab/phantompeakqualtools) for details. Make sure that it's consistent with default strand shift `-s=-500:5:1500` in `phantompeakqualtools`.
+`chip.xcor_exclusion_range_max` |  | Exclusion minimum for cross-corr. analysis. If not defined default value of `max(read length + 10, 50)` for TF and `max(read_len + 10, 100)` for histone are used.
 
 ## Optional control parameters
 
