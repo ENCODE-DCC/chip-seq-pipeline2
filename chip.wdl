@@ -3,7 +3,7 @@
 
 #CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
 #CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
-#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.out_def.json
+#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.json
 
 workflow chip {
 	String pipeline_ver = 'v1.2.2'
