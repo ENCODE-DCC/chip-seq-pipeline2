@@ -16,4 +16,6 @@ diff ../../atac-seq-pipeline/src/encode_task_qc_report.py encode_task_qc_report.
 diff ../../atac-seq-pipeline/src/encode_task_reproducibility.py encode_task_reproducibility.py 
 diff ../../atac-seq-pipeline/src/encode_task_spr.py encode_task_spr.py 
 diff ../../atac-seq-pipeline/src/encode_task_xcor.py encode_task_xcor.py
+diff ../../atac-seq-pipeline/src/encode_task_jsd.py encode_task_jsd.py
+diff ../../atac-seq-pipeline/src/encode_task_gc_bias.py encode_task_gc_bias.py
 

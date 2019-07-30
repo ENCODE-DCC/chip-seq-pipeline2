@@ -13,10 +13,12 @@ def parse_arguments():
                                         description='')
     parser.add_argument('bams', nargs='+', type=str,
                         help='List of paths for filtered experiment BAM files.')
-    parser.add_argument('--ctl-bam', type=str,
+    parser.add_argument('--ctl-bam', type=str, default='',
                         help='Path for filtered control BAM file.')
     parser.add_argument('--blacklist', type=str, default='',
                         help='Blacklist BED file.')
+    parser.add_argument('--mapq-thresh', default=30, type=int,
+                        help='Threshold for low MAPQ reads removal.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -31,17 +33,17 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
+def fingerprint(bams, ctl_bam, blacklist, mapq_thresh, nth, out_dir):
     # make bam index (.bai) first
     for bam in bams:
         samtools_index(bam, nth)
-    samtools_index(ctl_bam, nth)
+    if ctl_bam:
+        samtools_index(ctl_bam, nth)
 
     prefix = os.path.join(out_dir,
         os.path.basename(strip_ext_bam(bams[0])))
     plot_png =  '{}.jsd_plot.png'.format(prefix)
     tmp_log = '{}.jsd.tmp'.format(prefix)
-    mapq_thresh = 30
 
     labels = []
     bam_paths = []
@@ -53,10 +55,13 @@ def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
         labels.append('rep{}'.format(i+1)) # repN
         bam_paths.append(bam)
     # add control
-    labels.append('ctl1')
-    bam_paths.append(ctl_bam)
+    if ctl_bam:
+        labels.append('ctl1')
+        bam_paths.append(ctl_bam)
 
-    cmd = 'LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 plotFingerprint -b {} --JSDsample {} '
+    cmd = 'LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 plotFingerprint -b {} '
+    if ctl_bam:
+        cmd += '--JSDsample {} '.format(ctl_bam)
     cmd += '--labels {} '
     cmd += '--outQualityMetrics {} '
     cmd += '--minMappingQuality {} '
@@ -67,7 +72,6 @@ def fingerprint(bams, ctl_bam, blacklist, nth, out_dir):
     cmd += '--plotFile {}'
     cmd = cmd.format(
         ' '.join(bam_paths),
-        ctl_bam,
         ' '.join(labels),
         tmp_log,
         mapq_thresh,
@@ -98,7 +102,8 @@ def main():
 
     log.info('Plotting Fingerprint on BAMs and calculating JSD...')
     plot_png, jsd_qcs = fingerprint(
-        args.bams, args.ctl_bam, args.blacklist, args.nth, args.out_dir)
+        args.bams, args.ctl_bam, args.blacklist, args.mapq_thresh,
+        args.nth, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)

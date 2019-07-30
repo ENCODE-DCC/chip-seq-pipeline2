@@ -22,6 +22,7 @@ workflow chip {
 	File? genome_tsv 				# reference genome data TSV file including
 									# all genome-specific file paths and parameters
 	# individual genome parameters
+	String? genome_name				# genome name
 	File? ref_fa					# reference fasta (*.fa.gz)
 	File? bwa_idx_tar 				# bwa index tar (uncompressed .tar)
 	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed .tar)
@@ -29,6 +30,7 @@ workflow chip {
 	File? chrsz 					# 2-col chromosome sizes file
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
 	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
+	String? mito_chr_name
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 	File? tss 						# TSS BED file
 	File? dnase 					# open chromatin region BED file
@@ -54,11 +56,11 @@ workflow chip {
 	Boolean align_only = false 		# disable all post-align analysis (peak-calling, overlap, idr, ...)
 	Boolean true_rep_only = false 	# disable all analyses involving pseudo replicates (including overlap/idr)
 	Boolean enable_count_signal_track = false 		# generate count signal track
-	Boolean enable_fingerprint = true # no JSD plot generation (deeptools fingerprint)
+	Boolean enable_jsd = true 		# enable JSD plot generation (deeptools fingerprint)
 	Boolean enable_gc_bias = true
 
 	# parameters for aligner and filter
-	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL (use bwa mem instead of bwa aln/sam)
+	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL and BWA ONLY (use bwa mem instead of bwa aln/sam)
 									# available only for PE dataset with READ_LEN>=70bp
 	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
 	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
@@ -67,7 +69,6 @@ workflow chip {
 	Int? mapq_thresh 				# threshold for low MAPQ reads removal
 	Int mapq_thresh_bwa = 30
 	Int mapq_thresh_bowtie2 = 255	
-	String mito_chr_name = 'chrM' 	# name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
 	String regex_filter_reads = '' 	# Perl-style regular expression pattern for chr name to filter out reads
 									# those reads will be excluded from peak calling
 									# e.g. chrM
@@ -111,10 +112,10 @@ workflow chip {
 
 	Int spr_mem_mb = 16000
 
-	Int fingerprint_cpu = 2
-	Int fingerprint_mem_mb = 12000
-	Int fingerprint_time_hr = 6
-	String fingerprint_disks = "local-disk 200 HDD"
+	Int jsd_cpu = 2
+	Int jsd_mem_mb = 12000
+	Int jsd_time_hr = 6
+	String jsd_disks = "local-disk 200 HDD"
 
 	Int xcor_cpu = 2
 	Int xcor_mem_mb = 16000	
@@ -237,6 +238,9 @@ workflow chip {
 		else blacklist2_
 	String? mito_chr_name_ = if defined(mito_chr_name) then mito_chr_name
 		else read_genome_tsv.mito_chr_name		
+	String? genome_name_ = if defined(genome_name) then genome_name
+		else if defined(read_genome_tsv.genome_name) then read_genome_tsv.genome_name
+		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None'])),
 
 	# read additional annotation data
 	File? tss_ = if defined(tss) then tss
@@ -724,20 +728,21 @@ workflow chip {
 		}
 	}
 
-	Boolean has_input_of_fingerprint = defined(blacklist_) && #basename(blacklist_) != 'null' &&
+	Boolean has_input_of_jsd = defined(blacklist_) && #basename(blacklist_) != 'null' &&
 		length(select_all(nodup_bam_))==num_rep &&
 		num_ctl>0 && defined(ctl_nodup_bam_[0])
-	if ( has_input_of_fingerprint && enable_fingerprint ) {
+	if ( has_input_of_jsd && enable_jsd ) {
 		# fingerprint and JS-distance plot
-		call fingerprint { input :
+		call jsd { input :
 			nodup_bams = nodup_bam_,
 			ctl_bam = ctl_nodup_bam_[0], # use first control only
 			blacklist = blacklist_,
+			mapq_thresh = mapq_thresh_,
 
-			cpu = fingerprint_cpu,
-			mem_mb = fingerprint_mem_mb,
-			time_hr = fingerprint_time_hr,
-			disks = fingerprint_disks,
+			cpu = jsd_cpu,
+			mem_mb = jsd_mem_mb,
+			time_hr = jsd_time_hr,
+			disks = jsd_disks,
 		}
 	}
 
@@ -1124,7 +1129,7 @@ workflow chip {
 		pipeline_ver = pipeline_ver,
 		title = title,
 		description = description,
-		genome = basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None'])),
+		genome = genome_name_,
 		paired_ends = paired_end_,
 		ctl_paired_ends = ctl_paired_end_,
 		pipeline_type = pipeline_type,
@@ -1146,8 +1151,8 @@ workflow chip {
 		ctl_dup_qcs = filter_ctl.dup_qc,
 		ctl_lib_complexity_qcs = filter_ctl.lib_complexity_qc,
 
-		jsd_plot = fingerprint.plot,
-		jsd_qcs = fingerprint.jsd_qcs,
+		jsd_plot = jsd.plot,
+		jsd_qcs = jsd.jsd_qcs,
 
 		frip_qcs = call_peak.frip_qc,
 		frip_qcs_pr1 = call_peak_pr1.frip_qc,
@@ -1453,10 +1458,11 @@ task xcor {
 	}
 }
 
-task fingerprint {
+task jsd {
 	Array[File?] nodup_bams
 	File ctl_bam	 		# one control bam is required
 	File blacklist
+	Float mapq_thresh
 
 	Int cpu
 	Int mem_mb
@@ -1464,9 +1470,10 @@ task fingerprint {
 	String disks
 
 	command {
-		python $(which encode_task_fingerprint.py) \
+		python $(which encode_task_jsd.py) \
 			${sep=' ' nodup_bams} \
 			--ctl-bam ${ctl_bam} \
+			${"--mapq-thresh "+ mapq_thresh} \
 			${"--blacklist "+ blacklist} \
 			${"--nth " + cpu}
 	}
@@ -1944,6 +1951,7 @@ task read_genome_tsv {
 	String? null_s
 	command <<<
 		# create empty files for all entries
+		touch genome_name
 		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist blacklist2
 		touch custom_aligner_idx_tar
 		touch tss tss_enrich # for backward compatibility
@@ -1962,6 +1970,7 @@ task read_genome_tsv {
 		CODE
 	>>>
 	output {
+		String? genome_name = if size('genome_name')==0 then basename(genome_tsv) else read_string('genome_name')
 		String? ref_fa = if size('ref_fa')==0 then null_s else read_string('ref_fa')
 		String? bwa_idx_tar = if size('bwa_idx_tar')==0 then null_s else read_string('bwa_idx_tar')
 		String? bowtie2_idx_tar = if size('bowtie2_idx_tar')==0 then null_s else read_string('bowtie2_idx_tar')

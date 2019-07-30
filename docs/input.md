@@ -26,19 +26,25 @@ All reference genome specific reference files/parameters can be defined in a sin
 Parameter|Type|Description
 ---------|-------|-----------
 `chip.genome_tsv`| File | Choose one of the TSV files listed below or build your own
+`chip.genome_name`| String | Name of genome (e.g. hg38, hg19, ...)
 `chip.ref_fa`| File | Reference FASTA file
-`chip.bwa_idx_tar`| File | BWA index TAR file (uncompressed) built from FASTA file with `bwa index`
+`chip.ref_mito_fa`| File | Mito-only reference FASTA file
 `chip.bowtie2_idx_tar`| File | Bowtie2 index TAR file (uncompressed) built from FASTA file
+`chip.bowtie2_mito_idx_tar`| File | Mito-only Bowtie2 index TAR file (uncompressed) built from FASTA file
+`chip.bwa_idx_tar`| File | BWA index TAR file (uncompressed) built from FASTA file with `bwa index`
+`chip.bwa_mito_idx_tar`| File | Mito-only BWA index TAR file (uncompressed) built from FASTA file with `bwa index`
 `chip.custom_aligner_idx_tar` | File | Index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
+`chip.custom_aligner_mito_idx_tar` | File | Mito-only index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `chip.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `chip.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `chip.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
+`chip.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 
 We currently provide TSV files for 4 genomes as shown in the below table. `GENOME` should be `hg38`, `mm10`, `hg19` or `mm9`. You can [download/build](build_genome_database.md) it on your local computer. You can also [build a genome database for your own genome](build_genome_database.md).
 
 Platform|Path/URI
 -|-
-Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`
+Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_gcp.tsv`
 Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`
 Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`
 Local/SLURM/SGE|You need to [build](build_genome_database.md) or [download]() a genome database]. 
@@ -120,7 +126,7 @@ Parameter|Type|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q)
+`chip.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
 `chip.dup_marker` | `picard` | Choose a dup marker between `picard` and `sambamba`. `picard` is recommended, use `sambamba` only when picard fails.
 `chip.no_dup_removal` | false | Skip dup removal in a BAM filtering stage.
 
@@ -163,7 +169,8 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.enable_fingerprint` | true | Enable deeptools fingerprint (JS distance)
+`chip.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
+`chip.enable_gc_bias` | true | Enable GC bias calculation
 `chip.enable_count_signal_track` | false | Enable count signal track generation
 `chip.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 
@@ -171,7 +178,6 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.mito_chr_name` | `chrM` | Name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
 `chip.regex_filter_reads` | `chrM` | Regular expression to filter out reads with given chromosome name (1st column of BED/TAG-ALIGN). Any read with chr name that matches with this reg-ex pattern will be removed from outputs If your have changed the above parameter `chip.mito_chr_name` and still want to filter out mito reads then make sure that `chip.mito_chr_name` and `chip.regex_filter_reads` are the same
 
 ## Resource parameters
@@ -207,10 +213,10 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
-`chip.fingerprint_cpu` | 2
-`chip.fingerprint_mem_mb` | 12000
-`chip.fingerprint_time_hr` | 6
-`chip.fingerprint_disks` | `local-disk 100 HDD`
+`chip.jsd_cpu` | 2
+`chip.jsd_mem_mb` | 12000
+`chip.jsd_time_hr` | 6
+`chip.jsd_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------

@@ -8,17 +8,10 @@
     "chip.true_rep_only" : false,
 
     "chip.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
-    "chip.ref_fa" : null,
-    "chip.bowtie2_idx_tar" : null,
-    "chip.bwa_idx_tar" : null,
-    "chip.custom_aligner_idx_tar" : null,
-    "chip.chrsz" : null,
-    "chip.blacklist" : null,
-    "chip.blacklist2" : null,
-    "chip.gensz" : null,
 
     "chip.paired_end" : true,
     "chip.ctl_paired_end" : [true, true],
+
     "chip.paired_ends" : true,
     "chip.ctl_paired_ends" : [true, true],
 
@@ -79,11 +72,11 @@
     "chip.idr_thresh" : 0.05,
     "chip.spp_cap_num_peak" : 300000,
 
-    "chip.enable_fingerprint" : true,
+    "chip.enable_jsd" : true,
+    "chip.enable_gc_bias" : true,
     "chip.enable_count_signal_track" : false,
     "chip.keep_irregular_chr_in_bfilt_peak" : false,
 
-    "chip.mito_chr_name" : "chrM",
     "chip.regex_filter_reads" : "chrM",
 
     "chip.align_cpu" : 4,
@@ -103,10 +96,10 @@
 
     "chip.spr_mem_mb" : 16000,
 
-    "chip.fingerprint_cpu" : 2,
-    "chip.fingerprint_mem_mb" : 12000,
-    "chip.fingerprint_time_hr" : 6,
-    "chip.fingerprint_disks" : "local-disk 200 HDD",
+    "chip.jsd_cpu" : 2,
+    "chip.jsd_mem_mb" : 12000,
+    "chip.jsd_time_hr" : 6,
+    "chip.jsd_disks" : "local-disk 200 HDD",
 
     "chip.xcor_cpu" : 2,
     "chip.xcor_mem_mb" : 16000,
