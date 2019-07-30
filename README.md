@@ -7,22 +7,62 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 ### Features
 
-* **Portability**: Support for many cloud platforms (Google/DNAnexus) and cluster engines (SLURM/SGE/PBS).
+* **Portability**: Support for many cloud platforms (Google/AWS/DNAnexus) and cluster engines (SLURM/SGE/PBS).
 * **User-friendly HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
   - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/example_output/qc.html), [JSON](docs/example_output/v1.1.5/qc.json)
-* **Genomes**: Pre-built database for GRCh38, hg19, mm10, mm9 and additional support for custom genomes.
+* **Genomes**: Pre-built database for hg38, hg19, mm10, mm9 and additional support for custom genomes.
 
 ## Installation
+1) Git clone this repo.
 
-1) Install [Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell). Make sure that you have python3(> 3.4.1) installed on your system.
+	```bash
+	$ cd
+	$ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
+	```
+
+2) Install [Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
+
+	> **IMPORTANT**: Make sure that you have python3(> 3.4.1) installed on your system.
+
+	```bash
+	$ pip install caper  # use pip3 if it doesn't work
+	```
+
+3) Read through [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform. 
+	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
+
+## Running a pipeline locally with Caper
+
+1) Prepare an input JSON file. We will use a subsampled example input JSON based on URLs. Caper will automatically download (with a flag `--deepcopy`) all fastqs and reference human genome data recursively.
+	```bash
+	$ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK_subsampled_chr19_only_caper.json
+	```
+
+2-1) **Conda**: Run a workflow with Conda. Make sure that you have followed [this instruction](docs/install_conda.md) to install Conda and its environments.
+	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
+
+	```bash
+	$ source activate encode-chip-seq-pipeline
+	$ caper run chip.wdl -i ${INPUT_JSON} --deepcopy
+	```
+
+2-2) **Singularity (RECOMMENDED)**: Run a workflow with Singularity.
+
+	```bash
+	$ caper run chip.wdl -i ${INPUT_JSON} --deepcopy --use-singularity
+	```
+
+	> **HPCs**: To run multiple workflows on HPCs (e.g. Stanford Sherlock and SCG) see details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster). Do not run Caper on login nodes. Your workflows will get killed. There is a learning curve to understand server/client structure of Caper/Cromwell.
+
+
+2-3) **Docker**: Run a workflow with Docker.
 
   ```bash
-  $ pip install caper
+	$ caper run chip.wdl -i ${INPUT_JSON} --deepcopy --use-docker
   ```
 
-2) Read through [Caper's README](https://github.com/ENCODE-DCC/caper) carefully.
+3) You can also run a workflow on cloud platforms such as AWS (`aws`) and Google Cloud Platform (`gcp`) if Caper's configuration file is correctly configured for them. See details at [Caper's README](https://github.com/ENCODE-DCC/caper).
 
-3) Run a pipeline with Caper.
 
 ## Running pipelines without Caper
 
@@ -35,41 +75,6 @@ You can also run our pipeline on DNAnexus without using Caper or Cromwell. There
 1) [dxWDL CLI](docs/tutorial_dx_cli.md)
 2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
 
-## Conda
-
-> **WARNING**: DO NOT INSTALL CONDA 4.7 UNTIL WE FIX CONDA ENV INSTALLATION ISSUES. [4.6.14](https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh) IS RECOMMENDED.
-
-We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments). Please see [this instruction](docs/install_conda.md).
-
-## Tutorial
-
-Make sure that you have configured Caper correctly.
-> **WARNING**: Do not run Caper on HPC login nodes. Your jobs can be killed.
-
-Git clone the pipeline repository to download WDL and example input JSON.
-```bash
-$ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
-$ cd chip-seq-pipeline2
-```
-
-Run it. Due to `--deepcopy` all files (HTTP URLs) in `example_input_json/caper/ENCSR936XTK_subsampled_chr19_only.json` will be recursively copied into Caper's temporary folder (`--tmp-dir`).
-```bash
-$ caper run chip.wdl -i example_input_json/caper/ENCSR936XTK_subsampled_chr19_only_caper.json --deepcopy --use-singularity
-```
-
-If you use Docker then replace `--use-singularity` with `--use-docker`.
-```bash
-$ caper run chip.wdl -i example_input_json/caper/ENCSR936XTK_subsampled_chr19_only_caper.json --deepcopy --use-docker
-```
-
-If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
-```bash
-$ conda activate encode-chip-seq-pipeline
-$ caper run chip.wdl -i example_input_json/caper/ENCSR936XTK_subsampled_chr19_only_caper.json --deepcopy
-```
-
-To run it on an HPC (e.g. Stanford Sherlock and SCG). See details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster).
-
 ## Input JSON file
 
 An input JSON file includes all genomic data files, input parameters and metadata for running pipelines. Always use absolute paths in an input JSON.
@@ -78,15 +83,10 @@ An input JSON file includes all genomic data files, input parameters and metadat
 
 ## How to organize outputs
 
-Install [Croo](https://github.com/ENCODE-DCC/croo#installation). Make sure that you have python3(> 3.4.1) installed on your system.
+Install [Croo](https://github.com/ENCODE-DCC/croo#installation). Make sure that you have python3(> 3.4.1) installed on your system. Find a `metadata.json` on Caper's output directory.
 
 ```bash
 $ pip install croo
-```
-
-Find a `metadata.json` on Caper's output directory.
-
-```bash
 $ croo [METADATA_JSON_FILE]
 ```
 
