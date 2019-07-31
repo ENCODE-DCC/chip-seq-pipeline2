@@ -240,7 +240,7 @@ workflow chip {
 		else read_genome_tsv.mito_chr_name		
 	String? genome_name_ = if defined(genome_name) then genome_name
 		else if defined(read_genome_tsv.genome_name) then read_genome_tsv.genome_name
-		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None'])),
+		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None']))
 
 	# read additional annotation data
 	File? tss_ = if defined(tss) then tss
@@ -728,14 +728,12 @@ workflow chip {
 		}
 	}
 
-	Boolean has_input_of_jsd = defined(blacklist_) && #basename(blacklist_) != 'null' &&
-		length(select_all(nodup_bam_))==num_rep &&
-		num_ctl>0 && defined(ctl_nodup_bam_[0])
+	Boolean has_input_of_jsd = defined(blacklist_) && length(select_all(nodup_bam_))==num_rep
 	if ( has_input_of_jsd && enable_jsd ) {
 		# fingerprint and JS-distance plot
 		call jsd { input :
 			nodup_bams = nodup_bam_,
-			ctl_bam = ctl_nodup_bam_[0], # use first control only
+			ctl_bams = ctl_nodup_bam_, # use first control only
 			blacklist = blacklist_,
 			mapq_thresh = mapq_thresh_,
 
@@ -1460,9 +1458,9 @@ task xcor {
 
 task jsd {
 	Array[File?] nodup_bams
-	File ctl_bam	 		# one control bam is required
+	Array[File?] ctl_bams
 	File blacklist
-	Float mapq_thresh
+	Int mapq_thresh
 
 	Int cpu
 	Int mem_mb
@@ -1472,7 +1470,7 @@ task jsd {
 	command {
 		python $(which encode_task_jsd.py) \
 			${sep=' ' nodup_bams} \
-			--ctl-bam ${ctl_bam} \
+			${if length(ctl_bams)>0 then "--ctl-bam "+ select_first(ctl_bams) else ""} \
 			${"--mapq-thresh "+ mapq_thresh} \
 			${"--blacklist "+ blacklist} \
 			${"--nth " + cpu}
@@ -1826,6 +1824,7 @@ task qc_report {
 	String peak_caller
 	Int cap_num_peak
 	Float idr_thresh
+	Float pval_thresh	
 	# QCs
 	Array[File?] samstat_qcs
 	Array[File?] nodup_samstat_qcs
