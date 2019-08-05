@@ -1,12 +1,12 @@
 # ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.0
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.0
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.json
 
 workflow chip {
-	String pipeline_ver = 'v1.2.2'
+	String pipeline_ver = 'v1.3.0'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
