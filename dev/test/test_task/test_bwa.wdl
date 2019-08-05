@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task bwa
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chip.wdl" as chip
+import "../../../chip.wdl" as chip
 import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_bwa {
@@ -23,6 +23,7 @@ workflow test_bwa {
 	call chip.align as pe_bwa { input :
 		aligner = 'bwa',
 		idx_tar = pe_bwa_idx_tar,
+		mito_chr_name = 'chrM',
 		fastq_R1 = pe_fastqs[0],
 		fastq_R2 = pe_fastqs[1],
 		paired_end = true,
@@ -36,6 +37,7 @@ workflow test_bwa {
 	call chip.align as se_bwa { input :
 		aligner = 'bwa',
 		idx_tar = se_bwa_idx_tar,
+		mito_chr_name = 'chrM',
 		fastq_R1 = se_fastqs[0],
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
@@ -52,8 +54,8 @@ workflow test_bwa {
 			'se_bwa',
 		],
 		files = [
-			pe_bwa.flagstat_qc,
-			se_bwa.flagstat_qc,
+			pe_bwa.samstat_qc,
+			se_bwa.samstat_qc,
 		],
 		ref_files = [
 			ref_pe_flagstat,

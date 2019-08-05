@@ -1,0 +1,8 @@
+{
+    "test_gc_bias.paired_end" : true,
+    "test_gc_bias.ref_fa" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.gz",
+    "test_gc_bias.read_len_log" : "chip-seq-pipeline-test-data/input/pe/gc_bias/rep1-R1.subsampled.67.merged.read_length.txt",
+    "test_gc_bias.nodup_bam" : "chip-seq-pipeline-test-data/input/pe/gc_bias/rep1-R1.subsampled.67.merged.nodup.bam",
+
+    "test_gc_bias.ref_gc_log" : "chip-seq-pipeline-test-data/ref_output/test_gc_bias/rep1-R1.subsampled.67.merged.nodup.gc.txt"
+}

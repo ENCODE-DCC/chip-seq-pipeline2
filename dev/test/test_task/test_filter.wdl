@@ -1,6 +1,6 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task filter
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../chip.wdl" as chip
+import "../../../chip.wdl" as chip
 import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_filter {
