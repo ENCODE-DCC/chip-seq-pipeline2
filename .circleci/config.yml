@@ -70,7 +70,8 @@ jobs:
             source ${BASH_ENV}
             cd dev/test/test_task/
             rm -rf chip-seq-pipeline-test-data
-            git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data
+            #git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data
+            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
             for wdl in test_*.wdl
             do
               json=${wdl%.*}.json
