@@ -1,0 +1,19 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.1.5/ENCSR936XTK/qc.json",
+    "chip.pipeline_type" : "histone",
+    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_gcp.tsv",
+    "chip.fastqs_rep1_R1" : [
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep1/ENCFF846MLZ.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep1/ENCFF153OYB.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R1" : [
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep2/ENCFF536KEU.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep2/ENCFF481VUI.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep2/ENCFF270WDO.fastq.gz",
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep2/ENCFF753JZK.fastq.gz"
+    ],
+    "chip.paired_end" : false,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR878KIY",
+    "chip.description" : "ENCSR878KIY - Histone ChIP-seq SE test sample"
+}

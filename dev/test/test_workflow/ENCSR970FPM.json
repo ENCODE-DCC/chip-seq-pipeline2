@@ -1,0 +1,11 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.1.5/ENCSR936XTK/qc.json",
+    "chip.pipeline_type" : "histone",
+    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_gcp.tsv",
+    "chip.fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR970FPM/fastq/rep1/ENCFF774JBP.fastq.gz"
+    ],
+    "chip.paired_end" : false,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR970FPM",
+    "chip.description" : "ENCSR970FPM - Histone ChIP-seq SE unreplicated test sample. Only SE rep1 is taken. There is actuall a rep2 (PE)."
+}
