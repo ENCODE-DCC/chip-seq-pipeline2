@@ -111,7 +111,7 @@ jobs:
             cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip.sh ENCSR000DYI_subsampled_chr19_only_unrep.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only_unrep.metadata.json
 
   test_workflow_pe:
     <<: *machine_defaults
@@ -141,7 +141,7 @@ jobs:
             cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip.sh ENCSR000DYI_subsampled_chr19_only_hist.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only_hist.metadata.json
 
   test_workflow_hist_unrep_se:
     <<: *machine_defaults
@@ -156,7 +156,7 @@ jobs:
             cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip.sh ENCSR000DYI_subsampled_chr19_only_hist_unrep.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only.metadata.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR000DYI_subsampled_chr19_only_hist_unrep.metadata.json
 
   test_workflow_hist_pe:
     <<: *machine_defaults
@@ -171,7 +171,7 @@ jobs:
             cd dev/test/test_workflow/
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip.sh ENCSR936XTK_subsampled_chr19_only_hist.json tmp_key.json ${TAG}
-            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_chr19_only_hist.metadata.json
 
 
 # Define workflow here
