@@ -1,0 +1,255 @@
+{
+    "general": {
+        "date": "2019-08-07 18:43:41", 
+        "title": "ENCSR000DYI (subsampled 1/25, chr19_chrM only, fake histone, unrep)", 
+        "description": "CEBPB ChIP-seq on human A549 produced by the Snyder lab", 
+        "pipeline_ver": "v1.3.0", 
+        "pipeline_type": "histone", 
+        "genome": "hg38_chr19_chrM", 
+        "paired_end": [
+            false
+        ], 
+        "aligner": "bowtie2", 
+        "peak_caller": "macs2", 
+        "ctl_paired_end": [
+            false
+        ]
+    }, 
+    "align": {
+        "samstat": {
+            "rep1": {
+                "total_reads": 1221783, 
+                "total_reads_qc_failed": 0, 
+                "duplicate_reads": 0, 
+                "duplicate_reads_qc_failed": 0, 
+                "mapped_reads": 211167, 
+                "mapped_reads_qc_failed": 0, 
+                "pct_mapped_reads": 17.299999999999997, 
+                "paired_reads": 0, 
+                "paired_reads_qc_failed": 0, 
+                "read1": 0, 
+                "read1_qc_failed": 0, 
+                "read2": 0, 
+                "read2_qc_failed": 0, 
+                "properly_paired_reads": 0, 
+                "properly_paired_reads_qc_failed": 0, 
+                "pct_properly_paired_reads": 0.0, 
+                "with_itself": 0, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "pct_singletons": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "ctl1": {
+                "total_reads": 964739, 
+                "total_reads_qc_failed": 0, 
+                "duplicate_reads": 0, 
+                "duplicate_reads_qc_failed": 0, 
+                "mapped_reads": 170731, 
+                "mapped_reads_qc_failed": 0, 
+                "pct_mapped_reads": 17.7, 
+                "paired_reads": 0, 
+                "paired_reads_qc_failed": 0, 
+                "read1": 0, 
+                "read1_qc_failed": 0, 
+                "read2": 0, 
+                "read2_qc_failed": 0, 
+                "properly_paired_reads": 0, 
+                "properly_paired_reads_qc_failed": 0, 
+                "pct_properly_paired_reads": 0.0, 
+                "with_itself": 0, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "pct_singletons": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }
+        }, 
+        "dup": {
+            "rep1": {
+                "unpaired_reads": 49455, 
+                "paired_reads": 0, 
+                "unmapped_reads": 0, 
+                "unpaired_duplicate_reads": 1520, 
+                "paired_duplicate_reads": 0, 
+                "paired_optical_duplicate_reads": 0, 
+                "pct_duplicate_reads": 3.0734999999999997
+            }, 
+            "ctl1": {
+                "unpaired_reads": 40712, 
+                "paired_reads": 0, 
+                "unmapped_reads": 0, 
+                "unpaired_duplicate_reads": 1727, 
+                "paired_duplicate_reads": 0, 
+                "paired_optical_duplicate_reads": 0, 
+                "pct_duplicate_reads": 4.242
+            }
+        }, 
+        "nodup_samstat": {
+            "rep1": {
+                "total_reads": 47935, 
+                "total_reads_qc_failed": 0, 
+                "duplicate_reads": 0, 
+                "duplicate_reads_qc_failed": 0, 
+                "mapped_reads": 47935, 
+                "mapped_reads_qc_failed": 0, 
+                "pct_mapped_reads": 100.0, 
+                "paired_reads": 0, 
+                "paired_reads_qc_failed": 0, 
+                "read1": 0, 
+                "read1_qc_failed": 0, 
+                "read2": 0, 
+                "read2_qc_failed": 0, 
+                "properly_paired_reads": 0, 
+                "properly_paired_reads_qc_failed": 0, 
+                "pct_properly_paired_reads": 0.0, 
+                "with_itself": 0, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "pct_singletons": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }, 
+            "ctl1": {
+                "total_reads": 38985, 
+                "total_reads_qc_failed": 0, 
+                "duplicate_reads": 0, 
+                "duplicate_reads_qc_failed": 0, 
+                "mapped_reads": 38985, 
+                "mapped_reads_qc_failed": 0, 
+                "pct_mapped_reads": 100.0, 
+                "paired_reads": 0, 
+                "paired_reads_qc_failed": 0, 
+                "read1": 0, 
+                "read1_qc_failed": 0, 
+                "read2": 0, 
+                "read2_qc_failed": 0, 
+                "properly_paired_reads": 0, 
+                "properly_paired_reads_qc_failed": 0, 
+                "pct_properly_paired_reads": 0.0, 
+                "with_itself": 0, 
+                "with_itself_qc_failed": 0, 
+                "singletons": 0, 
+                "singletons_qc_failed": 0, 
+                "pct_singletons": 0.0, 
+                "diff_chroms": 0, 
+                "diff_chroms_qc_failed": 0
+            }
+        }
+    }, 
+    "lib_complexity": {
+        "lib_complexity": {
+            "rep1": {
+                "total_fragments": 43200, 
+                "distinct_fragments": 42626, 
+                "positions_with_one_read": 302, 
+                "NRF": 0.986713, 
+                "PBC1": 0.991695, 
+                "PBC2": 139.97351
+            }, 
+            "ctl1": {
+                "total_fragments": 33742, 
+                "distinct_fragments": 33160, 
+                "positions_with_one_read": 377, 
+                "NRF": 0.982751, 
+                "PBC1": 0.987515, 
+                "PBC2": 86.859416
+            }
+        }
+    }, 
+    "replication": {
+        "reproducibility": {
+            "overlap": {
+                "Nt": 0, 
+                "N1": 547, 
+                "Np": 0, 
+                "N_opt": 547, 
+                "N_consv": 547, 
+                "opt_set": "rep1-pr1_vs_rep1-pr2", 
+                "consv_set": "rep1-pr1_vs_rep1-pr2", 
+                "rescue_ratio": 0.0, 
+                "self_consistency_ratio": 1.0, 
+                "reproducibility": "pass"
+            }
+        }, 
+        "num_peaks": {
+            "rep1": {
+                "num_peaks": 767
+            }
+        }
+    }, 
+    "peak_stat": {
+        "peak_region_size": {
+            "rep1": {
+                "min_size": 120.0, 
+                "25_pct": 120.0, 
+                "50_pct": 144.0, 
+                "75_pct": 1277.5, 
+                "max_size": 47630.0, 
+                "mean": 1551.69361147
+            }, 
+            "overlap_opt": {
+                "min_size": 120.0, 
+                "25_pct": 120.0, 
+                "50_pct": 157.0, 
+                "75_pct": 1325.5, 
+                "max_size": 19181.0, 
+                "mean": 1446.72212066
+            }
+        }
+    }, 
+    "align_enrich": {
+        "xcor_score": {
+            "rep1": {
+                "subsampled_reads": 42597, 
+                "estimated_fragment_len": 120, 
+                "corr_estimated_fragment_len": 0.0352663738269759, 
+                "phantom_peak": 35, 
+                "corr_phantom_peak": 0.06800597, 
+                "argmin_corr": 1500, 
+                "min_corr": 0.02871845, 
+                "NSC": 1.228004, 
+                "RSC": 0.1666667
+            }
+        }, 
+        "jsd": {
+            "rep1": {
+                "auc": 0.0837059204827, 
+                "syn_auc": 0.462216875625, 
+                "x_intercept": 0.729552080361, 
+                "syn_x_intercept": 1.17700939785e-05, 
+                "elbow_pt": 0.749119505766, 
+                "syn_elbow_pt": 0.56385164806, 
+                "jsd": 0.0843268182886, 
+                "syn_jsd": 0.2859690936, 
+                "pct_genome_enrich": 25.192810777, 
+                "diff_enrich": 47.8750794853, 
+                "ch_div": 0.521490456936
+            }
+        }
+    }, 
+    "peak_enrich": {
+        "frac_reads_in_peaks": {
+            "macs2": {
+                "rep1": {
+                    "frip": 0.0643237786699
+                }, 
+                "rep1-pr1": {
+                    "frip": 0.650546974036
+                }, 
+                "rep1-pr2": {
+                    "frip": 0.651657432623
+                }
+            }, 
+            "overlap": {
+                "rep1-pr1_vs_rep1-pr2": {
+                    "frip": 0.0513651196094
+                }
+            }
+        }
+    }
+}
