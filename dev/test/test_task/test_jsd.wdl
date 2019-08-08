@@ -52,7 +52,7 @@ workflow test_jsd {
 		],
 		ref_files = [
 			ref_take_8_cols.out[0],
-			ref_take_8_cols.out[0],
+			ref_take_8_cols.out[1],
 			#ref_se_jsd_logs[0],
 			#ref_se_jsd_logs[1],
 		],
