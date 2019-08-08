@@ -1880,6 +1880,7 @@ task qc_report {
 			${"--genome " + genome} \
 			${"--multimapping " + 0} \
 			--paired-ends ${sep=" " paired_ends} \
+			--ctl-paired-ends ${sep=" " ctl_paired_ends} \
 			--pipeline-type ${pipeline_type} \
 			--aligner ${aligner} \
 			--peak-caller ${peak_caller} \
