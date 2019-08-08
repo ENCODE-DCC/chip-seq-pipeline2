@@ -30,14 +30,14 @@ workflow test_jsd {
 	}
 
 	# take first 8 columns (vaule in other columns are random)
-	#scatter(i in range(2)){
-	#	call take_8_cols { input :
-	#		f = se_jsd.jsd_qcs[i],
-	#	}
-	#	call take_8_cols as ref_take_8_cols { input :
-	#		f = ref_se_jsd_logs[i],
-	#	}
-	#}
+	scatter(i in range(2)){
+		call take_8_cols { input :
+			f = se_jsd.jsd_qcs[i],
+		}
+		call take_8_cols as ref_take_8_cols { input :
+			f = ref_se_jsd_logs[i],
+		}
+	}
 
 	call compare_md5sum.compare_md5sum { input :
 		labels = [
@@ -45,16 +45,16 @@ workflow test_jsd {
 			'se_jsd_rep2',
 		],
 		files = [
-			#take_8_cols.out[0],
-			#take_8_cols.out[1],
-			se_jsd.jsd_qcs[0],
-			se_jsd.jsd_qcs[1],
+			take_8_cols.out[0],
+			take_8_cols.out[1],
+			#se_jsd.jsd_qcs[0],
+			#se_jsd.jsd_qcs[1],
 		],
 		ref_files = [
-			#ref_take_8_cols.out[0],
-			#ref_take_8_cols.out[0],
-			ref_se_jsd_logs[0],
-			ref_se_jsd_logs[1],
+			ref_take_8_cols.out[0],
+			ref_take_8_cols.out[0],
+			#ref_se_jsd_logs[0],
+			#ref_se_jsd_logs[1],
 		],
 	}
 }
