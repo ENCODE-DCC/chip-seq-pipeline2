@@ -507,9 +507,8 @@ workflow chip {
 			}
 		}
 
-		if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) && defined(align.read_len_log) ) {
+		if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) ) {
 			call gc_bias { input :
-				read_len_log = align.read_len_log,
 				nodup_bam = nodup_bam_,
 				ref_fa = ref_fa_,
 			}
@@ -1784,13 +1783,11 @@ task reproducibility {
 }
 
 task gc_bias {
-	File read_len_log
 	File nodup_bam
 	File ref_fa
 
 	command {
 		python $(which encode_task_gc_bias.py) \
-			${"--read-len-log " + read_len_log} \
 			${"--nodup-bam " + nodup_bam} \
 			${"--ref-fa " + ref_fa}
 	}
