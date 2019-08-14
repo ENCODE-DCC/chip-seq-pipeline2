@@ -2,13 +2,13 @@
   "chip.fingerprint": {
     "plot": {
       "path": "qc/${basename}",
-      "table": "QC and logs/jensen-Shannon distance plot"
+      "table": "QC and logs/Jensen-Shannon distance plot"
     }
   },
   "chip.jsd": {
     "plot": {
       "path": "qc/${basename}",
-      "table": "QC and logs/jensen-Shannon distance plot"
+      "table": "QC and logs/Jensen-Shannon distance plot"
     }
   },
   "chip.bwa_ctl": {
