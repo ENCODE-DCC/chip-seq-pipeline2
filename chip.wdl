@@ -68,11 +68,10 @@ workflow chip {
 	Boolean no_dup_removal = false	# keep all dups in final BAM
 	Int? mapq_thresh 				# threshold for low MAPQ reads removal
 	Int mapq_thresh_bwa = 30
-	Int mapq_thresh_bowtie2 = 255	
-	String regex_filter_reads = '' 	# Perl-style regular expression pattern for chr name to filter out reads
-									# those reads will be excluded from peak calling
-									# e.g. chrM
-									# mito reads will be kept for peak-calling by default
+	Int mapq_thresh_bowtie2 = 255
+	Array[String] filter_chrs = [] 	# array of chromosomes to be removed from nodup/filt BAM
+									# chromosomes will be removed from both BAM header/contents
+									# e.g. ['chrM', 'MT']
 	Int subsample_reads = 0			# number of reads to subsample TAGALIGN
 									# 0 for no subsampling. this affects all downstream analysis
 	Int ctl_subsample_reads = 0		# number of reads to subsample control TAGALIGN
@@ -430,6 +429,8 @@ workflow chip {
 				paired_end = paired_end_,
 				dup_marker = dup_marker,
 				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
 				no_dup_removal = no_dup_removal,
 				mito_chr_name = mito_chr_name_,
 
@@ -446,7 +447,6 @@ workflow chip {
 		if ( has_input_of_bam2ta && !has_output_of_bam2ta ) {
 			call bam2ta { input :
 				bam = nodup_bam_,
-				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = paired_end_,
 				mito_chr_name = mito_chr_name_,
@@ -467,6 +467,8 @@ workflow chip {
 				paired_end = paired_end_,
 				dup_marker = dup_marker,
 				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
 				no_dup_removal = true,
 				mito_chr_name = mito_chr_name_,
 
@@ -479,7 +481,6 @@ workflow chip {
 				bam = filter.nodup_bam,  # output name is nodup but it's not deduped
 				paired_end = paired_end_,
 				subsample = 0,
-				regex_grep_v_ta = regex_filter_reads,
 				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
@@ -542,6 +543,8 @@ workflow chip {
 				paired_end = false,
 				dup_marker = dup_marker,
 				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
 				no_dup_removal = true,
 				mito_chr_name = mito_chr_name_,
 
@@ -554,7 +557,6 @@ workflow chip {
 				bam = filter_R1.nodup_bam,  # it's named as nodup bam but it's not deduped but just filtered
 				paired_end = false,
 				subsample = 0,
-				regex_grep_v_ta = regex_filter_reads,
 				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
@@ -653,6 +655,8 @@ workflow chip {
 				paired_end = ctl_paired_end_,
 				dup_marker = dup_marker,
 				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
 				no_dup_removal = no_dup_removal,
 				mito_chr_name = mito_chr_name_,
 
@@ -669,7 +673,6 @@ workflow chip {
 		if ( has_input_of_bam2ta_ctl && !has_output_of_bam2ta_ctl ) {
 			call bam2ta as bam2ta_ctl { input :
 				bam = ctl_nodup_bam_,
-				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = ctl_paired_end_,
 				mito_chr_name = mito_chr_name_,
@@ -1241,6 +1244,7 @@ task trim_fastq { # trim fastq (for PE R1 only)
 task align {
 	String aligner
 	String mito_chr_name
+	Int? multimapping
 	File? custom_align_py	
 	File? idx_tar			# reference index tar
 	File? fastq_R1 			# [read_end_id]
@@ -1266,6 +1270,7 @@ task align {
 		 	python $(which encode_task_bowtie2.py) \
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
+				${"--multimapping " + multimapping} \
 				${if paired_end then "--paired-end" else ""} \
 				${"--nth " + cpu}
 		else
@@ -1299,13 +1304,12 @@ task align {
 task filter {
 	File bam
 	Boolean paired_end
-	String dup_marker 				# picard.jar MarkDuplicates (picard) or 
-									# sambamba markdup (sambamba)
+	String dup_marker 			# picard.jar MarkDuplicates (picard) or 
+								# sambamba markdup (sambamba)
 	Int mapq_thresh				# threshold for low MAPQ reads removal
+	Array[String] filter_chrs 	# chrs to be removed from final (nodup/filt) BAM
+	File chrsz					# 2-col chromosome sizes file
 	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
-									# dup.qc and lib_complexity.qc will be empty files
-									# and nodup_bam in the output is 
-									# filtered bam with dupes	
 	String mito_chr_name
 	Int cpu
 	Int mem_mb
@@ -1316,9 +1320,11 @@ task filter {
 		python $(which encode_task_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
-			${"--multimapping " + 0} \
+			--multimapping 0 \
 			${"--dup-marker " + dup_marker} \
 			${"--mapq-thresh " + mapq_thresh} \
+			--filter-chrs ${sep=' ' filter_chrs} \
+			${"--chrsz " + chrsz} \
 			${if no_dup_removal then "--no-dup-removal" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
 			${"--nth " + cpu}
@@ -1341,8 +1347,6 @@ task filter {
 task bam2ta {
 	File bam
 	Boolean paired_end
-	String regex_grep_v_ta   	# Perl-style regular expression pattern 
-                        		# to remove matching reads from TAGALIGN
 	String mito_chr_name 		# mito chromosome name
 	Int subsample 				# number of reads to subsample TAGALIGN
 								# this affects all downstream analysis
@@ -1356,7 +1360,6 @@ task bam2ta {
 			${bam} \
 			--disable-tn5-shift \
 			${if paired_end then "--paired-end" else ""} \
-			${if regex_grep_v_ta!="" then "--regex-grep-v-ta '"+regex_grep_v_ta+"'" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
 			${"--subsample " + subsample} \
 			${"--nth " + cpu}
