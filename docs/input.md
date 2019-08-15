@@ -186,7 +186,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.regex_filter_reads` | `chrM` | Regular expression to filter out reads with given chromosome name (1st column of BED/TAG-ALIGN). Any read with chr name that matches with this reg-ex pattern will be removed from outputs If your have changed the above parameter `chip.mito_chr_name` and still want to filter out mito reads then make sure that `chip.mito_chr_name` and `chip.regex_filter_reads` are the same
+`chip.filter_chrs` | `[]` (empty array of string) | Array of chromosome names to be filtered out from a final (filtered/nodup) BAM. No chromosomes are filtered out by default.
 
 ## Resource parameters
 
