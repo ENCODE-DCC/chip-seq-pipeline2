@@ -14,6 +14,8 @@ workflow test_filter {
 	String pe_bam
 	String se_bam
 
+	String chrsz
+
 	String ref_pe_nodup_samstat_qc
 	String ref_pe_filt_samstat_qc
 	String ref_se_nodup_samstat_qc
@@ -32,6 +34,8 @@ workflow test_filter {
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
 		mito_chr_name = mito_chr_name,
+		filter_chrs = [],
+		chrsz = chrsz,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
@@ -45,6 +49,8 @@ workflow test_filter {
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
 		mito_chr_name = mito_chr_name,
+		filter_chrs = [],
+		chrsz = chrsz,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
@@ -58,6 +64,8 @@ workflow test_filter {
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
 		mito_chr_name = mito_chr_name,
+		filter_chrs = [],
+		chrsz = chrsz,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,
@@ -71,6 +79,8 @@ workflow test_filter {
 		dup_marker = dup_marker,
 		mapq_thresh = mapq_thresh,
 		mito_chr_name = mito_chr_name,
+		filter_chrs = [],
+		chrsz = chrsz,
 
 		cpu = filter_cpu,
 		mem_mb = filter_mem_mb,

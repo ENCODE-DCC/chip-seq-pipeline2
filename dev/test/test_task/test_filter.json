@@ -1,4 +1,5 @@
 {
+	"test_filter.chrsz" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes",
     "test_filter.pe_bam" : "chip-seq-pipeline-test-data/input/pe/bams/rep1/rep1-R1.subsampled.67.merged.bam",
     "test_filter.se_bam" : "chip-seq-pipeline-test-data/input/se/bams/rep1/rep1.subsampled.25.merged.bam",
 

@@ -5,8 +5,7 @@ import "compare_md5sum.wdl" as compare_md5sum
 
 workflow test_bam2ta {
 	Int bam2ta_subsample
-	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
-                        		# to remove matching reads from TAGALIGN
+
 	String pe_nodup_bam
 	String se_nodup_bam
 
@@ -24,7 +23,6 @@ workflow test_bam2ta {
 	call chip.bam2ta as pe_bam2ta { input :
 		bam = pe_nodup_bam,
 		subsample = 0,
-		regex_grep_v_ta = regex_filter_reads,
 		paired_end = true,
 		mito_chr_name = mito_chr_name,
 
@@ -36,7 +34,6 @@ workflow test_bam2ta {
 	call chip.bam2ta as pe_bam2ta_subsample { input :
 		bam = pe_nodup_bam,
 		subsample = bam2ta_subsample,
-		regex_grep_v_ta = regex_filter_reads,
 		paired_end = true,
 		mito_chr_name = mito_chr_name,
 
@@ -48,7 +45,6 @@ workflow test_bam2ta {
 	call chip.bam2ta as se_bam2ta { input :
 		bam = se_nodup_bam,
 		subsample = 0,
-		regex_grep_v_ta = regex_filter_reads,
 		paired_end = false,
 		mito_chr_name = mito_chr_name,
 
@@ -60,7 +56,6 @@ workflow test_bam2ta {
 	call chip.bam2ta as se_bam2ta_subsample { input :
 		bam = se_nodup_bam,
 		subsample = bam2ta_subsample,
-		regex_grep_v_ta = regex_filter_reads,
 		paired_end = false,
 		mito_chr_name = mito_chr_name,
 
