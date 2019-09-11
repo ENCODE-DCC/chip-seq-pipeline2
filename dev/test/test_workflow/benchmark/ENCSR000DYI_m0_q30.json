@@ -19,5 +19,6 @@
     "chip.align_R1.multimapping": 0,
     "chip.align_ctl.multimapping": 0,
     "chip.mapq_thresh": 30,
-    "chip.align_only": true
+    "chip.align_only": false,
+    "chip.spp_cpu": 8
 }
