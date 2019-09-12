@@ -68,7 +68,7 @@ workflow chip {
 	Boolean no_dup_removal = false	# keep all dups in final BAM
 	Int? mapq_thresh 				# threshold for low MAPQ reads removal
 	Int mapq_thresh_bwa = 30
-	Int mapq_thresh_bowtie2 = 255
+	Int mapq_thresh_bowtie2 = 30
 	Array[String] filter_chrs = [] 	# array of chromosomes to be removed from nodup/filt BAM
 									# chromosomes will be removed from both BAM header/contents
 									# e.g. ['chrM', 'MT']
@@ -459,37 +459,6 @@ workflow chip {
 		}
 		File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
 
-		# convert unfiltered BAM to a special TAG-ALIGN for xcor 
-		Boolean has_input_of_bam2ta_no_dedup = has_output_of_align || defined(align.bam)
-		if ( has_input_of_bam2ta_no_dedup ) {
-			call filter as filter_no_dedup { input :
-				bam = bam_,
-				paired_end = paired_end_,
-				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh_,
-				filter_chrs = filter_chrs,
-				chrsz = chrsz_,
-				no_dup_removal = true,
-				mito_chr_name = mito_chr_name_,
-
-				cpu = filter_cpu,
-				mem_mb = filter_mem_mb,
-				time_hr = filter_time_hr,
-				disks = filter_disks,
-			}
-			call bam2ta as bam2ta_no_dedup { input :
-				bam = filter.nodup_bam,  # output name is nodup but it's not deduped
-				paired_end = paired_end_,
-				subsample = 0,
-				mito_chr_name = mito_chr_name_,
-
-				cpu = bam2ta_cpu,
-				mem_mb = bam2ta_mem_mb,
-				time_hr = bam2ta_time_hr,
-				disks = bam2ta_disks,
-			}
-		}
-
 		Boolean has_input_of_spr = has_output_of_bam2ta || defined(bam2ta.ta)
 		if ( has_input_of_spr && !align_only && !true_rep_only ) {
 			call spr { input :
@@ -515,9 +484,9 @@ workflow chip {
 			}
 		}
 
+		# special trimming/mapping for xcor (when starting from FASTQs)
 		Boolean has_input_of_trim_fastq = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
-		if ( has_input_of_trim_fastq && paired_end_ ) {
-			# special trimming for paired end samples (for cross-corr analysis)
+		if ( has_input_of_trim_fastq ) {
 			call trim_fastq { input :
 				fastq = merged_fastq_R1_,
 				trim_bp = xcor_pe_trim_bp,
@@ -556,6 +525,37 @@ workflow chip {
 			call bam2ta as bam2ta_no_dedup_R1 { input :
 				bam = filter_R1.nodup_bam,  # it's named as nodup bam but it's not deduped but just filtered
 				paired_end = false,
+				subsample = 0,
+				mito_chr_name = mito_chr_name_,
+
+				cpu = bam2ta_cpu,
+				mem_mb = bam2ta_mem_mb,
+				time_hr = bam2ta_time_hr,
+				disks = bam2ta_disks,
+			}
+		}
+
+		# special trimming/mapping for xcor (when starting from BAMs)
+		Boolean has_input_of_bam2ta_no_dedup = has_output_of_align || defined(align.bam)
+		if ( has_input_of_bam2ta_no_dedup && !has_input_of_trim_fastq ) {
+			call filter as filter_no_dedup { input :
+				bam = bam_,
+				paired_end = paired_end_,
+				dup_marker = dup_marker,
+				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
+				no_dup_removal = true,
+				mito_chr_name = mito_chr_name_,
+
+				cpu = filter_cpu,
+				mem_mb = filter_mem_mb,
+				time_hr = filter_time_hr,
+				disks = filter_disks,
+			}
+			call bam2ta as bam2ta_no_dedup { input :
+				bam = filter_no_dedup.nodup_bam,  # output name is nodup but it's not deduped
+				paired_end = paired_end_,
 				subsample = 0,
 				mito_chr_name = mito_chr_name_,
 
