@@ -5,14 +5,12 @@
 2) Install Conda environment for pipeline.
 
   ```bash
-  $ export CONDA_RESTORE_FREE_CHANNEL=1  # for Conda >= 4.7  
   $ conda/install_dependencies.sh
   ```
 
-3) Initialize Conda and re-login.
+3) Initialize Conda and re-login. Skip this step for Conda < 4.6.
 
   ```bash
-  $ # do nothing for Conda < 4.6
   $ conda init bash  # for Conda >= 4.6
   $ exit
   ```
