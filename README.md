@@ -56,7 +56,8 @@ $ caper run chip.wdl -i examples/caper/ENCSR936XTK_subsampled_chr19_only.json --
 
 If you use Conda then remove `--use-singularity` from the command line and activate pipeline's Conda env before running a pipeline.
 ```bash
-$ conda activate encode-chip-seq-pipeline
+$ # source activate encode-chip-seq-pipeline  # for Conda < 4.6
+$ conda activate encode-chip-seq-pipeline  # for Conda >= 4.6
 $ caper run chip.wdl -i examples/caper/ENCSR936XTK_subsampled_chr19_only.json --deepcopy
 ```
 

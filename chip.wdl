@@ -1791,6 +1791,7 @@ task qc_report {
 			${"--genome " + genome} \
 			${"--multimapping " + 0} \
 			--paired-ends ${sep=" " paired_ends} \
+			--ctl-paired-ends ${sep=" " ctl_paired_ends} \
 			--pipeline-type ${pipeline_type} \
 			--peak-caller ${peak_caller} \
 			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
