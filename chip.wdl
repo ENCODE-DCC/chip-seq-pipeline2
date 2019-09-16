@@ -1204,7 +1204,7 @@ task merge_fastq { # merge trimmed fastqs
 	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
 				else transpose([fastqs_R1])
 	command {
-		python $(which encode_task_merge_fastq.py) \
+		python3 $(which encode_task_merge_fastq.py) \
 			${write_tsv(tmp_fastqs)} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--nth " + 1}
@@ -1226,7 +1226,7 @@ task trim_fastq { # trim fastq (for PE R1 only)
 	Int trim_bp
 
 	command {
-		python $(which encode_task_trim_fastq.py) \
+		python3 $(which encode_task_trim_fastq.py) \
 			${fastq} \
 			--trim-bp ${trim_bp}
 	}
@@ -1259,7 +1259,7 @@ task align {
 
 	command {
 		if [ "${aligner}" == "bwa" ]; then
-		 	python $(which encode_task_bwa.py) \
+		 	python3 $(which encode_task_bwa.py) \
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
 				${if paired_end then "--paired-end" else ""} \
@@ -1267,7 +1267,7 @@ task align {
 				${"--nth " + cpu}
 
 		elif [ "${aligner}" == "bowtie2" ]; then
-		 	python $(which encode_task_bowtie2.py) \
+		 	python3 $(which encode_task_bowtie2.py) \
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
 				${"--multimapping " + multimapping} \
@@ -1281,7 +1281,7 @@ task align {
 				${"--nth " + cpu}
 		fi 
 
-		python $(which encode_task_post_align.py) \
+		python3 $(which encode_task_post_align.py) \
 			${fastq_R1} $(ls *.bam) \
 			${"--mito-chr-name " + mito_chr_name} \
 			${"--nth " + cpu}
@@ -1317,7 +1317,7 @@ task filter {
 	String disks
 
 	command {
-		python $(which encode_task_filter.py) \
+		python3 $(which encode_task_filter.py) \
 			${bam} \
 			${if paired_end then "--paired-end" else ""} \
 			--multimapping 0 \
@@ -1356,7 +1356,7 @@ task bam2ta {
 	String disks
 
 	command {
-		python $(which encode_task_bam2ta.py) \
+		python3 $(which encode_task_bam2ta.py) \
 			${bam} \
 			--disable-tn5-shift \
 			${if paired_end then "--paired-end" else ""} \
@@ -1382,7 +1382,7 @@ task spr { # make two self pseudo replicates
 	Int mem_mb
 
 	command {
-		python $(which encode_task_spr.py) \
+		python3 $(which encode_task_spr.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""}
 	}
@@ -1402,7 +1402,7 @@ task pool_ta {
 	Array[File?] tas
 
 	command {
-		python $(which encode_task_pool_ta.py) \
+		python3 $(which encode_task_pool_ta.py) \
 			${sep=' ' tas}
 	}
 	output {
@@ -1433,7 +1433,7 @@ task xcor {
 	String disks
 
 	command {
-		python $(which encode_task_xcor.py) \
+		python3 $(which encode_task_xcor.py) \
 			${ta} \
 			${if paired_end then "--paired-end" else ""} \
 			${"--mito-chr-name " + mito_chr_name} \
@@ -1470,7 +1470,7 @@ task jsd {
 	String disks
 
 	command {
-		python $(which encode_task_jsd.py) \
+		python3 $(which encode_task_jsd.py) \
 			${sep=' ' nodup_bams} \
 			${if length(ctl_bams)>0 then "--ctl-bam "+ select_first(ctl_bams) else ""} \
 			${"--mapq-thresh "+ mapq_thresh} \
@@ -1498,7 +1498,7 @@ task choose_ctl {
 	Float ctl_depth_ratio 		# if ratio between controls is higher than this
 								# then always use pooled control for all exp rep.
 	command {
-		python $(which encode_task_choose_ctl.py) \
+		python3 $(which encode_task_choose_ctl.py) \
 			--tas ${sep=' ' tas} \
 			--ctl-tas ${sep=' ' ctl_tas} \
 			${"--ta-pooled " + ta_pooled} \
@@ -1522,7 +1522,7 @@ task count_signal_track {
 	File chrsz			# 2-col chromosome sizes file
 
 	command {
-		python $(which encode_task_count_signal_track.py) \
+		python3 $(which encode_task_count_signal_track.py) \
 			${ta} \
 			${"--chrsz " + chrsz}
 	}
@@ -1560,7 +1560,7 @@ task call_peak {
 
 	command {
 		if [ "${peak_caller}" == "macs2" ]; then
-			python $(which encode_task_macs2_chip.py) \
+			python2 $(which encode_task_macs2_chip.py) \
 				${sep=' ' tas} \
 				${"--gensz "+ gensz} \
 				${"--chrsz " + chrsz} \
@@ -1569,7 +1569,7 @@ task call_peak {
 				${"--pval-thresh "+ pval_thresh}
 
 		elif [ "${peak_caller}" == "spp" ]; then
-			python $(which encode_task_spp.py) \
+			python2 $(which encode_task_spp.py) \
 				${sep=' ' tas} \
 				${"--fraglen " + fraglen} \
 				${"--cap-num-peak " + cap_num_peak} \
@@ -1586,7 +1586,7 @@ task call_peak {
 				${"--nth " + cpu}
 		fi
 
-		python $(which encode_task_post_call_peak_chip.py) \
+		python3 $(which encode_task_post_call_peak_chip.py) \
 			$(ls *Peak.gz) \
 			${"--ta " + tas[0]} \
 			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
@@ -1629,7 +1629,7 @@ task macs2_signal_track {
 	String disks
 
 	command {
-		python $(which encode_task_macs2_signal_track_chip.py) \
+		python2 $(which encode_task_macs2_signal_track_chip.py) \
 			${sep=' ' tas} \
 			${"--gensz "+ gensz} \
 			${"--chrsz " + chrsz} \
@@ -1666,7 +1666,7 @@ task idr {
 	command {
 		${if defined(ta) then "" else "touch null.frip.qc"}
 		touch null 
-		python $(which encode_task_idr.py) \
+		python3 $(which encode_task_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--idr-thresh " + idr_thresh} \
@@ -1713,7 +1713,7 @@ task overlap {
 	command {
 		${if defined(ta) then "" else "touch null.frip.qc"}
 		touch null 
-		python $(which encode_task_overlap.py) \
+		python3 $(which encode_task_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
 			${"--prefix " + prefix} \
 			${"--peak-type " + peak_type} \
@@ -1753,7 +1753,7 @@ task reproducibility {
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
-		python $(which encode_task_reproducibility.py) \
+		python3 $(which encode_task_reproducibility.py) \
 			${sep=' ' peaks} \
 			--peaks-pr ${sep=' ' peaks_pr} \
 			${"--peak-ppr "+ peak_ppr} \
@@ -1790,7 +1790,7 @@ task gc_bias {
 	File ref_fa
 
 	command {
-		python $(which encode_task_gc_bias.py) \
+		python3 $(which encode_task_gc_bias.py) \
 			${"--nodup-bam " + nodup_bam} \
 			${"--ref-fa " + ref_fa}
 	}
@@ -1873,7 +1873,7 @@ task qc_report {
 	File? qc_json_ref
 
 	command {
-		python $(which encode_task_qc_report.py) \
+		python3 $(which encode_task_qc_report.py) \
 			${"--pipeline-ver " + pipeline_ver} \
 			${"--title '" + sub(title,"'","_") + "'"} \
 			${"--desc '" + sub(description,"'","_") + "'"} \

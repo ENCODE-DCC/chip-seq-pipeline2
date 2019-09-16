@@ -19,7 +19,7 @@ fi
 
 # pipeline specific params
 BUILD_BWT2_IDX=1
-BUILD_BWA_IDX=1
+BUILD_BWA_IDX=0
 
 GENOME=$1
 DEST_DIR=$(cd $(dirname $2) && pwd -P)/$(basename $2)

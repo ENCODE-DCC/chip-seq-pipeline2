@@ -33,23 +33,23 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 ## Running a pipeline locally with Caper
 
-1) Prepare an input JSON file. We will use a subsampled example input JSON based on URLs. Caper will automatically download (with a flag `--deepcopy`) all fastqs and reference human genome data recursively.
+1) Prepare an input JSON file. We will use a subsampled example input JSON based on URLs. Caper will automatically download all fastqs and reference human genome data recursively.
 	```bash
 	$ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK_subsampled_chr19_only_caper.json
 	```
 
 2-1) **Conda**: Run a workflow with Conda. Make sure that you have followed [this instruction](docs/install_conda.md) to install Conda and its environments.
-	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--use-singularity` to command line arguments).
+	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--singularity` to command line arguments).
 
 	```bash
-	$ source activate encode-chip-seq-pipeline
-	$ caper run chip.wdl -i ${INPUT_JSON} --deepcopy
+	$ conda activate encode-chip-seq-pipeline
+	$ caper run chip.wdl -i ${INPUT_JSON}
 	```
 
 2-2) **Singularity (RECOMMENDED)**: Run a workflow with Singularity.
 
 	```bash
-	$ caper run chip.wdl -i ${INPUT_JSON} --deepcopy --use-singularity
+	$ caper run chip.wdl -i ${INPUT_JSON} --singularity
 	```
 
 	> **HPCs**: To run multiple workflows on HPCs (e.g. Stanford Sherlock and SCG) see details at [Caper's README](https://github.com/ENCODE-DCC/caper/blob/master/README.md#how-to-run-it-on-slurm-cluster). Do not run Caper on login nodes. Your workflows will get killed. There is a learning curve to understand server/client structure of Caper/Cromwell.
@@ -58,7 +58,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 2-3) **Docker**: Run a workflow with Docker.
 
   ```bash
-	$ caper run chip.wdl -i ${INPUT_JSON} --deepcopy --use-docker
+	$ caper run chip.wdl -i ${INPUT_JSON} --docker
   ```
 
 3) You can also run a workflow on cloud platforms such as AWS (`aws`) and Google Cloud Platform (`gcp`) if Caper's configuration file is correctly configured for them. See details at [Caper's README](https://github.com/ENCODE-DCC/caper).
