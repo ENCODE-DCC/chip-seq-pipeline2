@@ -180,6 +180,9 @@ def main():
     log.info('Removing temporary files...')
     rm_f(temp_files)
 
+    log.info('Checking if BAM file is empty...')
+    assert(int(run_shell_cmd('samtools view -c {}'.format(bam))))
+
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
 
