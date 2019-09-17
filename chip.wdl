@@ -1569,14 +1569,14 @@ task call_peak {
 				${"--pval-thresh "+ pval_thresh}
 
 		elif [ "${peak_caller}" == "spp" ]; then
-			python2 $(which encode_task_spp.py) \
+			python3 $(which encode_task_spp.py) \
 				${sep=' ' tas} \
 				${"--fraglen " + fraglen} \
 				${"--cap-num-peak " + cap_num_peak} \
 				${"--nth " + cpu}
 
 		else
-			python ${custom_call_peak_py} \
+			python3 ${custom_call_peak_py} \
 				${sep=' ' tas} \
 				${"--gensz "+ gensz} \
 				${"--chrsz " + chrsz} \
