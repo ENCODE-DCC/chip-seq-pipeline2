@@ -10,7 +10,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 * **Portability**: Support for many cloud platforms (Google/AWS/DNAnexus) and cluster engines (SLURM/SGE/PBS).
 * **User-friendly HTML report**: tabulated quality metrics including alignment/peak statistics and FRiP along with many useful plots (IDR/cross-correlation measures).
   - Examples: [HTML](https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/example_output/qc.html), [JSON](docs/example_output/v1.1.5/qc.json)
-* **Genomes**: Pre-built database for hg38, hg19, mm10, mm9 and additional support for custom genomes.
+* **Supported genomes**: Pipeline needs genome specific data such as aligner indices, chromosome sizes file and blacklist. We provide a genome database downloader/builder for hg38, hg19, mm10, mm9. You can also use this [builder](docs/build_genome_database.md) to build genome database from FASTA for your custom genome.
 
 ## Installation
 1) Git clone this repo.
