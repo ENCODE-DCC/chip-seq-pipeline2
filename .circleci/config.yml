@@ -189,9 +189,9 @@ workflows:
       - test_workflow_unrep_se:
           requires:
             - build
-      - test_workflow_pe:
-          requires:
-            - build
+      #- test_workflow_pe:
+      #    requires:
+      #      - build
       - test_workflow_hist_se:
           requires:
             - build
