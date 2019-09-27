@@ -70,8 +70,6 @@ jobs:
             source ${BASH_ENV}
             cd dev/test/test_task/
             rm -rf chip-seq-pipeline-test-data
-            #git clone https://github.com/ENCODE-DCC/chip-seq-pipeline-test-data
-            #gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
             export BOTO_CONFIG=/dev/null
             gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
             for wdl in test_*.wdl
