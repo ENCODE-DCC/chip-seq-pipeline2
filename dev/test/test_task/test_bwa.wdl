@@ -1,7 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task bwa
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../chip.wdl" as chip
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../chip.wdl' as chip
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_bwa {
 	Array[String] pe_fastqs
@@ -18,7 +18,7 @@ workflow test_bwa {
 	Int bwa_cpu = 1
 	Int bwa_mem_mb = 20000
 	Int bwa_time_hr = 48
-	String bwa_disks = "local-disk 100 HDD"
+	String bwa_disks = 'local-disk 100 HDD'
 
 	call chip.align as pe_bwa { input :
 		aligner = 'bwa',

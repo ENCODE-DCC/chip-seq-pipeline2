@@ -1,7 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task spp
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../chip.wdl" as chip
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../chip.wdl' as chip
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_spp {
 	Int cap_num_peak
@@ -21,7 +21,7 @@ workflow test_spp {
 	Int spp_cpu = 1
 	Int spp_mem_mb = 16000
 	Int spp_time_hr = 72
-	String spp_disks = "local-disk 100 HDD"
+	String spp_disks = 'local-disk 100 HDD'
 
 	call chip.call_peak as se_spp { input :
 		peak_caller = 'spp',

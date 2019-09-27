@@ -1,7 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester for task macs2
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../chip.wdl" as chip
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../chip.wdl' as chip
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_macs2 {
 	Int cap_num_peak
@@ -22,7 +22,7 @@ workflow test_macs2 {
 
 	Int macs2_mem_mb = 16000
 	Int macs2_time_hr = 24
-	String macs2_disks = "local-disk 100 HDD"	
+	String macs2_disks = 'local-disk 100 HDD'	
 
 	call chip.call_peak as se_macs2 { input :
 		peak_caller = 'macs2',

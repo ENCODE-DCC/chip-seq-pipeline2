@@ -1,7 +1,7 @@
 # ENCODE DCC ChIP-Seq pipeline tester
 # Author: Jin Lee (leepc12@gmail.com)
-import "../../../chip.wdl" as chip
-import "compare_md5sum.wdl" as compare_md5sum
+import '../../../chip.wdl' as chip
+import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_choose_ctl {	
 	String se_ta_rep1
