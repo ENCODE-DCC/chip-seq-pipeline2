@@ -32,13 +32,13 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 ## Running a pipeline locally with Caper
 
-1) Prepare an input JSON file. We will use a subsampled example input JSON based on URLs. Caper will automatically download all fastqs and reference human genome data recursively.
+1) Prepare an input JSON file. Caper will automatically download all fastqs and reference human genome data defined in this JSON file recursively.
 	```bash
 	$ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK_subsampled_chr19_only_caper.json
 	```
 
 2-1) **Conda**: Run a workflow with Conda. Make sure that you have followed [this instruction](docs/install_conda.md) to install Conda and its environments.
-	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for our pipeline with Caper (by adding `--singularity` to command line arguments).
+	> **WARNING**: We no longer recommend Conda for resolving dependencies and plan to phase out Conda support. Instead we recommend using Docker or Singularity. You can install Singularity and use it for this pipeline with Caper (by adding `--singularity` to command line arguments).
 
 	```bash
 	$ conda activate encode-chip-seq-pipeline
@@ -69,14 +69,14 @@ Caper uses the cromwell workflow execution engine to run the workflow on the pla
 
 ## DNAnexus
 
-You can also run our pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
+You can also run this pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
 
 1) [dxWDL CLI](docs/tutorial_dx_cli.md)
 2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
 
 ## Input JSON file
 
-An input JSON file includes all genomic data files, input parameters and metadata for running pipelines. Always use absolute paths in an input JSON.
+An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
 
 [Input JSON file specification](docs/input.md)
 
