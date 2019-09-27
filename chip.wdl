@@ -1274,7 +1274,7 @@ task align {
 				${if paired_end then "--paired-end" else ""} \
 				${"--nth " + cpu}
 		else
-			python ${custom_align_py} \
+			python3 ${custom_align_py} \
 				${idx_tar} \
 				${fastq_R1} ${fastq_R2} \
 				${if paired_end then "--paired-end" else ""} \
