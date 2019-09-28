@@ -6,11 +6,16 @@
 import sys
 import os
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    assert_file_not_empty, log, ls_l, mkdir_p, rm_f, run_shell_cmd,
+    strip_ext_bam, strip_ext_ta)
+from encode_lib_genomic import (
+    samtools_name_sort, subsample_ta_pe, subsample_ta_se)
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE DCC BAM 2 TAGALIGN.',
-                                        description='')
+                                     description='')
     parser.add_argument('bam', type=str,
                         help='Path for BAM file.')
     parser.add_argument('--disable-tn5-shift', action="store_true",
@@ -23,12 +28,13 @@ def parse_arguments():
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end BAM')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
+                        help='Output directory.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
 
@@ -36,9 +42,10 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def bam2ta_se(bam, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     ta = '{}.tagAlign.gz'.format(prefix)
 
     cmd = 'bedtools bamtobed -i {} | '
@@ -50,9 +57,10 @@ def bam2ta_se(bam, out_dir):
     run_shell_cmd(cmd)
     return ta
 
+
 def bam2ta_pe(bam, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     ta = '{}.tagAlign.gz'.format(prefix)
     # intermediate files
     bedpe = '{}.bedpe.gz'.format(prefix)
@@ -80,9 +88,10 @@ def bam2ta_pe(bam, nth, out_dir):
     rm_f(bedpe)
     return ta
 
+
 def tn5_shift_ta(ta, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
+                          os.path.basename(strip_ext_ta(ta)))
     shifted_ta = '{}.tn5.tagAlign.gz'.format(prefix)
 
     cmd = 'zcat -f {} | '
@@ -96,6 +105,7 @@ def tn5_shift_ta(ta, out_dir):
     run_shell_cmd(cmd)
     return shifted_ta
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -104,7 +114,7 @@ def main():
     mkdir_p(args.out_dir)
 
     # declare temp arrays
-    temp_files = [] # files to deleted later at the end
+    temp_files = []  # files to deleted later at the end
 
     log.info('Converting BAM to TAGALIGN...')
     if args.paired_end:
@@ -116,10 +126,12 @@ def main():
         log.info('Subsampling TAGALIGN...')
         if args.paired_end:
             subsampled_ta = subsample_ta_pe(
-                ta, args.subsample, False, args.mito_chr_name, False, args.out_dir)
+                ta, args.subsample, False,
+                args.mito_chr_name, False, args.out_dir)
         else:
             subsampled_ta = subsample_ta_se(
-                ta, args.subsample, False, args.mito_chr_name, args.out_dir)
+                ta, args.subsample, False,
+                args.mito_chr_name, args.out_dir)
         temp_files.append(ta)
     else:
         subsampled_ta = ta
@@ -142,5 +154,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

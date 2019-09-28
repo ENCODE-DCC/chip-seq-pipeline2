@@ -6,11 +6,14 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    assert_file_not_empty, human_readable_number,
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE MACS2 callpeak',
-                                        description='')
+                                     description='')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
@@ -26,9 +29,10 @@ def parse_arguments():
                         help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
 
@@ -36,10 +40,11 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
-def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak, 
-    out_dir):
+
+def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
+          out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_ta(ta)))
+                          os.path.basename(strip_ext_ta(ta)))
     npeak = '{}.{}.{}.narrowPeak.gz'.format(
         prefix,
         'pval{}'.format(pval_thresh),
@@ -86,6 +91,7 @@ def macs2(ta, chrsz, gensz, pval_thresh, smooth_win, cap_num_peak,
 
     return npeak
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -107,5 +113,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

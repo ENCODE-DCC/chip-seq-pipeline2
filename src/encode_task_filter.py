@@ -6,16 +6,23 @@
 import sys
 import os
 import argparse
-from encode_lib_genomic import *
+from encode_lib_common import (
+    copy_f_to_dir, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext,
+    strip_ext_bam)
+from encode_lib_genomic import (
+    locate_picard, remove_chrs_from_bam, samstat, samtools_index,
+    samtools_name_sort)
+
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC filter.',
-                                        description='')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC filter.')
     parser.add_argument('bam', type=str,
                         help='Path for raw BAM file.')
-    parser.add_argument('--dup-marker', type=str, choices=['picard','sambamba'],
-                        default='picard',
-                        help='Dupe marker for filtering mapped reads in BAM.')    
+    parser.add_argument(
+        '--dup-marker', type=str, choices=['picard', 'sambamba'],
+        default='picard',
+        help='Dupe marker for filtering mapped reads in BAM.')
     parser.add_argument('--mapq-thresh', default=30, type=int,
                         help='Threshold for low MAPQ reads removal.')
     parser.add_argument('--no-dup-removal', action="store_true",
@@ -24,8 +31,9 @@ def parse_arguments():
                         help='Paired-end BAM.')
     parser.add_argument('--multimapping', default=0, type=int,
                         help='Multimapping reads.')
-    parser.add_argument('--filter-chrs', nargs='*',
-                        help='Chromosomes to be filtered for final (nodup/filt) BAM.')
+    parser.add_argument(
+        '--filter-chrs', nargs='*',
+        help='Chromosomes to be filtered for final (nodup/filt) BAM.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
     parser.add_argument('--mito-chr-name', default='chrM',
@@ -33,10 +41,11 @@ def parse_arguments():
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
 
@@ -44,12 +53,13 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     filt_bam = '{}.filt.bam'.format(prefix)
 
-    if multimapping:        
+    if multimapping:
         qname_sort_bam = samtools_name_sort(bam, nth, out_dir)
 
         cmd2 = 'samtools view -h {} | '
@@ -63,7 +73,7 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
             prefix,
             nth)
         run_shell_cmd(cmd2)
-        rm_f(qname_sort_bam) # remove temporary files
+        rm_f(qname_sort_bam)  # remove temporary files
     else:
         cmd = 'samtools view -F 1804 -q {} -u {} | '
         cmd += 'samtools sort /dev/stdin -o {} -T {} -@ {}'
@@ -77,9 +87,10 @@ def rm_unmapped_lowq_reads_se(bam, multimapping, mapq_thresh, nth, out_dir):
 
     return filt_bam
 
+
 def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     filt_bam = '{}.filt.bam'.format(prefix)
     tmp_filt_bam = '{}.tmp_filt.bam'.format(prefix)
     fixmate_bam = '{}.fixmate.bam'.format(prefix)
@@ -132,11 +143,12 @@ def rm_unmapped_lowq_reads_pe(bam, multimapping, mapq_thresh, nth, out_dir):
     rm_f(fixmate_bam)
     return filt_bam
 
-def mark_dup_picard(bam, out_dir): # shared by both se and pe
+
+def mark_dup_picard(bam, out_dir):  # shared by both se and pe
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
-    prefix = strip_ext(prefix,'filt') 
+    prefix = strip_ext(prefix, 'filt')
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
     dup_qc = '{}.dup.qc'.format(prefix)
 
@@ -155,11 +167,12 @@ def mark_dup_picard(bam, out_dir): # shared by both se and pe
     run_shell_cmd(cmd)
     return dupmark_bam, dup_qc
 
-def mark_dup_sambamba(bam, nth, out_dir): # shared by both se and pe
+
+def mark_dup_sambamba(bam, nth, out_dir):  # shared by both se and pe
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
-    prefix = strip_ext(prefix,'filt') 
+    prefix = strip_ext(prefix, 'filt')
     dupmark_bam = '{}.dupmark.bam'.format(prefix)
     dup_qc = '{}.dup.qc'
 
@@ -174,11 +187,12 @@ def mark_dup_sambamba(bam, nth, out_dir): # shared by both se and pe
     run_shell_cmd(cmd)
     return dupmark_bam, dup_qc
 
+
 def rm_dup_se(dupmark_bam, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(dupmark_bam)))
+                          os.path.basename(strip_ext_bam(dupmark_bam)))
     # strip extension appended in the previous step
-    prefix = strip_ext(prefix,'dupmark') 
+    prefix = strip_ext(prefix, 'dupmark')
     nodup_bam = '{}.nodup.bam'.format(prefix)
 
     cmd1 = 'samtools view -@ {} -F 1804 -b {} > {}'
@@ -189,11 +203,12 @@ def rm_dup_se(dupmark_bam, nth, out_dir):
     run_shell_cmd(cmd1)
     return nodup_bam
 
+
 def rm_dup_pe(dupmark_bam, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(dupmark_bam)))
+                          os.path.basename(strip_ext_bam(dupmark_bam)))
     # strip extension appended in the previous step
-    prefix = strip_ext(prefix,'dupmark') 
+    prefix = strip_ext(prefix, 'dupmark')
     nodup_bam = '{}.nodup.bam'.format(prefix)
 
     cmd1 = 'samtools view -@ {} -F 1804 -f 2 -b {} > {}'
@@ -204,19 +219,22 @@ def rm_dup_pe(dupmark_bam, nth, out_dir):
     run_shell_cmd(cmd1)
     return nodup_bam
 
+
 def pbc_qc_se(bam, mito_chr_name, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     # strip extension appended in the previous step
-    prefix = strip_ext(prefix,'dupmark') 
+    prefix = strip_ext(prefix, 'dupmark')
     pbc_qc = '{}.lib_complexity.qc'.format(prefix)
 
     cmd2 = 'bedtools bamtobed -i {} | '
     cmd2 += 'awk \'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$6}}\' | '
     cmd2 += 'grep -v "^{}\\s" | sort | uniq -c | '
     cmd2 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
-    cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
+    cmd2 += '($1==2){{m2=m2+1}} {{m0=m0+1}} '
+    cmd2 += '{{mt=mt+$1}} END{{m1_m2=-1.0; '
+    cmd2 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
+    cmd2 += 'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
     cmd2 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n",'
     cmd2 += 'mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd2 = cmd2.format(
@@ -226,9 +244,10 @@ def pbc_qc_se(bam, mito_chr_name, out_dir):
     run_shell_cmd(cmd2)
     return pbc_qc
 
+
 def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     prefix = os.path.join(out_dir,
-        os.path.basename(strip_ext_bam(bam)))
+                          os.path.basename(strip_ext_bam(bam)))
     pbc_qc = '{}.lib_complexity.qc'.format(prefix)
 
     nmsrt_bam = samtools_name_sort(bam, nth, out_dir)
@@ -237,7 +256,8 @@ def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     cmd3 += 'grep -v "^{}\\s" | sort | uniq -c | '
     cmd3 += 'awk \'BEGIN{{mt=0;m0=0;m1=0;m2=0}} ($1==1){{m1=m1+1}} '
     cmd3 += '($1==2){{m2=m2+1}} {{m0=m0+1}} {{mt=mt+$1}} END{{m1_m2=-1.0; '
-    cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
+    cmd3 += 'if(m2>0) m1_m2=m1/m2; m0_mt=0; '
+    cmd3 += 'if (mt>0) m0_mt=m0/mt; m1_m0=0; if (m0>0) m1_m0=m1/m0; '
     cmd3 += 'printf "%d\\t%d\\t%d\\t%d\\t%f\\t%f\\t%f\\n"'
     cmd3 += ',mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {}'
     cmd3 = cmd3.format(
@@ -247,6 +267,7 @@ def pbc_qc_pe(bam, mito_chr_name, nth, out_dir):
     run_shell_cmd(cmd3)
     rm_f(nmsrt_bam)
     return pbc_qc
+
 
 def main():
     # filt_bam - dupmark_bam - nodup_bam
@@ -259,28 +280,28 @@ def main():
     mkdir_p(args.out_dir)
 
     # declare temp arrays
-    temp_files = [] # files to deleted later at the end
+    temp_files = []  # files to deleted later at the end
 
     log.info('Removing unmapped/low-quality reads...')
     if args.paired_end:
         filt_bam = rm_unmapped_lowq_reads_pe(
-                args.bam, args.multimapping, args.mapq_thresh, 
-                args.nth, args.out_dir)
+            args.bam, args.multimapping, args.mapq_thresh,
+            args.nth, args.out_dir)
     else:
         filt_bam = rm_unmapped_lowq_reads_se(
-                args.bam, args.multimapping, args.mapq_thresh, 
-                args.nth, args.out_dir)
+            args.bam, args.multimapping, args.mapq_thresh,
+            args.nth, args.out_dir)
 
     log.info('Marking dupes with {}...'.format(args.dup_marker))
-    if args.dup_marker=='picard':
+    if args.dup_marker == 'picard':
         dupmark_bam, dup_qc = mark_dup_picard(
-                            filt_bam, args.out_dir)
-    elif args.dup_marker=='sambamba':
+            filt_bam, args.out_dir)
+    elif args.dup_marker == 'sambamba':
         dupmark_bam, dup_qc = mark_dup_sambamba(
-                            filt_bam, args.nth, args.out_dir)
+            filt_bam, args.nth, args.out_dir)
     else:
         raise argparse.ArgumentTypeError(
-        'Unsupported --dup-marker {}'.format(args.dup_marker))
+            'Unsupported --dup-marker {}'.format(args.dup_marker))
 
     if args.no_dup_removal:
         nodup_bam = filt_bam
@@ -289,10 +310,10 @@ def main():
         log.info('Removing dupes...')
         if args.paired_end:
             nodup_bam = rm_dup_pe(
-                        dupmark_bam, args.nth, args.out_dir)
+                dupmark_bam, args.nth, args.out_dir)
         else:
             nodup_bam = rm_dup_se(
-                        dupmark_bam, args.nth, args.out_dir)
+                dupmark_bam, args.nth, args.out_dir)
         samtools_index(dupmark_bam)
         temp_files.append(dupmark_bam+'.bai')
     temp_files.append(dupmark_bam)
@@ -306,17 +327,17 @@ def main():
         final_bam = nodup_bam
 
     log.info('samtools index (final_bam)...')
-    nodup_bai = samtools_index(final_bam, args.nth, args.out_dir)
+    samtools_index(final_bam, args.nth, args.out_dir)
 
     log.info('samstat...')
-    nodup_samstat_qc = samstat(final_bam, args.nth, args.out_dir)
+    samstat(final_bam, args.nth, args.out_dir)
 
     log.info('Generating PBC QC log...')
     if args.paired_end:
-        pbc_qc = pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth,
-                           args.out_dir)
+        pbc_qc_pe(dupmark_bam, args.mito_chr_name, args.nth,
+                  args.out_dir)
     else:
-        pbc_qc = pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
+        pbc_qc_se(dupmark_bam, args.mito_chr_name, args.out_dir)
 
     log.info('samtools index (raw bam)...')
     bam = copy_f_to_dir(args.bam, args.out_dir)
@@ -331,5 +352,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

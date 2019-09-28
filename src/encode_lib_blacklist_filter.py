@@ -6,22 +6,24 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    get_ext, get_num_lines, gunzip, log, mkdir_p,
+    rm_f, run_shell_cmd, strip_ext, strip_ext_bam)
+
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC Blacklist filter.',
-                                        description='')
-    parser.add_argument('peak', type=str,
-                        help='Peak file.')
+    parser = argparse.ArgumentParser(prog='ENCODE DCC Blacklist filter.')
+    parser.add_argument('peak', type=str, help='Peak file.')
     parser.add_argument('--blacklist', type=str, required=True,
                         help='Blacklist BED file.')
     parser.add_argument('--keep-irregular-chr', action="store_true",
-                        help='Keep reads with non-canonical chromosome names.')    
+                        help='Keep reads with non-canonical chromosome names.')
     parser.add_argument('--out-dir', default='', type=str,
-                        help='Output directory.')    
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
     if args.blacklist.endswith('null'):
@@ -31,13 +33,16 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
-    prefix = os.path.join(out_dir, 
+    prefix = os.path.join(
+        out_dir,
         os.path.basename(strip_ext(peak)))
     peak_ext = get_ext(peak)
     filtered = '{}.bfilt.{}.gz'.format(prefix, peak_ext)
 
-    if get_num_lines(peak)==0 or blacklist=='' or get_num_lines(blacklist)==0:
+    if get_num_lines(peak) == 0 or blacklist == '' \
+            or get_num_lines(blacklist) == 0:
         cmd = 'zcat -f {} | gzip -nc > {}'.format(peak, filtered)
         run_shell_cmd(cmd)
     else:
@@ -52,19 +57,20 @@ def blacklist_filter(peak, blacklist, keep_irregular_chr, out_dir):
             cmd += 'grep -P \'chr[\\dXY]+\\b\' | '
         cmd += 'gzip -nc > {}'
         cmd = cmd.format(
-            tmp1, # peak
-            tmp2, # blacklist
+            tmp1,  # peak
+            tmp2,  # blacklist
             filtered)
         run_shell_cmd(cmd)
         rm_f([tmp1, tmp2])
     return filtered
 
+
 def blacklist_filter_bam(bam, blacklist, out_dir):
-    prefix = os.path.join(out_dir, 
-        os.path.basename(strip_ext_bam(bam)))
+    prefix = os.path.join(out_dir,
+                          os.path.basename(strip_ext_bam(bam)))
     filtered = '{}.bfilt.bam'.format(prefix)
 
-    if blacklist=='' or get_num_lines(blacklist)==0:
+    if blacklist == '' or get_num_lines(blacklist) == 0:
         cmd = 'zcat -f {} | gzip -nc > {}'.format(bam, filtered)
         run_shell_cmd(cmd)
     else:
@@ -74,11 +80,12 @@ def blacklist_filter_bam(bam, blacklist, out_dir):
         cmd = 'bedtools intersect -nonamecheck -v -abam {} -b {} > {}'
         cmd = cmd.format(
             bam,
-            tmp2, # blacklist
+            tmp2,  # blacklist
             filtered)
         run_shell_cmd(cmd)
         rm_f([tmp2])
     return filtered
+
 
 def main():
     # read params
@@ -90,11 +97,12 @@ def main():
 
     # reproducibility QC
     log.info('Filtering peak with blacklist...')
-    filtered = blacklist_filter(
-                args.peak, args.blacklist, 
-                args.keep_irregular_chr, args.out_dir)
-    
+    blacklist_filter(
+        args.peak, args.blacklist,
+        args.keep_irregular_chr, args.out_dir)
+
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

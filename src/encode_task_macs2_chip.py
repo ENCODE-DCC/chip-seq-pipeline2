@@ -6,13 +6,18 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    assert_file_not_empty, human_readable_number,
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC MACS2 callpeak',
-                                        description='')
-    parser.add_argument('tas', type=str, nargs='+',
-                        help='Path for TAGALIGN file (first) and control TAGALIGN file (second; optional).')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC MACS2 callpeak')
+    parser.add_argument(
+        'tas', type=str, nargs='+',
+        help='Path for TAGALIGN file (first) and '
+             'control TAGALIGN file (second; optional).')
     parser.add_argument('--fraglen', type=int, required=True,
                         help='Fragment length.')
     parser.add_argument('--shift', type=int, default=0,
@@ -28,24 +33,26 @@ def parse_arguments():
                         help='Capping number of peaks by taking top N peaks.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
-    if len(args.tas)==1:
+    if len(args.tas) == 1:
         args.tas.append('')
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
 
+
 def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
-        out_dir):
+          out_dir):
     basename_ta = os.path.basename(strip_ext_ta(ta))
     if ctl_ta:
         basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
         basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
-        if len(basename_prefix) > 200: # UNIX cannot have len(filename) > 255
+        if len(basename_prefix) > 200:  # UNIX cannot have len(filename) > 255
             basename_prefix = '{}_x_control'.format(basename_ta)
     else:
         basename_prefix = basename_ta
@@ -55,14 +62,6 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
         'pval{}'.format(pval_thresh),
         human_readable_number(cap_num_peak))
     npeak_tmp = '{}.tmp'.format(npeak)
-    fc_bigwig = '{}.fc.signal.bigwig'.format(prefix)
-    pval_bigwig = '{}.pval.signal.bigwig'.format(prefix)
-    # temporary files
-    fc_bedgraph = '{}.fc.signal.bedgraph'.format(prefix)
-    fc_bedgraph_srt = '{}.fc.signal.srt.bedgraph'.format(prefix)
-    pval_bedgraph = '{}.pval.signal.bedgraph'.format(prefix)
-    pval_bedgraph_srt = '{}.pval.signal.srt.bedgraph'.format(prefix)
-
     temp_files = []
 
     cmd0 = ' macs2 callpeak '
@@ -93,12 +92,13 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
         npeak)
     run_shell_cmd(cmd2)
     rm_f(npeak_tmp)
-    
+
     # remove temporary files
     temp_files.append("{}_*".format(prefix))
     rm_f(temp_files)
 
     return npeak
+
 
 def main():
     # read params
@@ -120,5 +120,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

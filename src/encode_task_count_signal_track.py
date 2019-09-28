@@ -6,25 +6,29 @@
 import sys
 import os
 import argparse
-from encode_lib_common import *
+from encode_lib_common import (
+    log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE DCC Count signal track generation',
-                                        description='')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE DCC Count signal track generation')
     parser.add_argument('ta', type=str,
                         help='Path for TAGALIGN file.')
     parser.add_argument('--chrsz', type=str,
                         help='2-col chromosome sizes file.')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def count_signal_track(ta, chrsz, out_dir):
     prefix = os.path.join(out_dir, os.path.basename(strip_ext_ta(ta)))
@@ -48,7 +52,7 @@ def count_signal_track(ta, chrsz, out_dir):
 
     cmd3 = 'bedGraphToBigWig {} {} {}'
     cmd3 = cmd3.format(pos_bedgraph, chrsz, pos_bw)
-    run_shell_cmd(cmd3)    
+    run_shell_cmd(cmd3)
 
     cmd4 = 'bedGraphToBigWig {} {} {}'
     cmd4 = cmd4.format(neg_bedgraph, chrsz, neg_bw)
@@ -61,6 +65,7 @@ def count_signal_track(ta, chrsz, out_dir):
 
     return pos_bw, neg_bw
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -69,13 +74,13 @@ def main():
     mkdir_p(args.out_dir)
 
     log.info('Generating count signal tracks...')
-    pos_bw, neg_bw = count_signal_track( args.ta, args.chrsz, args.out_dir)
+    pos_bw, neg_bw = count_signal_track(args.ta, args.chrsz, args.out_dir)
 
     log.info('List all files in output directory...')
     ls_l(args.out_dir)
 
     log.info('All done.')
 
-if __name__=='__main__':
-    main()
 
+if __name__ == '__main__':
+    main()

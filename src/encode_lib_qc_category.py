@@ -9,15 +9,30 @@ from collections import OrderedDict
 from base64 import b64encode
 
 
+def to_number(var):
+    """Convert to number or return None
+    """
+    try:
+        if '.' in var:
+            raise ValueError
+        return int(var)
+    except ValueError:
+        try:
+            return float(var)
+        except ValueError:
+            return None
+
+
 class QCLog(object):
     """Parse a QC text file and convert it into a Python dict.
-       
+
        TSV (number of columns >= 1) can be converted without a parser function.
-       First column will be key name and the rest of columns will be 
+       First column will be key name and the rest of columns will be
        values.
 
        For other QC log types, specify a parser function.
     """
+
     def __init__(self, log_file, parser=None):
         """
         Args:
@@ -35,7 +50,7 @@ class QCLog(object):
         if isinstance(self._log_file, dict):
             self._dict = self._log_file
             return
-        
+
         if self._parser is None:
             d = OrderedDict()
             # can parse TSV
@@ -80,6 +95,7 @@ class QCPlot(object):
     """Embed image as base64 string and return HTML string.
        QCPlot supports all images types supported by HTML <img>.
     """
+
     def __init__(self, plot_file, caption=None, size_pct=100):
         self._plot_file = plot_file
         self._caption = caption
@@ -95,27 +111,17 @@ class QCPlot(object):
           <figcaption style="text-align:center">{caption}</figcaption>
         </figure>
         '''
-        return html.format(img_type=self._img_type,
-                           size_pct=self._size_pct,
-                           encoded=self._encoded,
-                           caption='' if self._caption is None else self._caption)
+        return html.format(
+            img_type=self._img_type,
+            size_pct=self._size_pct,
+            encoded=self._encoded,
+            caption='' if self._caption is None else self._caption)
 
     def __encode(self):
-        if self._plot_file.lower().endswith('.png'):
-            img_type = 'png'
-        elif self._plot_file.lower().endswith('.gif'):
-            img_type = 'gif'
-        elif self._plot_file.lower().endswith('.jpg'):
-            img_type = 'jpg'
-        elif self._plot_file.lower().endswith('.bmp'):
-            img_type = 'bmp'
-        else:
-            raise Exception('Unsupported plot type')
-
         self._encoded = b64encode(
             open(self._plot_file, 'rb').read()).decode("utf-8")
 
-    
+
 class QCCategory(object):
     """QCCategory can have a child QCCategory and HTML will be resursively
     stacked. This is useful for having subcategories.
@@ -131,7 +137,7 @@ class QCCategory(object):
                           For example of samtools flagstat
                           'mapped_qc_failed' : 'Mapped(QC-failed)'
 
-            parser: use it as default parser for all children QC logs                    
+            parser: use it as default parser for all children QC logs
         """
         self._cat_name = cat_name
         self._html_head = html_head
@@ -146,7 +152,7 @@ class QCCategory(object):
 
     def add_category(self, qc_category):
         self._child_categories.append(qc_category)
-    
+
     def add_log(self, log_file, key=None):
         assert(key not in self._qc_logs)
         self._qc_logs[key] = QCLog(
@@ -192,7 +198,7 @@ class QCCategory(object):
     def __qc_logs_to_html(self):
         """Print HTML only if there are contents to be shown
         Make an HTML table of qc_logs. For example,
-                 rep1    rep2    
+                 rep1    rep2
         -------+-------+--------
         key1   | val1  | val1
         """
@@ -200,18 +206,18 @@ class QCCategory(object):
             return ''
 
         html = '<table border="1" style="border-collapse:collapse">'
-        
+
         # make HTML header row
         header = '<tr><th bgcolor="#EEEEEE">'
         arr = [' ']
         if len(self._qc_logs) == 1 and \
-                list(self._qc_logs.keys())[0] is None:            
+                list(self._qc_logs.keys())[0] is None:
             # skip header for single qc log
             arr += ['Description']
         else:
             arr += self._qc_logs.keys()
         header += '</th><th bgcolor="#EEEEEE">'.join(arr) + '</th></tr>\n'
-        
+
         # declared as dict but will be used as set with empty values
         all_keys = OrderedDict()
         # contents
@@ -253,4 +259,3 @@ class QCCategory(object):
         for k, qc_plot in self._qc_plots.items():
             html += qc_plot.to_html()
         return html
-

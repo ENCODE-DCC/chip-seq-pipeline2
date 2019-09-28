@@ -3,19 +3,21 @@
 # ENCODE fragment length stat wrapper
 # Author: Daniel Kim, Jin Lee (leepc12@gmail.com)
 
+import warnings
+import numpy as np
+from collections import namedtuple
+from scipy.signal import find_peaks_cwt
+from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
-from encode_lib_genomic import remove_read_group, locate_picard
+from encode_lib_common import (
+    strip_ext_bam, ls_l, log, rm_f)
+from encode_lib_genomic import (
+    remove_read_group, locate_picard)
 import matplotlib as mpl
 mpl.use('Agg')
 
-from matplotlib import pyplot as plt
-from scipy.signal import find_peaks_cwt
-from collections import namedtuple
-import numpy as np
-import warnings
 warnings.filterwarnings("ignore")
 
 
@@ -51,7 +53,7 @@ class QCIntervalCheck(QCCheck):
     def message(self, value, qc_pass):
         return ('{}\tOK'.format(value) if qc_pass else
                 '{}\tout of range [{}, {}]'.format(value, self.lower,
-                                                  self.upper))
+                                                   self.upper))
 
 
 class QCLessThanEqualCheck(QCIntervalCheck):
@@ -72,7 +74,7 @@ class QCHasElementInRange(QCCheck):
 
     def check(self, elems):
         return (len([elem for elem in elems
-                    if self.lower <= elem <= self.upper]) > 0)
+                     if self.lower <= elem <= self.upper]) > 0)
 
     def message(self, elems, qc_pass):
         return ('OK' if qc_pass else
@@ -82,14 +84,18 @@ class QCHasElementInRange(QCCheck):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE fragment length stat')
-    parser.add_argument('--nodup-bam', type=str, help='Raw BAM file (from task filter).')
-    parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
+    parser.add_argument('--nodup-bam', type=str,
+                        help='Raw BAM file (from task filter).')
+    parser.add_argument('--out-dir', default='', type=str,
+                        help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET','DEBUG','INFO','WARNING','CRITICAL','ERROR','CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def read_picard_histogram(data_file):
     with open(data_file) as fp:
@@ -100,11 +106,12 @@ def read_picard_histogram(data_file):
 
     return data
 
+
 def get_insert_distribution(final_bam, prefix):
     '''
     Calls Picard CollectInsertSizeMetrics
     '''
-    logging.info('insert size distribution...')
+    log.info('insert size distribution...')
     insert_data = '{0}.inserts.hist_data.log'.format(prefix)
     insert_plot = '{0}.inserts.hist_graph.pdf'.format(prefix)
     graph_insert_dist = ('java -Xmx6G -XX:ParallelGCThreads=1 -jar '
@@ -117,9 +124,10 @@ def get_insert_distribution(final_bam, prefix):
                                                              insert_data,
                                                              insert_plot,
                                                              locate_picard())
-    logging.info(graph_insert_dist)
+    log.info(graph_insert_dist)
     os.system(graph_insert_dist)
     return insert_data, insert_plot
+
 
 def fragment_length_qc(data, prefix):
     results = []
@@ -129,16 +137,16 @@ def fragment_length_qc(data, prefix):
     MONO_NUC_UPPER_LIMIT = 300
 
     # % of NFR vs res
-    nfr_reads = data[data[:,0] < NFR_UPPER_LIMIT][:,1]
-    percent_nfr = nfr_reads.sum() / data[:,1].sum()
+    nfr_reads = data[data[:, 0] < NFR_UPPER_LIMIT][:, 1]
+    percent_nfr = nfr_reads.sum() / data[:, 1].sum()
     results.append(
         QCGreaterThanEqualCheck('Fraction of reads in NFR', 0.4)(percent_nfr))
 
     # % of NFR vs mononucleosome
     mono_nuc_reads = data[
-        (data[:,0] > MONO_NUC_LOWER_LIMIT) &
-        (data[:,0] <= MONO_NUC_UPPER_LIMIT)][:,1]
-    
+        (data[:, 0] > MONO_NUC_LOWER_LIMIT) &
+        (data[:, 0] <= MONO_NUC_UPPER_LIMIT)][:, 1]
+
     percent_nfr_vs_mono_nuc = (
         nfr_reads.sum() /
         mono_nuc_reads.sum())
@@ -147,20 +155,26 @@ def fragment_length_qc(data, prefix):
             percent_nfr_vs_mono_nuc))
 
     # peak locations
-    pos_start_val = data[0,0] # this may be greater than 0
+    pos_start_val = data[0, 0]  # this may be greater than 0
     peaks = find_peaks_cwt(data[:, 1], np.array([25]))
-    nuc_range_metrics = [('Presence of NFR peak', 20 - pos_start_val, 90 - pos_start_val),
-                         ('Presence of Mono-Nuc peak', 120 - pos_start_val, 250 - pos_start_val),
-                         ('Presence of Di-Nuc peak', 300 - pos_start_val, 500 - pos_start_val)]
+    nuc_range_metrics = [
+        ('Presence of NFR peak', 20 - pos_start_val, 90 - pos_start_val),
+        ('Presence of Mono-Nuc peak',
+         120 - pos_start_val, 250 - pos_start_val),
+        ('Presence of Di-Nuc peak',
+         300 - pos_start_val, 500 - pos_start_val)]
     for range_metric in nuc_range_metrics:
         results.append(QCHasElementInRange(*range_metric)(peaks))
 
     out = prefix + '.nucleosomal.qc'
     with open(out, 'w') as fp:
-        for elem in results:            
-            fp.write('\t'.join([elem.metric, str(elem.qc_pass), elem.message]) + '\n')
+        for elem in results:
+            fp.write(
+                '\t'.join(
+                    [elem.metric, str(elem.qc_pass), elem.message]) + '\n')
 
     return out
+
 
 def fragment_length_plot(data_file, prefix, peaks=None):
     try:
@@ -185,6 +199,7 @@ def fragment_length_plot(data_file, prefix, peaks=None):
 
     return plot_png
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -199,10 +214,9 @@ def main():
     insert_data, insert_plot = get_insert_distribution(RG_FREE_FINAL_BAM,
                                                        OUTPUT_PREFIX)
     # Also need to run n-nucleosome estimation
-    nucleosomal_qc = fragment_length_qc(read_picard_histogram(insert_data),
-                                        OUTPUT_PREFIX)
-
-    fraglen_dist_plot = fragment_length_plot(insert_data, OUTPUT_PREFIX)
+    fragment_length_qc(read_picard_histogram(insert_data),
+                       OUTPUT_PREFIX)
+    fragment_length_plot(insert_data, OUTPUT_PREFIX)
 
     rm_f(RG_FREE_FINAL_BAM)
 
@@ -211,5 +225,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

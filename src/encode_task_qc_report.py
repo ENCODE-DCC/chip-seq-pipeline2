@@ -4,17 +4,30 @@
 # Author: Jin Lee (leepc12@gmail.com)
 
 import sys
-import os
 import json
 import argparse
-from encode_lib_common import *
-from encode_lib_log_parser import *
+from encode_lib_common import (
+    infer_n_from_nC2, infer_pair_label_from_idx, log, now,
+    run_shell_cmd, write_txt)
+from encode_lib_log_parser import (
+    MAP_KEY_DESC_ANNOT_ENRICH_QC, MAP_KEY_DESC_DUP_QC, MAP_KEY_DESC_FLAGSTAT_QC,
+    MAP_KEY_DESC_FRAC_MITO_QC, MAP_KEY_DESC_FRIP_QC, MAP_KEY_DESC_JSD_QC,
+    MAP_KEY_DESC_LIB_COMPLEXITY_QC, MAP_KEY_DESC_NUCLEOSOMAL_QC,
+    MAP_KEY_DESC_NUM_PEAK_QC, MAP_KEY_DESC_PEAK_REGION_SIZE_QC,
+    MAP_KEY_DESC_PICARD_EST_LIB_SIZE_QC, MAP_KEY_DESC_REPRODUCIBILITY_QC,
+    MAP_KEY_DESC_TSS_ENRICH_QC, MAP_KEY_DESC_XCOR_SCORE)
+from encode_lib_log_parser import (
+    parse_annot_enrich_qc, parse_dup_qc, parse_flagstat_qc, parse_frac_mito_qc,
+    parse_frip_qc, parse_jsd_qc, parse_lib_complexity_qc, parse_nucleosomal_qc,
+    parse_num_peak_qc, parse_peak_region_size_qc, parse_picard_est_lib_size_qc,
+    parse_reproducibility_qc, parse_tss_enrich_qc, parse_xcor_score)
 from encode_lib_qc_category import QCCategory
 from collections import OrderedDict
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(prog='ENCODE Final QC report/JSON generator.')
+    parser = argparse.ArgumentParser(
+        prog='ENCODE Final QC report/JSON generator.')
     parser.add_argument('--title', type=str, default='Untitled',
                         help='Title of sample.')
     parser.add_argument('--desc', type=str, default='No description',
@@ -33,7 +46,7 @@ def parse_arguments():
                         help='List of true/false for paired endedness of sample.')
     parser.add_argument('--ctl-paired-ends', type=str, nargs='*',
                         help='List of true/false for paired endedness of control.')
-    parser.add_argument('--pipeline-type', type=str, required=True,                        
+    parser.add_argument('--pipeline-type', type=str, required=True,
                         help='Pipeline type.')
     parser.add_argument('--aligner', type=str, required=True,
                         help='Aligner.')
@@ -161,15 +174,15 @@ def parse_arguments():
     parser.add_argument('--qc-json-ref', type=str,
                         help='Reference QC JSON file to be compared to output QC JSON (developer\'s purpose only).')
     parser.add_argument('--log-level', default='INFO',
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR', 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
 
-    # parse with a special delimiter "_:_"    
+    # parse with a special delimiter "_:_"
     for a in vars(args):
-        if type(eval('args.{}'.format(a)))==list:
-            exec('args.{} = split_entries_and_extend(args.{})'.format(a,a))        
+        if type(eval('args.{}'.format(a))) == list:
+            exec('args.{} = split_entries_and_extend(args.{})'.format(a, a))
 
     print("__DEBUG__", args.paired_ends)
 
@@ -195,6 +208,7 @@ def parse_arguments():
     log.info(sys.argv)
     return args
 
+
 def split_entries_and_extend(l, delim='_:_'):
     result = []
     for a in l:
@@ -206,17 +220,21 @@ def split_entries_and_extend(l, delim='_:_'):
     # if all empty then return []
     return result if test_not_all_empty else []
 
+
 def str2bool(s):
     s = s.lower()
     if s not in ('false', 'true', 'False', 'True'):
         raise ValueError('Not a valid boolean string')
     return s == 'true'
 
+
 def str_rep(i):
     return 'rep' + str(i + 1)
 
+
 def str_ctl(i):
     return 'ctl' + str(i + 1)
+
 
 MAP_KEY_DESC_GENERAL = {
     'date': 'Report generated at',
@@ -230,6 +248,7 @@ MAP_KEY_DESC_GENERAL = {
     'paired_end': 'Paired-end per replicate',
     'ctl_paired_end': 'Control paired-end per replicate',
 }
+
 
 def make_cat_root(args):
     cat_root = QCCategory(
@@ -255,6 +274,7 @@ def make_cat_root(args):
     cat_root.add_log(d_general, key='general')
 
     return cat_root
+
 
 def make_cat_align(args, cat_root):
     cat_align = QCCategory(
@@ -291,7 +311,7 @@ def make_cat_align(args, cat_root):
             <li>not primary alignment (0x100)</li>
             <li>read fails platform/vendor quality checks (0x200)</li>
             <li>read is PCR or optical duplicate (0x400)</li>
-            </ul></p></div><br>        
+            </ul></p></div><br>
         """,
         parser=parse_dup_qc,
         map_key_desc=MAP_KEY_DESC_DUP_QC,
@@ -360,7 +380,7 @@ def make_cat_align(args, cat_root):
     cat_fraglen = QCCategory(
         'frag_len_stat',
         html_head='<h2>Fragment length statistics</h2>',
-        html_foot="""        
+        html_foot="""
             <p>Open chromatin assays show distinct fragment length enrichments, as the cut
             sites are only in open chromatin and not in nucleosomes. As such, peaks
             representing different n-nucleosomal (ex mono-nucleosomal, di-nucleosomal)
@@ -415,7 +435,7 @@ def make_cat_lib_complexity(args, cat_root):
         html_head='<h2>Library complexity (filtered non-mito BAM)</h2>',
         html_foot="""
             <div id='help-lib_complexity'>
-            <p>Mitochondrial reads are filtered out by default. 
+            <p>Mitochondrial reads are filtered out by default.
             The non-redundant fraction (NRF) is the fraction of non-redundant mapped reads
             in a dataset; it is the ratio between the number of positions in the genome
             that uniquely mapped reads map to and the total number of uniquely mappable
@@ -463,6 +483,7 @@ def make_cat_lib_complexity(args, cat_root):
                 cat_lc_lib_size.add_log(qc, key=str_rep(i))
 
     return cat_lc
+
 
 def make_cat_replication(args, cat_root):
     cat_replication = QCCategory(
@@ -548,6 +569,7 @@ def make_cat_replication(args, cat_root):
 
     return cat_replication
 
+
 def make_cat_peak_stat(args, cat_root):
     cat_peak_stat = QCCategory(
         'peak_stat',
@@ -588,6 +610,7 @@ def make_cat_peak_stat(args, cat_root):
         cat_peak_region_size.add_plot(plot, key='overlap_opt', size_pct=35)
 
     return cat_peak_stat
+
 
 def make_cat_align_enrich(args, cat_root):
     cat_align_enrich = QCCategory(
@@ -668,13 +691,13 @@ def make_cat_align_enrich(args, cat_root):
 
     return cat_align_enrich
 
+
 def make_cat_peak_enrich(args, cat_root):
     cat_peak_enrich = QCCategory(
         'peak_enrich',
         html_head='<h1>Peak enrichment</h1><hr>',
         parent=cat_root
     )
-
 
     cat_frip = QCCategory(
         'frac_reads_in_peaks',
@@ -799,6 +822,7 @@ def make_cat_peak_enrich(args, cat_root):
 
     return cat_peak_enrich
 
+
 def make_cat_etc(args, cat_root):
     cat_etc = QCCategory(
         'etc',
@@ -824,11 +848,12 @@ def make_cat_etc(args, cat_root):
 
     return cat_etc
 
+
 def main():
     # read params
     log.info('Parsing QC logs and reading QC plots...')
     args = parse_arguments()
-    
+
     # make a root QCCategory
     cat_root = make_cat_root(args)
 
@@ -840,7 +865,7 @@ def main():
     make_cat_align_enrich(args, cat_root)
     make_cat_peak_enrich(args, cat_root)
     make_cat_etc(args, cat_root)
-   
+
     log.info('Creating HTML report...')
     write_txt(args.out_qc_html, cat_root.to_html())
 
@@ -850,7 +875,7 @@ def main():
 
     if args.qc_json_ref:
         log.info('Comparing QC JSON file with reference...')
-        # exclude general section from comparing 
+        # exclude general section from comparing
         # because it includes metadata like date, pipeline_ver, ...
         # we want to compare actual quality metrics only
         j.pop('general')
@@ -858,7 +883,7 @@ def main():
         # JSD is tested in task level test.
         if 'align_enrich' in j and 'jsd' in j['align_enrich']:
             j['align_enrich'].pop('jsd')
-        with open(args.qc_json_ref,'r') as fp:
+        with open(args.qc_json_ref, 'r') as fp:
             j_ref = json.load(fp, object_pairs_hook=OrderedDict)
             if 'general' in j_ref:
                 j_ref.pop("general")
@@ -872,5 +897,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

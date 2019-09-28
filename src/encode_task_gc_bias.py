@@ -3,31 +3,38 @@
 # ENCODE DCC GC bias wrapper
 # Author: Daniel Kim, Jin Lee (leepc12@gmail.com)
 
+import warnings
+from matplotlib import pyplot as plt
 import sys
 import os
 import argparse
-from encode_lib_common import strip_ext_bam, ls_l, log, logging, mkdir_p, rm_f
-from encode_lib_genomic import remove_read_group, locate_picard
+from encode_lib_common import (
+    strip_ext_bam, ls_l, log, logging, rm_f)
+from encode_lib_genomic import (
+    remove_read_group, locate_picard)
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
 mpl.use('Agg')
 
-from matplotlib import pyplot as plt
-import warnings
 warnings.filterwarnings("ignore")
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE GC bias')
-    parser.add_argument('--nodup-bam', type=str, help='Raw BAM file (from task filter).')
+    parser.add_argument('--nodup-bam', type=str,
+                        help='Raw BAM file (from task filter).')
     parser.add_argument('--ref-fa', type=str, help='Reference fasta file.')
-    parser.add_argument('--out-dir', default='', type=str, help='Output directory.')
+    parser.add_argument('--out-dir', default='', type=str,
+                        help='Output directory.')
     parser.add_argument('--log-level', default='INFO', help='Log level',
-                        choices=['NOTSET','DEBUG','INFO','WARNING','CRITICAL','ERROR','CRITICAL'])
+                        choices=['NOTSET', 'DEBUG', 'INFO', 'WARNING',
+                                 'CRITICAL', 'ERROR', 'CRITICAL'])
     args = parser.parse_args()
     log.setLevel(args.log_level)
     log.info(sys.argv)
     return args
+
 
 def get_gc(qsorted_bam_file, reference_fasta, prefix):
     '''
@@ -55,6 +62,7 @@ def get_gc(qsorted_bam_file, reference_fasta, prefix):
     logging.info(get_gc_metrics)
     os.system(get_gc_metrics)
     return output_file, plot_file, summary_file
+
 
 def plot_gc(data_file, prefix):
     '''
@@ -95,6 +103,7 @@ def plot_gc(data_file, prefix):
 
     return plot_png
 
+
 def main():
     # read params
     args = parse_arguments()
@@ -107,10 +116,10 @@ def main():
     RG_FREE_FINAL_BAM = remove_read_group(FINAL_BAM)
 
     gc_out, gc_plot_pdf, gc_summary = get_gc(RG_FREE_FINAL_BAM,
-                                         REF,
-                                         OUTPUT_PREFIX)
+                                             REF,
+                                             OUTPUT_PREFIX)
     # will generate PNG format from gc_out
-    gc_plot_png = plot_gc(gc_out, OUTPUT_PREFIX)
+    plot_gc(gc_out, OUTPUT_PREFIX)
 
     rm_f(RG_FREE_FINAL_BAM)
 
@@ -119,5 +128,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()

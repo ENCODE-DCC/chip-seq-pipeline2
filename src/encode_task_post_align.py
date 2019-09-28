@@ -4,45 +4,51 @@
 
 import sys
 import os
-import re
 import argparse
-from encode_lib_common import mkdir_p
-from encode_lib_genomic import *
+from encode_lib_common import (
+    mkdir_p, log, ls_l, rm_f, strip_ext_fastq)
+from encode_lib_genomic import (
+    get_read_length, remove_chrs_from_bam, samstat, samtools_index)
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(prog='ENCODE post align',
-                                        description='')
+                                     description='')
     parser.add_argument('fastq', type=str,
                         help='Path for FASTQ R1')
     parser.add_argument('bam', type=str,
                         help='Path for BAM')
-    parser.add_argument('--chrsz', type=str,
-                        help='2-col chromosome sizes file. If not given then '
-                             'SAMstats on mito-free BAM will not be calcaulted.')
+    parser.add_argument(
+        '--chrsz', type=str,
+        help='2-col chromosome sizes file. If not given then '
+             'SAMstats on mito-free BAM will not be calcaulted.')
     parser.add_argument('--mito-chr-name', default='chrM',
                         help='Mito chromosome name.')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
-                            help='Output directory.')
-    parser.add_argument('--log-level', default='INFO', 
-                        choices=['NOTSET','DEBUG','INFO',
-                            'WARNING','CRITICAL','ERROR','CRITICAL'],
+                        help='Output directory.')
+    parser.add_argument('--log-level', default='INFO',
+                        choices=['NOTSET', 'DEBUG', 'INFO',
+                                 'WARNING', 'CRITICAL', 'ERROR',
+                                 'CRITICAL'],
                         help='Log level')
     args = parser.parse_args()
 
     log.setLevel(args.log_level)
-    log.info(sys.argv)    
+    log.info(sys.argv)
     return args
+
 
 def make_read_length_file(fastq, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq))
     prefix = os.path.join(out_dir, basename)
     txt = '{}.read_length.txt'.format(prefix)
     read_length = get_read_length(fastq)
-    with open(txt,'w') as fp:
+    with open(txt, 'w') as fp:
         fp.write(str(read_length))
     return txt
+
 
 def main():
     # read params
@@ -53,14 +59,14 @@ def main():
 
     # generate read length file
     log.info('Generating read length file...')
-    R1_read_length_file = make_read_length_file(
-                            args.fastq, args.out_dir)
+    make_read_length_file(
+        args.fastq, args.out_dir)
 
     log.info('Running samtools index...')
-    bai = samtools_index(args.bam, args.nth, args.out_dir)
+    samtools_index(args.bam, args.nth, args.out_dir)
 
     log.info('SAMstat on raw BAM...')
-    flagstat = samstat(args.bam, args.nth, args.out_dir)
+    samstat(args.bam, args.nth, args.out_dir)
 
     if args.chrsz:
         log.info('SAMstat on non-mito BAM...')
@@ -69,8 +75,7 @@ def main():
         non_mito_bam = remove_chrs_from_bam(args.bam, [args.mito_chr_name],
                                             args.chrsz,
                                             args.nth, non_mito_out_dir)
-        non_mito_flagstat = samstat(non_mito_bam, args.nth,
-                                    non_mito_out_dir)
+        samstat(non_mito_bam, args.nth, non_mito_out_dir)
         rm_f(non_mito_bam)
 
     log.info('List all files in output directory...')
@@ -78,5 +83,6 @@ def main():
 
     log.info('All done.')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()
