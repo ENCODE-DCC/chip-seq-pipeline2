@@ -22,32 +22,5 @@
     "chip.ctl_fastqs_rep1_R1" : [ "ctl1_R1.fastq.gz" ],
     "chip.ctl_fastqs_rep1_R2" : [ "ctl1_R2.fastq.gz" ],
     "chip.ctl_fastqs_rep2_R1" : [ "ctl2_R1.fastq.gz" ],
-    "chip.ctl_fastqs_rep2_R2" : [ "ctl2_R2.fastq.gz" ],
-
-    "chip.bams" : [
-        "raw_rep1.bam",
-        "raw_rep2.bam"
-    ],
-    "chip.ctl_bams" : [
-        "raw_ctl1.bam",
-        "raw_ctl2.bam"
-    ],
-
-    "chip.nodup_bams" : [
-        "nodup_rep1.bam",
-        "nodup_rep2.bam"
-    ],
-    "chip.ctl_nodup_bams" : [
-        "nodup_ctl1.bam",
-        "nodup_ctl2.bam"
-    ],
-
-    "chip.tas" : [
-        "rep1.tagAlign.gz",
-        "rep2.tagAlign.gz"
-    ],
-    "chip.ctl_tas" : [
-        "ctl1.tagAlign.gz",
-        "ctl2.tagAlign.gz"
-    ]
+    "chip.ctl_fastqs_rep2_R2" : [ "ctl2_R2.fastq.gz" ]
 }
