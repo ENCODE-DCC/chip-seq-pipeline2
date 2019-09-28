@@ -1,21 +1,21 @@
 {
     "chip.pipeline_type" : "tf",
-    "chip.genome_tsv" : "/mnt/lab_data/encode-pipeline-genome-data/hg38_chr19_chrM_klab.tsv",
-    "chip.fastqs_rep1_R1" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R1.subsampled.67.fastq.gz"
+    "chip.genome_tsv" : "https://storage.googleapis.com/encode-pipeline-genome-data/hg38_chr19_chrM_caper.tsv",
+    "chip.fastqs_rep1_R1" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R1.subsampled.67.fastq.gz"
     ],
-    "chip.fastqs_rep1_R2" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R2.subsampled.67.fastq.gz"
+    "chip.fastqs_rep1_R2" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R2.subsampled.67.fastq.gz"
     ],
-    "chip.fastqs_rep2_R1" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R1.subsampled.67.fastq.gz"
+    "chip.fastqs_rep2_R1" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R1.subsampled.67.fastq.gz"
     ],
-    "chip.fastqs_rep2_R2" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R2.subsampled.67.fastq.gz"
+    "chip.fastqs_rep2_R2" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R2.subsampled.67.fastq.gz"
     ],
-    "chip.ctl_fastqs_rep1_R1" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R1.subsampled.80.fastq.gz"
+    "chip.ctl_fastqs_rep1_R1" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R1.subsampled.80.fastq.gz"
     ],
-    "chip.ctl_fastqs_rep1_R2" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz"
+    "chip.ctl_fastqs_rep1_R2" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz"
     ],
-    "chip.ctl_fastqs_rep2_R1" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz"
+    "chip.ctl_fastqs_rep2_R1" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz"
     ],
-    "chip.ctl_fastqs_rep2_R2" : ["/mnt/lab_data/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz"
+    "chip.ctl_fastqs_rep2_R2" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz"
     ],
     "chip.paired_end" : true,
     "chip.always_use_pooled_ctl" : true,

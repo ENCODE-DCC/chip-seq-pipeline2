@@ -34,7 +34,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 1) Prepare an input JSON file. Caper will automatically download all fastqs and reference human genome data defined in this JSON file recursively.
 	```bash
-	$ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK_subsampled_chr19_only_caper.json
+	$ INPUT_JSON=https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only_caper.json
 	```
 
 2-1) **Conda**: Run a workflow with Conda. Make sure that you have followed [this instruction](docs/install_conda.md) to install Conda and its environments.
