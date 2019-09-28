@@ -368,8 +368,18 @@ workflow chip {
 	Int num_ctl = num_ctl_ta
 
 	# sanity check for inputs
-	if ( peak_caller_ == 'spp' && num_ctl == 0 && num_rep_peak == 0 ) {
-		call raise_exception { input:
+	if ( num_rep == 0 && num_ctl == 0 ) {
+		call raise_exception as error_input_data { input:
+			msg = 'No FASTQ/BAM/TAG-ALIGN/PEAK defined in your input JSON. Check if your FASTQs are defined as "chip.fastqs_repX_RY". DO NOT MISS suffix _R1 even for single ended FASTQ.'
+		}
+	}
+	if ( !defined(chrsz_) ) {
+		call raise_exception as error_genome_database { input:
+			msg = 'No genome database found in your input JSON. Did you define "chip.genome_tsv" correctly?'
+		}
+	}
+	if ( peak_caller_ == 'spp' && num_ctl == 0 ) {
+		call raise_exception as error_control_required { input:
 			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
 		}
 	}
@@ -731,7 +741,7 @@ workflow chip {
 	}
 
 	Boolean has_input_of_jsd = defined(blacklist_) && length(select_all(nodup_bam_))==num_rep
-	if ( has_input_of_jsd && enable_jsd ) {
+	if ( has_input_of_jsd && num_rep > 0 && enable_jsd ) {
 		# fingerprint and JS-distance plot
 		call jsd { input :
 			nodup_bams = nodup_bam_,
@@ -1063,7 +1073,7 @@ workflow chip {
 		}
 	}
 
-	if ( !align_only && !true_rep_only && num_rep>1 ) {
+	if ( !align_only && !true_rep_only && num_rep > 1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input :
 			prefix = 'pooled-pr1_vs_pooled-pr2',
@@ -1079,7 +1089,7 @@ workflow chip {
 		}
 	}
 
-	if ( !align_only && !true_rep_only && num_rep>1 ) {
+	if ( !align_only && !true_rep_only && num_rep > 1 ) {
 		# IDR on pooled pseduo replicates
 		call idr as idr_ppr { input :
 			prefix = 'pooled-pr1_vs_pooled-pr2',
@@ -1098,7 +1108,7 @@ workflow chip {
 	}
 
 	# reproducibility QC for overlap/IDR peaks
-	if ( !align_only && !true_rep_only ) {
+	if ( !align_only && !true_rep_only && num_rep > 0 ) {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
 			prefix = 'overlap',
@@ -1111,7 +1121,7 @@ workflow chip {
 		}
 	}
 
-	if ( !align_only && !true_rep_only && enable_idr ) {
+	if ( !align_only && !true_rep_only && num_rep > 0 && enable_idr ) {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr { input :
 			prefix = 'idr',
@@ -1204,6 +1214,17 @@ task merge_fastq { # merge trimmed fastqs
 	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
 				else transpose([fastqs_R1])
 	command {
+		# check if pipeline dependencies can be found
+		if [[ -z "$(which encode_task_merge_fastq.py 2> /dev/null || true)" ]]
+		then
+		  echo -e "\n* Error: pipeline dependencies not found." 1>&2
+		  echo 'Conda users: Did you install Conda and environment correctly (scripts/install_conda_env.sh)?' 1>&2
+		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
+		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
+		  echo -e "\n" 1>&2
+		  EXCEPTION_RAISED
+		fi
+
 		python3 $(which encode_task_merge_fastq.py) \
 			${write_tsv(tmp_fastqs)} \
 			${if paired_end then '--paired-end' else ''} \
@@ -1944,7 +1965,6 @@ task qc_report {
 }
 
 ### workflow system tasks
-
 task read_genome_tsv {
 	File genome_tsv
 
@@ -1991,6 +2011,7 @@ task read_genome_tsv {
 		String? roadmap_meta = if size('roadmap_meta')==0 then null_s else read_string('roadmap_meta')
 	}
 	runtime {
+		maxRetries : 0
 		cpu : 1
 		memory : '4000 MB'
 		time : 1
@@ -2026,10 +2047,13 @@ task rounded_mean {
 task raise_exception {
 	String msg
 	command {
-		echo 'Exception raised: ${msg}' >&2
+		echo -e "\n* Error: ${msg}\n" >&2
 		EXCEPTION_RAISED
 	}
 	output {
 		String error_msg = '${msg}'
+	}
+	runtime {
+		maxRetries : 0
 	}
 }
