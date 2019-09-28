@@ -370,7 +370,7 @@ workflow chip {
 	# sanity check for inputs
 	if ( peak_caller_ == 'spp' && num_ctl == 0 && num_rep_peak == 0 ) {
 		call raise_exception { input:
-			msg = 'SPP requires control inputs. Define control input files ('chip.ctl_*') in an input JSON file.'
+			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
 		}
 	}
 
