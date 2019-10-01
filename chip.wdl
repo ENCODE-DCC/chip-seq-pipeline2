@@ -782,9 +782,9 @@ workflow chip {
 
 	# we have all tas and ctl_tas (optional for histone chipseq) ready, let's call peaks
 	scatter(i in range(num_rep)) {
-		Boolean has_input_of_peak_call = defined(ta_[i])
-		Boolean has_output_of_peak_call = i<length(peaks) && defined(peaks[i])
-		if ( has_input_of_peak_call && !has_output_of_peak_call && !align_only ) {
+		Boolean has_input_of_call_peak = defined(ta_[i])
+		Boolean has_output_of_call_peak = i<length(peaks) && defined(peaks[i])
+		if ( has_input_of_call_peak && !has_output_of_call_peak && !align_only ) {
 			call call_peak { input :
 				peak_caller = peak_caller_,
 				peak_type = peak_type_,
@@ -804,11 +804,11 @@ workflow chip {
 				time_hr = call_peak_time_hr,
 			}
 		}
-		File? peak_ = if has_output_of_peak_call then peaks[i]
+		File? peak_ = if has_output_of_call_peak then peaks[i]
 			else call_peak.peak
 
 		# signal track
-		if ( has_input_of_peak_call && !align_only ) {
+		if ( has_input_of_call_peak && !align_only ) {
 			call macs2_signal_track { input :
 				tas = flatten([[ta_[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
@@ -823,9 +823,9 @@ workflow chip {
 		}
 
 		# call peaks on 1st pseudo replicated tagalign
-		Boolean has_input_of_peak_call_pr1 = defined(spr.ta_pr1[i])
-		Boolean has_output_of_peak_call_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
-		if ( has_input_of_peak_call_pr1 && !has_output_of_peak_call_pr1 && !true_rep_only ) {
+		Boolean has_input_of_call_peak_pr1 = defined(spr.ta_pr1[i])
+		Boolean has_output_of_call_peak_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
+		if ( has_input_of_call_peak_pr1 && !has_output_of_call_peak_pr1 && !true_rep_only ) {
 			call call_peak as call_peak_pr1 { input :
 				peak_caller = peak_caller_,
 				peak_type = peak_type_,
@@ -845,13 +845,13 @@ workflow chip {
 				time_hr = call_peak_time_hr,
 			}
 		}
-		File? peak_pr1_ = if has_output_of_peak_call_pr1 then peaks_pr1[i]
+		File? peak_pr1_ = if has_output_of_call_peak_pr1 then peaks_pr1[i]
 			else call_peak_pr1.peak
 
 		# call peaks on 2nd pseudo replicated tagalign
-		Boolean has_input_of_peak_call_pr2 = defined(spr.ta_pr2[i])
-		Boolean has_output_of_peak_call_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
-		if ( has_input_of_peak_call_pr2 && !has_output_of_peak_call_pr2 && !true_rep_only ) {
+		Boolean has_input_of_call_peak_pr2 = defined(spr.ta_pr2[i])
+		Boolean has_output_of_call_peak_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
+		if ( has_input_of_call_peak_pr2 && !has_output_of_call_peak_pr2 && !true_rep_only ) {
 			call call_peak as call_peak_pr2 { input :
 				peak_caller = peak_caller_,
 				peak_type = peak_type_,
@@ -871,7 +871,7 @@ workflow chip {
 				time_hr = call_peak_time_hr,
 			}
 		}
-		File? peak_pr2_ = if has_output_of_peak_call_pr2 then peaks_pr2[i]
+		File? peak_pr2_ = if has_output_of_call_peak_pr2 then peaks_pr2[i]
 			else call_peak_pr2.peak
 	}
 
@@ -889,9 +889,9 @@ workflow chip {
 		else if num_ctl < 2 then [ctl_ta_[0]] # choose first (only) control
 		else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
 
-	Boolean has_input_of_peak_caller_pooled = defined(pool_ta.ta_pooled)
-	Boolean has_output_of_peak_caller_pooled = defined(peak_pooled)
-	if ( has_input_of_peak_caller_pooled && !has_output_of_peak_caller_pooled && !align_only && num_rep>1 ) {
+	Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
+	Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
+	if ( has_input_of_call_peak_pooled && !has_output_of_call_peak_pooled && !align_only && num_rep>1 ) {
 		# call peaks on pooled replicate
 		# always call peaks for pooled replicate to get signal tracks
 		call call_peak as call_peak_pooled { input :
@@ -913,11 +913,11 @@ workflow chip {
 			time_hr = call_peak_time_hr,
 		}
 	}
-	File? peak_pooled_ = if has_output_of_peak_caller_pooled then peak_pooled
+	File? peak_pooled_ = if has_output_of_call_peak_pooled then peak_pooled
 		else call_peak_pooled.peak	
 
 	# macs2 signal track for pooled rep
-	if ( has_input_of_peak_caller_pooled && !align_only && num_rep>1 ) {
+	if ( has_input_of_call_peak_pooled && !align_only && num_rep>1 ) {
 		call macs2_signal_track as macs2_signal_track_pooled { input :
 			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
@@ -931,9 +931,9 @@ workflow chip {
 		}
 	}
 
-	Boolean has_input_of_peak_caller_ppr1 = defined(pool_ta_pr1.ta_pooled)
-	Boolean has_output_of_peak_caller_ppr1 = defined(peak_ppr1)
-	if ( has_input_of_peak_caller_ppr1 && !has_output_of_peak_caller_ppr1 && !align_only && !true_rep_only && num_rep>1 ) {
+	Boolean has_input_of_call_peak_ppr1 = defined(pool_ta_pr1.ta_pooled)
+	Boolean has_output_of_call_peak_ppr1 = defined(peak_ppr1)
+	if ( has_input_of_call_peak_ppr1 && !has_output_of_call_peak_ppr1 && !align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 1st pooled pseudo replicates
 		call call_peak as call_peak_ppr1 { input :
 			peak_caller = peak_caller_,
@@ -954,12 +954,12 @@ workflow chip {
 			time_hr = call_peak_time_hr,
 		}
 	}
-	File? peak_ppr1_ = if has_output_of_peak_caller_ppr1 then peak_ppr1
+	File? peak_ppr1_ = if has_output_of_call_peak_ppr1 then peak_ppr1
 		else call_peak_ppr1.peak
 
-	Boolean has_input_of_peak_caller_ppr2 = defined(pool_ta_pr2.ta_pooled)
-	Boolean has_output_of_peak_caller_ppr2 = defined(peak_ppr2)
-	if ( has_input_of_peak_caller_ppr2 && !has_output_of_peak_caller_ppr2 && !align_only && !true_rep_only && num_rep>1 ) {
+	Boolean has_input_of_call_peak_ppr2 = defined(pool_ta_pr2.ta_pooled)
+	Boolean has_output_of_call_peak_ppr2 = defined(peak_ppr2)
+	if ( has_input_of_call_peak_ppr2 && !has_output_of_call_peak_ppr2 && !align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 2nd pooled pseudo replicates
 		call call_peak as call_peak_ppr2 { input :
 			peak_caller = peak_caller_,
@@ -980,7 +980,7 @@ workflow chip {
 			time_hr = call_peak_time_hr,
 		}
 	}
-	File? peak_ppr2_ = if has_output_of_peak_caller_ppr2 then peak_ppr2
+	File? peak_ppr2_ = if has_output_of_call_peak_ppr2 then peak_ppr2
 		else call_peak_ppr2.peak
 
 	# do IDR/overlap on all pairs of two replicates (i,j)
