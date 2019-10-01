@@ -386,7 +386,6 @@ workflow chip {
 
 	# align each replicate
 	scatter(i in range(num_rep)) {
-		File? null_f
 		# to override endedness definition for individual replicate
 		# 	paired_end will override paired_ends[i]
 		Boolean? paired_end_ = if !defined(paired_end) && i<length(paired_ends) then paired_ends[i]
