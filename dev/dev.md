@@ -25,60 +25,64 @@ Run the following command line locally to build out DX workflows for this pipeli
 ```bash
 # version
 VER=dev-v1.3.0
+DOCKER=quay.io/encode-dcc/chip-seq-pipeline:$VER
 
 # general
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/general -defaults dev/examples/dx/template_general.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/general -defaults dev/examples/dx/template_general.json
 
 # hg38
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/hg38 -defaults dev/examples/dx/template_hg38.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/hg38 -defaults dev/examples/dx/template_hg38.json
 
 # hg19
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/hg19 -defaults dev/examples/dx/template_hg19.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/hg19 -defaults dev/examples/dx/template_hg19.json
 
 # mm10
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/mm10 -defaults dev/examples/dx/template_mm10.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/mm10 -defaults dev/examples/dx/template_mm10.json
 
 # mm9
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/mm9 -defaults dev/examples/dx/template_mm9.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/mm9 -defaults dev/examples/dx/template_mm9.json
 
 # test sample PE ENCSR936XTK (full)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK -defaults dev/examples/dx/ENCSR936XTK_dx.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK -defaults dev/examples/dx/ENCSR936XTK_dx.json
 
 # test sample SE ENCSR000DYI (full)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults dev/examples/dx/ENCSR000DYI_dx.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults dev/examples/dx/ENCSR000DYI_dx.json
 
 # test sample PE ENCSR936XTK (subsampled, chr19/chrM only)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled_chr19_only -defaults dev/examples/dx/ENCSR936XTK_subsampled_chr19_only_dx.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled_chr19_only -defaults dev/examples/dx/ENCSR936XTK_subsampled_chr19_only_dx.json
 
 # test sample SE ENCSR000DYI (subsampled, chr19/chrM only)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only -defaults dev/examples/dx/ENCSR000DYI_subsampled_chr19_only_dx.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only -defaults dev/examples/dx/ENCSR000DYI_subsampled_chr19_only_dx.json
+
+# test sample SE ENCSR000DYI (subsampled, chr19/chrM only, rep1)
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only_rep1 -defaults dev/examples/dx/ENCSR000DYI_subsampled_chr19_only_rep1_dx.json
 
 ## DX Azure
 
 # general
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/general -defaults dev/examples/dx_azure/template_general.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/general -defaults dev/examples/dx_azure/template_general.json
 
 # hg38
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/hg38 -defaults dev/examples/dx_azure/template_hg38.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/hg38 -defaults dev/examples/dx_azure/template_hg38.json
 
 # hg19
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/hg19 -defaults dev/examples/dx_azure/template_hg19.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/hg19 -defaults dev/examples/dx_azure/template_hg19.json
 
 # mm10
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/mm10 -defaults dev/examples/dx_azure/template_mm10.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/mm10 -defaults dev/examples/dx_azure/template_mm10.json
 
 # mm9
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/mm9 -defaults dev/examples/dx_azure/template_mm9.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/mm9 -defaults dev/examples/dx_azure/template_mm9.json
 
 # test sample PE ENCSR936XTK (full)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK -defaults dev/examples/dx_azure/ENCSR936XTK_dx_azure.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK -defaults dev/examples/dx_azure/ENCSR936XTK_dx_azure.json
 
 # test sample SE ENCSR000DYI (full)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults dev/examples/dx_azure/ENCSR000DYI_dx_azure.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI -defaults dev/examples/dx_azure/ENCSR000DYI_dx_azure.json
 
 # test sample PE ENCSR936XTK (subsampled, chr19/chrM only)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled_chr19_only -defaults dev/examples/dx_azure/ENCSR936XTK_subsampled_chr19_only_dx_azure.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR936XTK_subsampled_chr19_only -defaults dev/examples/dx_azure/ENCSR936XTK_subsampled_chr19_only_dx_azure.json
 
 # test sample SE ENCSR000DYI (subsampled, chr19/chrM only)
-java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras dev/workflow_opts/docker.json -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only -defaults dev/examples/dx_azure/ENCSR000DYI_subsampled_chr19_only_dx_azure.json
+java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only -defaults dev/examples/dx_azure/ENCSR000DYI_subsampled_chr19_only_dx_azure.json
 ```
