@@ -1,0 +1,17 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.1.5/ENCSR000DYI/qc.json",
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_gcp.tsv",
+    "chip.fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/rep1.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/rep2.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/ctl1.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq/ctl2.fastq.gz"
+    ],
+    "chip.paired_end" : false,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR000DYI",
+    "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
+}

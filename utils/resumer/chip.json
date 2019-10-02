@@ -13,7 +13,7 @@
         "chip.bam2ta" : {
             "ta" : "chip.tas"
         },
-        "chip.bwa_ctl" : {
+        "chip.align_ctl" : {
             "bam" : "chip.ctl_bams",
             "flagstat_qc" : "chip.ctl_flagstat_qcs"
         },

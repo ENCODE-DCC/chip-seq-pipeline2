@@ -1,0 +1,17 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.1.5/ENCSR936XTK/qc.json",
+    "chip.pipeline_type" : "histone",
+    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_gcp.tsv",
+    "chip.fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR203KEU/fastq/rep1/pair1/ENCFF950OXW.fastq.gz"
+    ],
+    "chip.fastqs_rep1_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR203KEU/fastq/rep1/pair2/ENCFF054HVM.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR203KEU/fastq/rep2/pair1/ENCFF666GAH.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR203KEU/fastq/rep2/pair2/ENCFF925HTP.fastq.gz"
+    ],
+    "chip.paired_end" : true,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR203KEU",
+    "chip.description" : "ENCSR203KEU - ENCODE Histone ChIP-seq PE test sample"
+}

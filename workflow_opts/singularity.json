@@ -1,5 +1,0 @@
-{
-    "default_runtime_attributes" : {
-        "singularity_container" : "~/.singularity/chip-seq-pipeline-v1.2.2.simg"
-    }
-}

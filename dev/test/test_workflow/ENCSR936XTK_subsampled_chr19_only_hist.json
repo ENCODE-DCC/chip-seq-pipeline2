@@ -1,0 +1,25 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.3.0/ENCSR936XTK_subsampled_chr19_only_hist/qc.json",
+    "chip.pipeline_type" : "histone",
+    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/hg38_chr19_chrM_gcp.tsv",
+    "chip.fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R1.subsampled.67.fastq.gz"
+    ],
+    "chip.fastqs_rep1_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R2.subsampled.67.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R1.subsampled.67.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R2.subsampled.67.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R1.subsampled.80.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep1_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep2_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz"
+    ],
+    "chip.paired_end" : true,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR936XTK (subsampled 1/67, chr19_chrM Only, fake histone)",
+    "chip.description" : "ZNF143 ChIP-seq on human GM12878"
+}

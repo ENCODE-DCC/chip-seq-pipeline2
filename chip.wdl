@@ -1,12 +1,12 @@
-# ENCODE DCC TF/Histone ChIP-Seq pipeline
+# ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.2.2
-#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.out_def.json
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.0
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.0
+#CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.json
 
 workflow chip {
-	String pipeline_ver = 'v1.2.2'
+	String pipeline_ver = 'dev-v1.3.0'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -22,101 +22,113 @@ workflow chip {
 	File? genome_tsv 				# reference genome data TSV file including
 									# all genome-specific file paths and parameters
 	# individual genome parameters
+	String? genome_name				# genome name
 	File? ref_fa					# reference fasta (*.fa.gz)
-	File? bwa_idx_tar 				# bwa index tar (uncompressed)
+	File? bwa_idx_tar 				# bwa index tar (uncompressed .tar)
+	File? bowtie2_idx_tar 			# bowtie2 index tar (uncompressed .tar)
+	File? custom_aligner_idx_tar 	# custom aligner's index tar (uncompressed .tar)
 	File? chrsz 					# 2-col chromosome sizes file
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
+	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
+	String? mito_chr_name
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
+	File? tss 						# TSS BED file
+	File? dnase 					# open chromatin region BED file
+	File? prom 						# promoter region BED file
+	File? enh 						# enhancer region BED file
+	File? reg2map 					# file with cell type signals
+	File? reg2map_bed 				# file of regions used to generate reg2map signals
+	File? roadmap_meta 				# roadmap metedata
 
 	### pipeline type
-	String pipeline_type  		# tf or histone chip-eq
-	String? peak_caller 		# default: (spp for tf) and (macs2 for histone)
+	String pipeline_type  			# tf or histone chip-seq
 
-	### optional but important
+	String aligner = 'bowtie2'
+	File? custom_align_py 			# custom align python script
+
+	String? peak_caller 			# default: (spp for tf) and (macs2 for histone)
+									# this will override the above defaults
+	String? peak_type 				# default: narrowPeak for macs2, regionPeak for spp
+									# this will override the above defaults
+	File? custom_call_peak_py 		# custom call_peak python script
+
+	## parameters for alignment
 	Boolean align_only = false 		# disable all post-align analysis (peak-calling, overlap, idr, ...)
-	Boolean true_rep_only = false 	# disable all analyses for pseudo replicates
-									# overlap and idr will also be disabled
-	Boolean disable_fingerprint = false # no JSD plot generation (deeptools fingerprint)
+	Boolean true_rep_only = false 	# disable all analyses involving pseudo replicates (including overlap/idr)
 	Boolean enable_count_signal_track = false 		# generate count signal track
-	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL
-									# use bwa mem instead of bwa aln + bwa sampe
-									#for PE dataset with read len>=70bp
+	Boolean enable_jsd = true 		# enable JSD plot generation (deeptools fingerprint)
+	Boolean enable_gc_bias = true
 
+	# parameters for aligner and filter
+	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL and BWA ONLY (use bwa mem instead of bwa aln/sam)
+									# available only for PE dataset with READ_LEN>=70bp
 	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
 	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
-
-	String dup_marker = 'picard'	# picard.jar MarkDuplicates (picard) or 
-									# sambamba markdup (sambamba)
-	Int mapq_thresh = 30			# threshold for low MAPQ reads removal
-	Boolean no_dup_removal = false	# no dupe reads removal when filtering BAM
-									# dup.qc and pbc.qc will be empty files
-									# and nodup_bam in the output is 
-									# filtered bam with dupes
-
-	String mito_chr_name = 'chrM' 	# name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
-	String regex_filter_reads = 'chrM' 	# Perl-style regular expression pattern for chr name to filter out reads
-                        			# those reads will be excluded from peak calling
+	String dup_marker = 'picard'	# picard, sambamba
+	Boolean no_dup_removal = false	# keep all dups in final BAM
+	Int? mapq_thresh 				# threshold for low MAPQ reads removal
+	Int mapq_thresh_bwa = 30
+	Int mapq_thresh_bowtie2 = 30
+	Array[String] filter_chrs = [] 	# array of chromosomes to be removed from nodup/filt BAM
+									# chromosomes will be removed from both BAM header/contents
+									# e.g. ['chrM', 'MT']
 	Int subsample_reads = 0			# number of reads to subsample TAGALIGN
 									# 0 for no subsampling. this affects all downstream analysis
 	Int ctl_subsample_reads = 0		# number of reads to subsample control TAGALIGN
-
-	Int xcor_subsample_reads = 15000000	# number of reads to subsample TAGALIGN
-									# this will be used for xcor only
-									# will not affect any downstream analysis
+	Int xcor_subsample_reads = 15000000 # subsample TAG-ALIGN for xcor only (not used for other downsteam analyses)
 	Int xcor_exclusion_range_min = -500
 	Int? xcor_exclusion_range_max
 
-	Boolean keep_irregular_chr_in_bfilt_peak = false # when filtering with blacklist
-								# do not filter peaks with irregular chr name
-								# and just keep them in bfilt_peak file
-								# (e.g. keep chr1_AABBCC, AABR07024382.1, ...)
-								# reg-ex pattern for regular chr names: /chr[\dXY]+[ \t]/
+	# parameters for peak calling
 	Boolean always_use_pooled_ctl = false # always use pooled control for all exp rep.
 	Float ctl_depth_ratio = 1.2 	# if ratio between controls is higher than this
 									# then always use pooled control for all exp rep.
-
-	### task-specific variables but defined in workflow level (limit of WDL)
-	Int macs2_cap_num_peak = 500000	# cap number of raw peaks called from MACS2
+	Int? cap_num_peak
+	Int cap_num_peak_spp = 300000	# cap number of raw peaks called from SPP
+	Int cap_num_peak_macs2 = 500000	# cap number of raw peaks called from MACS2
 	Float pval_thresh = 0.01		# p.value threshold
 	Float idr_thresh = 0.05			# IDR threshold
-	Int spp_cap_num_peak = 300000	# cap number of raw peaks called from SPP
-
+	Boolean keep_irregular_chr_in_bfilt_peak = false 
+									# peaks with irregular chr name will not be filtered out
+									# 	in bfilt_peak (blacklist filtered peak) file
+									# 	(e.g. chr1_AABBCC, AABR07024382.1, ...)
+									# 	reg-ex pattern for 'regular' chr name is chr[\dXY]+\b
 	### resources
-	Int bwa_cpu = 4
-	Int bwa_mem_mb = 20000
-	Int bwa_time_hr = 48
-	String bwa_disks = "local-disk 200 HDD"
+	Int align_cpu = 4
+	Int align_mem_mb = 20000
+	Int align_time_hr = 48
+	String align_disks = 'local-disk 200 HDD'
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
 	Int filter_time_hr = 24
-	String filter_disks = "local-disk 400 HDD"
+	String filter_disks = 'local-disk 400 HDD'
 
 	Int bam2ta_cpu = 2
 	Int bam2ta_mem_mb = 10000
 	Int bam2ta_time_hr = 6
-	String bam2ta_disks = "local-disk 100 HDD"
+	String bam2ta_disks = 'local-disk 100 HDD'
 
 	Int spr_mem_mb = 16000
 
-	Int fingerprint_cpu = 2
-	Int fingerprint_mem_mb = 12000
-	Int fingerprint_time_hr = 6
-	String fingerprint_disks = "local-disk 200 HDD"
+	Int jsd_cpu = 2
+	Int jsd_mem_mb = 12000
+	Int jsd_time_hr = 6
+	String jsd_disks = 'local-disk 200 HDD'
 
 	Int xcor_cpu = 2
 	Int xcor_mem_mb = 16000	
 	Int xcor_time_hr = 24
-	String xcor_disks = "local-disk 100 HDD"
+	String xcor_disks = 'local-disk 100 HDD'
 
-	Int macs2_mem_mb = 16000
-	Int macs2_time_hr = 24
-	String macs2_disks = "local-disk 200 HDD"
+	Int macs2_signal_track_mem_mb = 16000
+	Int macs2_signal_track_time_hr = 24
+	String macs2_signal_track_disks = 'local-disk 200 HDD'
 
-	Int spp_cpu = 2
-	Int spp_mem_mb = 16000
-	Int spp_time_hr = 72
-	String spp_disks = "local-disk 200 HDD"
+	Int call_peak_cpu = 2
+	Int call_peak_mem_mb = 16000
+	Int call_peak_time_hr = 72
+	String call_peak_disks = 'local-disk 200 HDD'
 
 	#### input file definition
 	# pipeline can start from any type of inputs and then leave all other types undefined
@@ -201,23 +213,66 @@ workflow chip {
 		else read_genome_tsv.ref_fa
 	File? bwa_idx_tar_ = if defined(bwa_idx_tar) then bwa_idx_tar
 		else read_genome_tsv.bwa_idx_tar
+	File? bowtie2_idx_tar_ = if defined(bowtie2_idx_tar) then bowtie2_idx_tar
+		else read_genome_tsv.bowtie2_idx_tar
+	File? custom_aligner_idx_tar_ = if defined(custom_aligner_idx_tar) then custom_aligner_idx_tar
+		else read_genome_tsv.custom_aligner_idx_tar
 	File? chrsz_ = if defined(chrsz) then chrsz
 		else read_genome_tsv.chrsz
 	String? gensz_ = if defined(gensz) then gensz
 		else read_genome_tsv.gensz
-	File? blacklist_ = if defined(blacklist) then blacklist
+	File? blacklist1_ = if defined(blacklist) then blacklist
 		else read_genome_tsv.blacklist
+	File? blacklist2_ = if defined(blacklist2) then blacklist2
+		else read_genome_tsv.blacklist2
+	# merge multiple blacklists
+	Array[File] blacklists = select_all([blacklist1_, blacklist2_])
+	if ( length(blacklists) > 1 ) {
+		call pool_ta as pool_blacklist { input:
+			tas = blacklists,
+		}
+	}
+	File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
+		else if length(blacklists) > 0 then blacklists[0]
+		else blacklist2_
+	String? mito_chr_name_ = if defined(mito_chr_name) then mito_chr_name
+		else read_genome_tsv.mito_chr_name		
+	String? genome_name_ = if defined(genome_name) then genome_name
+		else if defined(read_genome_tsv.genome_name) then read_genome_tsv.genome_name
+		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None']))
+
+	# read additional annotation data
+	File? tss_ = if defined(tss) then tss
+		else read_genome_tsv.tss
+	File? dnase_ = if defined(dnase) then dnase
+		else read_genome_tsv.dnase
+	File? prom_ = if defined(prom) then prom
+		else read_genome_tsv.prom
+	File? enh_ = if defined(enh) then enh
+		else read_genome_tsv.enh
+	File? reg2map_ = if defined(reg2map) then reg2map
+		else read_genome_tsv.reg2map
+	File? reg2map_bed_ = if defined(reg2map_bed) then reg2map_bed
+		else read_genome_tsv.reg2map_bed
+	File? roadmap_meta_ = if defined(roadmap_meta) then roadmap_meta
+		else read_genome_tsv.roadmap_meta
 
 	### temp vars (do not define these)
-	String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller, 'spp'])
+	String aligner_ = if defined(custom_align_py) then 'custom' else aligner
+	String peak_caller_ = if defined(custom_call_peak_py) then 'custom'
+						else if pipeline_type=='tf' then select_first([peak_caller, 'spp'])
 						else select_first([peak_caller, 'macs2'])
-	String peak_type = if peak_caller_=='spp' then 'regionPeak'
-						else if peak_caller_=='macs2' then 'narrowPeak'
-						else 'narrowPeak'
+	String peak_type_ = if peak_caller_=='spp' then select_first([peak_type, 'regionPeak'])
+						else if peak_caller_=='macs2' then select_first([peak_type, 'narrowPeak'])
+						else select_first([peak_type, 'narrowPeak'])
 	Boolean enable_idr = pipeline_type=='tf' # enable_idr for TF chipseq only
-	String idr_rank = if peak_caller_=='spp' then 'signal.value'
+	String idr_rank_ = if peak_caller_=='spp' then 'signal.value'
 						else if peak_caller_=='macs2' then 'p.value'
 						else 'p.value'
+	Int cap_num_peak_ = if peak_caller_ == 'spp' then select_first([cap_num_peak, cap_num_peak_spp])
+		else select_first([cap_num_peak, cap_num_peak_macs2])
+	Int mapq_thresh_ = if aligner=='bowtie2' then select_first([mapq_thresh, mapq_thresh_bowtie2])
+						else select_first([mapq_thresh, mapq_thresh_bwa])
 
 	# temporary 2-dim fastqs array [rep_id][merge_id]
 	Array[Array[File]] fastqs_R1 = 
@@ -312,6 +367,23 @@ workflow chip {
 		else length(ctl_tas)
 	Int num_ctl = num_ctl_ta
 
+	# sanity check for inputs
+	if ( num_rep == 0 && num_ctl == 0 ) {
+		call raise_exception as error_input_data { input:
+			msg = 'No FASTQ/BAM/TAG-ALIGN/PEAK defined in your input JSON. Check if your FASTQs are defined as "chip.fastqs_repX_RY". DO NOT MISS suffix _R1 even for single ended FASTQ.'
+		}
+	}
+	if ( !defined(chrsz_) ) {
+		call raise_exception as error_genome_database { input:
+			msg = 'No genome database found in your input JSON. Did you define "chip.genome_tsv" correctly?'
+		}
+	}
+	if ( peak_caller_ == 'spp' && num_ctl == 0 ) {
+		call raise_exception as error_control_required { input:
+			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
+		}
+	}
+
 	# align each replicate
 	scatter(i in range(num_rep)) {
 		# to override endedness definition for individual replicate
@@ -335,24 +407,29 @@ workflow chip {
 			defined(merged_fastqs_R2[i]) then merged_fastqs_R2[i]
 			else merge_fastq.merged_fastq_R2
 
-		Boolean has_input_of_bwa = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
-		Boolean has_output_of_bwa = i<length(bams) && defined(bams[i])
-		if ( has_input_of_bwa && !has_output_of_bwa ) {
-			call bwa { input :
-				bwa_idx_tar = bwa_idx_tar_,
+		Boolean has_input_of_align = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
+		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
+		if ( has_input_of_align && !has_output_of_align ) {
+			call align { input :
+				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
+				custom_align_py = custom_align_py,
+				idx_tar = if aligner=='bwa' then bwa_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_idx_tar_
+					else custom_aligner_idx_tar_,
 				fastq_R1 = merged_fastq_R1_,
 				fastq_R2 = merged_fastq_R2_,
 				paired_end = paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
-				cpu = bwa_cpu,
-				mem_mb = bwa_mem_mb,
-				time_hr = bwa_time_hr,
-				disks = bwa_disks,
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
 			}
 		}
-		File? bam_ = if has_output_of_bwa then bams[i] else bwa.bam
+		File? bam_ = if has_output_of_align then bams[i] else align.bam
 
-		Boolean has_input_of_filter = has_output_of_bwa || defined(bwa.bam)
+		Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
 		Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
 		# skip if we already have output of this step
 		if ( has_input_of_filter && !has_output_of_filter ) {
@@ -360,9 +437,11 @@ workflow chip {
 				bam = bam_,
 				paired_end = paired_end_,
 				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh,
+				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
 				no_dup_removal = no_dup_removal,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
@@ -377,10 +456,9 @@ workflow chip {
 		if ( has_input_of_bam2ta && !has_output_of_bam2ta ) {
 			call bam2ta { input :
 				bam = nodup_bam_,
-				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = paired_end_,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -389,23 +467,6 @@ workflow chip {
 			}
 		}
 		File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
-
-		# convert unfiltered BAM to a special TAG-ALIGN for xcor 
-		Boolean has_input_of_bam2ta_no_filt = has_output_of_bwa || defined(bwa.bam)
-		if ( has_input_of_bam2ta_no_filt ) {
-			call bam2ta as bam2ta_no_filt { input :
-				bam = bam_,
-				paired_end = paired_end_,
-				subsample = 0,
-				regex_grep_v_ta = regex_filter_reads,
-				mito_chr_name = mito_chr_name,
-
-				cpu = bam2ta_cpu,
-				mem_mb = bam2ta_mem_mb,
-				time_hr = bam2ta_time_hr,
-				disks = bam2ta_disks,
-			}
-		}
 
 		Boolean has_input_of_spr = has_output_of_bam2ta || defined(bam2ta.ta)
 		if ( has_input_of_spr && !align_only && !true_rep_only ) {
@@ -425,30 +486,87 @@ workflow chip {
 			}
 		}
 
+		if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) ) {
+			call gc_bias { input :
+				nodup_bam = nodup_bam_,
+				ref_fa = ref_fa_,
+			}
+		}
+
+		# special trimming/mapping for xcor (when starting from FASTQs)
 		Boolean has_input_of_trim_fastq = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
-		if ( has_input_of_trim_fastq && paired_end_ ) {
-			# special trimming for paired end samples (for cross-corr analysis)
+		if ( has_input_of_trim_fastq ) {
 			call trim_fastq { input :
 				fastq = merged_fastq_R1_,
 				trim_bp = xcor_pe_trim_bp,
 			}
-			call bwa as bwa_R1 { input :
-				bwa_idx_tar = bwa_idx_tar_,
+			call align as align_R1 { input :
+				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
+				custom_align_py = custom_align_py,
+				idx_tar = if aligner=='bwa' then bwa_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_idx_tar_
+					else custom_aligner_idx_tar_,
 				fastq_R1 = trim_fastq.trimmed_fastq,
 				paired_end = false,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
-				cpu = bwa_cpu,
-				mem_mb = bwa_mem_mb,
-				time_hr = bwa_time_hr,
-				disks = bwa_disks,
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
 			}
-			# no bam filtering for xcor
-			call bam2ta as bam2ta_no_filt_R1 { input :
-				bam = bwa_R1.bam,
+			# no bam deduping for xcor
+			call filter as filter_R1 { input :
+				bam = align_R1.bam,
+				paired_end = false,
+				dup_marker = dup_marker,
+				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
+				no_dup_removal = true,
+				mito_chr_name = mito_chr_name_,
+
+				cpu = filter_cpu,
+				mem_mb = filter_mem_mb,
+				time_hr = filter_time_hr,
+				disks = filter_disks,
+			}
+			call bam2ta as bam2ta_no_dedup_R1 { input :
+				bam = filter_R1.nodup_bam,  # it's named as nodup bam but it's not deduped but just filtered
 				paired_end = false,
 				subsample = 0,
-				regex_grep_v_ta = regex_filter_reads,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
+
+				cpu = bam2ta_cpu,
+				mem_mb = bam2ta_mem_mb,
+				time_hr = bam2ta_time_hr,
+				disks = bam2ta_disks,
+			}
+		}
+
+		# special trimming/mapping for xcor (when starting from BAMs)
+		Boolean has_input_of_bam2ta_no_dedup = has_output_of_align || defined(align.bam)
+		if ( has_input_of_bam2ta_no_dedup && !has_input_of_trim_fastq ) {
+			call filter as filter_no_dedup { input :
+				bam = bam_,
+				paired_end = paired_end_,
+				dup_marker = dup_marker,
+				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
+				no_dup_removal = true,
+				mito_chr_name = mito_chr_name_,
+
+				cpu = filter_cpu,
+				mem_mb = filter_mem_mb,
+				time_hr = filter_time_hr,
+				disks = filter_disks,
+			}
+			call bam2ta as bam2ta_no_dedup { input :
+				bam = filter_no_dedup.nodup_bam,  # output name is nodup but it's not deduped
+				paired_end = paired_end_,
+				subsample = 0,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -461,10 +579,10 @@ workflow chip {
 		# if not starting from fastqs, keep using old method
 		#  (mapping with both ends for tag-aligns to be used for xcor)
 		# subsample tagalign (non-mito) and cross-correlation analysis
-		File? ta_xcor = if defined(bam2ta_no_filt_R1.ta) then bam2ta_no_filt_R1.ta
-			else if defined(bam2ta_no_filt.ta) then bam2ta_no_filt.ta
+		File? ta_xcor = if defined(bam2ta_no_dedup_R1.ta) then bam2ta_no_dedup_R1.ta
+			else if defined(bam2ta_no_dedup.ta) then bam2ta_no_dedup.ta
 			else ta_
-		Boolean? paired_end_xcor = if defined(bam2ta_no_filt_R1.ta) then false
+		Boolean? paired_end_xcor = if defined(bam2ta_no_dedup_R1.ta) then false
 			else paired_end_
 
 		Boolean has_input_of_xcor = defined(ta_xcor)
@@ -473,7 +591,7 @@ workflow chip {
 				ta = ta_xcor,
 				paired_end = paired_end_xcor,
 				subsample = xcor_subsample_reads,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 				chip_seq_type = pipeline_type,
 				exclusion_range_min = xcor_exclusion_range_min,
 				exclusion_range_max = xcor_exclusion_range_max,
@@ -515,24 +633,29 @@ workflow chip {
 			defined(ctl_merged_fastqs_R2[i]) then ctl_merged_fastqs_R2[i]
 			else merge_fastq_ctl.merged_fastq_R2
 
-		Boolean has_input_of_bwa_ctl = has_output_of_merge_fastq_ctl || defined(merge_fastq_ctl.merged_fastq_R1)
-		Boolean has_output_of_bwa_ctl = i<length(ctl_bams) && defined(ctl_bams[i])
-		if ( has_input_of_bwa_ctl && !has_output_of_bwa_ctl ) {
-			call bwa as bwa_ctl { input :
-				bwa_idx_tar = bwa_idx_tar_,
+		Boolean has_input_of_align_ctl = has_output_of_merge_fastq_ctl || defined(merge_fastq_ctl.merged_fastq_R1)
+		Boolean has_output_of_align_ctl = i<length(ctl_bams) && defined(ctl_bams[i])
+		if ( has_input_of_align_ctl && !has_output_of_align_ctl ) {
+			call align as align_ctl { input :
+				aligner = aligner_,
+				mito_chr_name = mito_chr_name_,
+				custom_align_py = custom_align_py,
+				idx_tar = if aligner=='bwa' then bwa_idx_tar_
+					else if aligner=='bowtie2' then bowtie2_idx_tar_
+					else custom_aligner_idx_tar_,
 				fastq_R1 = ctl_merged_fastq_R1_,
 				fastq_R2 = ctl_merged_fastq_R2_,
 				paired_end = ctl_paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
-				cpu = bwa_cpu,
-				mem_mb = bwa_mem_mb,
-				time_hr = bwa_time_hr,
-				disks = bwa_disks,
+				cpu = align_cpu,
+				mem_mb = align_mem_mb,
+				time_hr = align_time_hr,
+				disks = align_disks,
 			}
 		}
-		File? ctl_bam_ = if has_output_of_bwa_ctl then ctl_bams[i] else bwa_ctl.bam
+		File? ctl_bam_ = if has_output_of_align_ctl then ctl_bams[i] else align_ctl.bam
 
-		Boolean has_input_of_filter_ctl = has_output_of_bwa_ctl || defined(bwa_ctl.bam)
+		Boolean has_input_of_filter_ctl = has_output_of_align_ctl || defined(align_ctl.bam)
 		Boolean has_output_of_filter_ctl = i<length(ctl_nodup_bams) && defined(ctl_nodup_bams[i])
 		# skip if we already have output of this step
 		if ( has_input_of_filter_ctl && !has_output_of_filter_ctl ) {
@@ -540,9 +663,11 @@ workflow chip {
 				bam = ctl_bam_,
 				paired_end = ctl_paired_end_,
 				dup_marker = dup_marker,
-				mapq_thresh = mapq_thresh,
+				mapq_thresh = mapq_thresh_,
+				filter_chrs = filter_chrs,
+				chrsz = chrsz_,
 				no_dup_removal = no_dup_removal,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
@@ -557,10 +682,9 @@ workflow chip {
 		if ( has_input_of_bam2ta_ctl && !has_output_of_bam2ta_ctl ) {
 			call bam2ta as bam2ta_ctl { input :
 				bam = ctl_nodup_bam_,
-				regex_grep_v_ta = regex_filter_reads,
 				subsample = subsample_reads,
 				paired_end = ctl_paired_end_,
-				mito_chr_name = mito_chr_name,
+				mito_chr_name = mito_chr_name_,
 
 				cpu = bam2ta_cpu,
 				mem_mb = bam2ta_mem_mb,
@@ -615,20 +739,19 @@ workflow chip {
 		}
 	}
 
-	Boolean has_input_of_fingerprint = defined(blacklist_) && #basename(blacklist_) != 'null' &&
-		length(select_all(nodup_bam_))==num_rep &&
-		num_ctl>0 && defined(ctl_nodup_bam_[0])
-	if ( has_input_of_fingerprint && !disable_fingerprint ) {
+	Boolean has_input_of_jsd = defined(blacklist_) && length(select_all(nodup_bam_))==num_rep
+	if ( has_input_of_jsd && num_rep > 0 && enable_jsd ) {
 		# fingerprint and JS-distance plot
-		call fingerprint { input :
+		call jsd { input :
 			nodup_bams = nodup_bam_,
-			ctl_bam = ctl_nodup_bam_[0], # use first control only
+			ctl_bams = ctl_nodup_bam_, # use first control only
 			blacklist = blacklist_,
+			mapq_thresh = mapq_thresh_,
 
-			cpu = fingerprint_cpu,
-			mem_mb = fingerprint_mem_mb,
-			time_hr = fingerprint_time_hr,
-			disks = fingerprint_disks,
+			cpu = jsd_cpu,
+			mem_mb = jsd_mem_mb,
+			time_hr = jsd_time_hr,
+			disks = jsd_disks,
 		}
 	}
 
@@ -659,47 +782,33 @@ workflow chip {
 
 	# we have all tas and ctl_tas (optional for histone chipseq) ready, let's call peaks
 	scatter(i in range(num_rep)) {
-		Boolean has_input_of_peak_call = defined(ta_[i])
-		Boolean has_output_of_peak_call = i<length(peaks) && defined(peaks[i])
-		if ( has_input_of_peak_call && !has_output_of_peak_call &&
-			 peak_caller_ == 'spp' && !align_only ) {
-			call spp { input :
-				tas = flatten([[ta_[i]], chosen_ctl_tas[i]]),
-				chrsz = chrsz_,
-				cap_num_peak = spp_cap_num_peak,
-				fraglen = fraglen_tmp[i],
-				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-	
-				cpu = spp_cpu,
-				mem_mb = spp_mem_mb,
-				disks = spp_disks,
-				time_hr = spp_time_hr,
-			}
-		}
-		if ( has_input_of_peak_call && !has_output_of_peak_call &&
-			 peak_caller_ == 'macs2' && !align_only ) {
-			call macs2 { input :
+		Boolean has_input_of_call_peak = defined(ta_[i])
+		Boolean has_output_of_call_peak = i<length(peaks) && defined(peaks[i])
+		if ( has_input_of_call_peak && !has_output_of_call_peak && !align_only ) {
+			call call_peak { input :
+				peak_caller = peak_caller_,
+				peak_type = peak_type_,
+				custom_call_peak_py = custom_call_peak_py,
 				tas = flatten([[ta_[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
 				chrsz = chrsz_,
-				cap_num_peak = macs2_cap_num_peak,
+				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				cpu = call_peak_cpu,
+				mem_mb = call_peak_mem_mb,
+				disks = call_peak_disks,
+				time_hr = call_peak_time_hr,
 			}
 		}
-		File? peak_ = if has_output_of_peak_call then peaks[i]
-			else if peak_caller_ == 'spp' then spp.rpeak
-			else macs2.npeak
+		File? peak_ = if has_output_of_call_peak then peaks[i]
+			else call_peak.peak
 
 		# signal track
-		if ( has_input_of_peak_call && !align_only ) {
+		if ( has_input_of_call_peak && !align_only ) {
 			call macs2_signal_track { input :
 				tas = flatten([[ta_[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
@@ -707,93 +816,63 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				mem_mb = macs2_signal_track_mem_mb,
+				disks = macs2_signal_track_disks,
+				time_hr = macs2_signal_track_time_hr,
 			}
 		}
 
 		# call peaks on 1st pseudo replicated tagalign
-		Boolean has_input_of_peak_call_pr1 = defined(spr.ta_pr1[i])
-		Boolean has_output_of_peak_call_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
-		if ( has_input_of_peak_call_pr1 && !has_output_of_peak_call_pr1 &&
-			 peak_caller_=='macs2' && !true_rep_only ) {
-			call macs2 as macs2_pr1 { input :
+		Boolean has_input_of_call_peak_pr1 = defined(spr.ta_pr1[i])
+		Boolean has_output_of_call_peak_pr1 = i<length(peaks_pr1) && defined(peaks_pr1[i])
+		if ( has_input_of_call_peak_pr1 && !has_output_of_call_peak_pr1 && !true_rep_only ) {
+			call call_peak as call_peak_pr1 { input :
+				peak_caller = peak_caller_,
+				peak_type = peak_type_,
+				custom_call_peak_py = custom_call_peak_py,
 				tas = flatten([[spr.ta_pr1[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
 				chrsz = chrsz_,
-				cap_num_peak = macs2_cap_num_peak,
+				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 	
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				cpu = call_peak_cpu,
+				mem_mb = call_peak_mem_mb,
+				disks = call_peak_disks,
+				time_hr = call_peak_time_hr,
 			}
 		}
-		if ( has_input_of_peak_call_pr1 && !has_output_of_peak_call_pr1 &&
-			 peak_caller_=='spp' && !true_rep_only ) {
-			# call peaks on 1st pseudo replicated tagalign 
-			call spp as spp_pr1 { input :
-				tas = flatten([[spr.ta_pr1[i]], chosen_ctl_tas[i]]),
-				chrsz = chrsz_,
-				cap_num_peak = spp_cap_num_peak,
-				fraglen = fraglen_tmp[i],
-				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-	
-				cpu = spp_cpu,
-				mem_mb = spp_mem_mb,
-				disks = spp_disks,
-				time_hr = spp_time_hr,
-			}
-		}
-		File? peak_pr1_ = if has_output_of_peak_call_pr1 then peaks_pr1[i]
-			else if peak_caller_ == 'spp' then spp_pr1.rpeak
-			else macs2_pr1.npeak
+		File? peak_pr1_ = if has_output_of_call_peak_pr1 then peaks_pr1[i]
+			else call_peak_pr1.peak
 
 		# call peaks on 2nd pseudo replicated tagalign
-		Boolean has_input_of_peak_call_pr2 = defined(spr.ta_pr2[i])
-		Boolean has_output_of_peak_call_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
-		if ( has_input_of_peak_call_pr2 && !has_output_of_peak_call_pr2 &&
-			 peak_caller_=='macs2' && !true_rep_only ) {
-			call macs2 as macs2_pr2 { input :
+		Boolean has_input_of_call_peak_pr2 = defined(spr.ta_pr2[i])
+		Boolean has_output_of_call_peak_pr2 = i<length(peaks_pr2) && defined(peaks_pr2[i])
+		if ( has_input_of_call_peak_pr2 && !has_output_of_call_peak_pr2 && !true_rep_only ) {
+			call call_peak as call_peak_pr2 { input :
+				peak_caller = peak_caller_,
+				peak_type = peak_type_,
+				custom_call_peak_py = custom_call_peak_py,
 				tas = flatten([[spr.ta_pr2[i]], chosen_ctl_tas[i]]),
 				gensz = gensz_,
 				chrsz = chrsz_,
-				cap_num_peak = macs2_cap_num_peak,
+				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-				mem_mb = macs2_mem_mb,
-				disks = macs2_disks,
-				time_hr = macs2_time_hr,
+				cpu = call_peak_cpu,
+				mem_mb = call_peak_mem_mb,
+				disks = call_peak_disks,
+				time_hr = call_peak_time_hr,
 			}
 		}
-		if ( has_input_of_peak_call_pr2 && !has_output_of_peak_call_pr2 &&
-			 peak_caller_=='spp' && !true_rep_only ) {
-			# call peaks on 2nd pseudo replicated tagalign 
-			call spp as spp_pr2 { input :
-				tas = flatten([[spr.ta_pr2[i]], chosen_ctl_tas[i]]),
-				chrsz = chrsz_,
-				cap_num_peak = spp_cap_num_peak,
-				fraglen = fraglen_tmp[i],
-				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-	
-				cpu = spp_cpu,
-				mem_mb = spp_mem_mb,
-				disks = spp_disks,
-				time_hr = spp_time_hr,
-			}
-		}
-		File? peak_pr2_ = if has_output_of_peak_call_pr2 then peaks_pr2[i]
-			else if peak_caller_ == 'spp' then spp_pr2.rpeak
-			else macs2_pr2.npeak
+		File? peak_pr2_ = if has_output_of_call_peak_pr2 then peaks_pr2[i]
+			else call_peak_pr2.peak
 	}
 
 	# if ( !align_only && num_rep > 1 ) {
@@ -810,50 +889,35 @@ workflow chip {
 		else if num_ctl < 2 then [ctl_ta_[0]] # choose first (only) control
 		else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
 
-	Boolean has_input_of_peak_caller_pooled = defined(pool_ta.ta_pooled)
-	Boolean has_output_of_peak_caller_pooled = defined(peak_pooled)
-	if ( has_input_of_peak_caller_pooled && !has_output_of_peak_caller_pooled &&
-		peak_caller_=='macs2' && !align_only && num_rep>1 ) {
+	Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
+	Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
+	if ( has_input_of_call_peak_pooled && !has_output_of_call_peak_pooled && !align_only && num_rep>1 ) {
 		# call peaks on pooled replicate
-		# always call MACS2 peaks for pooled replicate to get signal tracks
-		call macs2 as macs2_pooled { input :
+		# always call peaks for pooled replicate to get signal tracks
+		call call_peak as call_peak_pooled { input :
+			peak_caller = peak_caller_,
+			peak_type = peak_type_,
+			custom_call_peak_py = custom_call_peak_py,
 			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
 			chrsz = chrsz_,
-			cap_num_peak = macs2_cap_num_peak,
+			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			cpu = call_peak_cpu,
+			mem_mb = call_peak_mem_mb,
+			disks = call_peak_disks,
+			time_hr = call_peak_time_hr,
 		}
 	}
-	if ( has_input_of_peak_caller_pooled && !has_output_of_peak_caller_pooled &&
-		peak_caller_=='spp' && !align_only && num_rep>1 ) {
-		# call peaks on pooled replicate
-		call spp as spp_pooled { input :
-			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
-			chrsz = chrsz_,
-			cap_num_peak = spp_cap_num_peak,
-			fraglen = fraglen_mean.rounded_mean,
-			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-
-			cpu = spp_cpu,
-			mem_mb = spp_mem_mb,
-			disks = spp_disks,
-			time_hr = spp_time_hr,
-		}
-	}
-	File? peak_pooled_ = if has_output_of_peak_caller_pooled then peak_pooled
-		else if peak_caller_=='spp' then spp_pooled.rpeak
-		else macs2_pooled.npeak	
+	File? peak_pooled_ = if has_output_of_call_peak_pooled then peak_pooled
+		else call_peak_pooled.peak	
 
 	# macs2 signal track for pooled rep
-	if ( has_input_of_peak_caller_pooled && !align_only && num_rep>1 ) {
+	if ( has_input_of_call_peak_pooled && !align_only && num_rep>1 ) {
 		call macs2_signal_track as macs2_signal_track_pooled { input :
 			tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
@@ -861,93 +925,63 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			mem_mb = macs2_signal_track_mem_mb,
+			disks = macs2_signal_track_disks,
+			time_hr = macs2_signal_track_time_hr,
 		}
 	}
 
-	Boolean has_input_of_peak_caller_ppr1 = defined(pool_ta_pr1.ta_pooled)
-	Boolean has_output_of_peak_caller_ppr1 = defined(peak_ppr1)
-	if ( has_input_of_peak_caller_ppr1 && !has_output_of_peak_caller_ppr1 &&
-		peak_caller_=='macs2' && !align_only && !true_rep_only && num_rep>1 ) {
+	Boolean has_input_of_call_peak_ppr1 = defined(pool_ta_pr1.ta_pooled)
+	Boolean has_output_of_call_peak_ppr1 = defined(peak_ppr1)
+	if ( has_input_of_call_peak_ppr1 && !has_output_of_call_peak_ppr1 && !align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 1st pooled pseudo replicates
-		call macs2 as macs2_ppr1 { input :
+		call call_peak as call_peak_ppr1 { input :
+			peak_caller = peak_caller_,
+			peak_type = peak_type_,
+			custom_call_peak_py = custom_call_peak_py,
 			tas = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
 			chrsz = chrsz_,
-			cap_num_peak = macs2_cap_num_peak,
+			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			cpu = call_peak_cpu,
+			mem_mb = call_peak_mem_mb,
+			disks = call_peak_disks,
+			time_hr = call_peak_time_hr,
 		}
 	}
-	if ( has_input_of_peak_caller_ppr1 && !has_output_of_peak_caller_ppr1 &&
-		peak_caller_=='spp' && !align_only && !true_rep_only && num_rep>1 ) {
-		# call peaks on 1st pooled pseudo replicates
-		call spp as spp_ppr1 { input :
-			tas = flatten([select_all([pool_ta_pr1.ta_pooled]), chosen_ctl_ta_pooled]),
-			chrsz = chrsz_,
-			cap_num_peak = spp_cap_num_peak,
-			fraglen = fraglen_mean.rounded_mean,
-			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+	File? peak_ppr1_ = if has_output_of_call_peak_ppr1 then peak_ppr1
+		else call_peak_ppr1.peak
 
-			cpu = spp_cpu,
-			mem_mb = spp_mem_mb,
-			disks = spp_disks,
-			time_hr = spp_time_hr,
-		}
-	}
-	File? peak_ppr1_ = if has_output_of_peak_caller_ppr1 then peak_ppr1
-		else if peak_caller_=='spp' then spp_ppr1.rpeak
-		else macs2_ppr1.npeak
-
-	Boolean has_input_of_peak_caller_ppr2 = defined(pool_ta_pr2.ta_pooled)
-	Boolean has_output_of_peak_caller_ppr2 = defined(peak_ppr2)
-	if ( has_input_of_peak_caller_ppr2 && !has_output_of_peak_caller_ppr2 &&
-		peak_caller_=='macs2' && !align_only && !true_rep_only && num_rep>1 ) {
+	Boolean has_input_of_call_peak_ppr2 = defined(pool_ta_pr2.ta_pooled)
+	Boolean has_output_of_call_peak_ppr2 = defined(peak_ppr2)
+	if ( has_input_of_call_peak_ppr2 && !has_output_of_call_peak_ppr2 && !align_only && !true_rep_only && num_rep>1 ) {
 		# call peaks on 2nd pooled pseudo replicates
-		call macs2 as macs2_ppr2 { input :
+		call call_peak as call_peak_ppr2 { input :
+			peak_caller = peak_caller_,
+			peak_type = peak_type_,
+			custom_call_peak_py = custom_call_peak_py,
 			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
 			gensz = gensz_,
 			chrsz = chrsz_,
-			cap_num_peak = macs2_cap_num_peak,
+			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 
-			mem_mb = macs2_mem_mb,
-			disks = macs2_disks,
-			time_hr = macs2_time_hr,
+			cpu = call_peak_cpu,
+			mem_mb = call_peak_mem_mb,
+			disks = call_peak_disks,
+			time_hr = call_peak_time_hr,
 		}
 	}
-	if ( has_input_of_peak_caller_ppr2 && !has_output_of_peak_caller_ppr2 &&
-		peak_caller_=='spp' && !align_only && !true_rep_only && num_rep>1 ) {
-		# call peaks on 2nd pooled pseudo replicates
-		call spp as spp_ppr2 { input :
-			tas = flatten([select_all([pool_ta_pr2.ta_pooled]), chosen_ctl_ta_pooled]),
-			chrsz = chrsz_,
-			cap_num_peak = spp_cap_num_peak,
-			fraglen = fraglen_mean.rounded_mean,
-			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
-
-			cpu = spp_cpu,
-			mem_mb = spp_mem_mb,
-			disks = spp_disks,
-			time_hr = spp_time_hr,
-		}
-	}
-	File? peak_ppr2_ = if has_output_of_peak_caller_ppr2 then peak_ppr2
-		else if peak_caller_=='spp' then spp_ppr2.rpeak
-		else macs2_ppr2.npeak
+	File? peak_ppr2_ = if has_output_of_call_peak_ppr2 then peak_ppr2
+		else call_peak_ppr2.peak
 
 	# do IDR/overlap on all pairs of two replicates (i,j)
 	# 	where i and j are zero-based indices and 0 <= i < j < num_rep
@@ -964,12 +998,12 @@ workflow chip {
 			# pair.right = 0-based index of 2nd replicate
 			# Naive overlap on every pair of true replicates
 			call overlap { input :
-				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
+				prefix = 'rep'+(pair.left+1)+'_vs_rep'+(pair.right+1),
 				peak1 = peak_[pair.left],
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
 				fraglen = fraglen_mean.rounded_mean,
-				peak_type = peak_type,
+				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -984,14 +1018,14 @@ workflow chip {
 			# pair.right = 0-based index of 2nd replicate
 			# IDR on every pair of true replicates
 			call idr { input :
-				prefix = 'rep'+(pair.left+1)+"_rep"+(pair.right+1),
+				prefix = 'rep'+(pair.left+1)+'_vs_rep'+(pair.right+1),
 				peak1 = peak_[pair.left],
 				peak2 = peak_[pair.right],
 				peak_pooled = peak_pooled_,
 				fraglen = fraglen_mean.rounded_mean,
 				idr_thresh = idr_thresh,
-				peak_type = peak_type,
-				rank = idr_rank,
+				peak_type = peak_type_,
+				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -1001,15 +1035,15 @@ workflow chip {
 	}
 
 	# overlap on pseudo-replicates (pr1, pr2) for each true replicate
-	scatter( i in range(num_rep) ) {
-		if ( !align_only && !true_rep_only ) {
+	if ( !align_only && !true_rep_only ) {
+		scatter( i in range(num_rep) ) {
 			call overlap as overlap_pr { input :
-				prefix = "rep"+(i+1)+"-pr",
+				prefix = 'rep'+(i+1)+'-pr1_vs_rep'+(i+1)+'-pr2',
 				peak1 = peak_pr1_[i],
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
 				fraglen = fraglen_[i],
-				peak_type = peak_type,
+				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -1018,18 +1052,18 @@ workflow chip {
 		}
 	}
 
-	scatter( i in range(num_rep) ) {
-		if ( !align_only && !true_rep_only && enable_idr ) {
+	if ( !align_only && !true_rep_only && enable_idr ) {
+		scatter( i in range(num_rep) ) {
 			# IDR on pseduo replicates
 			call idr as idr_pr { input :
-				prefix = "rep"+(i+1)+"-pr",
+				prefix = 'rep'+(i+1)+'-pr1_vs_rep'+(i+1)+'-pr2',
 				peak1 = peak_pr1_[i],
 				peak2 = peak_pr2_[i],
 				peak_pooled = peak_[i],
 				fraglen = fraglen_[i],
 				idr_thresh = idr_thresh,
-				peak_type = peak_type,
-				rank = idr_rank,
+				peak_type = peak_type_,
+				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
 				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -1038,14 +1072,14 @@ workflow chip {
 		}
 	}
 
-	if ( !align_only && !true_rep_only && num_rep>1 ) {
+	if ( !align_only && !true_rep_only && num_rep > 1 ) {
 		# Naive overlap on pooled pseudo replicates
 		call overlap as overlap_ppr { input :
-			prefix = "ppr",
+			prefix = 'pooled-pr1_vs_pooled-pr2',
 			peak1 = peak_ppr1_,
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
-			peak_type = peak_type,
+			peak_type = peak_type_,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
@@ -1054,17 +1088,17 @@ workflow chip {
 		}
 	}
 
-	if ( !align_only && !true_rep_only && num_rep>1 ) {
+	if ( !align_only && !true_rep_only && num_rep > 1 ) {
 		# IDR on pooled pseduo replicates
 		call idr as idr_ppr { input :
-			prefix = "ppr",
+			prefix = 'pooled-pr1_vs_pooled-pr2',
 			peak1 = peak_ppr1_,
 			peak2 = peak_ppr2_,
 			peak_pooled = peak_pooled_,
 			idr_thresh = idr_thresh,
-			peak_type = peak_type,
+			peak_type = peak_type_,
 			fraglen = fraglen_mean.rounded_mean,
-			rank = idr_rank,
+			rank = idr_rank_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
@@ -1073,27 +1107,27 @@ workflow chip {
 	}
 
 	# reproducibility QC for overlap/IDR peaks
-	if ( !align_only && !true_rep_only ) {
+	if ( !align_only && !true_rep_only && num_rep > 0 ) {
 		# reproducibility QC for overlapping peaks
 		call reproducibility as reproducibility_overlap { input :
 			prefix = 'overlap',
 			peaks = overlap.bfilt_overlap_peak,
 			peaks_pr = overlap_pr.bfilt_overlap_peak,
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
-			peak_type = peak_type,
+			peak_type = peak_type_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
-	if ( !align_only && !true_rep_only && enable_idr ) {
+	if ( !align_only && !true_rep_only && num_rep > 0 && enable_idr ) {
 		# reproducibility QC for IDR peaks
 		call reproducibility as reproducibility_idr { input :
 			prefix = 'idr',
 			peaks = idr.bfilt_idr_peak,
 			peaks_pr = idr_pr.bfilt_idr_peak,
 			peak_ppr = idr_ppr.bfilt_idr_peak,
-			peak_type = peak_type,
+			peak_type = peak_type_,
 			chrsz = chrsz_,
 			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
@@ -1104,43 +1138,37 @@ workflow chip {
 		pipeline_ver = pipeline_ver,
 		title = title,
 		description = description,
-		genome = basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None'])),
+		genome = genome_name_,
 		paired_ends = paired_end_,
 		ctl_paired_ends = ctl_paired_end_,
 		pipeline_type = pipeline_type,
+		aligner = aligner_,
 		peak_caller = peak_caller_,
-		macs2_cap_num_peak = macs2_cap_num_peak,
-		spp_cap_num_peak = spp_cap_num_peak,		
+		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
+		pval_thresh = pval_thresh,
 
-		flagstat_qcs = bwa.flagstat_qc,
-		nodup_flagstat_qcs = filter.flagstat_qc,
+		samstat_qcs = align.samstat_qc,
+		nodup_samstat_qcs = filter.samstat_qc,
 		dup_qcs = filter.dup_qc,
-		pbc_qcs = filter.pbc_qc,
+		lib_complexity_qcs = filter.lib_complexity_qc,
 		xcor_plots = xcor.plot_png,
 		xcor_scores = xcor.score,
 
-		ctl_flagstat_qcs = bwa_ctl.flagstat_qc,
-		ctl_nodup_flagstat_qcs = filter_ctl.flagstat_qc,
+		ctl_samstat_qcs = align_ctl.samstat_qc,
+		ctl_nodup_samstat_qcs = filter_ctl.samstat_qc,
 		ctl_dup_qcs = filter_ctl.dup_qc,
-		ctl_pbc_qcs = filter_ctl.pbc_qc,
+		ctl_lib_complexity_qcs = filter_ctl.lib_complexity_qc,
 
-		jsd_plot = fingerprint.plot,
-		jsd_qcs = fingerprint.jsd_qcs,
+		jsd_plot = jsd.plot,
+		jsd_qcs = jsd.jsd_qcs,
 
-		frip_macs2_qcs = macs2.frip_qc,
-		frip_macs2_qcs_pr1 = macs2_pr1.frip_qc,
-		frip_macs2_qcs_pr2 = macs2_pr2.frip_qc,
-		frip_macs2_qc_pooled = macs2_pooled.frip_qc,
-		frip_macs2_qc_ppr1 = macs2_ppr1.frip_qc,
-		frip_macs2_qc_ppr2 = macs2_ppr2.frip_qc,
-
-		frip_spp_qcs = spp.frip_qc,
-		frip_spp_qcs_pr1 = spp_pr1.frip_qc,
-		frip_spp_qcs_pr2 = spp_pr2.frip_qc,
-		frip_spp_qc_pooled = spp_pooled.frip_qc,
-		frip_spp_qc_ppr1 = spp_ppr1.frip_qc,
-		frip_spp_qc_ppr2 = spp_ppr2.frip_qc,
+		frip_qcs = call_peak.frip_qc,
+		frip_qcs_pr1 = call_peak_pr1.frip_qc,
+		frip_qcs_pr2 = call_peak_pr2.frip_qc,
+		frip_qc_pooled = call_peak_pooled.frip_qc,
+		frip_qc_ppr1 = call_peak_ppr1.frip_qc,
+		frip_qc_ppr2 = call_peak_ppr2.frip_qc,
 
 		idr_plots = idr.idr_plot,
 		idr_plots_pr = idr_pr.idr_plot,
@@ -1153,6 +1181,20 @@ workflow chip {
 		frip_overlap_qc_ppr = overlap_ppr.frip_qc,
 		idr_reproducibility_qc = reproducibility_idr.reproducibility_qc,
 		overlap_reproducibility_qc = reproducibility_overlap.reproducibility_qc,
+
+		gc_plots = gc_bias.gc_plot,
+
+		peak_region_size_qcs = call_peak.peak_region_size_qc,
+		peak_region_size_plots = call_peak.peak_region_size_plot,
+		num_peak_qcs = call_peak.num_peak_qc,
+
+		idr_opt_peak_region_size_qc = reproducibility_idr.peak_region_size_qc,
+		idr_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
+		idr_opt_num_peak_qc = reproducibility_idr.num_peak_qc,
+
+		overlap_opt_peak_region_size_qc = reproducibility_overlap.peak_region_size_qc,
+		overlap_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
+		overlap_opt_num_peak_qc = reproducibility_overlap.num_peak_qc,
 	}
 
 	output {
@@ -1171,20 +1213,31 @@ task merge_fastq { # merge trimmed fastqs
 	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
 				else transpose([fastqs_R1])
 	command {
-		python $(which encode_merge_fastq.py) \
+		# check if pipeline dependencies can be found
+		if [[ -z "$(which encode_task_merge_fastq.py 2> /dev/null || true)" ]]
+		then
+		  echo -e "\n* Error: pipeline dependencies not found." 1>&2
+		  echo 'Conda users: Did you install Conda and environment correctly (scripts/install_conda_env.sh)?' 1>&2
+		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
+		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
+		  echo -e "\n" 1>&2
+		  EXCEPTION_RAISED
+		fi
+
+		python3 $(which encode_task_merge_fastq.py) \
 			${write_tsv(tmp_fastqs)} \
-			${if paired_end then "--paired-end" else ""} \
-			${"--nth " + 1}
+			${if paired_end then '--paired-end' else ''} \
+			${'--nth ' + 1}
 	}
 	output {
-		File merged_fastq_R1 = glob("R1/*.fastq.gz")[0]
-		File? merged_fastq_R2 = if paired_end then glob("R2/*.fastq.gz")[0] else null_f
+		File merged_fastq_R1 = glob('R1/*.fastq.gz')[0]
+		File? merged_fastq_R2 = if paired_end then glob('R2/*.fastq.gz')[0] else null_f
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 2
-		disks : "local-disk 100 HDD"
+		disks : 'local-disk 100 HDD'
 	}
 }
 
@@ -1193,24 +1246,28 @@ task trim_fastq { # trim fastq (for PE R1 only)
 	Int trim_bp
 
 	command {
-		python $(which encode_trim_fastq.py) \
+		python3 $(which encode_task_trim_fastq.py) \
 			${fastq} \
 			--trim-bp ${trim_bp}
 	}
 	output {
-		File trimmed_fastq = glob("*.fastq.gz")[0]
+		File trimmed_fastq = glob('*.fastq.gz')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
-task bwa {
-	File bwa_idx_tar	# reference bwa index tar
-	File? fastq_R1 		# [read_end_id]
+task align {
+	String aligner
+	String mito_chr_name
+	Int? multimapping
+	File? custom_align_py	
+	File? idx_tar			# reference index tar
+	File? fastq_R1 			# [read_end_id]
 	File? fastq_R2
 	Boolean paired_end
 	Boolean use_bwa_mem_for_pe
@@ -1221,21 +1278,43 @@ task bwa {
 	String disks
 
 	command {
-		python $(which encode_bwa.py) \
-			${bwa_idx_tar} \
-			${fastq_R1} ${fastq_R2} \
-			${if paired_end then "--paired-end" else ""} \
-			${if use_bwa_mem_for_pe then "--use-bwa-mem-for-pe" else ""} \
-			${"--nth " + cpu}
+		if [ '${aligner}' == 'bwa' ]; then
+		 	python3 $(which encode_task_bwa.py) \
+				${idx_tar} \
+				${fastq_R1} ${fastq_R2} \
+				${if paired_end then '--paired-end' else ''} \
+				${if use_bwa_mem_for_pe then '--use-bwa-mem-for-pe' else ''} \
+				${'--nth ' + cpu}
+
+		elif [ '${aligner}' == 'bowtie2' ]; then
+		 	python3 $(which encode_task_bowtie2.py) \
+				${idx_tar} \
+				${fastq_R1} ${fastq_R2} \
+				${'--multimapping ' + multimapping} \
+				${if paired_end then '--paired-end' else ''} \
+				${'--nth ' + cpu}
+		else
+			python3 ${custom_align_py} \
+				${idx_tar} \
+				${fastq_R1} ${fastq_R2} \
+				${if paired_end then '--paired-end' else ''} \
+				${'--nth ' + cpu}
+		fi 
+
+		python3 $(which encode_task_post_align.py) \
+			${fastq_R1} $(ls *.bam) \
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File bam = glob("*.bam")[0]
-		File bai = glob("*.bai")[0]
-		File flagstat_qc = glob("*.flagstat.qc")[0]
+		File bam = glob('*.bam')[0]
+		File bai = glob('*.bai')[0]
+		File samstat_qc = glob('*.samstats.qc')[0]
+		File read_len_log = glob('*.read_length.txt')[0]
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 		preemptible: 0
@@ -1245,13 +1324,12 @@ task bwa {
 task filter {
 	File bam
 	Boolean paired_end
-	String dup_marker 				# picard.jar MarkDuplicates (picard) or 
-									# sambamba markdup (sambamba)
+	String dup_marker 			# picard.jar MarkDuplicates (picard) or 
+								# sambamba markdup (sambamba)
 	Int mapq_thresh				# threshold for low MAPQ reads removal
+	Array[String] filter_chrs 	# chrs to be removed from final (nodup/filt) BAM
+	File chrsz					# 2-col chromosome sizes file
 	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
-									# dup.qc and pbc.qc will be empty files
-									# and nodup_bam in the output is 
-									# filtered bam with dupes	
 	String mito_chr_name
 	Int cpu
 	Int mem_mb
@@ -1259,26 +1337,28 @@ task filter {
 	String disks
 
 	command {
-		python $(which encode_filter.py) \
+		python3 $(which encode_task_filter.py) \
 			${bam} \
-			${if paired_end then "--paired-end" else ""} \
-			${"--multimapping " + 0} \
-			${"--dup-marker " + dup_marker} \
-			${"--mapq-thresh " + mapq_thresh} \
-			${if no_dup_removal then "--no-dup-removal" else ""} \
-			${"--mito-chr-name " + mito_chr_name} \
-			${"--nth " + cpu}
+			${if paired_end then '--paired-end' else ''} \
+			--multimapping 0 \
+			${'--dup-marker ' + dup_marker} \
+			${'--mapq-thresh ' + mapq_thresh} \
+			--filter-chrs ${sep=' ' filter_chrs} \
+			${'--chrsz ' + chrsz} \
+			${if no_dup_removal then '--no-dup-removal' else ''} \
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File nodup_bam = glob("*.bam")[0]
-		File nodup_bai = glob("*.bai")[0]
-		File flagstat_qc = glob("*.flagstat.qc")[0]
-		File dup_qc = glob("*.dup.qc")[0]
-		File pbc_qc = glob("*.pbc.qc")[0]
+		File nodup_bam = glob('*.bam')[0]
+		File nodup_bai = glob('*.bai')[0]
+		File samstat_qc = glob('*.samstats.qc')[0]
+		File dup_qc = glob('*.dup.qc')[0]
+		File lib_complexity_qc = glob('*.lib_complexity.qc')[0]
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1287,8 +1367,6 @@ task filter {
 task bam2ta {
 	File bam
 	Boolean paired_end
-	String regex_grep_v_ta   	# Perl-style regular expression pattern 
-                        		# to remove matching reads from TAGALIGN
 	String mito_chr_name 		# mito chromosome name
 	Int subsample 				# number of reads to subsample TAGALIGN
 								# this affects all downstream analysis
@@ -1298,21 +1376,20 @@ task bam2ta {
 	String disks
 
 	command {
-		python $(which encode_bam2ta.py) \
+		python3 $(which encode_task_bam2ta.py) \
 			${bam} \
 			--disable-tn5-shift \
-			${if paired_end then "--paired-end" else ""} \
-			${if regex_grep_v_ta!="" then "--regex-grep-v-ta '"+regex_grep_v_ta+"'" else ""} \
-			${"--mito-chr-name " + mito_chr_name} \
-			${"--subsample " + subsample} \
-			${"--nth " + cpu}
+			${if paired_end then '--paired-end' else ''} \
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--subsample ' + subsample} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File ta = glob("*.tagAlign.gz")[0]
+		File ta = glob('*.tagAlign.gz')[0]
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1325,19 +1402,19 @@ task spr { # make two self pseudo replicates
 	Int mem_mb
 
 	command {
-		python $(which encode_spr.py) \
+		python3 $(which encode_task_spr.py) \
 			${ta} \
-			${if paired_end then "--paired-end" else ""}
+			${if paired_end then '--paired-end' else ''}
 	}
 	output {
-		File ta_pr1 = glob("*.pr1.tagAlign.gz")[0]
-		File ta_pr2 = glob("*.pr2.tagAlign.gz")[0]
+		File ta_pr1 = glob('*.pr1.tagAlign.gz')[0]
+		File ta_pr2 = glob('*.pr2.tagAlign.gz')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1345,17 +1422,17 @@ task pool_ta {
 	Array[File?] tas
 
 	command {
-		python $(which encode_pool_ta.py) \
+		python3 $(which encode_task_pool_ta.py) \
 			${sep=' ' tas}
 	}
 	output {
-		File ta_pooled = glob("*.tagAlign.gz")[0]
+		File ta_pooled = glob('*.tagAlign.gz')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
@@ -1376,35 +1453,36 @@ task xcor {
 	String disks
 
 	command {
-		python $(which encode_xcor.py) \
+		python3 $(which encode_task_xcor.py) \
 			${ta} \
-			${if paired_end then "--paired-end" else ""} \
-			${"--mito-chr-name " + mito_chr_name} \
-			${"--subsample " + subsample} \
-			${"--chip-seq-type " + chip_seq_type} \
-			${"--exclusion-range-min " + exclusion_range_min} \
-			${"--exclusion-range-max " + exclusion_range_max} \
-			${"--subsample " + subsample} \
-			${"--nth " + cpu}
+			${if paired_end then '--paired-end' else ''} \
+			${'--mito-chr-name ' + mito_chr_name} \
+			${'--subsample ' + subsample} \
+			${'--chip-seq-type ' + chip_seq_type} \
+			${'--exclusion-range-min ' + exclusion_range_min} \
+			${'--exclusion-range-max ' + exclusion_range_max} \
+			${'--subsample ' + subsample} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File plot_pdf = glob("*.cc.plot.pdf")[0]
-		File plot_png = glob("*.cc.plot.png")[0]
-		File score = glob("*.cc.qc")[0]
-		Int fraglen = read_int(glob("*.cc.fraglen.txt")[0])
+		File plot_pdf = glob('*.cc.plot.pdf')[0]
+		File plot_png = glob('*.cc.plot.png')[0]
+		File score = glob('*.cc.qc')[0]
+		Int fraglen = read_int(glob('*.cc.fraglen.txt')[0])
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
 }
 
-task fingerprint {
+task jsd {
 	Array[File?] nodup_bams
-	File ctl_bam	 		# one control bam is required
+	Array[File?] ctl_bams
 	File blacklist
+	Int mapq_thresh
 
 	Int cpu
 	Int mem_mb
@@ -1412,19 +1490,20 @@ task fingerprint {
 	String disks
 
 	command {
-		python $(which encode_fingerprint.py) \
+		python3 $(which encode_task_jsd.py) \
 			${sep=' ' nodup_bams} \
-			--ctl-bam ${ctl_bam} \
-			${"--blacklist "+ blacklist} \
-			${"--nth " + cpu}
+			${if length(ctl_bams)>0 then '--ctl-bam '+ select_first(ctl_bams) else ''} \
+			${'--mapq-thresh '+ mapq_thresh} \
+			${'--blacklist '+ blacklist} \
+			${'--nth ' + cpu}
 	}
 	output {
-		File plot = glob("*.png")[0]
-		Array[File] jsd_qcs = glob("*.jsd.qc")
+		File plot = glob('*.png')[0]
+		Array[File] jsd_qcs = glob('*.jsd.qc')
 	}
 	runtime {
 		cpu : cpu
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1439,22 +1518,22 @@ task choose_ctl {
 	Float ctl_depth_ratio 		# if ratio between controls is higher than this
 								# then always use pooled control for all exp rep.
 	command {
-		python $(which encode_choose_ctl.py) \
+		python3 $(which encode_task_choose_ctl.py) \
 			--tas ${sep=' ' tas} \
 			--ctl-tas ${sep=' ' ctl_tas} \
-			${"--ta-pooled " + ta_pooled} \
-			${"--ctl-ta-pooled " + ctl_ta_pooled} \
-			${if always_use_pooled_ctl then "--always-use-pooled-ctl" else ""} \
-			${"--ctl-depth-ratio " + ctl_depth_ratio}
+			${'--ta-pooled ' + ta_pooled} \
+			${'--ctl-ta-pooled ' + ctl_ta_pooled} \
+			${if always_use_pooled_ctl then '--always-use-pooled-ctl' else ''} \
+			${'--ctl-depth-ratio ' + ctl_depth_ratio}
 	}
 	output {
-		Array[File] chosen_ctl_tas = glob("ctl_for_rep*.tagAlign.gz")
+		Array[File] chosen_ctl_tas = glob('ctl_for_rep*.tagAlign.gz')
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}	
 }
 
@@ -1463,59 +1542,95 @@ task count_signal_track {
 	File chrsz			# 2-col chromosome sizes file
 
 	command {
-		python $(which encode_count_signal_track.py) \
+		python3 $(which encode_task_count_signal_track.py) \
 			${ta} \
-			${"--chrsz " + chrsz}
+			${'--chrsz ' + chrsz}
 	}
 	output {
-		File pos_bw = glob("*.positive.bigwig")[0]
-		File neg_bw = glob("*.negative.bigwig")[0]
+		File pos_bw = glob('*.positive.bigwig')[0]
+		File neg_bw = glob('*.negative.bigwig')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "8000 MB"
+		memory : '8000 MB'
 		time : 4
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}
 }
 
-task macs2 {
-	Array[File?] tas		# [ta, control_ta]. control_ta is optional
+task call_peak {
+	String peak_caller
+	String peak_type
+	File? custom_call_peak_py
+
+	Array[File?] tas	# [ta, control_ta]. control_ta is optional
 	Int fraglen 		# fragment length from xcor
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
 	Float pval_thresh 	# p.value threshold
-	File blacklist 		# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
+	Int cpu	
 	Int mem_mb
 	Int time_hr
 	String disks
 
 	command {
-		python $(which encode_macs2_chip.py) \
-			${sep=' ' tas} \
-			${"--gensz "+ gensz} \
-			${"--chrsz " + chrsz} \
-			${"--fraglen " + fraglen} \
-			${"--cap-num-peak " + cap_num_peak} \
-			${"--pval-thresh "+ pval_thresh} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--blacklist "+ blacklist}
+		if [ '${peak_caller}' == 'macs2' ]; then
+			python2 $(which encode_task_macs2_chip.py) \
+				${sep=' ' tas} \
+				${'--gensz '+ gensz} \
+				${'--chrsz ' + chrsz} \
+				${'--fraglen ' + fraglen} \
+				${'--cap-num-peak ' + cap_num_peak} \
+				${'--pval-thresh '+ pval_thresh}
+
+		elif [ '${peak_caller}' == 'spp' ]; then
+			python3 $(which encode_task_spp.py) \
+				${sep=' ' tas} \
+				${'--fraglen ' + fraglen} \
+				${'--cap-num-peak ' + cap_num_peak} \
+				${'--nth ' + cpu}
+
+		else
+			python3 ${custom_call_peak_py} \
+				${sep=' ' tas} \
+				${'--gensz '+ gensz} \
+				${'--chrsz ' + chrsz} \
+				${'--fraglen ' + fraglen} \
+				${'--cap-num-peak ' + cap_num_peak} \
+				${'--pval-thresh '+ pval_thresh}
+				${'--nth ' + cpu}
+		fi
+
+		python3 $(which encode_task_post_call_peak_chip.py) \
+			$(ls *Peak.gz) \
+			${'--ta ' + tas[0]} \
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--chrsz ' + chrsz} \
+			${'--fraglen ' + fraglen} \
+			${'--peak-type ' + peak_type} \
+			${'--blacklist ' + blacklist}		
 	}
 	output {
-		File npeak = glob("*[!.][!b][!f][!i][!l][!t].narrowPeak.gz")[0]
-		File bfilt_npeak = glob("*.bfilt.narrowPeak.gz")[0]
-		File bfilt_npeak_bb = glob("*.bfilt.narrowPeak.bb")[0]
-		File bfilt_npeak_hammock = glob("*.bfilt.narrowPeak.hammock.gz*")[0]
-		File bfilt_npeak_hammock_tbi = glob("*.bfilt.narrowPeak.hammock.gz*")[1]
-		File frip_qc = glob("*.frip.qc")[0]
+		# generated by custom_call_peak_py
+		File peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
+		# generated by post_call_peak py
+		File bfilt_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
+		File bfilt_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+		File bfilt_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
+		File bfilt_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
+		File frip_qc = glob('*.frip.qc')[0]
+		File peak_region_size_qc = glob('*.peak_region_size.qc')[0]
+		File peak_region_size_plot = glob('*.peak_region_size.png')[0]
+		File num_peak_qc = glob('*.num_peak.qc')[0]
 	}
 	runtime {
-		cpu : 1
-		memory : "${mem_mb} MB"
+		cpu : if peak_caller == 'macs2' then 1 else cpu
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
 	}
@@ -1534,62 +1649,22 @@ task macs2_signal_track {
 	String disks
 
 	command {
-		python $(which encode_macs2_signal_track_chip.py) \
+		python2 $(which encode_task_macs2_signal_track_chip.py) \
 			${sep=' ' tas} \
-			${"--gensz "+ gensz} \
-			${"--chrsz " + chrsz} \
-			${"--fraglen " + fraglen} \
-			${"--pval-thresh "+ pval_thresh}
+			${'--gensz '+ gensz} \
+			${'--chrsz ' + chrsz} \
+			${'--fraglen ' + fraglen} \
+			${'--pval-thresh '+ pval_thresh}
 	}
 	output {
-		File pval_bw = glob("*.pval.signal.bigwig")[0]
-		File fc_bw = glob("*.fc.signal.bigwig")[0]
+		File pval_bw = glob('*.pval.signal.bigwig')[0]
+		File fc_bw = glob('*.fc.signal.bigwig')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "${mem_mb} MB"
+		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
-	}
-}
-
-task spp {
-	Array[File?] tas		# [ta, control_ta]. control_ta is always required
-	Int fraglen 		# fragment length from xcor
-	File chrsz			# 2-col chromosome sizes file
-	Int cap_num_peak 	# cap number of raw peaks called from MACS2
-	File blacklist 		# blacklist BED to filter raw peaks
-	Boolean	keep_irregular_chr_in_bfilt_peak
-
-	Int cpu
-	Int mem_mb
-	Int time_hr
-	String disks
-
-	command {
-		python $(which encode_spp.py) \
-			${sep=' ' tas} \
-			${"--chrsz " + chrsz} \
-			${"--fraglen " + fraglen} \
-			${"--cap-num-peak " + cap_num_peak} \
-			${"--nth " + cpu} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--blacklist "+ blacklist}
-	}
-	output {
-		File rpeak = glob("*[!.][!b][!f][!i][!l][!t].regionPeak.gz")[0]
-		File bfilt_rpeak = glob("*.bfilt.regionPeak.gz")[0]
-		File bfilt_rpeak_bb = glob("*.bfilt.regionPeak.bb")[0]
-		File bfilt_rpeak_hammock = glob("*.bfilt.regionPeak.hammock.gz*")[0]
-		File bfilt_rpeak_hammock_tbi = glob("*.bfilt.regionPeak.hammock.gz*")[1]
-		File frip_qc = glob("*.frip.qc")[0]
-	}
-	runtime {
-		cpu : cpu
-		memory : "${mem_mb} MB"
-		time : time_hr
-		disks : disks
-		preemptible: 0
 	}
 }
 
@@ -1599,7 +1674,7 @@ task idr {
 	File peak2
 	File peak_pooled
 	Float idr_thresh
-	File blacklist 		# blacklist BED to filter raw peaks
+	File? blacklist 	# blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta			# to calculate FRiP
@@ -1609,45 +1684,45 @@ task idr {
 	String rank
 
 	command {
-		${if defined(ta) then "" else "touch null.frip.qc"}
+		${if defined(ta) then '' else 'touch null.frip.qc'}
 		touch null 
-		python $(which encode_idr.py) \
+		python3 $(which encode_task_idr.py) \
 			${peak1} ${peak2} ${peak_pooled} \
-			${"--prefix " + prefix} \
-			${"--idr-thresh " + idr_thresh} \
-			${"--peak-type " + peak_type} \
+			${'--prefix ' + prefix} \
+			${'--idr-thresh ' + idr_thresh} \
+			${'--peak-type ' + peak_type} \
 			--idr-rank ${rank} \
-			${"--fraglen " + fraglen} \
-			${"--chrsz " + chrsz} \
-			${"--blacklist "+ blacklist} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--ta " + ta}
+			${'--fraglen ' + fraglen} \
+			${'--chrsz ' + chrsz} \
+			${'--blacklist '+ blacklist} \
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--ta ' + ta}
 	}
 	output {
-		File idr_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_idr_peak = glob("*.bfilt."+peak_type+".gz")[0]
-		File bfilt_idr_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		File bfilt_idr_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
-		File bfilt_idr_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
-		File idr_plot = glob("*.txt.png")[0]
-		File idr_unthresholded_peak = glob("*.txt.gz")[0]
-		File idr_log = glob("*.idr*.log")[0]
-		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
+		File idr_peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
+		File bfilt_idr_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
+		File bfilt_idr_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+		File bfilt_idr_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
+		File bfilt_idr_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
+		File idr_plot = glob('*.txt.png')[0]
+		File idr_unthresholded_peak = glob('*.txt.gz')[0]
+		File idr_log = glob('*.idr*.log')[0]
+		File frip_qc = if defined(ta) then glob('*.frip.qc')[0] else glob('null')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}	
 }
 
 task overlap {
-	String prefix 		# prefix for IDR output file
+	String prefix 	# prefix for IDR output file
 	File peak1
 	File peak2
 	File peak_pooled
-	File blacklist 	# blacklist BED to filter raw peaks
+	File? blacklist # blacklist BED to filter raw peaks
 	Boolean	keep_irregular_chr_in_bfilt_peak
 	# parameters to compute FRiP
 	File? ta		# to calculate FRiP
@@ -1656,32 +1731,32 @@ task overlap {
 	String peak_type
 
 	command {
-		${if defined(ta) then "" else "touch null.frip.qc"}
+		${if defined(ta) then '' else 'touch null.frip.qc'}
 		touch null 
-		python $(which encode_naive_overlap.py) \
+		python3 $(which encode_task_overlap.py) \
 			${peak1} ${peak2} ${peak_pooled} \
-			${"--prefix " + prefix} \
-			${"--peak-type " + peak_type} \
-			${"--fraglen " + fraglen} \
-			${"--chrsz " + chrsz} \
-			${"--blacklist "+ blacklist} \
+			${'--prefix ' + prefix} \
+			${'--peak-type ' + peak_type} \
+			${'--fraglen ' + fraglen} \
+			${'--chrsz ' + chrsz} \
+			${'--blacklist '+ blacklist} \
 			--nonamecheck \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--ta " + ta}
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--ta ' + ta}
 	}
 	output {
-		File overlap_peak = glob("*[!.][!b][!f][!i][!l][!t]."+peak_type+".gz")[0]
-		File bfilt_overlap_peak = glob("*.bfilt."+peak_type+".gz")[0]
-		File bfilt_overlap_peak_bb = glob("*.bfilt."+peak_type+".bb")[0]
-		File bfilt_overlap_peak_hammock = glob("*.bfilt."+peak_type+".hammock.gz*")[0]
-		File bfilt_overlap_peak_hammock_tbi = glob("*.bfilt."+peak_type+".hammock.gz*")[1]
-		File frip_qc = if defined(ta) then glob("*.frip.qc")[0] else glob("null")[0]
+		File overlap_peak = glob('*[!.][!b][!f][!i][!l][!t].'+peak_type+'.gz')[0]
+		File bfilt_overlap_peak = glob('*.bfilt.'+peak_type+'.gz')[0]
+		File bfilt_overlap_peak_bb = glob('*.bfilt.'+peak_type+'.bb')[0]
+		File bfilt_overlap_peak_hammock = glob('*.bfilt.'+peak_type+'.hammock.gz*')[0]
+		File bfilt_overlap_peak_hammock_tbi = glob('*.bfilt.'+peak_type+'.hammock.gz*')[1]
+		File frip_qc = if defined(ta) then glob('*.frip.qc')[0] else glob('null')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}	
 }
 
@@ -1698,32 +1773,57 @@ task reproducibility {
 	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
-		python $(which encode_reproducibility_qc.py) \
+		python3 $(which encode_task_reproducibility.py) \
 			${sep=' ' peaks} \
 			--peaks-pr ${sep=' ' peaks_pr} \
-			${"--peak-ppr "+ peak_ppr} \
+			${'--peak-ppr '+ peak_ppr} \
 			--prefix ${prefix} \
-			${"--peak-type " + peak_type} \
-			${if keep_irregular_chr_in_bfilt_peak then "--keep-irregular-chr" else ""} \
-			${"--chrsz " + chrsz}
+			${'--peak-type ' + peak_type} \
+			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--chrsz ' + chrsz}
 	}
 	output {
-		File optimal_peak = glob("optimal_peak.*.gz")[0]
-		File conservative_peak = glob("conservative_peak.*.gz")[0]
-		File optimal_peak_bb = glob("optimal_peak.*.bb")[0]
-		File conservative_peak_bb = glob("conservative_peak.*.bb")[0]
-		File optimal_peak_hammock = glob("optimal_peak.*.hammock.gz*")[0]
-		File optimal_peak_hammock_tbi = glob("optimal_peak.*.hammock.gz*")[1]
-		File conservative_peak_hammock = glob("conservative_peak.*.hammock.gz*")[0]
-		File conservative_peak_hammock_tbi = glob("conservative_peak.*.hammock.gz*")[1]
-		File reproducibility_qc = glob("*reproducibility.qc")[0]
+		File optimal_peak = glob('*optimal_peak.*.gz')[0]
+		File optimal_peak_bb = glob('*optimal_peak.*.bb')[0]
+		File optimal_peak_hammock = glob('*optimal_peak.*.hammock.gz*')[0]
+		File optimal_peak_hammock_tbi = glob('*optimal_peak.*.hammock.gz*')[1]
+		File conservative_peak = glob('*conservative_peak.*.gz')[0]
+		File conservative_peak_bb = glob('*conservative_peak.*.bb')[0]
+		File conservative_peak_hammock = glob('*conservative_peak.*.hammock.gz*')[0]
+		File conservative_peak_hammock_tbi = glob('*conservative_peak.*.hammock.gz*')[1]
+		File reproducibility_qc = glob('*reproducibility.qc')[0]
+		# QC metrics for optimal peak
+		File peak_region_size_qc = glob('*.peak_region_size.qc')[0]
+		File peak_region_size_plot = glob('*.peak_region_size.png')[0]
+		File num_peak_qc = glob('*.num_peak.qc')[0]
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}	
+}
+
+task gc_bias {
+	File nodup_bam
+	File ref_fa
+
+	command {
+		python3 $(which encode_task_gc_bias.py) \
+			${'--nodup-bam ' + nodup_bam} \
+			${'--ref-fa ' + ref_fa}
+	}
+	output {
+		File gc_plot = glob('*.gc_plot.png')[0]
+		File gc_log = glob('*.gc.txt')[0]
+	}
+	runtime {
+		cpu : 1
+		memory : '8000 MB'
+		time : 1
+		disks : 'local-disk 100 HDD'
+	}
 }
 
 # gather all outputs and generate 
@@ -1740,128 +1840,146 @@ task qc_report {
 	Array[Boolean?] paired_ends
 	Array[Boolean?] ctl_paired_ends
 	String pipeline_type
+	String aligner
 	String peak_caller
-	Int? macs2_cap_num_peak
-	Int? spp_cap_num_peak
+	Int cap_num_peak
 	Float idr_thresh
+	Float pval_thresh	
 	# QCs
-	Array[File?] flagstat_qcs
-	Array[File?] nodup_flagstat_qcs
+	Array[File?] samstat_qcs
+	Array[File?] nodup_samstat_qcs
 	Array[File?] dup_qcs
-	Array[File?] pbc_qcs
-	Array[File?] ctl_flagstat_qcs
-	Array[File?] ctl_nodup_flagstat_qcs
+	Array[File?] lib_complexity_qcs
+	Array[File?] ctl_samstat_qcs
+	Array[File?] ctl_nodup_samstat_qcs
 	Array[File?] ctl_dup_qcs
-	Array[File?] ctl_pbc_qcs
+	Array[File?] ctl_lib_complexity_qcs
 	Array[File?] xcor_plots
 	Array[File?] xcor_scores
-	File? jsd_plot 
-	Array[File?] jsd_qcs
+	File? jsd_plot
+	Array[File]? jsd_qcs
 	Array[File]? idr_plots
-	Array[File?] idr_plots_pr
+	Array[File]? idr_plots_pr
 	File? idr_plot_ppr
-	Array[File?] frip_macs2_qcs
-	Array[File?] frip_macs2_qcs_pr1
-	Array[File?] frip_macs2_qcs_pr2
-	File? frip_macs2_qc_pooled
-	File? frip_macs2_qc_ppr1 
-	File? frip_macs2_qc_ppr2 
-	Array[File?] frip_spp_qcs
-	Array[File?] frip_spp_qcs_pr1
-	Array[File?] frip_spp_qcs_pr2
-	File? frip_spp_qc_pooled
-	File? frip_spp_qc_ppr1 
-	File? frip_spp_qc_ppr2 
+	Array[File?] frip_qcs
+	Array[File?] frip_qcs_pr1
+	Array[File?] frip_qcs_pr2
+	File? frip_qc_pooled
+	File? frip_qc_ppr1 
+	File? frip_qc_ppr2 
 	Array[File]? frip_idr_qcs
-	Array[File?] frip_idr_qcs_pr
+	Array[File]? frip_idr_qcs_pr
 	File? frip_idr_qc_ppr 
-	Array[File?] frip_overlap_qcs
-	Array[File?] frip_overlap_qcs_pr
+	Array[File]? frip_overlap_qcs
+	Array[File]? frip_overlap_qcs_pr
 	File? frip_overlap_qc_ppr
 	File? idr_reproducibility_qc
 	File? overlap_reproducibility_qc
 
+	Array[File?] gc_plots
+
+	Array[File?] peak_region_size_qcs
+	Array[File?] peak_region_size_plots
+	Array[File?] num_peak_qcs
+
+	File? idr_opt_peak_region_size_qc
+	File? idr_opt_peak_region_size_plot
+	File? idr_opt_num_peak_qc
+
+	File? overlap_opt_peak_region_size_qc
+	File? overlap_opt_peak_region_size_plot
+	File? overlap_opt_num_peak_qc
+
 	File? qc_json_ref
 
 	command {
-		python $(which encode_qc_report.py) \
-			${"--pipeline-ver " + pipeline_ver} \
+		python3 $(which encode_task_qc_report.py) \
+			${'--pipeline-ver ' + pipeline_ver} \
 			${"--title '" + sub(title,"'","_") + "'"} \
 			${"--desc '" + sub(description,"'","_") + "'"} \
-			${"--genome " + genome} \
-			${"--multimapping " + 0} \
-			--paired-ends ${sep=" " paired_ends} \
-			--ctl-paired-ends ${sep=" " ctl_paired_ends} \
+			${'--genome ' + genome} \
+			${'--multimapping ' + 0} \
+			--paired-ends ${sep=' ' paired_ends} \
+			--ctl-paired-ends ${sep=' ' ctl_paired_ends} \
 			--pipeline-type ${pipeline_type} \
+			--aligner ${aligner} \
 			--peak-caller ${peak_caller} \
-			${"--macs2-cap-num-peak " + macs2_cap_num_peak} \
-			${"--spp-cap-num-peak " + spp_cap_num_peak} \
+			${'--cap-num-peak ' + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
-			--flagstat-qcs ${sep="_:_" flagstat_qcs} \
-			--nodup-flagstat-qcs ${sep="_:_" nodup_flagstat_qcs} \
-			--dup-qcs ${sep="_:_" dup_qcs} \
-			--pbc-qcs ${sep="_:_" pbc_qcs} \
-			--xcor-plots ${sep="_:_" xcor_plots} \
-			--xcor-scores ${sep="_:_" xcor_scores} \
-			--idr-plots ${sep="_:_" idr_plots} \
-			--idr-plots-pr ${sep="_:_" idr_plots_pr} \
-			--ctl-flagstat-qcs ${sep='_:_' ctl_flagstat_qcs} \
-			--ctl-nodup-flagstat-qcs ${sep='_:_' ctl_nodup_flagstat_qcs} \
+			--pval-thresh ${pval_thresh} \
+			--samstat-qcs ${sep='_:_' samstat_qcs} \
+			--nodup-samstat-qcs ${sep='_:_' nodup_samstat_qcs} \
+			--dup-qcs ${sep='_:_' dup_qcs} \
+			--lib-complexity-qcs ${sep='_:_' lib_complexity_qcs} \
+			--xcor-plots ${sep='_:_' xcor_plots} \
+			--xcor-scores ${sep='_:_' xcor_scores} \
+			--idr-plots ${sep='_:_' idr_plots} \
+			--idr-plots-pr ${sep='_:_' idr_plots_pr} \
+			--ctl-samstat-qcs ${sep='_:_' ctl_samstat_qcs} \
+			--ctl-nodup-samstat-qcs ${sep='_:_' ctl_nodup_samstat_qcs} \
 			--ctl-dup-qcs ${sep='_:_' ctl_dup_qcs} \
-			--ctl-pbc-qcs ${sep='_:_' ctl_pbc_qcs} \
-			${"--jsd-plot " + jsd_plot} \
+			--ctl-lib-complexity-qcs ${sep='_:_' ctl_lib_complexity_qcs} \
+			${'--jsd-plot ' + jsd_plot} \
 			--jsd-qcs ${sep='_:_' jsd_qcs} \
-			--frip-spp-qcs ${sep='_:_' frip_spp_qcs} \
-			--frip-spp-qcs-pr1 ${sep='_:_' frip_spp_qcs_pr1} \
-			--frip-spp-qcs-pr2 ${sep='_:_' frip_spp_qcs_pr2} \
-			${"--frip-spp-qc-pooled " + frip_spp_qc_pooled} \
-			${"--frip-spp-qc-ppr1 " + frip_spp_qc_ppr1} \
-			${"--frip-spp-qc-ppr2 " + frip_spp_qc_ppr2} \
-			${"--idr-plot-ppr " + idr_plot_ppr} \
-			--frip-macs2-qcs ${sep="_:_" frip_macs2_qcs} \
-			--frip-macs2-qcs-pr1 ${sep="_:_" frip_macs2_qcs_pr1} \
-			--frip-macs2-qcs-pr2 ${sep="_:_" frip_macs2_qcs_pr2} \
-			${"--frip-macs2-qc-pooled " + frip_macs2_qc_pooled} \
-			${"--frip-macs2-qc-ppr1 " + frip_macs2_qc_ppr1} \
-			${"--frip-macs2-qc-ppr2 " + frip_macs2_qc_ppr2} \
-			--frip-idr-qcs ${sep="_:_" frip_idr_qcs} \
-			--frip-idr-qcs-pr ${sep="_:_" frip_idr_qcs_pr} \
-			${"--frip-idr-qc-ppr " + frip_idr_qc_ppr} \
-			--frip-overlap-qcs ${sep="_:_" frip_overlap_qcs} \
-			--frip-overlap-qcs-pr ${sep="_:_" frip_overlap_qcs_pr} \
-			${"--frip-overlap-qc-ppr " + frip_overlap_qc_ppr} \
-			${"--idr-reproducibility-qc " + idr_reproducibility_qc} \
-			${"--overlap-reproducibility-qc " + overlap_reproducibility_qc} \
+			${'--idr-plot-ppr ' + idr_plot_ppr} \
+			--frip-qcs ${sep='_:_' frip_qcs} \
+			--frip-qcs-pr1 ${sep='_:_' frip_qcs_pr1} \
+			--frip-qcs-pr2 ${sep='_:_' frip_qcs_pr2} \
+			${'--frip-qc-pooled ' + frip_qc_pooled} \
+			${'--frip-qc-ppr1 ' + frip_qc_ppr1} \
+			${'--frip-qc-ppr2 ' + frip_qc_ppr2} \
+			--frip-idr-qcs ${sep='_:_' frip_idr_qcs} \
+			--frip-idr-qcs-pr ${sep='_:_' frip_idr_qcs_pr} \
+			${'--frip-idr-qc-ppr ' + frip_idr_qc_ppr} \
+			--frip-overlap-qcs ${sep='_:_' frip_overlap_qcs} \
+			--frip-overlap-qcs-pr ${sep='_:_' frip_overlap_qcs_pr} \
+			${'--frip-overlap-qc-ppr ' + frip_overlap_qc_ppr} \
+			${'--idr-reproducibility-qc ' + idr_reproducibility_qc} \
+			${'--overlap-reproducibility-qc ' + overlap_reproducibility_qc} \
+			--gc-plots ${sep='_:_' gc_plots} \
+			--peak-region-size-qcs ${sep='_:_' peak_region_size_qcs} \
+			--peak-region-size-plots ${sep='_:_' peak_region_size_plots} \
+			--num-peak-qcs ${sep='_:_' num_peak_qcs} \
+			${'--idr-opt-peak-region-size-qc ' + idr_opt_peak_region_size_qc} \
+			${'--idr-opt-peak-region-size-plot ' + idr_opt_peak_region_size_plot} \
+			${'--idr-opt-num-peak-qc ' + idr_opt_num_peak_qc} \
+			${'--overlap-opt-peak-region-size-qc ' + overlap_opt_peak_region_size_qc} \
+			${'--overlap-opt-peak-region-size-plot ' + overlap_opt_peak_region_size_plot} \
+			${'--overlap-opt-num-peak-qc ' + overlap_opt_num_peak_qc} \
 			--out-qc-html qc.html \
 			--out-qc-json qc.json \
-			${"--qc-json-ref " + qc_json_ref}
+			${'--qc-json-ref ' + qc_json_ref}
 	}
 	output {
 		File report = glob('*qc.html')[0]
 		File qc_json = glob('*qc.json')[0]
-		Boolean qc_json_ref_match = read_string("qc_json_ref_match.txt")=="True"
+		Boolean qc_json_ref_match = read_string('qc_json_ref_match.txt')=='True'
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}	
 }
 
 ### workflow system tasks
-
 task read_genome_tsv {
 	File genome_tsv
 
 	String? null_s
 	command <<<
 		# create empty files for all entries
-		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist
+		touch genome_name
+		touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist blacklist2
+		touch custom_aligner_idx_tar
+		touch tss tss_enrich # for backward compatibility
+		touch dnase prom enh reg2map reg2map_bed roadmap_meta
+		touch mito_chr_name
 
 		python <<CODE
 		import os
-		with open("${genome_tsv}",'r') as fp:
+		with open('${genome_tsv}','r') as fp:
 			for line in fp:
 				arr = line.strip('\n').split('\t')
 				if arr:
@@ -1871,17 +1989,32 @@ task read_genome_tsv {
 		CODE
 	>>>
 	output {
+		String? genome_name = if size('genome_name')==0 then basename(genome_tsv) else read_string('genome_name')
 		String? ref_fa = if size('ref_fa')==0 then null_s else read_string('ref_fa')
 		String? bwa_idx_tar = if size('bwa_idx_tar')==0 then null_s else read_string('bwa_idx_tar')
+		String? bowtie2_idx_tar = if size('bowtie2_idx_tar')==0 then null_s else read_string('bowtie2_idx_tar')
+		String? custom_aligner_idx_tar = if size('custom_aligner_idx_tar')==0 then null_s else read_string('custom_aligner_idx_tar')
 		String? chrsz = if size('chrsz')==0 then null_s else read_string('chrsz')
 		String? gensz = if size('gensz')==0 then null_s else read_string('gensz')
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
+		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
+		String? mito_chr_name = if size('mito_chr_name')==0 then null_s else read_string('mito_chr_name')
+		# optional data
+		String? tss = if size('tss')!=0 then read_string('tss')
+			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
+		String? dnase = if size('dnase')==0 then null_s else read_string('dnase')
+		String? prom = if size('prom')==0 then null_s else read_string('prom')
+		String? enh = if size('enh')==0 then null_s else read_string('enh')
+		String? reg2map = if size('reg2map')==0 then null_s else read_string('reg2map')
+		String? reg2map_bed = if size('reg2map_bed')==0 then null_s else read_string('reg2map_bed')
+		String? roadmap_meta = if size('roadmap_meta')==0 then null_s else read_string('roadmap_meta')
 	}
 	runtime {
+		maxRetries : 0
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"		
+		disks : 'local-disk 50 HDD'		
 	}
 }
 
@@ -1904,101 +2037,22 @@ task rounded_mean {
 	}
 	runtime {
 		cpu : 1
-		memory : "4000 MB"
+		memory : '4000 MB'
 		time : 1
-		disks : "local-disk 50 HDD"
+		disks : 'local-disk 50 HDD'
 	}	
 }
 
-task compare_md5sum {
-	Array[String] labels
-	Array[File] files
-	Array[File] ref_files
-
-	command <<<
-		python <<CODE	
-		from collections import OrderedDict
-		import os
-		import json
-		import hashlib
-
-		def md5sum(filename, blocksize=65536):
-		    hash = hashlib.md5()
-		    with open(filename, 'rb') as f:
-		        for block in iter(lambda: f.read(blocksize), b""):
-		            hash.update(block)
-		    return hash.hexdigest()
-
-		with open('${write_lines(labels)}','r') as fp:
-			labels = fp.read().splitlines()
-		with open('${write_lines(files)}','r') as fp:
-			files = fp.read().splitlines()
-		with open('${write_lines(ref_files)}','r') as fp:
-			ref_files = fp.read().splitlines()
-
-		result = OrderedDict()
-		match = OrderedDict()
-		match_overall = True
-
-		result['tasks'] = []
-		result['failed_task_labels'] = []
-		result['succeeded_task_labels'] = []
-		for i, label in enumerate(labels):
-			f = files[i]
-			ref_f = ref_files[i]
-			md5 = md5sum(f)
-			ref_md5 = md5sum(ref_f)
-			# if text file, read in contents
-			if f.endswith('.qc') or f.endswith('.txt') or \
-				f.endswith('.log') or f.endswith('.out'):
-				with open(f,'r') as fp:
-					contents = fp.read()
-				with open(ref_f,'r') as fp:
-					ref_contents = fp.read()
-			else:
-				contents = ''
-				ref_contents = ''
-			matched = md5==ref_md5
-			result['tasks'].append(OrderedDict([
-				('label', label),
-				('match', matched),
-				('md5sum', md5),
-				('ref_md5sum', ref_md5),
-				('basename', os.path.basename(f)),
-				('ref_basename', os.path.basename(ref_f)),
-				('contents', contents),
-				('ref_contents', ref_contents),
-				]))
-			match[label] = matched
-			match_overall &= matched
-			if matched:
-				result['succeeded_task_labels'].append(label)
-			else:
-				result['failed_task_labels'].append(label)		
-		result['match_overall'] = match_overall
-
-		with open('result.json','w') as fp:
-			fp.write(json.dumps(result, indent=4))
-		match_tmp = []
-		for key in match:
-			val = match[key]
-			match_tmp.append('{}\t{}'.format(key, val))
-		with open('match.tsv','w') as fp:
-			fp.writelines('\n'.join(match_tmp))
-		with open('match_overall.txt','w') as fp:
-			fp.write(str(match_overall))
-		CODE
-	>>>
+task raise_exception {
+	String msg
+	command {
+		echo -e "\n* Error: ${msg}\n" >&2
+		EXCEPTION_RAISED
+	}
 	output {
-		Map[String,String] match = read_map('match.tsv') # key:label, val:match
-		Boolean match_overall = read_boolean('match_overall.txt')
-		File json = glob('result.json')[0] # details (json file)
-		String json_str = read_string('result.json') # details (string)
+		String error_msg = '${msg}'
 	}
 	runtime {
-		cpu : 1
-		memory : "4000 MB"
-		time : 1
-		disks : "local-disk 50 HDD"		
+		maxRetries : 0
 	}
 }

@@ -119,3 +119,8 @@ hg38
 
 metadata.json
 resume.*.json
+
+tmp_db*
+*.local.json
+temp_db*
+

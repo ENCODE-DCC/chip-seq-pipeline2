@@ -47,16 +47,16 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     ```bash
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ BUCKET=gs://[YOUR_BUCKET_NAME]/ENCSR936XTK_subsampled
-    $ INPUT=examples/google/ENCSR936XTK_subsampled_chr19_only.json
+    $ INPUT=dev/examples/google/ENCSR936XTK_subsampled_chr19_only.json
 
-    $ java -jar -Dconfig.file=backends/backend.conf -Dbackend.default=google -Dbackend.providers.google.config.project=${PROJECT} -Dbackend.providers.google.config.root=${BUCKET} cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/docker.json
+    $ java -jar -Dconfig.file=dev/backends/backend.conf -Dbackend.default=google -Dbackend.providers.google.config.project=${PROJECT} -Dbackend.providers.google.config.root=${BUCKET} cromwell-38.jar run chip.wdl -i ${INPUT} -o dev/workflow_opts/docker.json
     ```
 
 11. It will take about 6 hours. You will be able to find all outputs on your Google Cloud bucket. Final QC report/JSON will be written on `gs://[YOUR_BUCKET_NAME]/ENCSR936XTK_subsampled/chip/[SOME_HASH_STRING]/call-qc_report/execution/glob*/qc.html` or `qc.json`. See [output directory structure](output.md) for details.
 
 12. See full specification for [input JSON file](input.md).
 
-13. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/google/ENCSR936XTK_subsampled_chr19_only.json`.
+13. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=dev/examples/google/ENCSR936XTK_subsampled_chr19_only.json`.
 
 ## Extras for advanced users
 
@@ -67,7 +67,7 @@ All test samples and genome data are shared on our public Google Cloud buckets. 
     * In-use IP addresses
     * Networks
 
-2. Set `default_runtime_attributes.zones` in `workflow_opts/docker.json` as your preferred Google Cloud zone.
+2. Set `default_runtime_attributes.zones` in `dev/workflow_opts/docker.json` as your preferred Google Cloud zone.
     ```javascript
     {
       "default_runtime_attributes" : {
