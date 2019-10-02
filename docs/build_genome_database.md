@@ -20,13 +20,13 @@
     $ bash conda/install_conda_env.sh
     ```
 
-3. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory. This will take several hours. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.
+2. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory. This will take several hours. We recommend not to run this installer on a login node of your cluster. It will take >8GB memory and >2h time.
     ```bash
     $ conda activate encode-chip-seq-pipeline
     $ bash conda/build_genome_data.sh [GENOME] [DESTINATION_DIR]
     ```
 
-4. Find a TSV file on the destination directory and use it for `"chip.genome_tsv"` in your input JSON.
+3. Find a TSV file on the destination directory and use it for `"chip.genome_tsv"` in your input JSON.
 
 
 ## How to build genome database for your own genome
