@@ -1,6 +1,6 @@
 # Input JSON
 
-An input JSON file includes all genomic data files, parameters and metadata for running pipelines. Our pipeline will use default values if they are not defined in an input JSON file. We provide a set of template JSON files: [minimum](../examples/template.json) and [full](../examples/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
+An input JSON file includes all genomic data files, parameters and metadata for running pipelines. Our pipeline will use default values if they are not defined in an input JSON file. We provide a set of template JSON files: [minimum](../example_input_json/template.json) and [full](../example_input_json/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
 
 Please read through the following step-by-step instruction to compose a input JSON file.
 
@@ -26,17 +26,25 @@ All reference genome specific reference files/parameters can be defined in a sin
 Parameter|Type|Description
 ---------|-------|-----------
 `chip.genome_tsv`| File | Choose one of the TSV files listed below or build your own
+`chip.genome_name`| String | Name of genome (e.g. hg38, hg19, ...)
 `chip.ref_fa`| File | Reference FASTA file
+`chip.ref_mito_fa`| File | Mito-only reference FASTA file
+`chip.bowtie2_idx_tar`| File | Bowtie2 index TAR file (uncompressed) built from FASTA file
+`chip.bowtie2_mito_idx_tar`| File | Mito-only Bowtie2 index TAR file (uncompressed) built from FASTA file
 `chip.bwa_idx_tar`| File | BWA index TAR file (uncompressed) built from FASTA file with `bwa index`
+`chip.bwa_mito_idx_tar`| File | Mito-only BWA index TAR file (uncompressed) built from FASTA file with `bwa index`
+`chip.custom_aligner_idx_tar` | File | Index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
+`chip.custom_aligner_mito_idx_tar` | File | Mito-only index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `chip.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `chip.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `chip.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
+`chip.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 
 We currently provide TSV files for 4 genomes as shown in the below table. `GENOME` should be `hg38`, `mm10`, `hg19` or `mm9`. You can [download/build](build_genome_database.md) it on your local computer. You can also [build a genome database for your own genome](build_genome_database.md).
 
 Platform|Path/URI
 -|-
-Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_google.tsv`
+Google Cloud Platform|`gs://encode-pipeline-genome-data/[GENOME]_gcp.tsv`
 Stanford Sherlock|`/home/groups/cherry/encode/pipeline_genome_data/[GENOME]_sherlock.tsv`
 Stanford SCG|`/reference/ENCODE/pipeline_genome_data/[GENOME]_scg.tsv`
 Local/SLURM/SGE|You need to [build](build_genome_database.md) or [download]() a genome database]. 
@@ -53,6 +61,14 @@ Additional information about each genome:
 |mm10|ENCODE|[mm10_no_alt_analysis_set_ENCODE](https://www.encodeproject.org/files/mm10_no_alt_analysis_set_ENCODE/@@download/mm10_no_alt_analysis_set_ENCODE.fasta.gz)|
 |hg19|UCSC|[GRCh37/hg19](http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/referenceSequences/male.hg19.fa.gz)|
 |mm9|UCSC|[mm9, NCBI Build 37](<http://hgdownload.cse.ucsc.edu/goldenPath/mm9/bigZips/mm9.2bit>)|
+
+## How to download genome database
+
+1. Choose `GENOME` from `hg19`, `hg38`, `mm9` and `mm10` and specify a destination directory.
+    ```bash
+    $ bash genome/download_genome_data.sh [GENOME] [DESTINATION_DIR]
+    ```
+2. Find a TSV file on the destination directory and use it for `"chip.genome_tsv"` in your input JSON.
 
 ## Input genomic data
 
@@ -106,11 +122,19 @@ You can mix up different data types for individual replicate/control replicate. 
 }
 ```
 
+## Optional mapping parameters
+
+Parameter|Type|Default|Description
+---------|---|----|-----------
+`chip.aligner` | String | bowtie2 | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
+`chip.use_bwa_mem_for_pe` | Boolean | false | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter.
+`chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
+
 ## Optional filtering parameters
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.mapq_thresh` | 30 | Threshold for mapped reads quality (samtools view -q)
+`chip.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
 `chip.dup_marker` | `picard` | Choose a dup marker between `picard` and `sambamba`. `picard` is recommended, use `sambamba` only when picard fails.
 `chip.no_dup_removal` | false | Skip dup removal in a BAM filtering stage.
 
@@ -128,6 +152,8 @@ Parameter|Default|Description
 ---------|-------|-----------
 `chip.xcor_pe_trim_bp` | 50 | Trim R1 of paired ended fastqs for cross-correlation analysis only. Trimmed fastqs will not be used for any other analyses
 `chip.use_filt_pe_ta_for_xcor` | false | Use filtered PE BAM/TAG-ALIGN for cross-correlation analysis ignoring the above trimmed R1 fastq
+`chip.xcor_exclusion_range_min` | -500 | Exclusion minimum for cross-corr. analysis. See [description for `-x=<min>:<max>`](https://github.com/kundajelab/phantompeakqualtools) for details. Make sure that it's consistent with default strand shift `-s=-500:5:1500` in `phantompeakqualtools`.
+`chip.xcor_exclusion_range_max` |  | Exclusion minimum for cross-corr. analysis. If not defined default value of `max(read length + 10, 50)` for TF and `max(read_len + 10, 100)` for histone are used.
 
 ## Optional control parameters
 
@@ -145,12 +171,14 @@ Parameter|Default|Description
 `chip.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p)
 `chip.idr_thresh` | 0.05 | Threshold for IDR (irreproducible discovery rate)
 `chip.spp_cap_num_peak` | 300000 | Cap number of peaks called from a peak-caller (SPP)
+`chip.custom_call_peak_py` | File | Python script for your custom peak caller. See details about [how to use a custom peak caller](#how-to-use-a-peak-caller)
 
 ## Optional pipeline flags
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.disable_fingerprint` | false | Disable deeptools fingerprint (JS distance)
+`chip.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
+`chip.enable_gc_bias` | true | Enable GC bias calculation
 `chip.enable_count_signal_track` | false | Enable count signal track generation
 `chip.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 
@@ -158,21 +186,20 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.mito_chr_name` | `chrM` | Name of mito chromosome. THIS IS NOT A REG-EX! you can define only one chromosome name for mito.
-`chip.regex_filter_reads` | `chrM` | Regular expression to filter out reads with given chromosome name (1st column of BED/TAG-ALIGN). Any read with chr name that matches with this reg-ex pattern will be removed from outputs If your have changed the above parameter `chip.mito_chr_name` and still want to filter out mito reads then make sure that `chip.mito_chr_name` and `chip.regex_filter_reads` are the same
+`chip.filter_chrs` | `[]` (empty array of string) | Array of chromosome names to be filtered out from a final (filtered/nodup) BAM. No chromosomes are filtered out by default.
 
 ## Resource parameters
 
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
-Resources defined here are PER REPLICATE. Therefore, total number of cores will be MAX(`chip.bwa_cpu` x `NUMBER_OF_REPLICATES`, `chip.spp_cpu` x 2 x `NUMBER_OF_REPLICATES`) because bwa and spp are bottlenecking tasks of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
+Resources defined here are PER REPLICATE. Therefore, total number of cores will be MAX(`chip.align_cpu` x `NUMBER_OF_REPLICATES`, `chip.call_peak_cpu` x 2 x `NUMBER_OF_REPLICATES`) because `align` and `call_peak` (especially for `spp`) are bottlenecking tasks of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
 
 Parameter|Default
 ---------|-------
-`chip.bwa_cpu` | 4
-`chip.bwa_mem_mb` | 20000
-`chip.bwa_time_hr` | 48
-`chip.bwa_disks` | `local-disk 100 HDD`
+`chip.align_cpu` | 4
+`chip.align_mem_mb` | 20000
+`chip.align_time_hr` | 48
+`chip.align_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------
@@ -194,10 +221,10 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
-`chip.fingerprint_cpu` | 2
-`chip.fingerprint_mem_mb` | 12000
-`chip.fingerprint_time_hr` | 6
-`chip.fingerprint_disks` | `local-disk 100 HDD`
+`chip.jsd_cpu` | 2
+`chip.jsd_mem_mb` | 12000
+`chip.jsd_time_hr` | 6
+`chip.jsd_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------
@@ -208,14 +235,162 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
-`chip.macs2_mem_mb` | 16000
-`chip.macs2_time_hr` | 24
-`chip.macs2_disks` | `local-disk 100 HDD`
+`chip.call_peak_cpu` | 2
+`chip.call_peak_mem_mb` | 16000
+`chip.call_peak_time_hr` | 24
+`chip.call_peak_disks` | `local-disk 100 HDD`
 
 Parameter|Default
 ---------|-------
-`chip.spp_cpu` | 2
-`chip.spp_mem_mb` | 16000
-`chip.spp_time_hr` | 72
-`chip.spp_disks` | `local-disk 100 HDD`
+`chip.macs2_signal_track_mem_mb` | 16000
+`chip.macs2_signal_track_time_hr` | 24
+`chip.macs2_signal_track_disks` | `local-disk 100 HDD`
+
+## How to use a custom aligner
+
+ENCODE ChIP-Seq pipeline currently supports `bwa` and `bowtie2`. In order to use your own aligner you need to define the following parameters first. You can define `custom_aligner_idx_tar` either in your input JSON file or in your genome TSV file. Such index TAR file should be an uncompressed TAR file without any directory structured.
+
+Parameter|Type|Description
+---------|-------|-----------
+`chip.custom_aligner_idx_tar` | File | Index TAR file (uncompressed) for your own aligner
+`chip.custom_align_py` | File | Python script for your custom aligner
+
+Here is a template for `custom_align.py`:
+
+```python
+#!/usr/bin/env python
+
+import os
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog='ENCODE template aligner')
+    parser.add_argument('index_prefix_or_tar', type=str,
+                        help='Path for prefix (or a tarball .tar) \
+                            for reference aligner index. \
+                            Tar ball must be packed without compression \
+                            and directory by using command line \
+                            "tar cvf [TAR] [TAR_PREFIX].*')
+    parser.add_argument('fastqs', nargs='+', type=str,
+                        help='List of FASTQs (R1 and R2). \
+                            FASTQs must be compressed with gzip (with .gz).')
+    parser.add_argument('--paired-end', action="store_true",
+                        help='Paired-end FASTQs.')
+    parser.add_argument('--multimapping', default=4, type=int,
+                        help='Multimapping reads')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
+    parser.add_argument('--out-dir', default='', type=str,
+                            help='Output directory.')
+    args = parser.parse_args()
+
+    # check if fastqs have correct dimension
+    if args.paired_end and len(args.fastqs)!=2:
+        raise argparse.ArgumentTypeError('Need 2 fastqs for paired end.')
+    if not args.paired_end and len(args.fastqs)!=1:
+        raise argparse.ArgumentTypeError('Need 1 fastq for single end.')
+
+    return args
+
+def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, out_dir):
+    basename = os.path.basename(os.path.splitext(fastq_R1)[0])    
+    prefix = os.path.join(out_dir, basename)
+    bam = '{}.bam'.format(prefix)
+
+    # map your fastqs somehow
+    os.system('touch {}'.format(bam))
+
+    return bam
+
+def main():
+    # read params
+    args = parse_arguments()
+   
+    # unpack index somehow on CWD
+    os.system('tar xvf {}'.format(args.index_prefix_or_tar))
+
+    bam = align(args.fastqs[0],
+                args.fastqs[1] if args.paired_end else None,
+                args.index_prefix_or_tar,
+                args.multimapping,
+                args.nth,
+                args.out_dir)
+
+if __name__=='__main__':
+    main()
+
 ```
+
+> **IMPORTANT**: Your custom python script should generate ONLY one `*.bam` file. For example, if there are two `.bam` files then pipeline will just pick the first one in an alphatical order.
+
+## How to use a custom peak caller
+
+Parameter|Type|Default|Description
+---------|-------|-----------
+`chip.peak_type` | String | `narrowPeak` | Only ENCODE peak types are supported: `narrowPeak`, `broadPeak` and `gappedPeak`
+`chip.custom_call_peak_py` | File | | Python script for your custom peak caller
+
+The file extension of your output peak file must be consitent with the `peak_type` you chose. For example, if you have chosen `narrowPeak` as `peak_type` then your output peak file should be `*.narrowPeak.gz`.
+
+Here is a template for `custom_call_peak.py`:
+
+```python
+#!/usr/bin/env python
+
+import os
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog='ENCODE template call_peak')
+    parser.add_argument('tas', type=str, nargs='+',
+                        help='Path for TAGALIGN file (first) and control TAGALIGN file (second; optional).')
+    parser.add_argument('--fraglen', type=int, required=True,
+                        help='Fragment length.')
+    parser.add_argument('--shift', type=int, default=0,
+                        help='macs2 callpeak --shift.')
+    parser.add_argument('--chrsz', type=str,
+                        help='2-col chromosome sizes file.')
+    parser.add_argument('--gensz', type=str,
+                        help='Genome size (sum of entries in 2nd column of \
+                            chr. sizes file, or hs for human, ms for mouse).')
+    parser.add_argument('--pval-thresh', default=0.01, type=float,
+                        help='P-Value threshold.')
+    parser.add_argument('--cap-num-peak', default=500000, type=int,
+                        help='Capping number of peaks by taking top N peaks.')
+    parser.add_argument('--out-dir', default='', type=str,
+                        help='Output directory.')
+    args = parser.parse_args()
+    if len(args.tas)==1:
+        args.tas.append('')
+    return args
+
+def call_peak(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak, out_dir):
+    basename_ta = os.path.basename(os.path.splitext(ta)[0])
+    if ctl_ta:
+        basename_ctl_ta = os.path.basename(os.path.splitext(ctl_ta)[0])
+        basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
+        if len(basename_prefix) > 200: # UNIX cannot have len(filename) > 255
+            basename_prefix = '{}_x_control'.format(basename_ta)
+    else:
+        basename_prefix = basename_ta
+
+    prefix = os.path.join(out_dir, basename_prefix)
+    npeak = '{}.narrowPeak.gz'.format(prefix)
+
+    os.system('touch {}'.format(npeak))
+
+    return npeak
+
+def main():
+    # read params
+    args = parse_arguments()
+
+    npeak = call_peak(
+        args.tas[0], args.tas[1], args.chrsz, args.gensz, args.pval_thresh,
+        args.shift, args.fraglen, args.cap_num_peak, args.out_dir)
+
+if __name__=='__main__':
+    main()
+```
+
+> **IMPORTANT**: Your custom python script should generate ONLY one `*.*Peak.gz` file. For example, if there are `*.narrowPeak.gz` and `*.broadPeak.gz` files pipeline will just pick the first one in an alphatical order.

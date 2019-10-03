@@ -26,13 +26,13 @@
     
 5. Run a pipeline for the test sample.
     ```bash
-    $ INPUT=examples/local/ENCSR936XTK_subsampled_chr19_only.json
+    $ INPUT=dev/examples/local/ENCSR936XTK_subsampled_chr19_only.json
     $ PIPELINE_METADATA=metadata.json
-    $ java -jar -Dconfig.file=backends/backend.conf cromwell-38.jar run chip.wdl -i ${INPUT} -o workflow_opts/docker.json -m ${PIPELINE_METADATA}
+    $ java -jar -Dconfig.file=dev/backends/backend.conf cromwell-38.jar run chip.wdl -i ${INPUT} -o dev/workflow_opts/docker.json -m ${PIPELINE_METADATA}
     ```
 
 6. It will take about 6 hours. You will be able to find all outputs on `cromwell-executions/chip/[RANDOM_HASH_STRING]/`. See [output directory structure](output.md) for details.
 
 7. See full specification for [input JSON file](input.md).
 
-8. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=examples/local/ENCSR936XTK_subsampled_chr19_only.json`.
+8. You can resume a failed pipeline from where it left off by using `PIPELINE_METADATA`(`metadata.json`) file. This file is created for each pipeline run. See [here](../utils/resumer/README.md) for details. Once you get a new input JSON file from the resumer, use it `INPUT=resume.[FAILED_WORKFLOW_ID].json` instead of `INPUT=dev/examples/local/ENCSR936XTK_subsampled_chr19_only.json`.

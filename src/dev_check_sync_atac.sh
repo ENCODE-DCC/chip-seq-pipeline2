@@ -1,18 +1,21 @@
 #!/bin/bash
 
-diff ../../atac-seq-pipeline/src/encode_bam2ta.py encode_bam2ta.py 
-diff ../../atac-seq-pipeline/src/encode_blacklist_filter.py encode_blacklist_filter.py 
-diff ../../atac-seq-pipeline/src/encode_common_genomic.py encode_common_genomic.py 
-diff ../../atac-seq-pipeline/src/encode_common_html.py encode_common_html.py 
-diff ../../atac-seq-pipeline/src/encode_common_log_parser.py encode_common_log_parser.py 
-diff ../../atac-seq-pipeline/src/encode_common.py encode_common.py 
-diff ../../atac-seq-pipeline/src/encode_filter.py encode_filter.py 
-diff ../../atac-seq-pipeline/src/encode_frip.py encode_frip.py 
-diff ../../atac-seq-pipeline/src/encode_idr.py encode_idr.py 
-diff ../../atac-seq-pipeline/src/encode_naive_overlap.py encode_naive_overlap.py 
-diff ../../atac-seq-pipeline/src/encode_pool_ta.py encode_pool_ta.py 
-diff ../../atac-seq-pipeline/src/encode_qc_report.py encode_qc_report.py 
-diff ../../atac-seq-pipeline/src/encode_reproducibility_qc.py encode_reproducibility_qc.py 
-diff ../../atac-seq-pipeline/src/encode_spr.py encode_spr.py 
-diff ../../atac-seq-pipeline/src/encode_xcor.py encode_xcor.py
+diff ../../atac-seq-pipeline/src/encode_task_bam2ta.py encode_task_bam2ta.py 
+diff ../../atac-seq-pipeline/src/encode_lib_blacklist_filter.py encode_lib_blacklist_filter.py 
+diff ../../atac-seq-pipeline/src/encode_lib_genomic.py encode_lib_genomic.py 
+diff ../../atac-seq-pipeline/src/encode_lib_log_parser.py encode_lib_log_parser.py 
+diff ../../atac-seq-pipeline/src/encode_lib_common.py encode_lib_common.py 
+diff ../../atac-seq-pipeline/src/encode_task_bowtie2.py encode_task_bowtie2.py 
+diff ../../atac-seq-pipeline/src/encode_task_filter.py encode_task_filter.py 
+diff ../../atac-seq-pipeline/src/encode_task_post_align.py encode_task_post_align.py 
+diff ../../atac-seq-pipeline/src/encode_lib_frip.py encode_lib_frip.py 
+diff ../../atac-seq-pipeline/src/encode_task_idr.py encode_task_idr.py 
+diff ../../atac-seq-pipeline/src/encode_task_overlap.py encode_task_overlap.py 
+diff ../../atac-seq-pipeline/src/encode_task_pool_ta.py encode_task_pool_ta.py 
+diff ../../atac-seq-pipeline/src/encode_task_qc_report.py encode_task_qc_report.py 
+diff ../../atac-seq-pipeline/src/encode_task_reproducibility.py encode_task_reproducibility.py 
+diff ../../atac-seq-pipeline/src/encode_task_spr.py encode_task_spr.py 
+diff ../../atac-seq-pipeline/src/encode_task_xcor.py encode_task_xcor.py
+diff ../../atac-seq-pipeline/src/encode_task_jsd.py encode_task_jsd.py
+diff ../../atac-seq-pipeline/src/encode_task_gc_bias.py encode_task_gc_bias.py
 

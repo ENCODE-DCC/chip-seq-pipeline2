@@ -1,0 +1,13 @@
+{
+    "test_jsd.se_nodup_bams" : [
+        "chip-seq-pipeline-test-data/input/se/nodup_bams/rep1/rep1.subsampled.25.merged.nodup.bam",
+        "chip-seq-pipeline-test-data/input/se/nodup_bams/rep2/rep2.subsampled.20.merged.nodup.bam"
+    ],
+    "test_jsd.se_ctl_nodup_bam" : "chip-seq-pipeline-test-data/input/se/nodup_bams/ctl1/ctl1.subsampled.25.merged.nodup.bam",
+    "test_jsd.se_blacklist" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38.blacklist.bed.gz",
+
+    "test_jsd.ref_se_jsd_logs" : [
+        "chip-seq-pipeline-test-data/ref_output/test_jsd/se/rep1.rep1.subsampled.25.merged.nodup.jsd.qc",
+        "chip-seq-pipeline-test-data/ref_output/test_jsd/se/rep2.rep2.subsampled.20.merged.nodup.jsd.qc"
+    ]
+}
