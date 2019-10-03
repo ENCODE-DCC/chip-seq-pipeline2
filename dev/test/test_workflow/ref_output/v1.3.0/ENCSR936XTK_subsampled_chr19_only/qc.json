@@ -1,7 +1,7 @@
 {
     "general": {
-        "date": "2019-10-02 20:21:02",
-        "title": "ENCSR936XTK (subsampled 1/50, chr19 and chrM Only)",
+        "date": "2019-10-03 06:25:07",
+        "title": "ENCSR936XTK (subsampled 1/50, chr19_chrM Only)",
         "description": "ZNF143 ChIP-seq on human GM12878",
         "pipeline_ver": "v1.3.0",
         "pipeline_type": "tf",
