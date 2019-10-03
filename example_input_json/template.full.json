@@ -50,7 +50,7 @@
     "chip.enable_count_signal_track" : false,
     "chip.keep_irregular_chr_in_bfilt_peak" : false,
 
-    "chip.regex_filter_reads" : "chrM",
+    "chip.filter_chrs" : [],
 
     "chip.align_cpu" : 4,
     "chip.align_mem_mb" : 20000,
