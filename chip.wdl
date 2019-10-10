@@ -1147,6 +1147,8 @@ workflow chip {
 		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
 		pval_thresh = pval_thresh,
+		xcor_pe_trim_bp = xcor_pe_trim_bp,
+		xcor_subsample_reads = xcor_subsample_reads,
 
 		samstat_qcs = align.samstat_qc,
 		nodup_samstat_qcs = filter.samstat_qc,
@@ -1844,7 +1846,9 @@ task qc_report {
 	String peak_caller
 	Int cap_num_peak
 	Float idr_thresh
-	Float pval_thresh	
+	Float pval_thresh
+	Int xcor_pe_trim_bp
+	Int xcor_subsample_reads
 	# QCs
 	Array[File?] samstat_qcs
 	Array[File?] nodup_samstat_qcs
@@ -1907,6 +1911,8 @@ task qc_report {
 			${'--cap-num-peak ' + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--pval-thresh ${pval_thresh} \
+			--xcor-pe-trim-bp ${xcor_pe_trim_bp} \
+			--xcor-subsample-reads ${xcor_subsample_reads} \
 			--samstat-qcs ${sep='_:_' samstat_qcs} \
 			--nodup-samstat-qcs ${sep='_:_' nodup_samstat_qcs} \
 			--dup-qcs ${sep='_:_' dup_qcs} \
