@@ -1582,7 +1582,7 @@ task call_peak {
 
 	command {
 		if [ '${peak_caller}' == 'macs2' ]; then
-			python2 $(which encode_task_macs2_chip.py) \
+			python3 $(which encode_task_macs2_chip.py) \
 				${sep=' ' tas} \
 				${'--gensz '+ gensz} \
 				${'--chrsz ' + chrsz} \
@@ -1651,7 +1651,7 @@ task macs2_signal_track {
 	String disks
 
 	command {
-		python2 $(which encode_task_macs2_signal_track_chip.py) \
+		python3 $(which encode_task_macs2_signal_track_chip.py) \
 			${sep=' ' tas} \
 			${'--gensz '+ gensz} \
 			${'--chrsz ' + chrsz} \
