@@ -2,8 +2,8 @@
 
 ## Command line for version change
 ```bash
-PREV_VER=v1.3.0
-NEW_VER=v1.3.0
+PREV_VER=dev-v1.3.1
+NEW_VER=v1.3.1
 for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
@@ -24,7 +24,7 @@ Run the following command line locally to build out DX workflows for this pipeli
 
 ```bash
 # version
-VER=v1.3.0
+VER=dev-v1.3.1
 DOCKER=quay.io/encode-dcc/chip-seq-pipeline:$VER
 
 # general
