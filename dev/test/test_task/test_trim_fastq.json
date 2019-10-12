@@ -1,5 +1,0 @@
-{
-    "test_trim_fastq.pe_fastq_rep1_R1" : "chip-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/rep1-R1.subsampled.67.fastq.gz",
-
-    "test_trim_fastq.ref_pe_trimmed_fastq_rep1_R1" : "chip-seq-pipeline-test-data/ref_output/test_trim_fastq/merge_fastqs_R1_rep1-R1.subsampled.67.merged.trim_50bp.fastq.gz"
-}
