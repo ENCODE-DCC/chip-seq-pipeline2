@@ -520,8 +520,9 @@ workflow chip {
 		}
 
 		# special trimming/mapping for xcor (when starting from BAMs)
-		Boolean has_input_of_bam2ta_no_dedup = has_output_of_align || defined(align.bam)
-		if ( has_input_of_bam2ta_no_dedup && !defined(bam2ta_no_dedup_R1.ta) ) {
+		Boolean has_input_of_bam2ta_no_dedup = (has_output_of_align || defined(align.bam))
+			&& !defined(bam2ta_no_dedup_R1.ta)
+		if ( has_input_of_bam2ta_no_dedup ) {
 			call filter as filter_no_dedup { input :
 				bam = bam_,
 				paired_end = paired_end_,
