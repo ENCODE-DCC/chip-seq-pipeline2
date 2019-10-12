@@ -4,8 +4,9 @@ import '../../../chip.wdl' as chip
 import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_bowtie2 {
-	Array[String] pe_fastqs
-	Array[String] se_fastqs
+	Array[File] pe_fastqs_R1
+	Array[File] pe_fastqs_R2
+	Array[File] se_fastqs
 
 	# we don't compare BAM because BAM's header includes date
 	# hence md5sums don't match all the time
@@ -24,8 +25,8 @@ workflow test_bowtie2 {
 		aligner = 'bowtie2',
 		idx_tar = pe_bowtie2_idx_tar,
 		mito_chr_name = 'chrM',
-		fastq_R1 = pe_fastqs[0],
-		fastq_R2 = pe_fastqs[1],
+		fastqs_R1 = pe_fastqs_R1,
+		fastqs_R2 = pe_fastqs_R2,
 		paired_end = true,
 		use_bwa_mem_for_pe = false,
 
@@ -38,7 +39,8 @@ workflow test_bowtie2 {
 		aligner = 'bowtie2',
 		idx_tar = se_bowtie2_idx_tar,
 		mito_chr_name = 'chrM',
-		fastq_R1 = se_fastqs[0],
+		fastqs_R1 = se_fastqs,
+		fastqs_R2 = [],
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
 

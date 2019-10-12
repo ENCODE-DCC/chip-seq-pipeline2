@@ -117,7 +117,7 @@ You can mix up different data types for individual replicate/control replicate. 
     "chip.fastqs_rep1_R1" : ["rep1.fastq.gz"],
     "chip.fastqs_rep3_R1" : ["rep3.fastq.gz"],
     "chip.bams" : [null, "rep2.bam", null, null, null],
-    "chip.nodup_bams" : [null, "rep2.bam", null, "rep4.nodup.bam", null],
+    "chip.nodup_bams" : [null, null, null, "rep4.nodup.bam", null],
     "chip.tas" : [null, null, null, null, "rep5.tagAlign.gz"]
 }
 ```

@@ -1,0 +1,4 @@
+{
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/hg19_dx_azure.tsv"
+}

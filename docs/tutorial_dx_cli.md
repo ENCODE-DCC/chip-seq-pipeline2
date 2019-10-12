@@ -45,8 +45,9 @@ This document describes instruction for the item 1).
     ```bash
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_chip_ENCSR936XTK_subsampled_chr19_only
+    $ DOCKER=quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.1
 
-    $ java -jar dxWDL-0.77.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras dev/workflow_opts/docker.json
+    $ java -jar dxWDL-0.77.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
 
 8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.

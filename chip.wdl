@@ -1,12 +1,12 @@
 # ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.0
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.0
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.1
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.1
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.json
 
 workflow chip {
-	String pipeline_ver = 'v1.3.0'
+	String pipeline_ver = 'dev-v1.3.1'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -180,10 +180,6 @@ workflow chip {
 	Array[File] ctl_fastqs_rep10_R2 = []
 
 	### other input types (bam, nodup_bam, ta)
-	Array[File?] merged_fastqs_R1 = []
-	Array[File?] merged_fastqs_R2 = [] 	
-	Array[File?] ctl_merged_fastqs_R1 = []
-	Array[File?] ctl_merged_fastqs_R2 = [] 	
 	Array[File?] bams = [] 			# [rep_id]
 	Array[File?] ctl_bams = [] 		# [rep_id]
 	Array[File?] nodup_bams = [] 	# [rep_id]
@@ -343,9 +339,7 @@ workflow chip {
 	# temporary variables to get number of replicates
 	# 	WDLic implementation of max(A,B,C,...)
 	Int num_rep_fastq = length(fastqs_R1)
-	Int num_rep_merged_fastq = if length(merged_fastqs_R1)<num_rep_fastq then num_rep_fastq
-		else length(merged_fastqs_R1)
-	Int num_rep_bam = if length(bams)<num_rep_merged_fastq then num_rep_merged_fastq
+	Int num_rep_bam = if length(bams)<num_rep_fastq then num_rep_fastq
 		else length(bams)
 	Int num_rep_nodup_bam = if length(nodup_bams)<num_rep_bam then num_rep_bam
 		else length(nodup_bams)
@@ -357,9 +351,7 @@ workflow chip {
 
 	# temporary variables to get number of controls
 	Int num_ctl_fastq = length(ctl_fastqs_R1)
-	Int num_ctl_merged_fastq = if length(ctl_merged_fastqs_R1)<num_ctl_fastq then num_ctl_fastq
-		else length(ctl_merged_fastqs_R1)
-	Int num_ctl_bam = if length(ctl_bams)<num_ctl_merged_fastq then num_ctl_merged_fastq
+	Int num_ctl_bam = if length(ctl_bams)<num_ctl_fastq then num_ctl_fastq
 		else length(ctl_bams)
 	Int num_ctl_nodup_bam = if length(ctl_nodup_bams)<num_ctl_bam then num_ctl_bam
 		else length(ctl_nodup_bams)
@@ -390,35 +382,20 @@ workflow chip {
 		# 	paired_end will override paired_ends[i]
 		Boolean? paired_end_ = if !defined(paired_end) && i<length(paired_ends) then paired_ends[i]
 			else paired_end
-		Boolean has_input_of_merge_fastq = i<length(fastqs_R1) && length(fastqs_R1[i])>0
-		Boolean has_output_of_merge_fastq = i<length(merged_fastqs_R1) &&
-			defined(merged_fastqs_R1[i])
-		if ( has_input_of_merge_fastq && !has_output_of_merge_fastq ) {
-			# merge fastqs
-			call merge_fastq { input :
-				fastqs_R1 = fastqs_R1[i],
-				fastqs_R2 = fastqs_R2[i],
-				paired_end = paired_end_,
-			}
-		}
-		File? merged_fastq_R1_ = if has_output_of_merge_fastq then merged_fastqs_R1[i]
-			else merge_fastq.merged_fastq_R1
-		File? merged_fastq_R2_ = if i<length(merged_fastqs_R2) &&
-			defined(merged_fastqs_R2[i]) then merged_fastqs_R2[i]
-			else merge_fastq.merged_fastq_R2
 
-		Boolean has_input_of_align = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
+		Boolean has_input_of_align = i<length(fastqs_R1) && length(fastqs_R1[i])>0
 		Boolean has_output_of_align = i<length(bams) && defined(bams[i])
 		if ( has_input_of_align && !has_output_of_align ) {
 			call align { input :
+				fastqs_R1 = fastqs_R1[i],
+				fastqs_R2 = fastqs_R2[i],
+
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
 					else custom_aligner_idx_tar_,
-				fastq_R1 = merged_fastq_R1_,
-				fastq_R2 = merged_fastq_R2_,
 				paired_end = paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 				cpu = align_cpu,
@@ -494,20 +471,18 @@ workflow chip {
 		}
 
 		# special trimming/mapping for xcor (when starting from FASTQs)
-		Boolean has_input_of_trim_fastq = has_output_of_merge_fastq || defined(merge_fastq.merged_fastq_R1)
-		if ( has_input_of_trim_fastq ) {
-			call trim_fastq { input :
-				fastq = merged_fastq_R1_,
-				trim_bp = xcor_pe_trim_bp,
-			}
+		if ( has_input_of_align ) {
 			call align as align_R1 { input :
+				fastqs_R1 = fastqs_R1[i],
+				fastqs_R2 = fastqs_R2[i],
+				trim_bp = xcor_pe_trim_bp,
+
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
 					else custom_aligner_idx_tar_,
-				fastq_R1 = trim_fastq.trimmed_fastq,
 				paired_end = false,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 				cpu = align_cpu,
@@ -546,7 +521,7 @@ workflow chip {
 
 		# special trimming/mapping for xcor (when starting from BAMs)
 		Boolean has_input_of_bam2ta_no_dedup = has_output_of_align || defined(align.bam)
-		if ( has_input_of_bam2ta_no_dedup && !has_input_of_trim_fastq ) {
+		if ( has_input_of_bam2ta_no_dedup && !defined(bam2ta_no_dedup_R1.ta) ) {
 			call filter as filter_no_dedup { input :
 				bam = bam_,
 				paired_end = paired_end_,
@@ -616,35 +591,19 @@ workflow chip {
 			else if defined(ctl_paired_end) then ctl_paired_end
 			else paired_end
 
-		Boolean has_input_of_merge_fastq_ctl = i<length(ctl_fastqs_R1) && length(ctl_fastqs_R1[i])>0
-		Boolean has_output_of_merge_fastq_ctl = i<length(ctl_merged_fastqs_R1) &&
-			defined(ctl_merged_fastqs_R1[i])
-		if ( has_input_of_merge_fastq_ctl && !has_output_of_merge_fastq_ctl ) {
-			# merge fastqs
-			call merge_fastq as merge_fastq_ctl { input :
-				fastqs_R1 = ctl_fastqs_R1[i],
-				fastqs_R2 = ctl_fastqs_R2[i],
-				paired_end = ctl_paired_end_,
-			}
-		}
-		File? ctl_merged_fastq_R1_ = if has_output_of_merge_fastq_ctl then ctl_merged_fastqs_R1[i]
-			else merge_fastq_ctl.merged_fastq_R1
-		File? ctl_merged_fastq_R2_ = if i<length(ctl_merged_fastqs_R2) &&
-			defined(ctl_merged_fastqs_R2[i]) then ctl_merged_fastqs_R2[i]
-			else merge_fastq_ctl.merged_fastq_R2
-
-		Boolean has_input_of_align_ctl = has_output_of_merge_fastq_ctl || defined(merge_fastq_ctl.merged_fastq_R1)
+		Boolean has_input_of_align_ctl = i<length(ctl_fastqs_R1) && length(ctl_fastqs_R1[i])>0
 		Boolean has_output_of_align_ctl = i<length(ctl_bams) && defined(ctl_bams[i])
 		if ( has_input_of_align_ctl && !has_output_of_align_ctl ) {
 			call align as align_ctl { input :
+				fastqs_R1 = ctl_fastqs_R1[i],
+				fastqs_R2 = ctl_fastqs_R2[i],
+
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
 				custom_align_py = custom_align_py,
 				idx_tar = if aligner=='bwa' then bwa_idx_tar_
 					else if aligner=='bowtie2' then bowtie2_idx_tar_
 					else custom_aligner_idx_tar_,
-				fastq_R1 = ctl_merged_fastq_R1_,
-				fastq_R2 = ctl_merged_fastq_R2_,
 				paired_end = ctl_paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 				cpu = align_cpu,
@@ -1147,6 +1106,8 @@ workflow chip {
 		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
 		pval_thresh = pval_thresh,
+		xcor_pe_trim_bp = xcor_pe_trim_bp,
+		xcor_subsample_reads = xcor_subsample_reads,
 
 		samstat_qcs = align.samstat_qc,
 		nodup_samstat_qcs = filter.samstat_qc,
@@ -1204,64 +1165,11 @@ workflow chip {
 	}
 }
 
-task merge_fastq { # merge trimmed fastqs
+task align {
 	Array[File] fastqs_R1 		# [merge_id]
 	Array[File] fastqs_R2
-	Boolean paired_end
+	Int? trim_bp			# this is for R1 only
 
-	File? null_f
-	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
-				else transpose([fastqs_R1])
-	command {
-		# check if pipeline dependencies can be found
-		if [[ -z "$(which encode_task_merge_fastq.py 2> /dev/null || true)" ]]
-		then
-		  echo -e "\n* Error: pipeline dependencies not found." 1>&2
-		  echo 'Conda users: Did you install Conda and environment correctly (scripts/install_conda_env.sh)?' 1>&2
-		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
-		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
-		  echo -e "\n" 1>&2
-		  EXCEPTION_RAISED
-		fi
-
-		python3 $(which encode_task_merge_fastq.py) \
-			${write_tsv(tmp_fastqs)} \
-			${if paired_end then '--paired-end' else ''} \
-			${'--nth ' + 1}
-	}
-	output {
-		File merged_fastq_R1 = glob('R1/*.fastq.gz')[0]
-		File? merged_fastq_R2 = if paired_end then glob('R2/*.fastq.gz')[0] else null_f
-	}
-	runtime {
-		cpu : 1
-		memory : '8000 MB'
-		time : 2
-		disks : 'local-disk 100 HDD'
-	}
-}
-
-task trim_fastq { # trim fastq (for PE R1 only)
-	File fastq
-	Int trim_bp
-
-	command {
-		python3 $(which encode_task_trim_fastq.py) \
-			${fastq} \
-			--trim-bp ${trim_bp}
-	}
-	output {
-		File trimmed_fastq = glob('*.fastq.gz')[0]
-	}
-	runtime {
-		cpu : 1
-		memory : '8000 MB'
-		time : 1
-		disks : 'local-disk 50 HDD'
-	}
-}
-
-task align {
 	String aligner
 	String mito_chr_name
 	Int? multimapping
@@ -1277,11 +1185,46 @@ task align {
 	Int time_hr
 	String disks
 
+	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
+				else transpose([fastqs_R1])
 	command {
+		# check if pipeline dependencies can be found
+		if [[ -z "$(which encode_task_merge_fastq.py 2> /dev/null || true)" ]]
+		then
+		  echo -e "\n* Error: pipeline dependencies not found." 1>&2
+		  echo 'Conda users: Did you activate Conda environment (conda activate encode-chip-seq-pipeline)?' 1>&2
+		  echo '    Or did you install Conda and environment correctly (bash scripts/install_conda_env.sh)?' 1>&2
+		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
+		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
+		  echo -e "\n" 1>&2
+		  EXCEPTION_RAISED
+		fi
+		python3 $(which encode_task_merge_fastq.py) \
+			${write_tsv(tmp_fastqs)} \
+			${if paired_end then '--paired-end' else ''} \
+			${'--nth ' + 1}
+
+		if [ -z '${trim_bp}' ]; then
+			SUFFIX=
+		else
+			SUFFIX=_trimmed
+			python3 $(which encode_task_trim_fastq.py) \
+				R1/*.fastq.gz \
+				--trim-bp ${trim_bp} \
+				--out-dir R1$SUFFIX
+			if [ '${paired_end}' == 'true' ]; then
+				python3 $(which encode_task_trim_fastq.py) \
+					R2/*.fastq.gz \
+					--trim-bp ${trim_bp} \
+					--out-dir R2$SUFFIX
+			fi
+		fi
+
 		if [ '${aligner}' == 'bwa' ]; then
 		 	python3 $(which encode_task_bwa.py) \
 				${idx_tar} \
-				${fastq_R1} ${fastq_R2} \
+				R1$SUFFIX/*.fastq.gz \
+				${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
 				${if paired_end then '--paired-end' else ''} \
 				${if use_bwa_mem_for_pe then '--use-bwa-mem-for-pe' else ''} \
 				${'--nth ' + cpu}
@@ -1289,22 +1232,25 @@ task align {
 		elif [ '${aligner}' == 'bowtie2' ]; then
 		 	python3 $(which encode_task_bowtie2.py) \
 				${idx_tar} \
-				${fastq_R1} ${fastq_R2} \
+				R1$SUFFIX/*.fastq.gz \
+				${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
 				${'--multimapping ' + multimapping} \
 				${if paired_end then '--paired-end' else ''} \
 				${'--nth ' + cpu}
 		else
 			python3 ${custom_align_py} \
 				${idx_tar} \
-				${fastq_R1} ${fastq_R2} \
+				R1$SUFFIX/*.fastq.gz \
+				${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
 				${if paired_end then '--paired-end' else ''} \
 				${'--nth ' + cpu}
 		fi 
 
 		python3 $(which encode_task_post_align.py) \
-			${fastq_R1} $(ls *.bam) \
+			R1$SUFFIX/*.fastq.gz $(ls *.bam) \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu}
+		rm -rf R1 R2 R1$SUFFIX R2$SUFFIX
 	}
 	output {
 		File bam = glob('*.bam')[0]
@@ -1580,7 +1526,7 @@ task call_peak {
 
 	command {
 		if [ '${peak_caller}' == 'macs2' ]; then
-			python2 $(which encode_task_macs2_chip.py) \
+			python3 $(which encode_task_macs2_chip.py) \
 				${sep=' ' tas} \
 				${'--gensz '+ gensz} \
 				${'--chrsz ' + chrsz} \
@@ -1649,7 +1595,7 @@ task macs2_signal_track {
 	String disks
 
 	command {
-		python2 $(which encode_task_macs2_signal_track_chip.py) \
+		python3 $(which encode_task_macs2_signal_track_chip.py) \
 			${sep=' ' tas} \
 			${'--gensz '+ gensz} \
 			${'--chrsz ' + chrsz} \
@@ -1844,7 +1790,9 @@ task qc_report {
 	String peak_caller
 	Int cap_num_peak
 	Float idr_thresh
-	Float pval_thresh	
+	Float pval_thresh
+	Int xcor_pe_trim_bp
+	Int xcor_subsample_reads
 	# QCs
 	Array[File?] samstat_qcs
 	Array[File?] nodup_samstat_qcs
@@ -1907,6 +1855,8 @@ task qc_report {
 			${'--cap-num-peak ' + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--pval-thresh ${pval_thresh} \
+			--xcor-pe-trim-bp ${xcor_pe_trim_bp} \
+			--xcor-subsample-reads ${xcor_subsample_reads} \
 			--samstat-qcs ${sep='_:_' samstat_qcs} \
 			--nodup-samstat-qcs ${sep='_:_' nodup_samstat_qcs} \
 			--dup-qcs ${sep='_:_' dup_qcs} \
