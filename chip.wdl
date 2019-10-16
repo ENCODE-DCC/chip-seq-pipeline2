@@ -1189,6 +1189,8 @@ task align {
 	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
 				else transpose([fastqs_R1])
 	command {
+		set -e
+
 		# check if pipeline dependencies can be found
 		if [[ -z "$(which encode_task_merge_fastq.py 2> /dev/null || true)" ]]
 		then
@@ -1198,7 +1200,7 @@ task align {
 		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
 		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
 		  echo -e "\n" 1>&2
-		  EXCEPTION_RAISED
+		  exit 3
 		fi
 		python3 $(which encode_task_merge_fastq.py) \
 			${write_tsv(tmp_fastqs)} \
@@ -1526,6 +1528,8 @@ task call_peak {
 	String disks
 
 	command {
+		set -e
+
 		if [ '${peak_caller}' == 'macs2' ]; then
 			python3 $(which encode_task_macs2_chip.py) \
 				${sep=' ' tas} \
@@ -1998,7 +2002,7 @@ task raise_exception {
 	String msg
 	command {
 		echo -e "\n* Error: ${msg}\n" >&2
-		EXCEPTION_RAISED
+		exit 2
 	}
 	output {
 		String error_msg = '${msg}'
