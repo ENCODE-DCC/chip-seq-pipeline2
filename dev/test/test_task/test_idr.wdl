@@ -18,6 +18,8 @@ workflow test_idr {
 	String se_blacklist
 	String se_chrsz
 
+	String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
+
 	Int fraglen
 
 	call chip.idr as se_idr { input : 
@@ -31,7 +33,8 @@ workflow test_idr {
 		chrsz = se_chrsz,
 		fraglen = fraglen,
 		blacklist = se_blacklist,
-		keep_irregular_chr_in_bfilt_peak = false,
+		regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
+
 		ta = se_ta_pooled,
 	}
 

@@ -18,6 +18,8 @@ workflow test_spp {
 	String se_blacklist
 	String se_chrsz
 
+	String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
+
 	Int spp_cpu = 1
 	Int spp_mem_mb = 16000
 	Int spp_time_hr = 72
@@ -33,7 +35,7 @@ workflow test_spp {
 		fraglen = fraglen,
 		cap_num_peak = cap_num_peak,
 		blacklist = se_blacklist,
-		keep_irregular_chr_in_bfilt_peak = false,
+		regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
 
 		cpu = spp_cpu,
 		mem_mb = spp_mem_mb,

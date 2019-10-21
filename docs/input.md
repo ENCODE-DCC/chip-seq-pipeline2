@@ -39,6 +39,7 @@ Parameter|Type|Description
 `chip.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `chip.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 `chip.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
+`chip.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
 
 We currently provide TSV files for 4 genomes as shown in the below table. `GENOME` should be `hg38`, `mm10`, `hg19` or `mm9`. You can [download/build](build_genome_database.md) it on your local computer. You can also [build a genome database for your own genome](build_genome_database.md).
 
@@ -180,7 +181,6 @@ Parameter|Default|Description
 `chip.enable_jsd` | true | Enable deeptools fingerprint (JS distance)
 `chip.enable_gc_bias` | true | Enable GC bias calculation
 `chip.enable_count_signal_track` | false | Enable count signal track generation
-`chip.keep_irregular_chr_in_bfilt_peak` | false | Keep irregular chromosome names. Use this for custom genomes without canonical chromosome names (chr1, chrX, ...)
 
 ## Other optional parameters
 
