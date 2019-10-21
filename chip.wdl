@@ -755,7 +755,7 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -796,7 +796,7 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 	
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -822,7 +822,7 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -864,7 +864,7 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -905,7 +905,7 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -931,7 +931,7 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -965,7 +965,7 @@ workflow chip {
 				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -987,7 +987,7 @@ workflow chip {
 				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -1005,7 +1005,7 @@ workflow chip {
 				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = ta_[i],
 			}
 		}
@@ -1025,7 +1025,7 @@ workflow chip {
 				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = ta_[i],
 			}
 		}
@@ -1042,7 +1042,7 @@ workflow chip {
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -1060,7 +1060,7 @@ workflow chip {
 			rank = idr_rank_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -1075,7 +1075,6 @@ workflow chip {
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
 			peak_type = peak_type_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
@@ -1088,7 +1087,6 @@ workflow chip {
 			peak_ppr = idr_ppr.bfilt_idr_peak,
 			peak_type = peak_type_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
