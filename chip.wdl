@@ -1557,7 +1557,7 @@ task call_peak {
 		python3 $(which encode_task_post_call_peak_chip.py) \
 			$(ls *Peak.gz) \
 			${'--ta ' + tas[0]} \
-			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
+			${'--regex-bfilt-peak-chr-name \'' + regex_bfilt_peak_chr_name + '\''} \
 			${'--chrsz ' + chrsz} \
 			${'--fraglen ' + fraglen} \
 			${'--peak-type ' + peak_type} \
@@ -1643,7 +1643,7 @@ task idr {
 			${'--fraglen ' + fraglen} \
 			${'--chrsz ' + chrsz} \
 			${'--blacklist '+ blacklist} \
-			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
+			${'--regex-bfilt-peak-chr-name \'' + regex_bfilt_peak_chr_name + '\''} \
 			${'--ta ' + ta}
 	}
 	output {
@@ -1689,7 +1689,7 @@ task overlap {
 			${'--chrsz ' + chrsz} \
 			${'--blacklist '+ blacklist} \
 			--nonamecheck \
-			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
+			${'--regex-bfilt-peak-chr-name \'' + regex_bfilt_peak_chr_name + '\''} \
 			${'--ta ' + ta}
 	}
 	output {
