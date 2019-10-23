@@ -16,6 +16,8 @@ workflow test_overlap {
 	String se_blacklist
 	String se_chrsz
 
+	String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
+
 	Int fraglen
 
 	call chip.overlap as se_overlap { input :
@@ -25,7 +27,8 @@ workflow test_overlap {
 		peak_pooled = se_peak_pooled,
 		peak_type = 'regionPeak',
 		blacklist = se_blacklist,
-		keep_irregular_chr_in_bfilt_peak = false,
+		regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
+
 		chrsz = se_chrsz,
 		fraglen = fraglen,
 		ta = se_ta_pooled,
