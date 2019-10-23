@@ -1,12 +1,12 @@
 # ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.1
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.1
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.2
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.2
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.json
 
 workflow chip {
-	String pipeline_ver = 'v1.3.1'
+	String pipeline_ver = 'v1.3.2'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -31,6 +31,7 @@ workflow chip {
 	File? blacklist 				# blacklist BED (peaks overlapping will be filtered out)
 	File? blacklist2 				# 2nd blacklist (will be merged with 1st one)
 	String? mito_chr_name
+	String? regex_bfilt_peak_chr_name
 	String? gensz 					# genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 	File? tss 						# TSS BED file
 	File? dnase 					# open chromatin region BED file
@@ -88,11 +89,7 @@ workflow chip {
 	Int cap_num_peak_macs2 = 500000	# cap number of raw peaks called from MACS2
 	Float pval_thresh = 0.01		# p.value threshold
 	Float idr_thresh = 0.05			# IDR threshold
-	Boolean keep_irregular_chr_in_bfilt_peak = false 
-									# peaks with irregular chr name will not be filtered out
-									# 	in bfilt_peak (blacklist filtered peak) file
-									# 	(e.g. chr1_AABBCC, AABR07024382.1, ...)
-									# 	reg-ex pattern for 'regular' chr name is chr[\dXY]+\b
+
 	### resources
 	Int align_cpu = 4
 	Int align_mem_mb = 20000
@@ -233,6 +230,8 @@ workflow chip {
 		else blacklist2_
 	String? mito_chr_name_ = if defined(mito_chr_name) then mito_chr_name
 		else read_genome_tsv.mito_chr_name		
+	String? regex_bfilt_peak_chr_name_ = if defined(regex_bfilt_peak_chr_name) then regex_bfilt_peak_chr_name
+		else read_genome_tsv.regex_bfilt_peak_chr_name
 	String? genome_name_ = if defined(genome_name) then genome_name
 		else if defined(read_genome_tsv.genome_name) then read_genome_tsv.genome_name
 		else basename(select_first([genome_tsv, ref_fa_, chrsz_, 'None']))
@@ -756,7 +755,7 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -797,7 +796,7 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 	
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -823,7 +822,7 @@ workflow chip {
 				pval_thresh = pval_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 				cpu = call_peak_cpu,
 				mem_mb = call_peak_mem_mb,
@@ -865,7 +864,7 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -906,7 +905,7 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -932,7 +931,7 @@ workflow chip {
 			pval_thresh = pval_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
 			cpu = call_peak_cpu,
 			mem_mb = call_peak_mem_mb,
@@ -966,7 +965,7 @@ workflow chip {
 				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -988,7 +987,7 @@ workflow chip {
 				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = pool_ta.ta_pooled,
 			}
 		}
@@ -1006,7 +1005,7 @@ workflow chip {
 				peak_type = peak_type_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = ta_[i],
 			}
 		}
@@ -1026,7 +1025,7 @@ workflow chip {
 				rank = idr_rank_,
 				blacklist = blacklist_,
 				chrsz = chrsz_,
-				keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 				ta = ta_[i],
 			}
 		}
@@ -1043,7 +1042,7 @@ workflow chip {
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -1061,7 +1060,7 @@ workflow chip {
 			rank = idr_rank_,
 			blacklist = blacklist_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
+			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 			ta = pool_ta.ta_pooled,
 		}
 	}
@@ -1076,7 +1075,6 @@ workflow chip {
 			peak_ppr = overlap_ppr.bfilt_overlap_peak,
 			peak_type = peak_type_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
@@ -1089,7 +1087,6 @@ workflow chip {
 			peak_ppr = idr_ppr.bfilt_idr_peak,
 			peak_type = peak_type_,
 			chrsz = chrsz_,
-			keep_irregular_chr_in_bfilt_peak = keep_irregular_chr_in_bfilt_peak,
 		}
 	}
 
@@ -1189,6 +1186,8 @@ task align {
 	Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
 				else transpose([fastqs_R1])
 	command {
+		set -e
+
 		# check if pipeline dependencies can be found
 		if [[ -z "$(which encode_task_merge_fastq.py 2> /dev/null || true)" ]]
 		then
@@ -1198,7 +1197,7 @@ task align {
 		  echo 'GCP/AWS/Docker users: Did you add --docker flag to Caper command line arg?' 1>&2
 		  echo 'Singularity users: Did you add --singularity flag to Caper command line arg?' 1>&2
 		  echo -e "\n" 1>&2
-		  EXCEPTION_RAISED
+		  exit 3
 		fi
 		python3 $(which encode_task_merge_fastq.py) \
 			${write_tsv(tmp_fastqs)} \
@@ -1518,7 +1517,7 @@ task call_peak {
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
 	Float pval_thresh 	# p.value threshold
 	File? blacklist 	# blacklist BED to filter raw peaks
-	Boolean	keep_irregular_chr_in_bfilt_peak
+	String? regex_bfilt_peak_chr_name
 
 	Int cpu	
 	Int mem_mb
@@ -1526,6 +1525,8 @@ task call_peak {
 	String disks
 
 	command {
+		set -e
+
 		if [ '${peak_caller}' == 'macs2' ]; then
 			python3 $(which encode_task_macs2_chip.py) \
 				${sep=' ' tas} \
@@ -1556,7 +1557,7 @@ task call_peak {
 		python3 $(which encode_task_post_call_peak_chip.py) \
 			$(ls *Peak.gz) \
 			${'--ta ' + tas[0]} \
-			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
 			${'--chrsz ' + chrsz} \
 			${'--fraglen ' + fraglen} \
 			${'--peak-type ' + peak_type} \
@@ -1622,7 +1623,7 @@ task idr {
 	File peak_pooled
 	Float idr_thresh
 	File? blacklist 	# blacklist BED to filter raw peaks
-	Boolean	keep_irregular_chr_in_bfilt_peak
+	String regex_bfilt_peak_chr_name
 	# parameters to compute FRiP
 	File? ta			# to calculate FRiP
 	Int fraglen 		# fragment length from xcor
@@ -1642,7 +1643,7 @@ task idr {
 			${'--fraglen ' + fraglen} \
 			${'--chrsz ' + chrsz} \
 			${'--blacklist '+ blacklist} \
-			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
 			${'--ta ' + ta}
 	}
 	output {
@@ -1670,7 +1671,7 @@ task overlap {
 	File peak2
 	File peak_pooled
 	File? blacklist # blacklist BED to filter raw peaks
-	Boolean	keep_irregular_chr_in_bfilt_peak
+	String regex_bfilt_peak_chr_name
 	# parameters to compute FRiP
 	File? ta		# to calculate FRiP
 	Int fraglen 	# fragment length from xcor (for FRIP)
@@ -1688,7 +1689,7 @@ task overlap {
 			${'--chrsz ' + chrsz} \
 			${'--blacklist '+ blacklist} \
 			--nonamecheck \
-			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
+			${'--regex-bfilt-peak-chr-name "' + regex_bfilt_peak_chr_name + '"'} \
 			${'--ta ' + ta}
 	}
 	output {
@@ -1717,7 +1718,6 @@ task reproducibility {
 	File? peak_ppr			# Peak file from pooled pseudo replicate.
 	String peak_type
 	File chrsz			# 2-col chromosome sizes file
-	Boolean	keep_irregular_chr_in_bfilt_peak
 
 	command {
 		python3 $(which encode_task_reproducibility.py) \
@@ -1726,7 +1726,6 @@ task reproducibility {
 			${'--peak-ppr '+ peak_ppr} \
 			--prefix ${prefix} \
 			${'--peak-type ' + peak_type} \
-			${if keep_irregular_chr_in_bfilt_peak then '--keep-irregular-chr' else ''} \
 			${'--chrsz ' + chrsz}
 	}
 	output {
@@ -1927,6 +1926,7 @@ task read_genome_tsv {
 		touch tss tss_enrich # for backward compatibility
 		touch dnase prom enh reg2map reg2map_bed roadmap_meta
 		touch mito_chr_name
+		touch regex_bfilt_peak_chr_name
 
 		python <<CODE
 		import os
@@ -1950,6 +1950,8 @@ task read_genome_tsv {
 		String? blacklist = if size('blacklist')==0 then null_s else read_string('blacklist')
 		String? blacklist2 = if size('blacklist2')==0 then null_s else read_string('blacklist2')
 		String? mito_chr_name = if size('mito_chr_name')==0 then null_s else read_string('mito_chr_name')
+		String? regex_bfilt_peak_chr_name = if size('regex_bfilt_peak_chr_name')==0 then 'chr[\\dXY]+'
+			else read_string('regex_bfilt_peak_chr_name')
 		# optional data
 		String? tss = if size('tss')!=0 then read_string('tss')
 			else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
@@ -1998,7 +2000,7 @@ task raise_exception {
 	String msg
 	command {
 		echo -e "\n* Error: ${msg}\n" >&2
-		EXCEPTION_RAISED
+		exit 2
 	}
 	output {
 		String error_msg = '${msg}'
