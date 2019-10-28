@@ -207,14 +207,14 @@ Parameter|Default
 `chip.align_cpu` | 4
 `chip.align_mem_mb` | 20000
 `chip.align_time_hr` | 48
-`chip.align_disks` | `local-disk 100 HDD`
+`chip.align_disks` | `local-disk 400 HDD`
 
 Parameter|Default
 ---------|-------
 `chip.filter_cpu` | 2
 `chip.filter_mem_mb` | 20000
 `chip.filter_time_hr` | 24
-`chip.filter_disks` | `local-disk 100 HDD`
+`chip.filter_disks` | `local-disk 400 HDD`
 
 Parameter|Default
 ---------|-------
@@ -232,7 +232,7 @@ Parameter|Default
 `chip.jsd_cpu` | 2
 `chip.jsd_mem_mb` | 12000
 `chip.jsd_time_hr` | 6
-`chip.jsd_disks` | `local-disk 100 HDD`
+`chip.jsd_disks` | `local-disk 200 HDD`
 
 Parameter|Default
 ---------|-------
@@ -246,13 +246,13 @@ Parameter|Default
 `chip.call_peak_cpu` | 2
 `chip.call_peak_mem_mb` | 16000
 `chip.call_peak_time_hr` | 24
-`chip.call_peak_disks` | `local-disk 100 HDD`
+`chip.call_peak_disks` | `local-disk 200 HDD`
 
 Parameter|Default
 ---------|-------
 `chip.macs2_signal_track_mem_mb` | 16000
 `chip.macs2_signal_track_time_hr` | 24
-`chip.macs2_signal_track_disks` | `local-disk 100 HDD`
+`chip.macs2_signal_track_disks` | `local-disk 200 HDD`
 
 ## How to use a custom aligner
 
