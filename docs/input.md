@@ -182,6 +182,14 @@ Parameter|Default|Description
 `chip.enable_gc_bias` | true | Enable GC bias calculation
 `chip.enable_count_signal_track` | false | Enable count signal track generation
 
+## Optional parameter for fragment length
+
+Our pipeline automatically estimate fragment lengths (required for TF ChIP-Seq) from cross-correlation (task `xcor`) anaylses, but `chip.fraglen` will override those estimated ones. Use this if your pipeline fails due to invalid (negative) fragment length estimated from the cross-correlation analysis.
+
+Parameter|Type | Description
+---------|-----|-----------
+`chip.fraglen` | `Array[Int]` | Fragment length for each replicate.
+
 ## Other optional parameters
 
 Parameter|Default|Description
