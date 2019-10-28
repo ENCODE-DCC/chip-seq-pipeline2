@@ -219,10 +219,13 @@ workflow chip {
 	File? blacklist2_ = if defined(blacklist2) then blacklist2
 		else read_genome_tsv.blacklist2
 	# merge multiple blacklists
+	# two blacklists can have different number of columns (3 vs 6)
+	# so we limit merged blacklist's columns to 3
 	Array[File] blacklists = select_all([blacklist1_, blacklist2_])
 	if ( length(blacklists) > 1 ) {
 		call pool_ta as pool_blacklist { input:
 			tas = blacklists,
+			col = 3,
 		}
 	}
 	File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
@@ -1366,10 +1369,12 @@ task spr { # make two self pseudo replicates
 
 task pool_ta {
 	Array[File?] tas
+	Int? col 			# number of columns in pooled TA
 
 	command {
 		python3 $(which encode_task_pool_ta.py) \
-			${sep=' ' tas}
+			${sep=' ' tas} \
+			${'--col ' + col}
 	}
 	output {
 		File ta_pooled = glob('*.tagAlign.gz')[0]
