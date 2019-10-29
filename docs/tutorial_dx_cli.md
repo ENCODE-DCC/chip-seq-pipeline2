@@ -45,7 +45,7 @@ This document describes instruction for the item 1).
     ```bash
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_chip_ENCSR936XTK_subsampled_chr19_only
-    $ DOCKER=quay.io/encode-dcc/chip-seq-pipeline:v1.3.2
+    $ DOCKER=quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.3
 
     $ java -jar dxWDL-0.77.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
