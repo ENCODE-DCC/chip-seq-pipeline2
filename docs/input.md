@@ -254,6 +254,15 @@ Parameter|Default
 `chip.macs2_signal_track_time_hr` | 24
 `chip.macs2_signal_track_disks` | `local-disk 200 HDD`
 
+> **IMPORTANT**: If you see Java memory errors, check the following resource parameters.
+
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`.
+
+Parameter|Default
+---------|-------
+`chip.filter_picard_java_heap` | `4G`
+`chip.gc_bias_picard_java_heap` | `6G`
+
 ## How to use a custom aligner
 
 ENCODE ChIP-Seq pipeline currently supports `bwa` and `bowtie2`. In order to use your own aligner you need to define the following parameters first. You can define `custom_aligner_idx_tar` either in your input JSON file or in your genome TSV file. Such index TAR file should be an uncompressed TAR file without any directory structured.

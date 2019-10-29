@@ -127,6 +127,9 @@ workflow chip {
 	Int call_peak_time_hr = 72
 	String call_peak_disks = 'local-disk 200 HDD'
 
+	String filter_picard_java_heap = '4G'
+	String gc_bias_picard_java_heap = '6G'
+
 	#### input file definition
 	# pipeline can start from any type of inputs and then leave all other types undefined
 	# supported types: fastq, bam, nodup_bam (filtered bam), ta (tagAlign), peak
@@ -424,6 +427,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -469,6 +473,7 @@ workflow chip {
 			call gc_bias { input :
 				nodup_bam = nodup_bam_,
 				ref_fa = ref_fa_,
+				picard_java_heap = gc_bias_picard_java_heap,
 			}
 		}
 
@@ -505,6 +510,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -537,6 +543,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -633,6 +640,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -1280,8 +1288,10 @@ task filter {
 	File chrsz					# 2-col chromosome sizes file
 	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
 	String mito_chr_name
+
 	Int cpu
 	Int mem_mb
+	String picard_java_heap
 	Int time_hr
 	String disks
 
@@ -1296,7 +1306,8 @@ task filter {
 			${'--chrsz ' + chrsz} \
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
-			${'--nth ' + cpu}
+			${'--nth ' + cpu} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1760,10 +1771,13 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
+	String picard_java_heap
+
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--ref-fa ' + ref_fa}
+			${'--ref-fa ' + ref_fa} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
