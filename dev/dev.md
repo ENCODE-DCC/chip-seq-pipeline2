@@ -2,18 +2,12 @@
 
 ## Command line for version change
 ```bash
-PREV_VER=v1.3.2
-NEW_VER=v1.3.2
+PREV_VER=dev-v1.3.3
+NEW_VER=dev-v1.3.3
 for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh})
 do
   sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
 done
-cd dev/workflow_opts
-for f in $(grep -rl ${PREV_VER} --include=*.json)
-do
-  sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
-done
-cd ../../
 ```
 
 ## Building templates on DX for each genome
@@ -24,7 +18,7 @@ Run the following command line locally to build out DX workflows for this pipeli
 
 ```bash
 # version
-VER=v1.3.2
+VER=dev-v1.3.3
 DOCKER=quay.io/encode-dcc/chip-seq-pipeline:$VER
 
 # general

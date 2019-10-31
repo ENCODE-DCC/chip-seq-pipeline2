@@ -1,12 +1,12 @@
 # ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.2
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.2
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.3
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.3
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.json
 
 workflow chip {
-	String pipeline_ver = 'v1.3.2'
+	String pipeline_ver = 'dev-v1.3.3'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -94,7 +94,7 @@ workflow chip {
 	Int align_cpu = 4
 	Int align_mem_mb = 20000
 	Int align_time_hr = 48
-	String align_disks = 'local-disk 200 HDD'
+	String align_disks = 'local-disk 400 HDD'
 
 	Int filter_cpu = 2
 	Int filter_mem_mb = 20000
@@ -126,6 +126,9 @@ workflow chip {
 	Int call_peak_mem_mb = 16000
 	Int call_peak_time_hr = 72
 	String call_peak_disks = 'local-disk 200 HDD'
+
+	String filter_picard_java_heap = '4G'
+	String gc_bias_picard_java_heap = '6G'
 
 	#### input file definition
 	# pipeline can start from any type of inputs and then leave all other types undefined
@@ -219,10 +222,13 @@ workflow chip {
 	File? blacklist2_ = if defined(blacklist2) then blacklist2
 		else read_genome_tsv.blacklist2
 	# merge multiple blacklists
+	# two blacklists can have different number of columns (3 vs 6)
+	# so we limit merged blacklist's columns to 3
 	Array[File] blacklists = select_all([blacklist1_, blacklist2_])
 	if ( length(blacklists) > 1 ) {
 		call pool_ta as pool_blacklist { input:
 			tas = blacklists,
+			col = 3,
 		}
 	}
 	File? blacklist_ = if length(blacklists) > 1 then pool_blacklist.ta_pooled
@@ -421,6 +427,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -466,6 +473,7 @@ workflow chip {
 			call gc_bias { input :
 				nodup_bam = nodup_bam_,
 				ref_fa = ref_fa_,
+				picard_java_heap = gc_bias_picard_java_heap,
 			}
 		}
 
@@ -502,6 +510,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -534,6 +543,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -630,6 +640,7 @@ workflow chip {
 
 				cpu = filter_cpu,
 				mem_mb = filter_mem_mb,
+				picard_java_heap = filter_picard_java_heap,
 				time_hr = filter_time_hr,
 				disks = filter_disks,
 			}
@@ -1277,8 +1288,10 @@ task filter {
 	File chrsz					# 2-col chromosome sizes file
 	Boolean no_dup_removal 		# no dupe reads removal when filtering BAM
 	String mito_chr_name
+
 	Int cpu
 	Int mem_mb
+	String picard_java_heap
 	Int time_hr
 	String disks
 
@@ -1293,7 +1306,8 @@ task filter {
 			${'--chrsz ' + chrsz} \
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
-			${'--nth ' + cpu}
+			${'--nth ' + cpu} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1366,10 +1380,12 @@ task spr { # make two self pseudo replicates
 
 task pool_ta {
 	Array[File?] tas
+	Int? col 			# number of columns in pooled TA
 
 	command {
 		python3 $(which encode_task_pool_ta.py) \
-			${sep=' ' tas}
+			${sep=' ' tas} \
+			${'--col ' + col}
 	}
 	output {
 		File ta_pooled = glob('*.tagAlign.gz')[0]
@@ -1755,10 +1771,13 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
+	String picard_java_heap
+
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
-			${'--ref-fa ' + ref_fa}
+			${'--ref-fa ' + ref_fa} \
+			${'--picard-java-heap ' + picard_java_heap}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
