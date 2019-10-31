@@ -1,24 +1,7 @@
-# Dev
+#!/bin/bash
+set -e
 
-## Command line for version change
-```bash
-PREV_VER=dev-v1.3.3
-NEW_VER=dev-v1.3.3
-for f in $(grep -rl ${PREV_VER} --include=*.{wdl,md,sh})
-do
-  sed -i "s/${PREV_VER}/${NEW_VER}/g" ${f}
-done
-```
-
-## Building templates on DX for each genome
-
-Make sure that you have [`dxWDL-0.79.1.jar`](https://github.com/DNAnexus/dxWDL/releases/download/0.79.1/dxWDL-0.79.1.jar) on your `$HOME`. Install [DNAnexus Platform SDK](https://wiki.DNAnexus.com/downloads) with `pip install dxpy`. Log-in on DNAnexus with `dx login` and choose "ENCODE Uniform Processing Pipelines" (name of our official DNAnexus project for pipelines).
-
-Run the following command line locally to build out DX workflows for this pipeline on our official one. This will overwrite (`-f` parameter does it).
-
-```bash
-# version
-VER=dev-v1.3.3
+VER=$(cat chip.wdl | grep "#CAPER docker" | awk 'BEGIN{FS=":"} {print $2}')
 DOCKER=quay.io/encode-dcc/chip-seq-pipeline:$VER
 
 # general
@@ -73,4 +56,3 @@ java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processin
 
 # test sample SE ENCSR000DYI (subsampled, chr19/chrM only)
 java -jar ~/dxWDL-0.79.1.jar compile chip.wdl -project "ENCODE Uniform Processing Pipelines Azure" -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}") -f -folder /ChIP-seq2/workflows/$VER/test_ENCSR000DYI_subsampled_chr19_only -defaults example_input_json/dx_azure/ENCSR000DYI_subsampled_chr19_only_dx_azure.json
-```

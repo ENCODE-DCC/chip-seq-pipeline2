@@ -43,9 +43,10 @@ This document describes instruction for the item 1).
 
 7. Compile `chip.wdl` with an input JSON for the SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
     ```bash
+    $ WDL=chip.wdl
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_chip_ENCSR936XTK_subsampled_chr19_only
-    $ DOCKER=quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.3
+    $ DOCKER=$(cat ${WDL} | grep "#CAPER docker" | awk '{print $3}')
 
     $ java -jar dxWDL-0.77.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
