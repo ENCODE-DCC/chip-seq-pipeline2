@@ -55,7 +55,7 @@
     "chip.align_cpu" : 4,
     "chip.align_mem_mb" : 20000,
     "chip.align_time_hr" : 48,
-    "chip.align_disks" : "local-disk 200 HDD",
+    "chip.align_disks" : "local-disk 400 HDD",
 
     "chip.filter_cpu" : 2,
     "chip.filter_mem_mb" : 20000,
@@ -86,5 +86,8 @@
 
     "chip.macs2_signal_track_mem_mb" : 16000,
     "chip.macs2_signal_track_time_hr" : 24,
-    "chip.macs2_signal_track_disks" : "local-disk 200 HDD"
+    "chip.macs2_signal_track_disks" : "local-disk 200 HDD",
+
+    "chip.filter_picard_java_heap" : "4G",
+    "chip.gc_bias_picard_java_heap" : "6G"
 }
