@@ -1,6 +1,6 @@
 # Input JSON
 
-An input JSON file includes all genomic data files, parameters and metadata for running pipelines. Our pipeline will use default values if they are not defined in an input JSON file. We provide a set of template JSON files: [minimum](../example_input_json/template.json) and [full](../example_input_json/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
+An input JSON file is a file which must include all the information needed to run this pipeline. Hence, it must include the absolute paths to all the control and experimental fastq files; paths to all the genomic data files needed for this pipeline, and it must also specify the parameters and the metadata needed for running this pipeline. If the parameters are not specified in an input JSON file, default values will be used. We provide a set of template JSON files: [minimum](../example_input_json/template.json) and [full](../example_input_json/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
 
 # Checklist
 
@@ -79,7 +79,7 @@ Pipeline can start from any of the following data types (FASTQ, BAM, NODUP_BAM a
     * Define a BAM for each replicate. Our pipeline does not determine read endedness from a BAM file. You need to explicitly define read endedness.
     * Example of 3 singled-ended replicates.
         ```javascript
-        {
+        {       
             "chip.paired_end" : false,
             "chip.bams" : ["rep1.bam", "rep2.bam", "rep3.bam"]
         }
