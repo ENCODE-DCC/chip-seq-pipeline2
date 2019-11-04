@@ -35,7 +35,6 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform.
 	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
 
-
 ## Test input JSON file
 
 Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only_caper.json` as `[INPUT_JSON]` in Caper's documentation.
@@ -64,3 +63,16 @@ Install [Croo](https://github.com/ENCODE-DCC/croo#installation). **You can skip 
 $ pip install croo
 $ croo [METADATA_JSON_FILE]
 ```
+
+## How to make a spreadsheet of QC metrics
+
+Install [qc2tsv](https://github.com/ENCODE-DCC/qc2tsv#installation). Make sure that you have python3(> 3.4.1) installed on your system. 
+
+Once you have [organized output with Croo](#how-to-organize-outputs), you will be able to find pipeline's final output file `qc/qc.json` which has all QC metrics in it. Simply feed `qc2tsv` with multiple `qc.json` files. It can take various URIs like local path, `gs://` and `s3://`.
+
+```bash
+$ pip install qc2tsv
+$ qc2tsv /sample1/qc.json gs://sample2/qc.json s3://sample3/qc.json ... > spreadsheet.tsv
+```
+
+QC metrics for each experiment (`qc.json`) will be split into multiple rows (1 for overall experiment + 1 for each bio replicate) in a spreadsheet.
