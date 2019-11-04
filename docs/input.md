@@ -182,6 +182,14 @@ Parameter|Default|Description
 `chip.enable_gc_bias` | true | Enable GC bias calculation
 `chip.enable_count_signal_track` | false | Enable count signal track generation
 
+## Optional parameter for fragment length
+
+Our pipeline automatically estimate fragment lengths (required for TF ChIP-Seq) from cross-correlation (task `xcor`) anaylses, but `chip.fraglen` will override those estimated ones. Use this if your pipeline fails due to invalid (negative) fragment length estimated from the cross-correlation analysis.
+
+Parameter|Type | Description
+---------|-----|-----------
+`chip.fraglen` | `Array[Int]` | Fragment length for each replicate.
+
 ## Other optional parameters
 
 Parameter|Default|Description
@@ -199,14 +207,14 @@ Parameter|Default
 `chip.align_cpu` | 4
 `chip.align_mem_mb` | 20000
 `chip.align_time_hr` | 48
-`chip.align_disks` | `local-disk 100 HDD`
+`chip.align_disks` | `local-disk 400 HDD`
 
 Parameter|Default
 ---------|-------
 `chip.filter_cpu` | 2
 `chip.filter_mem_mb` | 20000
 `chip.filter_time_hr` | 24
-`chip.filter_disks` | `local-disk 100 HDD`
+`chip.filter_disks` | `local-disk 400 HDD`
 
 Parameter|Default
 ---------|-------
@@ -224,7 +232,7 @@ Parameter|Default
 `chip.jsd_cpu` | 2
 `chip.jsd_mem_mb` | 12000
 `chip.jsd_time_hr` | 6
-`chip.jsd_disks` | `local-disk 100 HDD`
+`chip.jsd_disks` | `local-disk 200 HDD`
 
 Parameter|Default
 ---------|-------
@@ -238,13 +246,22 @@ Parameter|Default
 `chip.call_peak_cpu` | 2
 `chip.call_peak_mem_mb` | 16000
 `chip.call_peak_time_hr` | 24
-`chip.call_peak_disks` | `local-disk 100 HDD`
+`chip.call_peak_disks` | `local-disk 200 HDD`
 
 Parameter|Default
 ---------|-------
 `chip.macs2_signal_track_mem_mb` | 16000
 `chip.macs2_signal_track_time_hr` | 24
-`chip.macs2_signal_track_disks` | `local-disk 100 HDD`
+`chip.macs2_signal_track_disks` | `local-disk 200 HDD`
+
+> **IMPORTANT**: If you see Java memory errors, check the following resource parameters.
+
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`.
+
+Parameter|Default
+---------|-------
+`chip.filter_picard_java_heap` | `4G`
+`chip.gc_bias_picard_java_heap` | `6G`
 
 ## How to use a custom aligner
 
