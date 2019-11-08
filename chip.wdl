@@ -1184,8 +1184,6 @@ task align {
 	Int? multimapping
 	File? custom_align_py	
 	File? idx_tar			# reference index tar
-	File? fastq_R1 			# [read_end_id]
-	File? fastq_R2
 	Boolean paired_end
 	Boolean use_bwa_mem_for_pe
 
