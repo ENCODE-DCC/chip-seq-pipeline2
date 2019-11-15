@@ -120,7 +120,7 @@ workflow chip {
 
 	Int macs2_signal_track_mem_mb = 16000
 	Int macs2_signal_track_time_hr = 24
-	String macs2_signal_track_disks = 'local-disk 200 HDD'
+	String macs2_signal_track_disks = 'local-disk 400 HDD'
 
 	Int call_peak_cpu = 2
 	Int call_peak_mem_mb = 16000
