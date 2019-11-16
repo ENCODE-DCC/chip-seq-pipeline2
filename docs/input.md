@@ -4,6 +4,8 @@ An input JSON file includes all genomic data files, parameters and metadata for 
 
 Please read through the following step-by-step instruction to compose a input JSON file.
 
+>**IMPORTANT**: ALWAYS USE ABSOLUTE PATHS.
+
 ## Pipeline metadata
 
 Parameter|Description
@@ -252,7 +254,7 @@ Parameter|Default
 ---------|-------
 `chip.macs2_signal_track_mem_mb` | 16000
 `chip.macs2_signal_track_time_hr` | 24
-`chip.macs2_signal_track_disks` | `local-disk 200 HDD`
+`chip.macs2_signal_track_disks` | `local-disk 400 HDD`
 
 > **IMPORTANT**: If you see Java memory errors, check the following resource parameters.
 
