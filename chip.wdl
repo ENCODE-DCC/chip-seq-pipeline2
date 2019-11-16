@@ -120,7 +120,7 @@ workflow chip {
 
 	Int macs2_signal_track_mem_mb = 16000
 	Int macs2_signal_track_time_hr = 24
-	String macs2_signal_track_disks = 'local-disk 200 HDD'
+	String macs2_signal_track_disks = 'local-disk 400 HDD'
 
 	Int call_peak_cpu = 2
 	Int call_peak_mem_mb = 16000
@@ -1184,8 +1184,6 @@ task align {
 	Int? multimapping
 	File? custom_align_py	
 	File? idx_tar			# reference index tar
-	File? fastq_R1 			# [read_end_id]
-	File? fastq_R2
 	Boolean paired_end
 	Boolean use_bwa_mem_for_pe
 
@@ -1597,6 +1595,7 @@ task call_peak {
 		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
+		preemptible: 0		
 	}
 }
 
@@ -1629,6 +1628,7 @@ task macs2_signal_track {
 		memory : '${mem_mb} MB'
 		time : time_hr
 		disks : disks
+		preemptible: 0
 	}
 }
 

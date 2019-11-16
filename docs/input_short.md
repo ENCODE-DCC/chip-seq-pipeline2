@@ -2,6 +2,8 @@
 
 An input JSON file is a file which must include all the information needed to run this pipeline. Hence, it must include the absolute paths to all the control and experimental fastq files; paths to all the genomic data files needed for this pipeline, and it must also specify the parameters and the metadata needed for running this pipeline. If the parameters are not specified in an input JSON file, default values will be used. We provide a set of template JSON files: [minimum](../example_input_json/template.json) and [full](../example_input_json/template.full.json). We recommend to use a minimum template instead of full one. A full template includes all parameters of the pipeline with default values defined.
 
+>**IMPORTANT**: ALWAYS USE ABSOLUTE PATHS.
+
 # Checklist
 
 Mandatory parameters.
@@ -230,7 +232,7 @@ Parameter|Default
 ---------|-------
 `chip.macs2_signal_track_mem_mb` | 16000
 `chip.macs2_signal_track_time_hr` | 24
-`chip.macs2_signal_track_disks` | `local-disk 200 HDD`
+`chip.macs2_signal_track_disks` | `local-disk 400 HDD`
 
 > **IMPORTANT**: If you see Java memory errors, check the following resource parameters.
 

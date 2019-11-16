@@ -10,10 +10,7 @@
     "chip.genome_tsv" : "/path_to_genome_data/hg38/hg38.tsv",
 
     "chip.paired_end" : true,
-    "chip.ctl_paired_end" : [true, true],
-
-    "chip.paired_ends" : true,
-    "chip.ctl_paired_ends" : [true, true],
+    "chip.ctl_paired_end" : true,
 
     "chip.fastqs_rep1_R1" : [ "rep1_R1_L1.fastq.gz", "rep1_R1_L2.fastq.gz", "rep1_R1_L3.fastq.gz" ],
     "chip.fastqs_rep1_R2" : [ "rep1_R2_L1.fastq.gz", "rep1_R2_L2.fastq.gz", "rep1_R2_L3.fastq.gz" ],
@@ -40,15 +37,14 @@
     "chip.ctl_depth_ratio" : 1.2,
 
     "chip.peak_caller" : null,
-    "chip.macs2_cap_num_peak" : 500000,
+    "chip.cap_num_peak_macs2" : 500000,
     "chip.pval_thresh" : 0.01,
     "chip.idr_thresh" : 0.05,
-    "chip.spp_cap_num_peak" : 300000,
+    "chip.cap_num_peak_spp" : 300000,
 
     "chip.enable_jsd" : true,
     "chip.enable_gc_bias" : true,
     "chip.enable_count_signal_track" : false,
-    "chip.keep_irregular_chr_in_bfilt_peak" : false,
 
     "chip.filter_chrs" : [],
 
@@ -86,7 +82,7 @@
 
     "chip.macs2_signal_track_mem_mb" : 16000,
     "chip.macs2_signal_track_time_hr" : 24,
-    "chip.macs2_signal_track_disks" : "local-disk 200 HDD",
+    "chip.macs2_signal_track_disks" : "local-disk 400 HDD",
 
     "chip.filter_picard_java_heap" : "4G",
     "chip.gc_bias_picard_java_heap" : "6G"
