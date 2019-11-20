@@ -671,6 +671,7 @@ workflow chip {
 		# pool tagaligns from true replicates
 		call pool_ta { input :
 			tas = ta_,
+			prefix = 'rep',
 		}
 	}
 
@@ -680,6 +681,7 @@ workflow chip {
 		# pool tagaligns from pseudo replicate 1
 		call pool_ta as pool_ta_pr1 { input :
 			tas = spr.ta_pr1,
+			prefix = 'rep-pr1',
 		}
 	}
 
@@ -689,6 +691,7 @@ workflow chip {
 		# pool tagaligns from pseudo replicate 2
 		call pool_ta as pool_ta_pr2 { input :
 			tas = spr.ta_pr2,
+			prefix = 'rep-pr2',
 		}
 	}
 
@@ -698,6 +701,7 @@ workflow chip {
 		# pool tagaligns from true replicates
 		call pool_ta as pool_ta_ctl { input :
 			tas = ctl_ta_,
+			prefix = 'ctl',
 		}
 	}
 
@@ -1379,10 +1383,12 @@ task spr { # make two self pseudo replicates
 task pool_ta {
 	Array[File?] tas
 	Int? col 			# number of columns in pooled TA
+	String? prefix 		# basename prefix
 
 	command {
 		python3 $(which encode_task_pool_ta.py) \
 			${sep=' ' tas} \
+			${'--prefix ' + prefix} \
 			${'--col ' + col}
 	}
 	output {
