@@ -481,7 +481,7 @@ workflow chip {
 		if ( has_input_of_align ) {
 			call align as align_R1 { input :
 				fastqs_R1 = fastqs_R1[i],
-				fastqs_R2 = fastqs_R2[i],
+				fastqs_R2 = [],
 				trim_bp = xcor_pe_trim_bp,
 
 				aligner = aligner_,
