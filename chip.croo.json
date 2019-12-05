@@ -9,7 +9,7 @@
     "plot": {
       "path": "qc/${basename}",
       "table": "QC and logs/Jensen-Shannon distance plot",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"JSD\nPlot\"]"
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"JSD\\nPlot\"]"
     }
   },
   "chip.bwa_ctl": {
@@ -32,7 +32,7 @@
     "samstat_qc": {
       "path": "qc/ctl${i+1}/${basename}",
       "table": "QC and logs/Control ${i+1}/SAMstats log for Raw BAM",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\nQC\"]",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\\nQC\"]",
       "subgraph": "cluster_ctl${i+1}"
     }
   },
@@ -40,7 +40,7 @@
     "nodup_bam": {
       "path": "align/ctl${i+1}/${basename}",
       "table": "Alignment/Control ${i+1}/Filtered BAM",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Filt/deduped\nBAM\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Filt/deduped\\nBAM\"]",
       "subgraph": "cluster_ctl${i+1}"
     },
     "flagstat_qc": {
@@ -50,7 +50,7 @@
     "samstat_qc": {
       "path": "qc/ctl${i+1}/${basename}",
       "table": "QC and logs/Control ${i+1}/SAMstats log for filtered BAM",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\nQC\"]",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\\nQC\"]",
       "subgraph": "cluster_ctl${i+1}"
     },
     "dup_qc": {
@@ -64,7 +64,7 @@
     "lib_complexity_qc": {
       "path": "qc/ctl${i+1}/${basename}",
       "table": "QC and logs/Control ${i+1}/Library complexity QC for filtered BAM",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"LibCmplx\nQC\"]",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"LibCmplx\\nQC\"]",
       "subgraph": "cluster_ctl${i+1}"
     },
     "mito_dup_log": {
@@ -108,7 +108,7 @@
     "samstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/SAMstats log for Raw BAM",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\nQC\"]",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\\nQC\"]",
       "subgraph": "cluster_rep${i+1}"
     }
   },
@@ -116,7 +116,7 @@
     "nodup_bam": {
       "path": "align/rep${i+1}/${basename}",
       "table": "Alignment/Replicate ${i+1}/Filtered BAM",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Filt/deduped\nBAM\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Filt/deduped\\nBAM\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "flagstat_qc": {
@@ -126,7 +126,7 @@
     "samstat_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/SAMstats log for filtered BAM",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\nQC\"]",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"SAMstats\\nQC\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "dup_qc": {
@@ -140,7 +140,7 @@
     "lib_complexity_qc": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Library complexity QC for filtered BAM",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"LibCmplx\nQC\"]",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"LibCmplx\\nQC\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "mito_dup_log": {
@@ -190,7 +190,7 @@
     "plot_png": {
       "path": "qc/rep${i+1}/${basename}",
       "table": "QC and logs/Replicate ${i+1}/Cross-correlation Plot",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"XCOR\nPlot\"]",
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"XCOR\\nPlot\"]",
       "subgraph": "cluster_rep${i+1}"      
     },
     "score": {
@@ -476,7 +476,7 @@
     "bfilt_peak": {
       "path": "peak/rep${i+1}/${basename}",
       "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\n(bfilt)\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\\n(bfilt)\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "bfilt_peak_bb": {
@@ -546,7 +546,7 @@
     "bfilt_peak": {
       "path": "peak/pooled-rep/${basename}",
       "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\n(bfilt)\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Peak\\n(bfilt)\"]",
       "subgraph": "cluster_pooled_rep"
     },
     "bfilt_peak_bb": {
@@ -611,14 +611,14 @@
       "path": "signal/rep${i+1}/${basename}",
       "table": "Signal/Replicate ${i+1}/MACS2 signal track (p-val)",
       "ucsc_track": "track type=bigWig name=\"MACS2 p-val (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\np-val\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\\np-val\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "fc_bw": {
       "path": "signal/rep${i+1}/${basename}",
       "table": "Signal/Replicate ${i+1}/MACS2 signal track (fold-enrichment)",
       "ucsc_track": "track type=bigWig name=\"MACS2 fc (rep${i+1})\" priority=${i+1} smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\nFC\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\\nFC\"]",
       "subgraph": "cluster_rep${i+1}"
     }
   },
@@ -627,14 +627,14 @@
       "path": "signal/pooled-rep/${basename}",
       "table": "Signal/Pooled replicate/MACS2 signal track (p-val)",
       "ucsc_track": "track type=bigWig name=\"MACS2 p-val (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\np-val\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\\np-val\"]",
       "subgraph": "cluster_pooled_rep"
     },
     "fc_bw": {
       "path": "signal/pooled-rep/${basename}",
       "table": "Signal/Pooled replicate/MACS2 signal track (fold-enrichment)",
       "ucsc_track": "track type=bigWig name=\"MACS2 fc (pooled)\" priority=0 smoothingWindow=off maxHeightPixels=80:60:40 color=255,0,0 autoScale=off viewLimits=0:40 visibility=full",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\nFC\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"BW\\nFC\"]",
       "subgraph": "cluster_pooled_rep"
     }
   },
@@ -642,13 +642,13 @@
     "pos_bw": {
       "path": "signal/rep${i+1}/${basename}",
       "table": "Signal/Replicate ${i+1}/Count signal track (positive)",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count +\nSignal\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count +\\nSignal\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "neg_bw": {
       "path": "signal/rep${i+1}/${basename}",
       "table": "Signal/Replicate ${i+1}/Count signal track (negative)",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count -\nSignal\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count -\\nSignal\"]",
       "subgraph": "cluster_pooled_rep"
     }
   },
@@ -656,13 +656,13 @@
     "pos_bw": {
       "path": "signal/pooled-rep/${basename}",
       "table": "Signal/Pooled replicate/Count signal track (positive)",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count +\nSignal\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count +\\nSignal\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "neg_bw": {
       "path": "signal/pooled-rep/${basename}",
       "table": "Signal/Pooled replicate/Count signal track (negative)",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count -\nSignal\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Count -\\nSignal\"]",
       "subgraph": "cluster_pooled_rep"
     }
   },
@@ -670,7 +670,7 @@
     "bfilt_idr_peak": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR NPeak\n${basename.split('.')[0]}\"]"
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR NPeak\\n${basename.split('.')[0]}\"]"
     },
     "bfilt_idr_peak_bb": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
@@ -687,7 +687,7 @@
     "idr_plot": {
       "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "QC and logs/${basename.split('.')[0].replace('_',' vs. ').replace('-',' vs. ').capitalize()}/IDR plot",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR Plot\n${basename.split('.')[0]}\"]"
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR Plot\\n${basename.split('.')[0]}\"]"
     },
     "idr_log": {
       "path": "qc/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
@@ -702,7 +702,7 @@
     "bfilt_idr_peak": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
       "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered IDR peak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR Peak\nppr\"]"
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR Peak\\nppr\"]"
     },
     "bfilt_idr_peak_bb": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
@@ -719,7 +719,7 @@
     "idr_plot": {
       "path": "qc/pooled-pseudorep1_vs_2/${basename}",
       "table": "QC and logs/Pooled pseudoreplicate 1 vs. 2/IDR plot",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR Plot\nppr\"]"
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR Plot\\nppr\"]"
     },
     "idr_log": {
       "path": "qc/pooled-pseudorep1_vs_2/${basename}",
@@ -764,7 +764,7 @@
     "bfilt_overlap_peak": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\n${basename.split('.')[0]}\"]"      
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\\n${basename.split('.')[0]}\"]"      
     },
     "bfilt_overlap_peak_bb": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
@@ -783,7 +783,7 @@
     "bfilt_overlap_peak": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
       "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered overlap peak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\nppr\"]"
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\\nppr\"]"
     },
     "bfilt_overlap_peak_bb": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
@@ -820,7 +820,7 @@
     "optimal_peak": {
       "path": "peak/idr_reproducibility/${basename}",
       "table": "Peak/IDR reproducibility/Optimal peak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR Peak\noptimal\"]"
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"IDR Peak\\noptimal\"]"
     },
     "optimal_peak_bb": {
       "path": "peak/idr_reproducibility/${basename}",
@@ -847,14 +847,14 @@
     "reproducibility_qc": {
       "path": "qc/${basename}",
       "table": "QC and logs/Reproducibility QC for overlap peaks",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR\nreproducibility\"]"
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"IDR\\nreproducibility\"]"
     }
   },
   "chip.reproducibility_overlap": {
     "optimal_peak": {
       "path": "peak/overlap_reproducibility/${basename}",
       "table": "Peak/Overlap reproducibility/Optimal peak",
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\noptimal\"]"
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=lightyellow label=\"Overlap Peak\\noptimal\"]"
     },
     "optimal_peak_bb": {
       "path": "peak/overlap_reproducibility/${basename}",
@@ -881,7 +881,7 @@
     "reproducibility_qc": {
       "path": "qc/${basename}",
       "table": "QC and logs/Reproducibility QC for IDR peaks",
-      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"Overlap\nreproducibility\"]"
+      "node": "[shape=oval style=\"filled\" fillcolor=gainsboro fontsize=6 margin=0 label=\"Overlap\\nreproducibility\"]"
     }
   },
   "chip.qc_report": {
@@ -896,163 +896,163 @@
   },
   "inputs": {
     "chip.fastqs_rep1_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep1"
     },
     "chip.fastqs_rep1_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep1"
     },
     "chip.fastqs_rep2_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep2"
     },
     "chip.fastqs_rep2_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep2"
     },
     "chip.fastqs_rep3_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep3"
     },
     "chip.fastqs_rep3_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep3"
     },
     "chip.fastqs_rep4_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep4"
     },
     "chip.fastqs_rep4_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep4"
     },
     "chip.fastqs_rep5_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep5"
     },
     "chip.fastqs_rep5_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep5"
     },
     "chip.fastqs_rep6_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep6"
     },
     "chip.fastqs_rep6_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep6"
     },
     "chip.fastqs_rep7_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep7"
     },
     "chip.fastqs_rep7_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep7"
     },
     "chip.fastqs_rep8_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep8"
     },
     "chip.fastqs_rep8_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep8"
     },
     "chip.fastqs_rep9_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep9"
     },
     "chip.fastqs_rep9_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep9"
     },
     "chip.fastqs_rep10_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_rep10"
     },
     "chip.fastqs_rep10_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_rep10"
     },
     "chip.ctl_fastqs_rep1_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl1"
     },
     "chip.ctl_fastqs_rep1_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl1"
     },
     "chip.ctl_fastqs_rep2_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl2"
     },
     "chip.ctl_fastqs_rep2_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl2"
     },
     "chip.ctl_fastqs_rep3_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl3"
     },
     "chip.ctl_fastqs_rep3_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl3"
     },
     "chip.ctl_fastqs_rep4_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl4"
     },
     "chip.ctl_fastqs_rep4_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl4"
     },
     "chip.ctl_fastqs_rep5_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl5"
     },
     "chip.ctl_fastqs_rep5_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl5"
     },
     "chip.ctl_fastqs_rep6_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl6"
     },
     "chip.ctl_fastqs_rep6_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl6"
     },
     "chip.ctl_fastqs_rep7_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl7"
     },
     "chip.ctl_fastqs_rep7_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl7"
     },
     "chip.ctl_fastqs_rep8_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl8"
     },
     "chip.ctl_fastqs_rep8_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl8"
     },
     "chip.ctl_fastqs_rep9_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl9"
     },
     "chip.ctl_fastqs_rep9_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl9"
     },
     "chip.ctl_fastqs_rep10_R1": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR1 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR1 (${i+1})\"]",
       "subgraph": "cluster_ctl10"
     },
     "chip.ctl_fastqs_rep10_R2": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\nR2 (${i+1})\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"FASTQ\\nR2 (${i+1})\"]",
       "subgraph": "cluster_ctl10"
     },
     "chip.bams": {
@@ -1060,19 +1060,19 @@
       "subgraph": "cluster_rep${i+1}"
     },
     "chip.nodup_bams": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\nBAM\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\\nBAM\"]",
       "subgraph": "cluster_rep${i+1}"
     },
     "chip.tas": {
       "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"TAG-ALIGN\"]",
       "subgraph": "cluster_rep${i+1}"
     },
-    "chip.ctl_bams": {
+    "chip.ctl_bams": { 
       "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"BAM\"]",
       "subgraph": "cluster_ctl${i+1}"
     },
     "chip.ctl_nodup_bams": {
-      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\nBAM\"]",
+      "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Filt/deduped\\nBAM\"]",
       "subgraph": "cluster_ctl${i+1}"
     },
     "chip.ctl_tas": {
@@ -1087,7 +1087,7 @@
       "node": "[shape=box style=\"filled, rounded\" fillcolor=pink label=\"Peak\"]",
       "subgraph": "cluster_pooled_rep"
     }
-  },  
+  },
   "task_graph_template": {
     "graph [rankdir=LR nodesep=0.1 ranksep=0.3]": null,
     "node [shape=box fontsize=9 margin=0.05 penwidth=0.5 height=0 fillcolor=lightcyan color=darkgrey style=filled]": null,
