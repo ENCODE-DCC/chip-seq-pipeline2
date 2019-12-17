@@ -63,6 +63,7 @@ workflow chip {
 	# parameters for aligner and filter
 	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL and BWA ONLY (use bwa mem instead of bwa aln/sam)
 									# available only for PE dataset with READ_LEN>=70bp
+	Int crop_length = 0 			# crop reads in FASTQs (0 by default, i.e. disabled)
 	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
 	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
 	String dup_marker = 'picard'	# picard, sambamba
@@ -395,6 +396,7 @@ workflow chip {
 			call align { input :
 				fastqs_R1 = fastqs_R1[i],
 				fastqs_R2 = fastqs_R2[i],
+				crop_length = crop_length,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -484,6 +486,7 @@ workflow chip {
 				fastqs_R1 = fastqs_R1[i],
 				fastqs_R2 = [],
 				trim_bp = xcor_pe_trim_bp,
+				crop_length = 0,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -608,6 +611,7 @@ workflow chip {
 			call align as align_ctl { input :
 				fastqs_R1 = ctl_fastqs_R1[i],
 				fastqs_R2 = ctl_fastqs_R2[i],
+				crop_length = crop_length,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -1189,7 +1193,7 @@ task align {
 	Array[File] fastqs_R1 		# [merge_id]
 	Array[File] fastqs_R2
 	Int? trim_bp			# this is for R1 only
-
+	Int crop_length
 	String aligner
 	String mito_chr_name
 	Int? multimapping
@@ -1222,7 +1226,9 @@ task align {
 		python3 $(which encode_task_merge_fastq.py) \
 			${write_tsv(tmp_fastqs)} \
 			${if paired_end then '--paired-end' else ''} \
-			${'--nth ' + 1}
+			${'--crop-length ' + crop_length} \
+			${'--memory-mb ' + mem_mb} \
+			${'--nth ' + cpu}
 
 		if [ -z '${trim_bp}' ]; then
 			SUFFIX=
