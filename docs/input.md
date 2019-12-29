@@ -262,8 +262,8 @@ There are special parameters to control maximum Java heap memory (e.g. `java -Xm
 
 Parameter|Default
 ---------|-------
-`chip.filter_picard_java_heap` | `4G`
-`chip.gc_bias_picard_java_heap` | `6G`
+`chip.filter_picard_java_heap` | = `chip.filter_mem_mb`
+`chip.gc_bias_picard_java_heap` | `10G`
 
 ## How to use a custom aligner
 

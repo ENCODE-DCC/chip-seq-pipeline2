@@ -127,8 +127,8 @@ workflow chip {
 	Int call_peak_time_hr = 72
 	String call_peak_disks = 'local-disk 200 HDD'
 
-	String filter_picard_java_heap = '4G'
-	String gc_bias_picard_java_heap = '6G'
+	String? filter_picard_java_heap
+	String? gc_bias_picard_java_heap
 
 	#### input file definition
 	# pipeline can start from any type of inputs and then leave all other types undefined
@@ -1309,7 +1309,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1783,7 +1783,7 @@ task gc_bias {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + picard_java_heap}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '10G'}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
@@ -1791,7 +1791,7 @@ task gc_bias {
 	}
 	runtime {
 		cpu : 1
-		memory : '8000 MB'
+		memory : '10000 MB'
 		time : 1
 		disks : 'local-disk 100 HDD'
 	}
