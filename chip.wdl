@@ -1,12 +1,12 @@
 # ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.5.1
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.5.1
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.5.1
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.5.1
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v3.json
 
 workflow chip {
-	String pipeline_ver = 'dev-v1.3.5.1'
+	String pipeline_ver = 'v1.3.5.1'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -1293,7 +1293,7 @@ task filter {
 
 	Int cpu
 	Int mem_mb
-	String picard_java_heap
+	String? picard_java_heap
 	Int time_hr
 	String disks
 
@@ -1777,7 +1777,7 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
-	String picard_java_heap
+	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_gc_bias.py) \
