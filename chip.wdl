@@ -1792,7 +1792,7 @@ task gc_bias {
 	runtime {
 		cpu : 1
 		memory : '10000 MB'
-		time : 1
+		time : 6
 		disks : 'local-disk 100 HDD'
 	}
 }
