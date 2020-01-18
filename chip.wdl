@@ -87,7 +87,8 @@ workflow chip {
 	Int? cap_num_peak
 	Int cap_num_peak_spp = 300000	# cap number of raw peaks called from SPP
 	Int cap_num_peak_macs2 = 500000	# cap number of raw peaks called from MACS2
-	Float pval_thresh = 0.01		# p.value threshold
+	Float pval_thresh = 0.01		# p.value threshold (for MACS2 peak caller only)
+	Float fdr_thresh = 0.01			# FDR threshold (for SPP peak caller only: Rscript run_spp.R -fdr)
 	Float idr_thresh = 0.05			# IDR threshold
 
 	### resources
@@ -768,6 +769,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
+				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -809,6 +811,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
+				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -835,6 +838,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
+				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -877,6 +881,7 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -918,6 +923,7 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -944,6 +950,7 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -1535,7 +1542,9 @@ task call_peak {
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
-	Float pval_thresh 	# p.value threshold
+	Float pval_thresh 	# p.value threshold for MACS2
+	Float fdr_thresh 	# FDR threshold for SPP
+
 	File? blacklist 	# blacklist BED to filter raw peaks
 	String? regex_bfilt_peak_chr_name
 
@@ -1561,6 +1570,7 @@ task call_peak {
 				${sep=' ' tas} \
 				${'--fraglen ' + fraglen} \
 				${'--cap-num-peak ' + cap_num_peak} \
+				${'--fdr-thresh '+ fdr_thresh} \
 				${'--nth ' + cpu}
 
 		else
@@ -1571,6 +1581,7 @@ task call_peak {
 				${'--fraglen ' + fraglen} \
 				${'--cap-num-peak ' + cap_num_peak} \
 				${'--pval-thresh '+ pval_thresh}
+				${'--fdr-thresh '+ fdr_thresh}
 				${'--nth ' + cpu}
 		fi
 

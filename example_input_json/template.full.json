@@ -39,6 +39,7 @@
     "chip.peak_caller" : null,
     "chip.cap_num_peak_macs2" : 500000,
     "chip.pval_thresh" : 0.01,
+    "chip.fdr_thresh" : 0.01,
     "chip.idr_thresh" : 0.05,
     "chip.cap_num_peak_spp" : 300000,
 
