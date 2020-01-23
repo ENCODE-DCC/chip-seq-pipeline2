@@ -376,7 +376,7 @@ workflow chip {
 			msg = 'No genome database found in your input JSON. Did you define "chip.genome_tsv" correctly?'
 		}
 	}
-	if ( peak_caller_ == 'spp' && num_ctl == 0 ) {
+	if ( !align_only && peak_caller_ == 'spp' && num_ctl == 0 ) {
 		call raise_exception as error_control_required { input:
 			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
 		}
