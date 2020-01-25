@@ -1543,7 +1543,7 @@ task call_peak {
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
 	Float pval_thresh 	# p.value threshold for MACS2
-	Float fdr_thresh 	# FDR threshold for SPP
+	Float? fdr_thresh 	# FDR threshold for SPP
 
 	File? blacklist 	# blacklist BED to filter raw peaks
 	String? regex_bfilt_peak_chr_name
