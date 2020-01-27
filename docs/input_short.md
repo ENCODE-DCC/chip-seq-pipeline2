@@ -33,6 +33,7 @@ Mandatory parameters.
     * See [this](#adapters) for how to define adapters to be trimmed.
 
 6) Important parameters
+    * `chip.crop_length`: Crop FASTQs with Trimmomatic. **WARNING**: Check your FASTQs' read length first. Reads SMALLER than this will be excluded from mapping, hence not included in output BAM files and all downstream analyses. It is 0 (disabled) by default.
     * `chip.always_use_pooled_ctl`: (For TF ChIP-seq only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
     * `chip.ctl_depth_ratio`: (For TF ChIP-seq only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
 
@@ -241,4 +242,5 @@ There are special parameters to control maximum Java heap memory (e.g. `java -Xm
 Parameter|Default
 ---------|-------
 `chip.filter_picard_java_heap` | = `chip.filter_mem_mb`
+`chip.align_trimmomatic_java_heap` | = `chip.align_mem_mb`
 `chip.gc_bias_picard_java_heap` | `10G`
