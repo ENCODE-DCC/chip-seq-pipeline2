@@ -10,9 +10,6 @@ from encode_lib_common import (
     log, ls_l, mkdir_p, read_tsv, run_shell_cmd,
     strip_ext_fastq)
 
-from encode_lib_genomic import (
-    locate_trimmomatic)
-
 
 def parse_arguments(debug=False):
     parser = argparse.ArgumentParser(prog='ENCODE DCC fastq merger.',
