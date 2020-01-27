@@ -28,7 +28,7 @@ r-snowfall
 r-bitops
 r-catools
 bioconductor-rsamtools
-r-spp  # 1.15 in docker/singularity image
+r-spp ==1.15.5  # 1.14 in docker/singularity image, 1.16 has lwcc() error
 libiconv
 
 bwa ==0.7.17
