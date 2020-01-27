@@ -742,7 +742,7 @@ workflow chip {
 
 	Boolean has_all_input_of_choose_ctl = length(select_all(ta_))==num_rep
 		&& length(select_all(ctl_ta_))==num_ctl && num_ctl > 0
-	if ( has_all_input_of_choose_ctl ) {
+	if ( has_all_input_of_choose_ctl && !align_only ) {
 		# choose appropriate control for each exp IP replicate
 		# outputs:
 		# 	choose_ctl.idx : control replicate index for each exp replicate 
