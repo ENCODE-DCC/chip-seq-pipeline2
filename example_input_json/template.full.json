@@ -22,6 +22,8 @@
     "chip.ctl_fastqs_rep2_R1" : [ "ctl2_R1.fastq.gz" ],
     "chip.ctl_fastqs_rep2_R2" : [ "ctl2_R2.fastq.gz" ],
 
+    "chip.crop_length" : 0,
+
     "chip.mapq_thresh" : 30,
     "chip.dup_marker" : "picard",
     "chip.no_dup_removal" : false,
@@ -30,7 +32,7 @@
     "chip.ctl_subsample_reads" : 0,
     "chip.xcor_subsample_reads" : 15000000,
 
-    "chip.xcor_pe_trim_bp" : 50,
+    "chip.xcor_trim_bp" : 50,
     "chip.use_filt_pe_ta_for_xcor" : false,
 
     "chip.always_use_pooled_ctl" : false,
@@ -39,6 +41,7 @@
     "chip.peak_caller" : null,
     "chip.cap_num_peak_macs2" : 500000,
     "chip.pval_thresh" : 0.01,
+    "chip.fdr_thresh" : 0.01,
     "chip.idr_thresh" : 0.05,
     "chip.cap_num_peak_spp" : 300000,
 

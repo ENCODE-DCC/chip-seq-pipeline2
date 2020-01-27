@@ -130,6 +130,7 @@ You can mix up different data types for individual replicate/control replicate. 
 Parameter|Type|Default|Description
 ---------|---|----|-----------
 `chip.aligner` | String | bowtie2 | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
+`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than this will be excluded while cropping, hence not included in output BAM files and all downstream analyses. 0: cropping disabled.
 `chip.use_bwa_mem_for_pe` | Boolean | false | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 
@@ -153,7 +154,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.xcor_pe_trim_bp` | 50 | Trim R1 of paired ended fastqs for cross-correlation analysis only. Trimmed fastqs will not be used for any other analyses
+`chip.xcor_trim_bp` | 50 | Trim R1 fastq for cross-correlation analysis only. Trimmed fastqs will not be used for any other analyses
 `chip.use_filt_pe_ta_for_xcor` | false | Use filtered PE BAM/TAG-ALIGN for cross-correlation analysis ignoring the above trimmed R1 fastq
 `chip.xcor_exclusion_range_min` | -500 | Exclusion minimum for cross-corr. analysis. See [description for `-x=<min>:<max>`](https://github.com/kundajelab/phantompeakqualtools) for details. Make sure that it's consistent with default strand shift `-s=-500:5:1500` in `phantompeakqualtools`.
 `chip.xcor_exclusion_range_max` |  | Exclusion minimum for cross-corr. analysis. If not defined default value of `max(read length + 10, 50)` for TF and `max(read_len + 10, 100)` for histone are used.
@@ -170,10 +171,11 @@ Parameter|Default|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `chip.peak_caller`| `spp` for `tf` type<br>`macs2` for `histone` type| `spp` or `macs2`. `spp` requires control<br>`macs2` can work without controls
-`chip.macs2_cap_num_peak` | 500000 | Cap number of peaks called from a peak-caller (MACS2)
+`chip.cap_num_peak_macs2` | 500000 | Cap number of peaks called from a peak-caller (MACS2)
 `chip.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p)
 `chip.idr_thresh` | 0.05 | Threshold for IDR (irreproducible discovery rate)
-`chip.spp_cap_num_peak` | 300000 | Cap number of peaks called from a peak-caller (SPP)
+`chip.fdr_thresh` | 0.01 | Threshold for FDR for run_spp.R -fdr
+`chip.cap_num_peak_spp` | 300000 | Cap number of peaks called from a peak-caller (SPP)
 `chip.custom_call_peak_py` | File | Python script for your custom peak caller. See details about [how to use a custom peak caller](#how-to-use-a-peak-caller)
 
 ## Optional pipeline flags
@@ -263,6 +265,7 @@ There are special parameters to control maximum Java heap memory (e.g. `java -Xm
 Parameter|Default
 ---------|-------
 `chip.filter_picard_java_heap` | = `chip.filter_mem_mb`
+`chip.align_trimmomatic_java_heap` | = `chip.align_mem_mb`
 `chip.gc_bias_picard_java_heap` | `10G`
 
 ## How to use a custom aligner
