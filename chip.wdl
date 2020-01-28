@@ -1,12 +1,12 @@
 # ENCODE TF/Histone ChIP-Seq pipeline
 # Author: Jin Lee (leepc12@gmail.com)
 
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.5.1
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.5.1
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:v1.3.6
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:v1.3.6
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v3.json
 
 workflow chip {
-	String pipeline_ver = 'v1.3.5.1'
+	String pipeline_ver = 'v1.3.6'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'
@@ -63,7 +63,8 @@ workflow chip {
 	# parameters for aligner and filter
 	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL and BWA ONLY (use bwa mem instead of bwa aln/sam)
 									# available only for PE dataset with READ_LEN>=70bp
-	Int xcor_pe_trim_bp = 50 		# for cross-correlation analysis only (R1 of paired-end fastqs)
+	Int crop_length = 0 			# crop reads in FASTQs with Trimmomatic (0 by default, i.e. disabled)
+	Int xcor_trim_bp = 50 			# for cross-correlation analysis only (R1 of paired-end fastqs)
 	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
 	String dup_marker = 'picard'	# picard, sambamba
 	Boolean no_dup_removal = false	# keep all dups in final BAM
@@ -87,7 +88,8 @@ workflow chip {
 	Int? cap_num_peak
 	Int cap_num_peak_spp = 300000	# cap number of raw peaks called from SPP
 	Int cap_num_peak_macs2 = 500000	# cap number of raw peaks called from MACS2
-	Float pval_thresh = 0.01		# p.value threshold
+	Float pval_thresh = 0.01		# p.value threshold (for MACS2 peak caller only)
+	Float fdr_thresh = 0.01			# FDR threshold (for SPP peak caller only: Rscript run_spp.R -fdr)
 	Float idr_thresh = 0.05			# IDR threshold
 
 	### resources
@@ -127,6 +129,7 @@ workflow chip {
 	Int call_peak_time_hr = 72
 	String call_peak_disks = 'local-disk 200 HDD'
 
+	String? align_trimmomatic_java_heap
 	String? filter_picard_java_heap
 	String? gc_bias_picard_java_heap
 
@@ -375,7 +378,7 @@ workflow chip {
 			msg = 'No genome database found in your input JSON. Did you define "chip.genome_tsv" correctly?'
 		}
 	}
-	if ( peak_caller_ == 'spp' && num_ctl == 0 ) {
+	if ( !align_only && peak_caller_ == 'spp' && num_ctl == 0 ) {
 		call raise_exception as error_control_required { input:
 			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
 		}
@@ -394,6 +397,7 @@ workflow chip {
 			call align { input :
 				fastqs_R1 = fastqs_R1[i],
 				fastqs_R2 = fastqs_R2[i],
+				crop_length = crop_length,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -403,6 +407,8 @@ workflow chip {
 					else custom_aligner_idx_tar_,
 				paired_end = paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+
+				trimmomatic_java_heap = align_trimmomatic_java_heap,
 				cpu = align_cpu,
 				mem_mb = align_mem_mb,
 				time_hr = align_time_hr,
@@ -482,7 +488,8 @@ workflow chip {
 			call align as align_R1 { input :
 				fastqs_R1 = fastqs_R1[i],
 				fastqs_R2 = [],
-				trim_bp = xcor_pe_trim_bp,
+				trim_bp = xcor_trim_bp,
+				crop_length = 0,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -492,6 +499,7 @@ workflow chip {
 					else custom_aligner_idx_tar_,
 				paired_end = false,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+
 				cpu = align_cpu,
 				mem_mb = align_mem_mb,
 				time_hr = align_time_hr,
@@ -607,6 +615,7 @@ workflow chip {
 			call align as align_ctl { input :
 				fastqs_R1 = ctl_fastqs_R1[i],
 				fastqs_R2 = ctl_fastqs_R2[i],
+				crop_length = crop_length,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -616,6 +625,8 @@ workflow chip {
 					else custom_aligner_idx_tar_,
 				paired_end = ctl_paired_end_,
 				use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+
+				trimmomatic_java_heap = align_trimmomatic_java_heap,
 				cpu = align_cpu,
 				mem_mb = align_mem_mb,
 				time_hr = align_time_hr,
@@ -731,7 +742,7 @@ workflow chip {
 
 	Boolean has_all_input_of_choose_ctl = length(select_all(ta_))==num_rep
 		&& length(select_all(ctl_ta_))==num_ctl && num_ctl > 0
-	if ( has_all_input_of_choose_ctl ) {
+	if ( has_all_input_of_choose_ctl && !align_only ) {
 		# choose appropriate control for each exp IP replicate
 		# outputs:
 		# 	choose_ctl.idx : control replicate index for each exp replicate 
@@ -768,6 +779,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
+				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -809,6 +821,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
+				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -835,6 +848,7 @@ workflow chip {
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
 				pval_thresh = pval_thresh,
+				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
 				blacklist = blacklist_,
 				regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -877,6 +891,7 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -918,6 +933,7 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -944,6 +960,7 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
 			regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
@@ -1119,7 +1136,7 @@ workflow chip {
 		cap_num_peak = cap_num_peak_,
 		idr_thresh = idr_thresh,
 		pval_thresh = pval_thresh,
-		xcor_pe_trim_bp = xcor_pe_trim_bp,
+		xcor_trim_bp = xcor_trim_bp,
 		xcor_subsample_reads = xcor_subsample_reads,
 
 		samstat_qcs = align.samstat_qc,
@@ -1182,7 +1199,7 @@ task align {
 	Array[File] fastqs_R1 		# [merge_id]
 	Array[File] fastqs_R2
 	Int? trim_bp			# this is for R1 only
-
+	Int crop_length
 	String aligner
 	String mito_chr_name
 	Int? multimapping
@@ -1191,6 +1208,7 @@ task align {
 	Boolean paired_end
 	Boolean use_bwa_mem_for_pe
 
+	String? trimmomatic_java_heap
 	Int cpu
 	Int mem_mb
 	Int time_hr
@@ -1215,7 +1233,7 @@ task align {
 		python3 $(which encode_task_merge_fastq.py) \
 			${write_tsv(tmp_fastqs)} \
 			${if paired_end then '--paired-end' else ''} \
-			${'--nth ' + 1}
+			${'--nth ' + cpu}
 
 		if [ -z '${trim_bp}' ]; then
 			SUFFIX=
@@ -1231,6 +1249,21 @@ task align {
 					--trim-bp ${trim_bp} \
 					--out-dir R2$SUFFIX
 			fi
+		fi
+		if [ '${crop_length}' == '0' ]; then
+			SUFFIX=$SUFFIX
+		else
+			NEW_SUFFIX="$SUFFIX"_cropped
+			python3 $(which encode_task_trimmomatic.py) \
+				--fastq1 R1$SUFFIX/*.fastq.gz \
+				${if paired_end then '--fastq2 R2$SUFFIX/*.fastq.gz' else ''} \
+				${if paired_end then '--paired-end' else ''} \
+				--crop-length ${crop_length} \
+				--out-dir-R1 R1$NEW_SUFFIX \
+				${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
+				${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (mem_mb + 'M')} \
+				${'--nth ' + cpu}
+			SUFFIX=$NEW_SUFFIX
 		fi
 
 		if [ '${aligner}' == 'bwa' ]; then
@@ -1535,7 +1568,9 @@ task call_peak {
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
-	Float pval_thresh 	# p.value threshold
+	Float pval_thresh 	# p.value threshold for MACS2
+	Float? fdr_thresh 	# FDR threshold for SPP
+
 	File? blacklist 	# blacklist BED to filter raw peaks
 	String? regex_bfilt_peak_chr_name
 
@@ -1561,6 +1596,7 @@ task call_peak {
 				${sep=' ' tas} \
 				${'--fraglen ' + fraglen} \
 				${'--cap-num-peak ' + cap_num_peak} \
+				${'--fdr-thresh '+ fdr_thresh} \
 				${'--nth ' + cpu}
 
 		else
@@ -1571,6 +1607,7 @@ task call_peak {
 				${'--fraglen ' + fraglen} \
 				${'--cap-num-peak ' + cap_num_peak} \
 				${'--pval-thresh '+ pval_thresh}
+				${'--fdr-thresh '+ fdr_thresh}
 				${'--nth ' + cpu}
 		fi
 
@@ -1792,7 +1829,7 @@ task gc_bias {
 	runtime {
 		cpu : 1
 		memory : '10000 MB'
-		time : 1
+		time : 6
 		disks : 'local-disk 100 HDD'
 	}
 }
@@ -1816,7 +1853,7 @@ task qc_report {
 	Int cap_num_peak
 	Float idr_thresh
 	Float pval_thresh
-	Int xcor_pe_trim_bp
+	Int xcor_trim_bp
 	Int xcor_subsample_reads
 	# QCs
 	Array[File?] samstat_qcs
@@ -1880,7 +1917,7 @@ task qc_report {
 			${'--cap-num-peak ' + cap_num_peak} \
 			--idr-thresh ${idr_thresh} \
 			--pval-thresh ${pval_thresh} \
-			--xcor-pe-trim-bp ${xcor_pe_trim_bp} \
+			--xcor-trim-bp ${xcor_trim_bp} \
 			--xcor-subsample-reads ${xcor_subsample_reads} \
 			--samstat-qcs ${sep='_:_' samstat_qcs} \
 			--nodup-samstat-qcs ${sep='_:_' nodup_samstat_qcs} \
