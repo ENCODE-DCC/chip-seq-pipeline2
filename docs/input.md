@@ -39,6 +39,7 @@ Parameter|Type|Description
 `chip.custom_aligner_mito_idx_tar` | File | Mito-only index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `chip.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `chip.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
+`chip.blacklist2`| File | Second blacklist. Two blacklist files (`atac.blacklist` and `atac.blacklist2`) will be merged.
 `chip.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 `chip.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 `chip.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
