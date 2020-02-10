@@ -172,9 +172,9 @@ Parameter|Default|Description
 ---------|-------|-----------
 `chip.peak_caller`| `spp` for `tf` type<br>`macs2` for `histone` type| `spp` or `macs2`. `spp` requires control<br>`macs2` can work without controls
 `chip.cap_num_peak_macs2` | 500000 | Cap number of peaks called from a peak-caller (MACS2)
-`chip.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p)
-`chip.idr_thresh` | 0.05 | Threshold for IDR (irreproducible discovery rate)
-`chip.fdr_thresh` | 0.01 | Threshold for FDR for run_spp.R -fdr
+`chip.pval_thresh` | 0.01 | P-value threshold for peak-caller MACS2 (macs2 callpeak -p).
+`chip.idr_thresh` | 0.05 | IDR (irreproducible discovery rate) threshold.
+`chip.fdr_thresh` | 0.01 | FDR threshold for peak-caller SPP (run_spp.R -fdr=).
 `chip.cap_num_peak_spp` | 300000 | Cap number of peaks called from a peak-caller (SPP)
 `chip.custom_call_peak_py` | File | Python script for your custom peak caller. See details about [how to use a custom peak caller](#how-to-use-a-peak-caller)
 
