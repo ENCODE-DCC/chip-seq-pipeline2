@@ -27,6 +27,13 @@ Mandatory parameters.
     * We provide a genome TSV file that defines all genome-specific parameters and reference data files. Caper will automatically download big reference data files from our ENCODE repository.
     * However, we also have reference data mirrors for [some platforms](input_details.md/#reference-genome) (GCP, AWS, Sherlock, SCG, ...). On these platforms, you can use a different TSV file to prevent downloading such big reference data.
     * To build a new TSV file from use your own FASTA (`.fa` and `.2bit`) see [this](build_genome_database.md).
+    * You can also define genome specific parameters (defined in a genome TSV file) in an input JSON file. Parameters defined in an input JSON file will override those defined in a genome TSV file. For example, you can simply replace a blacklist file while keeping all other parameters in a genome TSV file for `hg38`.
+        ```javascript
+        {
+            "chip.genome_tsv" : "/somewhere/hg38.tsv",
+            "chip.blacklist": "/new/genome/data/new_blacklist.bed.gz"
+        }
+        ```
 
 5) [Input files](#input-files) and [adapters](#adapters)
     * See [this](#input-files) for how to define FASTQ/BAM/TAG-ALIGNs for your sample.
@@ -34,8 +41,11 @@ Mandatory parameters.
 
 6) Important parameters
     * `chip.crop_length`: Crop FASTQs with Trimmomatic. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than this will be excluded while cropping, hence not included in output BAM files and all downstream analyses. It is 0 (disabled) by default.
-    * `chip.always_use_pooled_ctl`: (For TF ChIP-seq only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
-    * `chip.ctl_depth_ratio`: (For TF ChIP-seq only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
+    * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
+    * `chip.ctl_depth_ratio`: (For experiments with controls only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
+    * `chip.pval_thresh`: P-value threshold for peak-caller MACS2 (macs2 callpeak -p).
+    * `chip.fdr_thresh`: FDR threshold for peak-caller SPP (run_spp.R -fdr=).
+    * `chip.idr_thresh`: IDR (irreproducible discovery rate) threshold.
 
 7) [Resources](#resources)
     * If your FASTQs/BAMs are big (>10GB) then try with higher resource settings, especially for memory (`chip.[TASK_NAME]_mem_mb`).
