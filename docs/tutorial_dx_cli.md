@@ -41,14 +41,24 @@ This document describes instruction for the item 1).
       $ INPUT=example_input_json/dx_azure/ENCSR936XTK_subsampled_chr19_only_dx_azure.json
       ```
 
-7. Compile `chip.wdl` with an input JSON for the SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
+7. Make a WDL for DNAnexus use only. The original WDL will not work with inputs (e.g. BAMs, TAs) other than FASTQs. Then compile `chip.new.wdl` with an input JSON for the SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
     ```bash
-    $ WDL=chip.wdl
+    $ cp chip.wdl chip.dx.wdl
+    $ sed -i 's/Array\[File?\] bams = \[\]/Array\[File\] bams = \[\]/g' chip.dx.wdl
+    $ sed -i 's/Array\[File?\] nodup_bams = \[\]/Array\[File\] nodup_bams = \[\]/g' chip.dx.wdl
+    $ sed -i 's/Array\[File?\] tas = \[\]/Array\[File\] tas = \[\]/g' chip.dx.wdl
+    $ sed -i 's/Array\[File?\] ctl_bams = \[\]/Array\[File\] ctl_bams = \[\]/g' chip.dx.wdl
+    $ sed -i 's/Array\[File?\] ctl_nodup_bams = \[\]/Array\[File\] ctl_nodup_bams = \[\]/g' chip.dx.wdl
+    $ sed -i 's/Array\[File?\] ctl_tas = \[\]/Array\[File\] ctl_tas = \[\]/g' chip.dx.wdl
+    ```
+
+    ```bash
+    $ WDL=chip.dx.wdl
     $ PROJECT=[YOUR_PROJECT_NAME]
     $ OUT_FOLDER=/test_sample_chip_ENCSR936XTK_subsampled_chr19_only
     $ DOCKER=$(cat ${WDL} | grep "#CAPER docker" | awk '{print $3}')
 
-    $ java -jar dxWDL-0.77.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
+    $ java -jar dxWDL-0.81.6.jar compile chip.wdl -project ${PROJECT} -f -folder ${OUT_FOLDER} -defaults ${INPUT} -extras <(echo "{\"default_runtime_attributes\":{\"docker\":\"${DOCKER}\"}}")
     ```
 
 8. Go to DNAnexus [project page](https://platform.DNAnexus.com/projects) and click on your project.
