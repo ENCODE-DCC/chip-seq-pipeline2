@@ -41,7 +41,7 @@ This document describes instruction for the item 1).
       $ INPUT=example_input_json/dx_azure/ENCSR936XTK_subsampled_chr19_only_dx_azure.json
       ```
 
-7. Make a WDL for DNAnexus use only. The original WDL will not work with inputs (e.g. BAMs, TAs) other than FASTQs. Then compile `chip.new.wdl` with an input JSON for the SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
+7. Make a WDL for DNAnexus use only. The original WDL will not work with inputs (e.g. BAMs, TAs) other than FASTQs. Then compile `chip.dx.wdl` with an input JSON for the SUBSAMPLED paired-end sample of [ENCSR936XTK](https://www.encodeproject.org/experiments/ENCSR936XTK/).
     ```bash
     $ cp chip.wdl chip.dx.wdl
     $ sed -i 's/Array\[File?\] bams = \[\]/Array\[File\] bams = \[\]/g' chip.dx.wdl
