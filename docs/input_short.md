@@ -35,9 +35,9 @@ Mandatory parameters.
         }
         ```
 
-5) [Input files](#input-files) and [adapters](#adapters)
+5) [Input files](#input-files)
     * See [this](#input-files) for how to define FASTQ/BAM/TAG-ALIGNs for your sample.
-    * See [this](#adapters) for how to define adapters to be trimmed.
+    * ChIP-seq pipeline does not have an adapter detector/trimmer.
 
 6) Important parameters
     * `chip.crop_length`: Crop FASTQs with Trimmomatic. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than this will be excluded while cropping, hence not included in output BAM files and all downstream analyses. It is 0 (disabled) by default.
