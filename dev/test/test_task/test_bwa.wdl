@@ -30,6 +30,7 @@ workflow test_bwa {
 		paired_end = true,
 		use_bwa_mem_for_pe = false,
 		crop_length = 0,
+		crop_length = 0,
 
 		cpu = bwa_cpu,
 		mem_mb = bwa_mem_mb,
@@ -44,6 +45,7 @@ workflow test_bwa {
 		fastqs_R2 = [],
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
+		crop_length = 0,
 		crop_length = 0,
 
 		cpu = bwa_cpu,

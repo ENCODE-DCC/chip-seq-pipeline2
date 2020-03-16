@@ -398,6 +398,7 @@ workflow chip {
 				fastqs_R1 = fastqs_R1[i],
 				fastqs_R2 = fastqs_R2[i],
 				crop_length = crop_length,
+				min_length = crop_length - 2,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -490,6 +491,7 @@ workflow chip {
 				fastqs_R2 = [],
 				trim_bp = xcor_trim_bp,
 				crop_length = 0,
+				min_length = 0,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -616,6 +618,7 @@ workflow chip {
 				fastqs_R1 = ctl_fastqs_R1[i],
 				fastqs_R2 = ctl_fastqs_R2[i],
 				crop_length = crop_length,
+				min_length = crop_length - 2,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -1200,6 +1203,7 @@ task align {
 	Array[File] fastqs_R2
 	Int? trim_bp			# this is for R1 only
 	Int crop_length
+	Int min_length
 	String aligner
 	String mito_chr_name
 	Int? multimapping
@@ -1259,6 +1263,7 @@ task align {
 				${if paired_end then '--fastq2 R2$SUFFIX/*.fastq.gz' else ''} \
 				${if paired_end then '--paired-end' else ''} \
 				--crop-length ${crop_length} \
+				--min-length ${min_length} \
 				--out-dir-R1 R1$NEW_SUFFIX \
 				${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
 				${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (mem_mb + 'M')} \

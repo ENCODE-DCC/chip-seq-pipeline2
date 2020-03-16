@@ -36,6 +36,7 @@ workflow test_bowtie2 {
 		paired_end = true,
 		use_bwa_mem_for_pe = false,
 		crop_length = 0,
+		min_length = 0,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -51,6 +52,7 @@ workflow test_bowtie2 {
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
 		crop_length = 0,
+		min_length = 0,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -67,6 +69,7 @@ workflow test_bowtie2 {
 		paired_end = true,
 		use_bwa_mem_for_pe = false,
 		crop_length = pe_crop_length,
+		min_length = pe_crop_length - 2,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -82,6 +85,7 @@ workflow test_bowtie2 {
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
 		crop_length = se_crop_length,
+		min_length = se_crop_length - 2,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,

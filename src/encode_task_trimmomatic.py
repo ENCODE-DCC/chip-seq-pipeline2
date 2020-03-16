@@ -22,8 +22,12 @@ def parse_arguments(debug=False):
                         help='FASTQ R2 to be trimmed.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
-    parser.add_argument('--crop-length', type=int,
-                        help='Number of basepair to crop.')
+    parser.add_argument('--crop-length', type=int, required=True,
+                        help='Number of basepair to crop.'
+                             'Trimmomatic\'s parameter CROP.')
+    parser.add_argument('--min-length', type=int, required=True,
+                        help='All reads shorted than this will be removed '
+                             'Trimmomatic\'s parameter MINLEN.')
     parser.add_argument('--out-dir-R1', default='', type=str,
                         help='Output directory for cropped R1 fastq.')
     parser.add_argument('--out-dir-R2', default='', type=str,
@@ -47,33 +51,34 @@ def parse_arguments(debug=False):
     return args
 
 
-def trimmomatic_se(fastq1, crop_length, out_dir,
+def trimmomatic_se(fastq1, crop_length, min_length, out_dir,
                    nth=1, java_heap=None):
     prefix = os.path.join(out_dir,
                           os.path.basename(strip_ext_fastq(fastq1)))
-    cropped = '{}.crop_{}bp.fastq.gz'.format(prefix, crop_length)
+    cropped = '{p}.crop_{cl}_minlen_{ml}.fastq.gz'.format(
+        p=prefix, cl=crop_length, ml=min_length)
 
     if java_heap is None:
         java_heap_param = '-Xmx6G'
     else:
         java_heap_param = '-Xmx{}'.format(java_heap)
 
-    cmd = 'java -XX:ParallelGCThreads=1 {} -jar {} SE -threads {} '
-    cmd += '{} {} MINLEN:{} CROP:{}'
+    cmd = 'java -XX:ParallelGCThreads=1 {param} -jar {jar} SE -threads {nth} '
+    cmd += '{fq1} {cropped} MINLEN:{ml} CROP:{cl}'
     cmd = cmd.format(
-        java_heap_param,
-        locate_trimmomatic(),
-        nth,
-        fastq1,
-        cropped,
-        crop_length,
-        crop_length)
+        param=java_heap_param,
+        jar=locate_trimmomatic(),
+        nth=nth,
+        fq1=fastq1,
+        cropped=cropped,
+        ml=min_length,
+        cl=crop_length)
     run_shell_cmd(cmd)
 
     return cropped
 
 
-def trimmomatic_pe(fastq1, fastq2, crop_length, out_dir_R1, out_dir_R2,
+def trimmomatic_pe(fastq1, fastq2, crop_length, min_length, out_dir_R1, out_dir_R2,
                    nth=1, java_heap=None):
     prefix_R1 = os.path.join(
         out_dir_R1, os.path.basename(strip_ext_fastq(fastq1)))
@@ -89,20 +94,21 @@ def trimmomatic_pe(fastq1, fastq2, crop_length, out_dir_R1, out_dir_R2,
     else:
         java_heap_param = '-Xmx{}'.format(java_heap)
 
-    cmd = 'java -XX:ParallelGCThreads=1 {} -jar {} PE -threads {} '
-    cmd += '{} {} {} {} {} {} MINLEN:{} CROP:{}'
+    cmd = 'java -XX:ParallelGCThreads=1 {param} -jar {jar} PE -threads {nth} '
+    cmd += '{fq1} {fq2} {cropped1} {tmp_cropped1} {cropped2} {tmp_cropped2} '
+    cmd += 'MINLEN:{ml} CROP:{cl}'
     cmd = cmd.format(
-        java_heap_param,
-        locate_trimmomatic(),
-        nth,
-        fastq1,
-        fastq2,
-        cropped_R1,
-        tmp_cropped_R1,
-        cropped_R2,
-        tmp_cropped_R2,
-        crop_length,
-        crop_length)
+        param=java_heap_param,
+        jar=locate_trimmomatic(),
+        nth=nth,
+        fq1=fastq1,
+        fq2=fastq2,
+        cropped1=cropped_R1,
+        tmp_cropped1=tmp_cropped_R1,
+        cropped2=cropped_R2,
+        tmp_cropped2=tmp_cropped_R2,
+        ml=min_length,
+        cl=crop_length)
     run_shell_cmd(cmd)
     rm_f([tmp_cropped_R1, tmp_cropped_R2])
 
@@ -118,18 +124,22 @@ def main():
     if args.paired_end:
         mkdir_p(args.out_dir_R2)
 
-    log.info('Cropping fastqs ({} bp) with Trimmomatic...'.format(args.crop_length))
+    log.info(
+        'Cropping fastqs with Trimmomatic... '
+        'crop_length={cl}, min_length={ml}'.format(
+            cl=args.crop_length,
+            ml=args.min_length,))
     if args.paired_end:
         cropped_R1, cropped_R2 = trimmomatic_pe(
             args.fastq1, args.fastq2,
-            args.crop_length,
+            args.crop_length, args.min_length,
             args.out_dir_R1, args.out_dir_R2,
             args.nth,
             args.trimmomatic_java_heap)
     else:
         cropped_R1 = trimmomatic_se(
             args.fastq1,
-            args.crop_length,
+            args.crop_length, args.min_length,
             args.out_dir_R1,
             args.nth,
             args.trimmomatic_java_heap)

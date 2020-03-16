@@ -40,7 +40,7 @@ Mandatory parameters.
     * ChIP-seq pipeline does not have an adapter detector/trimmer.
 
 6) Important parameters
-    * `chip.crop_length`: Crop FASTQs with Trimmomatic. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than this will be excluded while cropping, hence not included in output BAM files and all downstream analyses. It is 0 (disabled) by default.
+    * `chip.crop_length`: Crop FASTQs with Trimmomatic (using parameters `MINLEN` and `CROP`). `MINLEN` will be set as `chip.crop_length` - 2. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than (`chip.crop_length` - 2) will be excluded while cropping, hence not included in output BAM files and all downstream analyses. It is 0 (disabled) by default.
     * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
     * `chip.ctl_depth_ratio`: (For experiments with controls only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
     * `chip.pval_thresh`: P-value threshold for peak-caller MACS2 (macs2 callpeak -p).
