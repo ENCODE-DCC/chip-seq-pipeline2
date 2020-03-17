@@ -10,6 +10,8 @@ workflow test_bowtie2 {
 
 	Int pe_crop_length
 	Int se_crop_length
+	Int pe_crop_length_tol = 2
+	Int se_crop_length_tol = 2
 
 	# we don't compare BAM because BAM's header includes date
 	# hence md5sums don't match all the time
@@ -36,7 +38,7 @@ workflow test_bowtie2 {
 		paired_end = true,
 		use_bwa_mem_for_pe = false,
 		crop_length = 0,
-		min_length = 0,
+		crop_length_tol = 0,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -52,7 +54,7 @@ workflow test_bowtie2 {
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
 		crop_length = 0,
-		min_length = 0,
+		crop_length_tol = 0,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -69,7 +71,7 @@ workflow test_bowtie2 {
 		paired_end = true,
 		use_bwa_mem_for_pe = false,
 		crop_length = pe_crop_length,
-		min_length = pe_crop_length - 2,
+		crop_length_tol = pe_crop_length_tol,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,
@@ -85,7 +87,7 @@ workflow test_bowtie2 {
 		paired_end = false,
 		use_bwa_mem_for_pe = false,
 		crop_length = se_crop_length,
-		min_length = se_crop_length - 2,
+		crop_length_tol = se_crop_length_tol,
 
 		cpu = bowtie2_cpu,
 		mem_mb = bowtie2_mem_mb,

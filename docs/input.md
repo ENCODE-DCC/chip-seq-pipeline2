@@ -131,9 +131,11 @@ You can mix up different data types for individual replicate/control replicate. 
 Parameter|Type|Default|Description
 ---------|---|----|-----------
 `chip.aligner` | String | bowtie2 | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
-`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `MINLEN` and `CROP`). `MINLEN` will be set as `chip.crop_length` - 2. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than (`chip.crop_length` - 2) will be excluded while cropping, hence not included in output BAM files and all downstream analyses. 0: cropping disabled.
+`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.`chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
+
 `chip.use_bwa_mem_for_pe` | Boolean | false | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
+
 
 ## Optional filtering parameters
 

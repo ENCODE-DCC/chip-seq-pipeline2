@@ -64,6 +64,7 @@ workflow chip {
 	Boolean use_bwa_mem_for_pe = false # THIS IS EXPERIMENTAL and BWA ONLY (use bwa mem instead of bwa aln/sam)
 									# available only for PE dataset with READ_LEN>=70bp
 	Int crop_length = 0 			# crop reads in FASTQs with Trimmomatic (0 by default, i.e. disabled)
+	Int crop_length_tol = 2 	# keep shorter reads around crop_length
 	Int xcor_trim_bp = 50 			# for cross-correlation analysis only (R1 of paired-end fastqs)
 	Boolean use_filt_pe_ta_for_xcor = false # PE only. use filtered PE BAM for cross-corr.
 	String dup_marker = 'picard'	# picard, sambamba
@@ -398,7 +399,7 @@ workflow chip {
 				fastqs_R1 = fastqs_R1[i],
 				fastqs_R2 = fastqs_R2[i],
 				crop_length = crop_length,
-				min_length = crop_length - 2,
+				crop_length_tol = crop_length_tol,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -491,7 +492,7 @@ workflow chip {
 				fastqs_R2 = [],
 				trim_bp = xcor_trim_bp,
 				crop_length = 0,
-				min_length = 0,
+				crop_length_tol = 0,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -618,7 +619,7 @@ workflow chip {
 				fastqs_R1 = ctl_fastqs_R1[i],
 				fastqs_R2 = ctl_fastqs_R2[i],
 				crop_length = crop_length,
-				min_length = crop_length - 2,
+				crop_length_tol = crop_length_tol,
 
 				aligner = aligner_,
 				mito_chr_name = mito_chr_name_,
@@ -1203,7 +1204,7 @@ task align {
 	Array[File] fastqs_R2
 	Int? trim_bp			# this is for R1 only
 	Int crop_length
-	Int min_length
+	Int crop_length_tol
 	String aligner
 	String mito_chr_name
 	Int? multimapping
@@ -1263,7 +1264,7 @@ task align {
 				${if paired_end then '--fastq2 R2$SUFFIX/*.fastq.gz' else ''} \
 				${if paired_end then '--paired-end' else ''} \
 				--crop-length ${crop_length} \
-				--min-length ${min_length} \
+				--crop-length-tol "${crop_length_tol}" \
 				--out-dir-R1 R1$NEW_SUFFIX \
 				${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
 				${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (mem_mb + 'M')} \
