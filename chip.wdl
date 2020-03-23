@@ -761,10 +761,18 @@ workflow chip {
 		}
 	}
 
-	# make control ta array [[1,2,3,4]] -> [[1],[2],[3],[4]], will be zipped with exp ta array latter
-	Array[Array[File]] chosen_ctl_tas =
-		if has_all_input_of_choose_ctl then transpose(select_all([choose_ctl.chosen_ctl_tas]))
-		else [[],[],[],[],[],[],[],[],[],[]]
+	scatter(i in range(num_rep)) {
+		# make control ta array [[1,2,3,4]] -> [[1],[2],[3],[4]]
+		# chosen_ctl_ta_id
+		# 	>=0: control TA index (this means that control TA with this index exists)
+		# 	-1: use pooled control
+		#	-2: there is no control
+		Int chosen_ctl_ta_id = if has_all_input_of_choose_ctl && !align_only then
+			select_first([choose_ctl.chosen_ctl_ta_ids])[i] else -2
+		Array[File] chosen_ctl_tas = if chosen_ctl_ta_id == -2 then []
+			else if chosen_ctl_ta_id == -1 then [ select_first([pool_ta_ctl.ta_pooled]) ]
+			else [ select_first([ctl_ta_[ chosen_ctl_ta_id ]]) ]
+	}
 
 	# workaround for dx error (Unsupported combination: womType: Int womValue: ([225], Array[Int]))
 	Array[Int] fraglen_tmp = select_all(fraglen_)
@@ -1532,7 +1540,7 @@ task choose_ctl {
 			${'--ctl-depth-ratio ' + ctl_depth_ratio}
 	}
 	output {
-		Array[File] chosen_ctl_tas = glob('ctl_for_rep*.tagAlign.gz')
+		Array[Int] chosen_ctl_ta_ids = read_lines('chosen_ctl.tsv')
 	}
 	runtime {
 		cpu : 1
