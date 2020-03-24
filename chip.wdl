@@ -1221,6 +1221,7 @@ task align {
 	Boolean paired_end
 	Boolean use_bwa_mem_for_pe
 
+	Float trimmomatic_java_heap_factor = 0.9
 	String? trimmomatic_java_heap
 	Int cpu
 	Int mem_mb
@@ -1275,7 +1276,7 @@ task align {
 				--crop-length-tol "${crop_length_tol}" \
 				--out-dir-R1 R1$NEW_SUFFIX \
 				${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
-				${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (mem_mb + 'M')} \
+				${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (mem_mb * trimmomatic_java_heap_factor + 'M')} \
 				${'--nth ' + cpu}
 			SUFFIX=$NEW_SUFFIX
 		fi
@@ -1340,6 +1341,7 @@ task filter {
 
 	Int cpu
 	Int mem_mb
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 	Int time_hr
 	String disks
@@ -1356,7 +1358,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1828,13 +1830,15 @@ task gc_bias {
 	File nodup_bam
 	File ref_fa
 
+	Int mem_mb = 10000
+	Float picard_java_heap_factor = 0.9
 	String? picard_java_heap
 
 	command {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else '10G'}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
@@ -1842,7 +1846,7 @@ task gc_bias {
 	}
 	runtime {
 		cpu : 1
-		memory : '10000 MB'
+		memory : '${mem_mb} MB'
 		time : 6
 		disks : 'local-disk 100 HDD'
 	}
