@@ -1276,7 +1276,7 @@ task align {
 				--crop-length-tol "${crop_length_tol}" \
 				--out-dir-R1 R1$NEW_SUFFIX \
 				${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
-				${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (mem_mb * trimmomatic_java_heap_factor + 'M')} \
+				${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (round(mem_mb * trimmomatic_java_heap_factor) + 'M')} \
 				${'--nth ' + cpu}
 			SUFFIX=$NEW_SUFFIX
 		fi
@@ -1358,7 +1358,7 @@ task filter {
 			${if no_dup_removal then '--no-dup-removal' else ''} \
 			${'--mito-chr-name ' + mito_chr_name} \
 			${'--nth ' + cpu} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File nodup_bam = glob('*.bam')[0]
@@ -1838,7 +1838,7 @@ task gc_bias {
 		python3 $(which encode_task_gc_bias.py) \
 			${'--nodup-bam ' + nodup_bam} \
 			${'--ref-fa ' + ref_fa} \
-			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (mem_mb * picard_java_heap_factor + 'M')}
+			${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
 	}
 	output {
 		File gc_plot = glob('*.gc_plot.png')[0]
