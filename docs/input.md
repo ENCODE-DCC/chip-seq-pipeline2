@@ -152,6 +152,9 @@ Parameter|Default|Description
 `chip.subsample_reads` | 0 | Subsample reads (0: no subsampling). Subsampled reads will be used for all downsteam analyses including peak-calling
 `chip.ctl_subsample_reads` | 0 | Subsample control reads. 
 `chip.xcor_subsample_reads` | 15000000 | Subsample reads for cross-corr. analysis only (0: no subsampling). Subsampled reads will be used for cross-corr. analysis only
+`chip.ctl_depth_limit` | 200000000 | Chosen control. 
+`chip.exp_ctl_depth_ratio_limit` | 200000000 | Subsample reads (0: no subsampling). Subsampled reads will be used for all downsteam analyses including peak-calling
+
 
 ## Optional cross-correlation analysis parameters
 

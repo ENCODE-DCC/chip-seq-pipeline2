@@ -78,6 +78,9 @@ workflow chip {
 	Int subsample_reads = 0			# number of reads to subsample TAGALIGN
 									# 0 for no subsampling. this affects all downstream analysis
 	Int ctl_subsample_reads = 0		# number of reads to subsample control TAGALIGN
+	Int ctl_depth_limit = 200000000
+	Float exp_ctl_depth_ratio_limit = 5.0
+
 	Int xcor_subsample_reads = 15000000 # subsample TAG-ALIGN for xcor only (not used for other downsteam analyses)
 	Int xcor_exclusion_range_min = -500
 	Int? xcor_exclusion_range_max
@@ -758,6 +761,8 @@ workflow chip {
 			ctl_ta_pooled = pool_ta_ctl.ta_pooled,
 			always_use_pooled_ctl = always_use_pooled_ctl,
 			ctl_depth_ratio = ctl_depth_ratio,
+			ctl_depth_limit = ctl_depth_limit,
+			exp_ctl_depth_ratio_limit = exp_ctl_depth_ratio_limit,
 		}
 	}
 
@@ -772,7 +777,16 @@ workflow chip {
 		Array[File] chosen_ctl_tas = if chosen_ctl_ta_id == -2 then []
 			else if chosen_ctl_ta_id == -1 then [ select_first([pool_ta_ctl.ta_pooled]) ]
 			else [ select_first([ctl_ta_[ chosen_ctl_ta_id ]]) ]
+
+		Int chosen_ctl_ta_subsample = if has_all_input_of_choose_ctl && !align_only then
+			select_first([choose_ctl.chosen_ctl_ta_subsample])[i] else 0
+		Boolean chosen_ctl_paired_end = if chosen_ctl_ta_id == -2 then false
+			else if chosen_ctl_ta_id == -1 then select_first([ctl_paired_end_])[0]
+			else select_first([ctl_paired_end_])[chosen_ctl_ta_id]
 	}
+	Int chosen_ctl_ta_pooled_subsample = if has_all_input_of_choose_ctl && !align_only then
+
+		else 0
 
 	# workaround for dx error (Unsupported combination: womType: Int womValue: ([225], Array[Int]))
 	Array[Int] fraglen_tmp = select_all(fraglen_)
@@ -790,6 +804,8 @@ workflow chip {
 				gensz = gensz_,
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
+				ctl_subsample = chosen_ctl_ta_subsample[i],
+				ctl_paired_end = chosen_ctl_paired_end[i],
 				pval_thresh = pval_thresh,
 				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
@@ -812,6 +828,8 @@ workflow chip {
 				gensz = gensz_,
 				chrsz = chrsz_,
 				pval_thresh = pval_thresh,
+				ctl_subsample = chosen_ctl_ta_subsample[i],
+				ctl_paired_end = chosen_ctl_paired_end[i],
 				fraglen = fraglen_tmp[i],
 
 				mem_mb = macs2_signal_track_mem_mb,
@@ -832,6 +850,8 @@ workflow chip {
 				gensz = gensz_,
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
+				ctl_subsample = chosen_ctl_ta_subsample[i],
+				ctl_paired_end = chosen_ctl_paired_end[i],
 				pval_thresh = pval_thresh,
 				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
@@ -859,6 +879,8 @@ workflow chip {
 				gensz = gensz_,
 				chrsz = chrsz_,
 				cap_num_peak = cap_num_peak_,
+				ctl_subsample = chosen_ctl_ta_subsample[i],
+				ctl_paired_end = chosen_ctl_paired_end[i],
 				pval_thresh = pval_thresh,
 				fdr_thresh = fdr_thresh,
 				fraglen = fraglen_tmp[i],
@@ -888,6 +910,7 @@ workflow chip {
 	Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl then []
 		else if num_ctl < 2 then [ctl_ta_[0]] # choose first (only) control
 		else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
+	Boolean chosen_ctl_ta_pooled_paired_end = select_first(ctl_paired_end_)
 
 	Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
 	Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
@@ -902,6 +925,8 @@ workflow chip {
 			gensz = gensz_,
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
+			ctl_subsample = choose_ctl.chosen_ctl_ta_subsample_pooled,
+			ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
 			pval_thresh = pval_thresh,
 			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
@@ -924,6 +949,8 @@ workflow chip {
 			gensz = gensz_,
 			chrsz = chrsz_,
 			pval_thresh = pval_thresh,
+			ctl_subsample = choose_ctl.chosen_ctl_ta_subsample_pooled,
+			ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
 			fraglen = fraglen_mean.rounded_mean,
 
 			mem_mb = macs2_signal_track_mem_mb,
@@ -1532,6 +1559,9 @@ task choose_ctl {
 	Boolean always_use_pooled_ctl # always use pooled control for all exp rep.
 	Float ctl_depth_ratio 		# if ratio between controls is higher than this
 								# then always use pooled control for all exp rep.
+	Int ctl_depth_limit
+	Float exp_ctl_depth_ratio_limit
+
 	command {
 		python3 $(which encode_task_choose_ctl.py) \
 			--tas ${sep=' ' tas} \
@@ -1539,10 +1569,14 @@ task choose_ctl {
 			${'--ta-pooled ' + ta_pooled} \
 			${'--ctl-ta-pooled ' + ctl_ta_pooled} \
 			${if always_use_pooled_ctl then '--always-use-pooled-ctl' else ''} \
-			${'--ctl-depth-ratio ' + ctl_depth_ratio}
+			${'--ctl-depth-ratio ' + ctl_depth_ratio} \
+			${'--ctl-depth-limit ' + ctl_depth_limit} \
+			${'--exp-ctl-depth-ratio-limit ' + exp_ctl_depth_ratio_limit}
 	}
 	output {
-		Array[Int] chosen_ctl_ta_ids = read_lines('chosen_ctl.tsv')
+		Array[Int] chosen_ctl_ta_ids = read_lines(glob('chosen_ctl.tsv')[0])
+		Array[Int] chosen_ctl_ta_subsample = read_lines(glob('chosen_ctl_subsample.tsv')[0])
+		Int chosen_ctl_ta_subsample_pooled = read_int(glob('chosen_ctl_subsample_pooled.txt')[0])
 	}
 	runtime {
 		cpu : 1
@@ -1577,13 +1611,14 @@ task call_peak {
 	String peak_caller
 	String peak_type
 	File? custom_call_peak_py
-
 	Array[File?] tas	# [ta, control_ta]. control_ta is optional
 	Int fraglen 		# fragment length from xcor
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
 	Int cap_num_peak	# cap number of raw peaks called from MACS2
+	Int ctl_subsample	# subsample control if >0. 0: no subsampling
+	Boolean ctl_paired_end # control is paired end
 	Float pval_thresh 	# p.value threshold for MACS2
 	Float? fdr_thresh 	# FDR threshold for SPP
 
@@ -1605,6 +1640,8 @@ task call_peak {
 				${'--chrsz ' + chrsz} \
 				${'--fraglen ' + fraglen} \
 				${'--cap-num-peak ' + cap_num_peak} \
+				${'--ctl-subsample ' + ctl_subsample} \
+				${if ctl_paired_end then '--ctl-paired-end' else ''} \
 				${'--pval-thresh '+ pval_thresh}
 
 		elif [ '${peak_caller}' == 'spp' ]; then
@@ -1612,9 +1649,10 @@ task call_peak {
 				${sep=' ' tas} \
 				${'--fraglen ' + fraglen} \
 				${'--cap-num-peak ' + cap_num_peak} \
+				${'--ctl-subsample ' + ctl_subsample} \
+				${if ctl_paired_end then '--ctl-paired-end' else ''} \
 				${'--fdr-thresh '+ fdr_thresh} \
-				${'--nth ' + cpu}
-
+				${'--nth ' + cpu} \
 		else
 			python3 ${custom_call_peak_py} \
 				${sep=' ' tas} \
@@ -1622,8 +1660,10 @@ task call_peak {
 				${'--chrsz ' + chrsz} \
 				${'--fraglen ' + fraglen} \
 				${'--cap-num-peak ' + cap_num_peak} \
-				${'--pval-thresh '+ pval_thresh}
-				${'--fdr-thresh '+ fdr_thresh}
+				${'--ctl-subsample ' + ctl_subsample}
+				${if ctl_paired_end then '--ctl-paired-end' else ''} \
+				${'--pval-thresh '+ pval_thresh} \
+				${'--fdr-thresh '+ fdr_thresh} \
 				${'--nth ' + cpu}
 		fi
 
@@ -1664,6 +1704,8 @@ task macs2_signal_track {
 	String gensz		# Genome size (sum of entries in 2nd column of 
                         # chr. sizes file, or hs for human, ms for mouse)
 	File chrsz			# 2-col chromosome sizes file
+	Int ctl_subsample	# subsample control if >0. 0: no subsampling
+	Boolean ctl_paired_end # control is paired end	
 	Float pval_thresh 	# p.value threshold
 
 	Int mem_mb
@@ -1676,7 +1718,9 @@ task macs2_signal_track {
 			${'--gensz '+ gensz} \
 			${'--chrsz ' + chrsz} \
 			${'--fraglen ' + fraglen} \
-			${'--pval-thresh '+ pval_thresh}
+			${'--pval-thresh '+ pval_thresh} \
+			${'--ctl-subsample ' + ctl_subsample} \
+			${if ctl_paired_end then '--ctl-paired-end' else ''}
 	}
 	output {
 		File pval_bw = glob('*.pval.signal.bigwig')[0]
@@ -2078,8 +2122,10 @@ task rounded_mean {
 
 task raise_exception {
 	String msg
+	Array[String] vals
 	command {
 		echo -e "\n* Error: ${msg}\n" >&2
+		echo -e "* Vals: ${sep=',' vals}\n" >&2
 		exit 2
 	}
 	output {
