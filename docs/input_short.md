@@ -42,23 +42,31 @@ Mandatory parameters.
 6) Important parameters
     * `chip.crop_length`: Crop FASTQs with Trimmomatic (using parameters `CROP`). It is 0 (disabled) by default.
     * `chip.crop_length_tol`: Read length tolerance while cropping FASTQs with `chip.crop_length`. Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)`. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than `MINLEN` will be excluded while cropping, hence not included in output BAM files and all downstream analyses. Tolerance is 2 by default.
-    * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
-    * `chip.ctl_depth_ratio`: (For experiments with controls only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
     * `chip.pval_thresh`: P-value threshold for peak-caller MACS2 (macs2 callpeak -p).
     * `chip.fdr_thresh`: FDR threshold for peak-caller SPP (run_spp.R -fdr=).
     * `chip.idr_thresh`: IDR (irreproducible discovery rate) threshold.
 
-7) [Resources](#resources)
+7) Parameters for subsampling experiment replicates and controls.
+    These parameters are used for subsampling on filtered (nodup) BAMs. Therefore, setting these parameters will affect all downsteam analyses including peak-calling. It's 0 by default, which means no subsampling. These parameters will be applied to each experiment replicate and control.
+   
+    * `chip.subsample_reads`: Subsample experiment replicate's reads. 
+    * `chip.ctl_subsample_reads`: Subsample control's reads.
+
+8) Parameters for subsampling controls.
+    Before calling peaks, there is a separate (from item 7) mechanism to subsample controls to prevent using too deep controls. Pipeline has a logic to find an approriate control for each experiment replicate. Choices are 1) control with the same index (e.g. rep2 vs. ctl2), 2) pooled control (e.g. rep2 vs. ctl1 + ctl2). 
+
+    * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
+    * `chip.ctl_depth_ratio`: (For experiments with controls only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
+
+9) [Resources](#resources)
     * If your FASTQs/BAMs are big (>10GB) then try with higher resource settings, especially for memory (`chip.[TASK_NAME]_mem_mb`).
 
 Optional parameters.
 
-8) Useful parameters
-    * `chip.subsample_reads`: Subsample experimet reads. This will affect all downsteam analyses including peak-calling. It's 0 by default, which means no subsampling.
-    * `chip.ctl_subsample_reads`: Subsample control reads. This will affect all downsteam analyses including peak-calling. It's 0 by default, which means no subsampling.
+10) Other useful parameters
     * `chip.fraglen`: Array of Integers. Fragment length for each bio replicate. If you start from FASTQs then our pipeline automatically estimate it from cross-correlation analysis (task `xcor`) result since such analysis requires a special treamtment for FASTQs. It is possible that fragment length is not estimated correctly (or pipeline can fail due to negative fraglen) if you start from different types (BAM/TAG-ALIGN). For such case, you can manually define fragment length for each bio rep. (e.g. `[200, 150]` means 200 for rep1 and 150 for rep2).
 
-9) Flags
+11) Flags
     * `chip.align_only`: Peak calling and its downstream analyses will be disabled. Useful if you just want to align your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them.
     * `chip.true_rep_only`: Disable pseudo replicate generation and all related analyses
 
