@@ -781,12 +781,11 @@ workflow chip {
 		Int chosen_ctl_ta_subsample = if has_all_input_of_choose_ctl && !align_only then
 			select_first([choose_ctl.chosen_ctl_ta_subsample])[i] else 0
 		Boolean chosen_ctl_paired_end = if chosen_ctl_ta_id == -2 then false
-			else if chosen_ctl_ta_id == -1 then select_first([ctl_paired_end_])[0]
-			else select_first([ctl_paired_end_])[chosen_ctl_ta_id]
+			else if chosen_ctl_ta_id == -1 then select_first(ctl_paired_end_)
+			else select_first([ctl_paired_end_[chosen_ctl_ta_id]])
 	}
 	Int chosen_ctl_ta_pooled_subsample = if has_all_input_of_choose_ctl && !align_only then
-
-		else 0
+		select_first([choose_ctl.chosen_ctl_ta_subsample_pooled]) else 0
 
 	# workaround for dx error (Unsupported combination: womType: Int womValue: ([225], Array[Int]))
 	Array[Int] fraglen_tmp = select_all(fraglen_)
@@ -907,10 +906,11 @@ workflow chip {
 	# }
 
 	# actually not an array
-	Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl then []
+	Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl || align_only then []
 		else if num_ctl < 2 then [ctl_ta_[0]] # choose first (only) control
 		else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
-	Boolean chosen_ctl_ta_pooled_paired_end = select_first(ctl_paired_end_)
+	Boolean chosen_ctl_ta_pooled_paired_end = if !has_all_input_of_choose_ctl || align_only then false
+		else select_first(ctl_paired_end_)
 
 	Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
 	Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
@@ -925,7 +925,7 @@ workflow chip {
 			gensz = gensz_,
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
-			ctl_subsample = choose_ctl.chosen_ctl_ta_subsample_pooled,
+			ctl_subsample = chosen_ctl_ta_pooled_subsample,
 			ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
 			pval_thresh = pval_thresh,
 			fdr_thresh = fdr_thresh,
@@ -949,7 +949,7 @@ workflow chip {
 			gensz = gensz_,
 			chrsz = chrsz_,
 			pval_thresh = pval_thresh,
-			ctl_subsample = choose_ctl.chosen_ctl_ta_subsample_pooled,
+			ctl_subsample = chosen_ctl_ta_pooled_subsample,
 			ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
 			fraglen = fraglen_mean.rounded_mean,
 
@@ -972,6 +972,8 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			ctl_subsample = chosen_ctl_ta_pooled_subsample,
+			ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
 			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
@@ -999,6 +1001,8 @@ workflow chip {
 			chrsz = chrsz_,
 			cap_num_peak = cap_num_peak_,
 			pval_thresh = pval_thresh,
+			ctl_subsample = chosen_ctl_ta_pooled_subsample,
+			ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
 			fdr_thresh = fdr_thresh,
 			fraglen = fraglen_mean.rounded_mean,
 			blacklist = blacklist_,
@@ -1652,7 +1656,7 @@ task call_peak {
 				${'--ctl-subsample ' + ctl_subsample} \
 				${if ctl_paired_end then '--ctl-paired-end' else ''} \
 				${'--fdr-thresh '+ fdr_thresh} \
-				${'--nth ' + cpu} \
+				${'--nth ' + cpu}
 		else
 			python3 ${custom_call_peak_py} \
 				${sep=' ' tas} \
@@ -2122,7 +2126,7 @@ task rounded_mean {
 
 task raise_exception {
 	String msg
-	Array[String] vals
+	Array[String]? vals
 	command {
 		echo -e "\n* Error: ${msg}\n" >&2
 		echo -e "* Vals: ${sep=',' vals}\n" >&2

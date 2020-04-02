@@ -7,11 +7,14 @@ workflow test_macs2_signal_track {
 	Float pval_thresh
 
 	Int fraglen
+	Int ctl_subsample
+	Boolean ctl_paired_end
 	# test macs2 for SE set only
 	String se_ta
 	String se_ctl_ta
 
 	String ref_se_macs2_pval_bw # p-val signal
+	String ref_se_macs2_subsample_pval_bw # p-val signal
 	String se_chrsz
 	String se_gensz
 
@@ -21,6 +24,8 @@ workflow test_macs2_signal_track {
 
 	call chip.macs2_signal_track as se_macs2_signal_track { input :
 		tas = [se_ta, se_ctl_ta],
+		ctl_subsample = 0,
+		ctl_paired_end = ctl_paired_end,
 		gensz = se_gensz,
 		chrsz = se_chrsz,
 		fraglen = fraglen,
@@ -31,15 +36,32 @@ workflow test_macs2_signal_track {
 		disks = macs2_disks,		
 	}
 
+	call chip.macs2_signal_track as se_macs2_signal_track_subsample { input :
+		tas = [se_ta, se_ctl_ta],
+		ctl_subsample = ctl_subsample,
+		ctl_paired_end = ctl_paired_end,
+		gensz = se_gensz,
+		chrsz = se_chrsz,
+		fraglen = fraglen,
+		pval_thresh = pval_thresh,
+
+		mem_mb = macs2_mem_mb,
+		time_hr = macs2_time_hr,
+		disks = macs2_disks,
+	}
+
 	call compare_md5sum.compare_md5sum { input :
 		labels = [
 			'se_macs2_pval_bw',
+			'se_macs2_subsample_pval_bw',
 		],
 		files = [
 			se_macs2_signal_track.pval_bw,
+			se_macs2_signal_track_subsample.pval_bw,
 		],
 		ref_files = [
 			ref_se_macs2_pval_bw,
+			ref_se_macs2_subsample_pval_bw,
 		],
 	}
 }
