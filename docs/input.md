@@ -149,11 +149,11 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.subsample_reads` | 0 | Subsample reads (0: no subsampling). Subsampled reads will be used for all downsteam analyses including peak-calling
-`chip.ctl_subsample_reads` | 0 | Subsample control reads. 
+`chip.subsample_reads` | 0 | Subsample reads (0: no subsampling). For PE dataset, this is not a number of read pairs but number of reads. Subsampled reads will be used for all downsteam analyses including peak-calling. Subsampling is done during BAM to TAG-ALIGN conversion. Output TAG-ALIGN and all donwsteam analyses like peak-calling will be affected.
+`chip.ctl_subsample_reads` | 0 | Subsample control reads (not number of read pairs). For PE dataset, this is not a number of read pairs but number of reads. Subsampling is done during BAM to TAG-ALIGN conversion. Output control TAG-ALIGN and all donwsteam analyses like peak-calling will be affected.
 `chip.xcor_subsample_reads` | 15000000 | Subsample reads for cross-corr. analysis only (0: no subsampling). Subsampled reads will be used for cross-corr. analysis only
-`chip.ctl_depth_limit` | 200000000 | Chosen control. 
-`chip.exp_ctl_depth_ratio_limit` | 200000000 | Subsample reads (0: no subsampling). Subsampled reads will be used for all downsteam analyses including peak-calling
+`chip.ctl_depth_limit` | 200000000 | Hard limit for automatic subsampling control. For PE dataset, this is not a number of read pairs but number of reads. This is different from manual control subsampling controlled by `chip.xcor_subsample_reads`. This is an additional subsampling for controls in a peak-calling task.
+`chip.exp_ctl_depth_ratio_limit` | 5.0 | For each experiment replicate, corresponding chosen control will be subsampled if control's read is deeper than replicate's multiplied by this number.
 
 
 ## Optional cross-correlation analysis parameters

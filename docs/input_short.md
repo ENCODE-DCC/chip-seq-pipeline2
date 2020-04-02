@@ -49,14 +49,17 @@ Mandatory parameters.
 7) Parameters for subsampling experiment replicates and controls.
     These parameters are used for subsampling on filtered (nodup) BAMs. Therefore, setting these parameters will affect all downsteam analyses including peak-calling. It's 0 by default, which means no subsampling. These parameters will be applied to each experiment replicate and control.
    
-    * `chip.subsample_reads`: Subsample experiment replicate's reads. 
-    * `chip.ctl_subsample_reads`: Subsample control's reads.
+    * `chip.subsample_reads`: Subsample experiment replicate's reads. For PE dataset, this is not a number of read pairs but number of reads. 
+    * `chip.ctl_subsample_reads`: Subsample control's reads. For PE dataset, this is not a number of read pairs but number of reads. 
 
-8) Parameters for subsampling controls.
-    Before calling peaks, there is a separate (from item 7) mechanism to subsample controls to prevent using too deep controls. Pipeline has a logic to find an approriate control for each experiment replicate. Choices are 1) control with the same index (e.g. rep2 vs. ctl2), 2) pooled control (e.g. rep2 vs. ctl1 + ctl2). 
-
+8) Parameters for automatically choosing an appropriate control and subsampling it.
+    Before calling peaks, there is a separate (from item 7) mechanism to subsample controls to prevent using too deep controls. Pipeline has a logic to find an approriate control for each experiment replicate. Choices are 1) control with the same index (e.g. rep2 vs. ctl2), 2) pooled control (e.g. rep2 vs. ctl1 + ctl2).
     * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
     * `chip.ctl_depth_ratio`: (For experiments with controls only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
+
+    > **IMPORTANT**: Either of the following parameters are set to > 0 for automatic subsampling. Set all of them to 0 to disable automatic subsample. Such automatic control subsampling does not work with controls with mixed endedness (e.g. SE ctl-rep1 + PE ctl-rep2). Pipeline calculates `Limit1` and `Limit2` from the following two parameters. And then takes a maximum of them and calls it `Limit`. If a chosen control for experiment replicate (each one and pooled one) is deeper than `Limit` then that such control is subsampled to `Limit`.
+    * `chip.exp_ctl_depth_ratio_limit`: (For experiments with controls only) `Limit1` is defined as experiment replicate's depth multiplied by this parameter. It's 5.0 by default.
+    * `chip.ctl_depth_limit`: (For experiments with controls only) Hard limit on control's depth. If control is deeper than this hard limit then such control is subsampled to it.
 
 9) [Resources](#resources)
     * If your FASTQs/BAMs are big (>10GB) then try with higher resource settings, especially for memory (`chip.[TASK_NAME]_mem_mb`).
