@@ -9,6 +9,7 @@ import argparse
 from encode_lib_common import (
     assert_file_not_empty, human_readable_number,
     log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_ta)
+from encode_lib_genomic import subsample_ta_se, subsample_ta_pe
 
 
 def parse_arguments():
@@ -60,12 +61,12 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
                 ctl_ta = subsample_ta_pe(
                     ctl_ta, ctl_subsample,
                     non_mito=False, mito_chr_name=None, r1_only=False,
-                    out_dir=out_dir):
+                    out_dir=out_dir)
             else:
                 ctl_ta = subsample_ta_se(
                     ctl_ta, ctl_subsample,
                     non_mito=False, mito_chr_name=None,
-                    out_dir=out_dir):
+                    out_dir=out_dir)
 
         basename_ctl_ta = os.path.basename(strip_ext_ta(ctl_ta))
         basename_prefix = '{}_x_{}'.format(basename_ta, basename_ctl_ta)
