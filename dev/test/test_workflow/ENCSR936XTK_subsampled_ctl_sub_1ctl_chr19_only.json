@@ -1,5 +1,5 @@
 {
-    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.4.0/ENCSR936XTK_subsampled_ctl_sub_chr19_only/qc.json",
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.4.0/ENCSR936XTK_subsampled_ctl_sub_1ctl_chr19_only/qc.json",
     "chip.pipeline_type" : "tf",
     "chip.genome_tsv" : "gs://encode-pipeline-genome-data/genome_tsv/v1/hg38_chr19_chrM_gcp.tsv",
     "chip.fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R1.subsampled.50.fastq.gz"
@@ -14,13 +14,9 @@
     ],
     "chip.ctl_fastqs_rep1_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz"
     ],
-    "chip.ctl_fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz"
-    ],
-    "chip.ctl_fastqs_rep2_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz"
-    ],
     "chip.paired_end" : true,
-    "chip.ctl_depth_limit": 46000,
-    "chip.exp_ctl_depth_ratio_limit": 0.9,
-    "chip.title" : "ENCSR936XTK (subsampled 1/50, ctl sub 46000 0.9, chr19_chrM Only)",
+    "chip.ctl_depth_limit": 25000,
+    "chip.exp_ctl_depth_ratio_limit": 0.53,
+    "chip.title" : "ENCSR936XTK (subsampled 1/50, ctl sub 25000 0.53, chr19_chrM Only)",
     "chip.description" : "ZNF143 ChIP-seq on human GM12878"
 }

@@ -387,6 +387,16 @@ workflow chip {
 			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
 		}
 	}
+	if ( ctl_depth_limit > 0 && exp_ctl_depth_ratio_limit > 0 && num_ctl > 1 && length(ctl_paired_ends) > 1  ) {
+		call raise_exception as error_subsample_pooled_control_with_mixed_endedness { input:
+			msg = 'Cannot use automatic control subsampling ("chip.ctl_depth_limit">0 and "chip.exp_ctl_depth_limit">0) for ' +
+			      'multiple controls with mixed endedness (e.g. SE ctl-rep1 and PE ctl-rep2). ' +
+			      'Automatic control subsampling is enabled by default. ' +
+			      'Disable automatic control subsampling by explicitly defining the above two parameters as 0 in your input JSON file. ' +
+			      'You can still use manual control subsamping ("chip.ctl_subsample_reads">0) since it is done ' +
+			      'for individual control\'s TAG-ALIGN output according to each control\'s endedness. '
+		}
+	}
 
 	# align each replicate
 	scatter(i in range(num_rep)) {

@@ -141,21 +141,22 @@ def main():
                 else:
                     ctl_ta_idx[i] = i
 
-    # subsampling chosen control for each replicate
-    ctl_ta_subsample = [0]*num_rep
-    for rep in range(num_rep):
-        chosen_ctl = ctl_ta_idx[rep]
-        depth = depths[rep]
-        depth_ctl = depths_ctl[chosen_ctl]
-        limit = int(max(depth * args.exp_ctl_depth_ratio_limit, args.ctl_depth_limit))
-        if depth_ctl > limit:
-            ctl_ta_subsample[rep] = limit
-
-    # subsampling pooled control for pooled replicate
+    ctl_ta_subsample = [0] * num_rep
     ctl_ta_subsampled_pooled = 0
-    limit = int(max(depth_rep_pooled * args.exp_ctl_depth_ratio_limit, args.ctl_depth_limit))
-    if depth_ctl_pooled > limit:
-        ctl_ta_subsampled_pooled = limit
+    if args.exp_ctl_depth_ratio_limit and args.ctl_depth_limit:
+        # subsampling chosen control for each replicate
+        for rep in range(num_rep):
+            chosen_ctl = ctl_ta_idx[rep]
+            depth = depths[rep]
+            depth_ctl = depths_ctl[chosen_ctl]
+            limit = int(max(depth * args.exp_ctl_depth_ratio_limit, args.ctl_depth_limit))
+            if depth_ctl > limit:
+                ctl_ta_subsample[rep] = limit
+
+        # subsampling pooled control for pooled replicate
+        limit = int(max(depth_rep_pooled * args.exp_ctl_depth_ratio_limit, args.ctl_depth_limit))
+        if depth_ctl_pooled > limit:
+            ctl_ta_subsampled_pooled = limit
 
     # for each replicate check
     log.info('Writing idx.txt...')
