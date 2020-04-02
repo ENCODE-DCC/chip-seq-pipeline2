@@ -387,7 +387,7 @@ workflow chip {
 			msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
 		}
 	}
-	if ( ctl_depth_limit > 0 && exp_ctl_depth_ratio_limit > 0 && num_ctl > 1 && length(ctl_paired_ends) > 1  ) {
+	if ( ( ctl_depth_limit > 0 || exp_ctl_depth_ratio_limit > 0 ) && num_ctl > 1 && length(ctl_paired_ends) > 1  ) {
 		call raise_exception as error_subsample_pooled_control_with_mixed_endedness { input:
 			msg = 'Cannot use automatic control subsampling ("chip.ctl_depth_limit">0 and "chip.exp_ctl_depth_limit">0) for ' +
 			      'multiple controls with mixed endedness (e.g. SE ctl-rep1 and PE ctl-rep2). ' +

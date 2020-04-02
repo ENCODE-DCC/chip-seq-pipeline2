@@ -28,7 +28,25 @@
     "test_choose_ctl.ref_se_choose_ctl_single_ctl_sub2" : 46249,
     "test_choose_ctl.ref_se_choose_ctl_single_ctl_sub_pooled" : 0,
 
+    "test_choose_ctl.ref_se_choose_ctl_disabled_idx1" : 0,
+    "test_choose_ctl.ref_se_choose_ctl_disabled_idx2" : 1,
+    "test_choose_ctl.ref_se_choose_ctl_disabled_sub1" : 0,
+    "test_choose_ctl.ref_se_choose_ctl_disabled_sub2" : 0,
+    "test_choose_ctl.ref_se_choose_ctl_disabled_sub_pooled" : 0,
+
+    "test_choose_ctl.ref_se_choose_ctl_ctl_depth_limit_only_idx1" : 0,
+    "test_choose_ctl.ref_se_choose_ctl_ctl_depth_limit_only_idx2" : 1,
+    "test_choose_ctl.ref_se_choose_ctl_ctl_depth_limit_only_sub1" : 45000,
+    "test_choose_ctl.ref_se_choose_ctl_ctl_depth_limit_only_sub2" : 45000,
+    "test_choose_ctl.ref_se_choose_ctl_ctl_depth_limit_only_sub_pooled" : 45000,
+
+    "test_choose_ctl.ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx1" : 0,
+    "test_choose_ctl.ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx2" : 1,
+    "test_choose_ctl.ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub1" : 0,
+    "test_choose_ctl.ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub2" : 46249,
+    "test_choose_ctl.ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub_pooled" : 93085,
+
     "test_choose_ctl.ctl_depth_ratio" : 1.5,
-    "test_choose_ctl.ctl_depth_limit" : 450000,
+    "test_choose_ctl.ctl_depth_limit" : 45000,
     "test_choose_ctl.exp_ctl_depth_ratio_limit" : 1.5
 }
