@@ -142,7 +142,7 @@ jobs:
             ./test_chip.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
 
-  test_workflow_pe:
+  test_workflow_ctl_sub_pe:
     <<: *machine_defaults
     steps:
       - checkout
@@ -156,6 +156,21 @@ jobs:
             echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
             ./test_chip.sh ENCSR936XTK_subsampled_ctl_sub_chr19_only.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_ctl_sub_chr19_only.metadata.json
+
+  test_workflow_ctl_sub_1ctl_pe:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 300m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_chip.sh ENCSR936XTK_subsampled_ctl_sub_1ctl_chr19_only.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_ctl_sub_1ctl_chr19_only.metadata.json
 
   test_workflow_hist_se:
     <<: *machine_defaults
@@ -215,10 +230,19 @@ workflows:
       - test_workflow_se:
           requires:
             - build
+      - test_workflow_ctl_sub_se:
+          requires:
+            - build
       - test_workflow_unrep_se:
           requires:
             - build
       - test_workflow_pe:
+          requires:
+            - build
+      - test_workflow_ctl_sub_pe:
+          requires:
+            - build
+      - test_workflow_ctl_sub_1ctl_pe:
           requires:
             - build
       - test_workflow_hist_se:
