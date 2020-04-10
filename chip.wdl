@@ -1,12 +1,18 @@
-# ENCODE TF/Histone ChIP-Seq pipeline
-# Author: Jin Lee (leepc12@gmail.com)
-
-#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.7
-#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:dev-v1.3.7
+#CAPER docker quay.io/encode-dcc/chip-seq-pipeline:1.3.7
+#CAPER singularity docker://quay.io/encode-dcc/chip-seq-pipeline:1.3.7
 #CROO out_def https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v4.json
 
 workflow chip {
-	String pipeline_ver = 'dev-v1.3.7'
+	meta {
+		author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
+		description: 'ENCODE TF/Histone ChIP-Seq pipeline'
+
+		caper_docker: 'quay.io/encode-dcc/chip-seq-pipeline:1.3.7'
+		caper_singularity: 'docker://quay.io/encode-dcc/chip-seq-pipeline:1.3.7'
+		croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v4.json'
+	}
+	# pipeline version
+	String pipeline_ver = '1.3.7'
 	### sample name, description
 	String title = 'Untitled'
 	String description = 'No description'

@@ -18,7 +18,7 @@ Parameter|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `chip.pipeline_type`| `tf` | `tf` for TF ChIP-seq or `histone` for Histone ChIP-seq.
-`chip.align_only`| false | Peak calling and its downstream analyses will be disabled. Useful if you just want to map your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them.
+`chip.align_only`| false | Peak calling and its downstream analyses will be disabled. Useful if you just want to map your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them. Even though `chip.pipeline_type` does not matter for align only mode, you still need to define it since it is a required parameter in WDL. Define it as `tf` for such cases.
 `chip.true_rep_only` | false | Disable pseudo replicate generation and all related analyses
 
 ## Reference genome
