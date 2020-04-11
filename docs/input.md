@@ -18,7 +18,7 @@ Parameter|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `chip.pipeline_type`| `tf` | `tf` for TF ChIP-seq or `histone` for Histone ChIP-seq.
-`chip.align_only`| false | Peak calling and its downstream analyses will be disabled. Useful if you just want to map your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them.
+`chip.align_only`| false | Peak calling and its downstream analyses will be disabled. Useful if you just want to map your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them. Even though `chip.pipeline_type` does not matter for align only mode, you still need to define it since it is a required parameter in WDL. Define it as `tf` for such cases.
 `chip.true_rep_only` | false | Disable pseudo replicate generation and all related analyses
 
 ## Reference genome
@@ -39,6 +39,7 @@ Parameter|Type|Description
 `chip.custom_aligner_mito_idx_tar` | File | Mito-only index TAR file (uncompressed) for your own aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 `chip.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `chip.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
+`chip.blacklist2`| File | Second blacklist. Two blacklist files (`atac.blacklist` and `atac.blacklist2`) will be merged.
 `chip.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 `chip.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 `chip.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
@@ -130,9 +131,11 @@ You can mix up different data types for individual replicate/control replicate. 
 Parameter|Type|Default|Description
 ---------|---|----|-----------
 `chip.aligner` | String | bowtie2 | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
-`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic. **WARNING**: Check your FASTQs' read length first. Reads SHORTER than this will be excluded while cropping, hence not included in output BAM files and all downstream analyses. 0: cropping disabled.
+`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
+`chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
 `chip.use_bwa_mem_for_pe` | Boolean | false | Currently supported aligners: bwa and bowtie2. To use your own custom aligner, see the below parameter.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
+
 
 ## Optional filtering parameters
 
@@ -146,9 +149,12 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.subsample_reads` | 0 | Subsample reads (0: no subsampling). Subsampled reads will be used for all downsteam analyses including peak-calling
-`chip.ctl_subsample_reads` | 0 | Subsample control reads. 
+`chip.subsample_reads` | 0 | Subsample reads (0: no subsampling). For PE dataset, this is not a number of read pairs but number of reads. Subsampled reads will be used for all downsteam analyses including peak-calling. Subsampling is done during BAM to TAG-ALIGN conversion. Output TAG-ALIGN and all donwsteam analyses like peak-calling will be affected.
+`chip.ctl_subsample_reads` | 0 | Subsample control reads (not number of read pairs). For PE dataset, this is not a number of read pairs but number of reads. Subsampling is done during BAM to TAG-ALIGN conversion. Output control TAG-ALIGN and all donwsteam analyses like peak-calling will be affected.
 `chip.xcor_subsample_reads` | 15000000 | Subsample reads for cross-corr. analysis only (0: no subsampling). Subsampled reads will be used for cross-corr. analysis only
+`chip.ctl_depth_limit` | 200000000 | Hard limit for automatic subsampling control. For PE dataset, this is not a number of read pairs but number of reads. This is different from manual control subsampling controlled by `chip.xcor_subsample_reads`. This is an additional subsampling for controls in a peak-calling task.
+`chip.exp_ctl_depth_ratio_limit` | 5.0 | For each experiment replicate, corresponding chosen control will be subsampled if control's read is deeper than replicate's multiplied by this number.
+
 
 ## Optional cross-correlation analysis parameters
 
@@ -172,9 +178,9 @@ Parameter|Default|Description
 ---------|-------|-----------
 `chip.peak_caller`| `spp` for `tf` type<br>`macs2` for `histone` type| `spp` or `macs2`. `spp` requires control<br>`macs2` can work without controls
 `chip.cap_num_peak_macs2` | 500000 | Cap number of peaks called from a peak-caller (MACS2)
-`chip.pval_thresh` | 0.01 | P-value threshold for MACS2 (macs2 callpeak -p)
-`chip.idr_thresh` | 0.05 | Threshold for IDR (irreproducible discovery rate)
-`chip.fdr_thresh` | 0.01 | Threshold for FDR for run_spp.R -fdr
+`chip.pval_thresh` | 0.01 | P-value threshold for peak-caller MACS2 (macs2 callpeak -p).
+`chip.idr_thresh` | 0.05 | IDR (irreproducible discovery rate) threshold.
+`chip.fdr_thresh` | 0.01 | FDR threshold for peak-caller SPP (run_spp.R -fdr=).
 `chip.cap_num_peak_spp` | 300000 | Cap number of peaks called from a peak-caller (SPP)
 `chip.custom_call_peak_py` | File | Python script for your custom peak caller. See details about [how to use a custom peak caller](#how-to-use-a-peak-caller)
 
