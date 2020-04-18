@@ -1,15 +1,15 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.4.0.1'
+    String pipeline_ver = 'dev-v1.4.1'
 
     meta {
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'quay.io/encode-dcc/chip-seq-pipeline:v1.4.0.1'
-        caper_singularity: 'docker://quay.io/encode-dcc/chip-seq-pipeline:v1.4.0.1'
+        caper_docker: 'quay.io/encode-dcc/chip-seq-pipeline:dev-v1.4.1'
+        caper_singularity: 'docker://quay.io/encode-dcc/chip-seq-pipeline:dev-v1.4.1'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v4.json'
     }
     input {
