@@ -117,23 +117,21 @@ workflow chip {
         Array[String] filter_chrs = []
         Int subsample_reads = 0
         Int ctl_subsample_reads = 0
-        Int ctl_depth_limit = 200000000
-        Float exp_ctl_depth_ratio_limit = 5.0
-
         Int xcor_subsample_reads = 15000000
         Int xcor_exclusion_range_min = -500
         Int? xcor_exclusion_range_max
 
         # group: peak_calling
+        Int ctl_depth_limit = 200000000
+        Float exp_ctl_depth_ratio_limit = 5.0
         Array[Int?] fraglen = []
         String? peak_caller
-        Boolean always_use_pooled_ctl = false # always use pooled control for all exp rep.
-        Float ctl_depth_ratio = 1.2     # if ratio between controls is higher than this
-                                        # then always use pooled control for all exp rep.
+        Boolean always_use_pooled_ctl = false
+        Float ctl_depth_ratio = 1.2
         Int? cap_num_peak
-        Float pval_thresh = 0.01        # p.value threshold (for MACS2 peak caller only)
-        Float fdr_thresh = 0.01            # FDR threshold (for SPP peak caller only: Rscript run_spp.R -fdr)
-        Float idr_thresh = 0.05            # IDR threshold
+        Float pval_thresh = 0.01
+        Float fdr_thresh = 0.01
+        Float idr_thresh = 0.05
 
         # group: resource_parameter
         Int align_cpu = 4
@@ -180,11 +178,11 @@ workflow chip {
     parameter_meta {
         title: {
             description: 'Experiment title.',
-            group: 'pipeline_metadata',
+            group: 'pipeline_metadata'
         }
         description: {
             description: 'Experiment description.',
-            group: 'pipeline_metadata',
+            group: 'pipeline_metadata'
         }
         genome_tsv: {
             description: 'Reference genome database TSV.',
@@ -282,7 +280,7 @@ workflow chip {
             group: 'input_genomic_data',
             help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep1_R1: {
+        fastqs_rep1_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.'
@@ -292,7 +290,7 @@ workflow chip {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep2_R1: {
+        fastqs_rep2_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 2.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
@@ -302,7 +300,7 @@ workflow chip {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep3_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep3_R1: {
+        fastqs_rep3_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 3.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep3_R1). These FASTQs are usually technical replicates to be merged.'
@@ -312,7 +310,7 @@ workflow chip {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep4_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep4_R1: {
+        fastqs_rep4_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 4.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep4_R1). These FASTQs are usually technical replicates to be merged.'
@@ -322,7 +320,7 @@ workflow chip {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep5_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep5_R1: {
+        fastqs_rep5_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 5.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep5_R1). These FASTQs are usually technical replicates to be merged.'
@@ -332,7 +330,7 @@ workflow chip {
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep6_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        fastqs_rep6_R1: {
+        fastqs_rep6_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 6.',
             group: 'input_genomic_data',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep6_R1). These FASTQs are usually technical replicates to be merged.'
@@ -438,7 +436,7 @@ workflow chip {
             group: 'input_genomic_data_control',
             help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of controls (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined.  Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep1_R2).'
         }
-        ctl_fastqs_rep1_R1: {
+        ctl_fastqs_rep1_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 1.',
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.'
@@ -448,7 +446,7 @@ workflow chip {
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        ctl_fastqs_rep2_R1: {
+        ctl_fastqs_rep2_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 2.',
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
@@ -458,7 +456,7 @@ workflow chip {
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep3_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        ctl_fastqs_rep3_R1: {
+        ctl_fastqs_rep3_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 3.',
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep3_R1). These FASTQs are usually technical replicates to be merged.'
@@ -468,7 +466,7 @@ workflow chip {
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep4_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        ctl_fastqs_rep4_R1: {
+        ctl_fastqs_rep4_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 4.',
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep4_R1). These FASTQs are usually technical replicates to be merged.'
@@ -478,7 +476,7 @@ workflow chip {
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep5_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        ctl_fastqs_rep5_R1: {
+        ctl_fastqs_rep5_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 5.',
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep5_R1). These FASTQs are usually technical replicates to be merged.'
@@ -488,7 +486,7 @@ workflow chip {
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep6_R2). These FASTQs are usually technical replicates to be merged.'
         }
-        ctl_fastqs_rep6_R1: {
+        ctl_fastqs_rep6_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 6.',
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep6_R1). These FASTQs are usually technical replicates to be merged.'
@@ -618,9 +616,9 @@ workflow chip {
             help: 'Duplicate reads are filtererd out during filtering BAMs to gerenate NODUP_BAM. This flag will keep all duplicate reads in NODUP_BAM. This flag does not affect naming of NODUP_BAM. NODUP_BAM will still have .nodup. suffix in its filename.'
         }
         mapq_thresh: {
-            description: 'Threshold for low MAPQ reads removal',
+            description: 'Threshold for low MAPQ reads removal.',
             group: 'alignment',
-            help: 'Low MAPQ reads are filtered out while filtering BAM.',
+            help: 'Low MAPQ reads are filtered out while filtering BAM.'
         }
         filter_chrs: {
             description: 'List of chromosomes to be filtered out while filtering BAM.',
@@ -637,6 +635,21 @@ workflow chip {
             group: 'alignment',
             help: 'This affects all downstream analyses after filtering control BAM. (e.g. all TAG-ALIGN files, peak-calling). Reads will be shuffled only if actual number of reads in BAM exceeds this number. 0 means disabled.'
         }
+        xcor_subsample_reads: {
+            description: 'Subsample reads for cross-corrlelation analysis only.',
+            group: 'alignment',
+            help: 'This does not affect downstream analyses after filtering BAM. It is for cross-correlation analysis only.  0 means disabled.'
+        }
+        xcor_exclusion_range_min: {
+            description: 'Exclusion minimum for cross-correlation analysis.',
+            group: 'alignment',
+            help: 'For run_spp.R -s. Make sure that it is consistent with default strand shift -s=-500:5:1500 in run_spp.R.'
+        }
+        xcor_exclusion_range_max: {
+            description: 'Exclusion maximum for cross-coorrelation analysis.',
+            group: 'alignment',
+            help: 'For run_spp.R -s. If not defined default value of `max(read length + 10, 50)` for TF and `max(read_len + 10, 100)` for histone are used'
+        }
 
         ctl_depth_limit: {
             description: 'Hard limit for chosen control\'s depth.',
@@ -647,23 +660,6 @@ workflow chip {
             description: 'Second limit for chosen control\'s depth.',
             group: 'peak_calling',
             help: 'If control chosen by chip.always_use_pooled_ctl and chip.ctl_depth_ratio is deeper than experiment replicate\'s read depth multiplied by this factor then such control is subsampled down to maximum of multiplied value and hard limit chip.ctl_depth_limit.'
-        }
-
-        xcor_subsample_reads: {
-            description: 'Subsample reads for cross-corrlelation analysis only.',
-            group: 'alignment',
-            help: 'This does not affect downstream analyses after filtering BAM. It is for cross-correlation analysis only.  0 means disabled.'
-        }
-
-        xcor_exclusion_range_min: {
-            description: 'Exclusion minimum for cross-correlation analysis.',
-            group: 'peak_calling',
-            help: 'For run_spp.R -s. Make sure that it is consistent with default strand shift -s=-500:5:1500 in run_spp.R.'
-        }
-        xcor_exclusion_range_max: {
-            description: 'Exclusion maximum for cross-coorrelation analysis.',
-            group: 'peak_calling',
-            help: 'For run_spp.R -s. If not defined default value of `max(read length + 10, 50)` for TF and `max(read_len + 10, 100)` for histone are used'
         }
         fraglen: {
             description: 'Fragment length for each biological replicate.',
