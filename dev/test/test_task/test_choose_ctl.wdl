@@ -133,47 +133,47 @@ workflow test_choose_ctl {
         exp_ctl_depth_ratio_limit = exp_ctl_depth_ratio_limit,
     }
 
-    Map[String, Pair[Int, Int]] tests = {
-        'se_choose_ctl_idx1': (se_choose_ctl.chosen_ctl_ta_ids[0], ref_se_choose_ctl_idx1),
-        'se_choose_ctl_idx2': (se_choose_ctl.chosen_ctl_ta_ids[1], ref_se_choose_ctl_idx2),
-        'se_choose_ctl_sub1': (se_choose_ctl.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_sub1),
-        'se_choose_ctl_sub2': (se_choose_ctl.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_sub2),
-        'se_choose_ctl_sub_pooled': (se_choose_ctl.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_sub_pooled),
+    Array[Pair[String, Pair[Int, Int]]] tests = [
+        ('se_choose_ctl_idx1', (se_choose_ctl.chosen_ctl_ta_ids[0], ref_se_choose_ctl_idx1)),
+        ('se_choose_ctl_idx2', (se_choose_ctl.chosen_ctl_ta_ids[1], ref_se_choose_ctl_idx2)),
+        ('se_choose_ctl_sub1', (se_choose_ctl.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_sub1)),
+        ('se_choose_ctl_sub2', (se_choose_ctl.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_sub2)),
+        ('se_choose_ctl_sub_pooled', (se_choose_ctl.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_sub_pooled)),
 
-        'se_choose_ctl_always_use_pooled_ctl_idx1': (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_ids[0], ref_se_choose_ctl_always_use_pooled_ctl_idx1),
-        'se_choose_ctl_always_use_pooled_ctl_idx2': (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_ids[1], ref_se_choose_ctl_always_use_pooled_ctl_idx2),
-        'se_choose_ctl_always_use_pooled_ctl_sub1': (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_always_use_pooled_ctl_sub1),
-        'se_choose_ctl_always_use_pooled_ctl_sub2': (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_always_use_pooled_ctl_sub2),
-        'se_choose_ctl_always_use_pooled_ctl_sub_pooled': (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_always_use_pooled_ctl_sub_pooled),
+        ('se_choose_ctl_always_use_pooled_ctl_idx1', (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_ids[0], ref_se_choose_ctl_always_use_pooled_ctl_idx1)),
+        ('se_choose_ctl_always_use_pooled_ctl_idx2', (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_ids[1], ref_se_choose_ctl_always_use_pooled_ctl_idx2)),
+        ('se_choose_ctl_always_use_pooled_ctl_sub1', (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_always_use_pooled_ctl_sub1)),
+        ('se_choose_ctl_always_use_pooled_ctl_sub2', (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_always_use_pooled_ctl_sub2)),
+        ('se_choose_ctl_always_use_pooled_ctl_sub_pooled', (se_choose_ctl_always_use_pooled_ctl.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_always_use_pooled_ctl_sub_pooled)),
 
-        'se_choose_ctl_single_rep_idx1': (se_choose_ctl_single_rep.chosen_ctl_ta_ids[0], ref_se_choose_ctl_single_rep_idx1),
-        'se_choose_ctl_single_rep_sub1': (se_choose_ctl_single_rep.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_single_rep_sub1),
-        'se_choose_ctl_single_rep_sub_pooled': (se_choose_ctl_single_rep.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_single_rep_sub_pooled),
+        ('se_choose_ctl_single_rep_idx1', (se_choose_ctl_single_rep.chosen_ctl_ta_ids[0], ref_se_choose_ctl_single_rep_idx1)),
+        ('se_choose_ctl_single_rep_sub1', (se_choose_ctl_single_rep.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_single_rep_sub1)),
+        ('se_choose_ctl_single_rep_sub_pooled', (se_choose_ctl_single_rep.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_single_rep_sub_pooled)),
 
-        'se_choose_ctl_single_ctl_idx1': (se_choose_ctl_single_ctl.chosen_ctl_ta_ids[0], ref_se_choose_ctl_single_ctl_idx1),
-        'se_choose_ctl_single_ctl_idx2': (se_choose_ctl_single_ctl.chosen_ctl_ta_ids[1], ref_se_choose_ctl_single_ctl_idx2),
-        'se_choose_ctl_single_ctl_sub1': (se_choose_ctl_single_ctl.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_single_ctl_sub1),
-        'se_choose_ctl_single_ctl_sub2': (se_choose_ctl_single_ctl.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_single_ctl_sub2),
-        'se_choose_ctl_single_ctl_sub_pooled': (se_choose_ctl_single_ctl.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_single_ctl_sub_pooled),
+        ('se_choose_ctl_single_ctl_idx1', (se_choose_ctl_single_ctl.chosen_ctl_ta_ids[0], ref_se_choose_ctl_single_ctl_idx1)),
+        ('se_choose_ctl_single_ctl_idx2', (se_choose_ctl_single_ctl.chosen_ctl_ta_ids[1], ref_se_choose_ctl_single_ctl_idx2)),
+        ('se_choose_ctl_single_ctl_sub1', (se_choose_ctl_single_ctl.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_single_ctl_sub1)),
+        ('se_choose_ctl_single_ctl_sub2', (se_choose_ctl_single_ctl.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_single_ctl_sub2)),
+        ('se_choose_ctl_single_ctl_sub_pooled', (se_choose_ctl_single_ctl.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_single_ctl_sub_pooled)),
 
-        'se_choose_ctl_disabled_idx1': (se_choose_ctl_disabled.chosen_ctl_ta_ids[0], ref_se_choose_ctl_disabled_idx1),
-        'se_choose_ctl_disabled_idx2': (se_choose_ctl_disabled.chosen_ctl_ta_ids[1], ref_se_choose_ctl_disabled_idx2),
-        'se_choose_ctl_disabled_sub1': (se_choose_ctl_disabled.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_disabled_sub1),
-        'se_choose_ctl_disabled_sub2': (se_choose_ctl_disabled.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_disabled_sub2),
-        'se_choose_ctl_disabled_sub_pooled': (se_choose_ctl_disabled.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_disabled_sub_pooled),
+        ('se_choose_ctl_disabled_idx1', (se_choose_ctl_disabled.chosen_ctl_ta_ids[0], ref_se_choose_ctl_disabled_idx1)),
+        ('se_choose_ctl_disabled_idx2', (se_choose_ctl_disabled.chosen_ctl_ta_ids[1], ref_se_choose_ctl_disabled_idx2)),
+        ('se_choose_ctl_disabled_sub1', (se_choose_ctl_disabled.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_disabled_sub1)),
+        ('se_choose_ctl_disabled_sub2', (se_choose_ctl_disabled.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_disabled_sub2)),
+        ('se_choose_ctl_disabled_sub_pooled', (se_choose_ctl_disabled.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_disabled_sub_pooled)),
 
-        'se_choose_ctl_ctl_depth_limit_only_idx1': (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_ids[0], ref_se_choose_ctl_ctl_depth_limit_only_idx1),
-        'se_choose_ctl_ctl_depth_limit_only_idx2': (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_ids[1], ref_se_choose_ctl_ctl_depth_limit_only_idx2),
-        'se_choose_ctl_ctl_depth_limit_only_sub1': (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_ctl_depth_limit_only_sub1),
-        'se_choose_ctl_ctl_depth_limit_only_sub2': (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_ctl_depth_limit_only_sub2),
-        'se_choose_ctl_ctl_depth_limit_only_sub_pooled': (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_ctl_depth_limit_only_sub_pooled),
+        ('se_choose_ctl_ctl_depth_limit_only_idx1', (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_ids[0], ref_se_choose_ctl_ctl_depth_limit_only_idx1)),
+        ('se_choose_ctl_ctl_depth_limit_only_idx2', (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_ids[1], ref_se_choose_ctl_ctl_depth_limit_only_idx2)),
+        ('se_choose_ctl_ctl_depth_limit_only_sub1', (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_ctl_depth_limit_only_sub1)),
+        ('se_choose_ctl_ctl_depth_limit_only_sub2', (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_ctl_depth_limit_only_sub2)),
+        ('se_choose_ctl_ctl_depth_limit_only_sub_pooled', (se_choose_ctl_ctl_depth_limit_only.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_ctl_depth_limit_only_sub_pooled)),
 
-        'se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx1': (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_ids[0], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx1),
-        'se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx2': (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_ids[1], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx2),
-        'se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub1': (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub1),
-        'se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub2': (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub2),
-        'se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub_pooled': (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub_pooled),
-    }
+        ('se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx1', (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_ids[0], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx1)),
+        ('se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx2', (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_ids[1], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_idx2)),
+        ('se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub1', (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_subsample[0], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub1)),
+        ('se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub2', (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_subsample[1], ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub2)),
+        ('se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub_pooled', (se_choose_ctl_exp_ctl_depth_ratio_limit_only.chosen_ctl_ta_subsample_pooled, ref_se_choose_ctl_exp_ctl_depth_ratio_limit_only_sub_pooled)),
+    ]
     scatter( test in tests ) {
         String k = test.left
         Pair[Int, Int] v = test.right
