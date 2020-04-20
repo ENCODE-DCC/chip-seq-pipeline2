@@ -644,7 +644,7 @@ workflow chip {
             help: 'If control chosen by chip.always_use_pooled_ctl and chip.ctl_depth_ratio is deeper than this hard limit, then such control is subsampled.'
         }
         exp_ctl_depth_ratio_limit: {
-            description: 'Second limit for chosen control\'s' depth.',
+            description: 'Second limit for chosen control\'s depth.',
             group: 'peak_calling',
             help: 'If control chosen by chip.always_use_pooled_ctl and chip.ctl_depth_ratio is deeper than experiment replicate\'s read depth multiplied by this factor then such control is subsampled down to maximum of multiplied value and hard limit chip.ctl_depth_limit.'
         }
