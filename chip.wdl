@@ -2006,6 +2006,7 @@ task filter {
     Float picard_java_heap_factor = 0.9
 
     command {
+        set -e
         python3 $(which encode_task_filter.py) \
             ${bam} \
             ${if paired_end then '--paired-end' else ''} \
@@ -2048,6 +2049,7 @@ task bam2ta {
     }
 
     command {
+        set -e
         python3 $(which encode_task_bam2ta.py) \
             ${bam} \
             --disable-tn5-shift \
@@ -2076,6 +2078,7 @@ task spr {
     }
 
     command {
+        set -e
         python3 $(which encode_task_spr.py) \
             ${ta} \
             ${if paired_end then '--paired-end' else ''}
@@ -2100,6 +2103,7 @@ task pool_ta {
     }
 
     command {
+        set -e
         python3 $(which encode_task_pool_ta.py) \
             ${sep=' ' select_all(tas)} \
             ${'--prefix ' + prefix} \
@@ -2135,6 +2139,7 @@ task xcor {
     }
 
     command {
+        set -e
         python3 $(which encode_task_xcor.py) \
             ${ta} \
             ${if paired_end then '--paired-end' else ''} \
@@ -2175,6 +2180,7 @@ task jsd {
     }
 
     command {
+        set -e
         python3 $(which encode_task_jsd.py) \
             ${sep=' ' select_all(nodup_bams)} \
             ${if length(ctl_bams)>0 then '--ctl-bam '+ select_first(ctl_bams) else ''} \
@@ -2208,6 +2214,7 @@ task choose_ctl {
     }
 
     command {
+        set -e
         python3 $(which encode_task_choose_ctl.py) \
             --tas ${sep=' ' select_all(tas)} \
             --ctl-tas ${sep=' ' select_all(ctl_tas)} \
@@ -2241,6 +2248,7 @@ task count_signal_track {
     }
 
     command {
+        set -e
         python3 $(which encode_task_count_signal_track.py) \
             ${ta} \
             ${'--chrsz ' + chrsz}
@@ -2353,6 +2361,7 @@ task macs2_signal_track {
     }
 
     command {
+        set -e
         python3 $(which encode_task_macs2_signal_track_chip.py) \
             ${sep=' ' select_all(tas)} \
             ${'--gensz '+ gensz} \
@@ -2393,6 +2402,7 @@ task idr {
     }
 
     command {
+        set -e
         ${if defined(ta) then '' else 'touch null.frip.qc'}
         touch null 
         python3 $(which encode_task_idr.py) \
@@ -2442,6 +2452,7 @@ task overlap {
     }
 
     command {
+        set -e
         ${if defined(ta) then '' else 'touch null.frip.qc'}
         touch null 
         python3 $(which encode_task_overlap.py) \
@@ -2485,6 +2496,7 @@ task reproducibility {
     }
 
     command {
+        set -e
         python3 $(which encode_task_reproducibility.py) \
             ${sep=' ' peaks} \
             --peaks-pr ${sep=' ' peaks_pr} \
@@ -2527,6 +2539,7 @@ task gc_bias {
     Float picard_java_heap_factor = 0.9
 
     command {
+        set -e
         python3 $(which encode_task_gc_bias.py) \
             ${'--nodup-bam ' + nodup_bam} \
             ${'--ref-fa ' + ref_fa} \
@@ -2612,6 +2625,7 @@ task qc_report {
     }
 
     command {
+        set -e
         python3 $(which encode_task_qc_report.py) \
             ${'--pipeline-ver ' + pipeline_ver} \
             ${"--title '" + sub(title,"'","_") + "'"} \
