@@ -1,0 +1,16 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.3.0/ENCSR936XTK_subsampled_chr19_only/qc.json",
+    "chip.pipeline_type" : "control",
+    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/genome_tsv/v1/hg38_chr19_chrM_gcp.tsv",
+    "chip.fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R1.subsampled.80.fastq.gz"
+    ],
+    "chip.fastqs_rep1_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R2" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz"
+    ],
+    "chip.paired_end" : true,
+    "chip.title" : "ENCSR936XTK (subsampled 1/50, chr19_chrM Only, control only)",
+    "chip.description" : "ZNF143 ChIP-seq on human GM12878"
+}

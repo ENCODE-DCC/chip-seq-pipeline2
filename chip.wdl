@@ -548,14 +548,14 @@ workflow chip {
         }
 
         pipeline_type: {
-            description: 'Pipeline type. tf for TF ChIP-Seq or histone for Histone ChIP-Seq.',
+            description: 'Pipeline type. tf for TF ChIP-Seq, histone for Histone ChIP-Seq or control for mapping controls only.',
             group: 'pipeline_parameter',
-            help: 'Default peak caller is different for each type. spp For TF ChIP-Seq and macs2 for histone ChIP-Seq. Regardless of pipeline type, spp always requires controls but macs2 doesn\'t.'
+            help: 'Default peak caller is different for each type. spp For TF ChIP-Seq and macs2 for histone ChIP-Seq. Regardless of pipeline type, spp always requires controls but macs2 doesn\'t. For control mode, chip.align_only is automatically turned on and cross-correlation analysis is disabled. Do not define ctl_* for control mode. Define fastqs_repX_RY instead.'
         }
         align_only: {
             description: 'Align only mode.',
             group: 'pipeline_parameter',
-            help: 'Reads will be aligned but there will be no peak-calling on them.'
+            help: 'Reads will be aligned but there will be no peak-calling on them. It is turned on automatically if chip.pipeline_type is control.'
         }
         true_rep_only: {
             description: 'Disables all analyses related to pseudo-replicates.',
@@ -921,6 +921,8 @@ workflow chip {
     Int cap_num_peak_ = if peak_caller_ == 'spp' then select_first([cap_num_peak, cap_num_peak_spp])
         else select_first([cap_num_peak, cap_num_peak_macs2])
     Int mapq_thresh_ = mapq_thresh
+    Boolean enable_xcor_ = if pipeline_type=='control' then false else true
+    Boolean align_only_ = if pipeline_type=='control' then true else align_only
 
     # temporary 2-dim fastqs array [rep_id][merge_id]
     Array[Array[File]] fastqs_R1 = 
@@ -1017,7 +1019,7 @@ workflow chip {
             msg = 'No FASTQ/BAM/TAG-ALIGN/PEAK defined in your input JSON. Check if your FASTQs are defined as "chip.fastqs_repX_RY". DO NOT MISS suffix _R1 even for single ended FASTQ.'
         }
     }
-    if ( !align_only && peak_caller_ == 'spp' && num_ctl == 0 ) {
+    if ( !align_only_ && peak_caller_ == 'spp' && num_ctl == 0 ) {
         call raise_exception as error_control_required { input:
             msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
         }
@@ -1040,6 +1042,16 @@ workflow chip {
                   'Disable automatic control subsampling by explicitly defining the above two parameters as 0 in your input JSON file. ' +
                   'You can still use manual control subsamping ("chip.ctl_subsample_reads">0) since it is done ' +
                   'for individual control\'s TAG-ALIGN output according to each control\'s endedness. '
+        }
+    }
+    if ( pipeline_type = 'control' && num_ctl > 0 ) {
+        call raise_exception as error_ctl_input_defined_in_control_mode { input:
+            msg = 'In control mode (chip.pipeline_type: control), do not define ctl_* input variables. Define fastqs_repX_RY instead.'
+        }
+    }
+    if ( pipeline_type = 'control' && num_rep_fastq == 0 ) {
+        call raise_exception as error_ctl_fastq_input_required_for_control_mode { input:
+            msg = 'Control mode (chip.pipeline_type: control) is for FASTQs only. Define FASTQs in fastqs_repX_RY. Pipeline will recognize them as control FASTQs.'
         }
     }
 
@@ -1116,7 +1128,7 @@ workflow chip {
         File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
 
         Boolean has_input_of_spr = has_output_of_bam2ta || defined(bam2ta.ta)
-        if ( has_input_of_spr && !align_only && !true_rep_only ) {
+        if ( has_input_of_spr && !align_only_ && !true_rep_only ) {
             call spr { input :
                 ta = ta_,
                 paired_end = paired_end_,
@@ -1236,7 +1248,7 @@ workflow chip {
             else paired_end_
 
         Boolean has_input_of_xcor = defined(ta_xcor)
-        if ( has_input_of_xcor ) {
+        if ( has_input_of_xcor && enable_xcor_ ) {
             call xcor { input :
                 ta = ta_xcor,
                 paired_end = paired_end_xcor,
@@ -1343,7 +1355,7 @@ workflow chip {
 
     # if there are pr1 TAs for ALL replicates then pool them
     Boolean has_all_inputs_of_pool_ta_pr1 = length(select_all(spr.ta_pr1))==num_rep
-    if ( has_all_inputs_of_pool_ta_pr1 && num_rep>1 && !align_only && !true_rep_only ) {
+    if ( has_all_inputs_of_pool_ta_pr1 && num_rep>1 && !align_only_ && !true_rep_only ) {
         # pool tagaligns from pseudo replicate 1
         call pool_ta as pool_ta_pr1 { input :
             tas = spr.ta_pr1,
@@ -1353,7 +1365,7 @@ workflow chip {
 
     # if there are pr2 TAs for ALL replicates then pool them
     Boolean has_all_inputs_of_pool_ta_pr2 = length(select_all(spr.ta_pr2))==num_rep
-    if ( has_all_inputs_of_pool_ta_pr1 && num_rep>1 && !align_only && !true_rep_only ) {
+    if ( has_all_inputs_of_pool_ta_pr1 && num_rep>1 && !align_only_ && !true_rep_only ) {
         # pool tagaligns from pseudo replicate 2
         call pool_ta as pool_ta_pr2 { input :
             tas = spr.ta_pr2,
@@ -1397,7 +1409,7 @@ workflow chip {
 
     Boolean has_all_input_of_choose_ctl = length(select_all(ta_))==num_rep
         && length(select_all(ctl_ta_))==num_ctl && num_ctl > 0
-    if ( has_all_input_of_choose_ctl && !align_only ) {
+    if ( has_all_input_of_choose_ctl && !align_only_ ) {
         # choose appropriate control for each exp IP replicate
         # outputs:
         #     choose_ctl.idx : control replicate index for each exp replicate 
@@ -1420,19 +1432,19 @@ workflow chip {
         #     >=0: control TA index (this means that control TA with this index exists)
         #     -1: use pooled control
         #    -2: there is no control
-        Int chosen_ctl_ta_id = if has_all_input_of_choose_ctl && !align_only then
+        Int chosen_ctl_ta_id = if has_all_input_of_choose_ctl && !align_only_ then
             select_first([choose_ctl.chosen_ctl_ta_ids])[i] else -2
         Array[File] chosen_ctl_tas = if chosen_ctl_ta_id == -2 then []
             else if chosen_ctl_ta_id == -1 then [ select_first([pool_ta_ctl.ta_pooled]) ]
             else [ select_first([ctl_ta_[ chosen_ctl_ta_id ]]) ]
 
-        Int chosen_ctl_ta_subsample = if has_all_input_of_choose_ctl && !align_only then
+        Int chosen_ctl_ta_subsample = if has_all_input_of_choose_ctl && !align_only_ then
             select_first([choose_ctl.chosen_ctl_ta_subsample])[i] else 0
         Boolean chosen_ctl_paired_end = if chosen_ctl_ta_id == -2 then false
             else if chosen_ctl_ta_id == -1 then ctl_paired_end_[0]
             else ctl_paired_end_[chosen_ctl_ta_id]
     }
-    Int chosen_ctl_ta_pooled_subsample = if has_all_input_of_choose_ctl && !align_only then
+    Int chosen_ctl_ta_pooled_subsample = if has_all_input_of_choose_ctl && !align_only_ then
         select_first([choose_ctl.chosen_ctl_ta_subsample_pooled]) else 0
 
     # workaround for dx error (Unsupported combination: womType: Int womValue: ([225], Array[Int]))
@@ -1442,7 +1454,7 @@ workflow chip {
     scatter(i in range(num_rep)) {
         Boolean has_input_of_call_peak = defined(ta_[i])
         Boolean has_output_of_call_peak = i<length(peaks) && defined(peaks[i])
-        if ( has_input_of_call_peak && !has_output_of_call_peak && !align_only ) {
+        if ( has_input_of_call_peak && !has_output_of_call_peak && !align_only_ ) {
             call call_peak { input :
                 peak_caller = peak_caller_,
                 peak_type = peak_type_,
@@ -1468,7 +1480,7 @@ workflow chip {
             else call_peak.peak
 
         # signal track
-        if ( has_input_of_call_peak && !align_only ) {
+        if ( has_input_of_call_peak && !align_only_ ) {
             call macs2_signal_track { input :
                 tas = flatten([[ta_[i]], chosen_ctl_tas[i]]),
                 gensz = gensz_,
@@ -1541,7 +1553,7 @@ workflow chip {
             else call_peak_pr2.peak
     }
 
-    # if ( !align_only && num_rep > 1 ) {
+    # if ( !align_only_ && num_rep > 1 ) {
     # rounded mean of fragment length, which will be used for 
     #  1) calling peaks for pooled true/pseudo replicates
     #  2) calculating FRiP
@@ -1551,15 +1563,15 @@ workflow chip {
     # }
 
     # actually not an array
-    Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl || align_only then []
+    Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl || align_only_ then []
         else if num_ctl < 2 then [ctl_ta_[0]] # choose first (only) control
         else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
-    Boolean chosen_ctl_ta_pooled_paired_end = if !has_all_input_of_choose_ctl || align_only then false
+    Boolean chosen_ctl_ta_pooled_paired_end = if !has_all_input_of_choose_ctl || align_only_ then false
         else ctl_paired_end_[0]
 
     Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
     Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
-    if ( has_input_of_call_peak_pooled && !has_output_of_call_peak_pooled && !align_only && num_rep>1 ) {
+    if ( has_input_of_call_peak_pooled && !has_output_of_call_peak_pooled && !align_only_ && num_rep>1 ) {
         # call peaks on pooled replicate
         # always call peaks for pooled replicate to get signal tracks
         call call_peak as call_peak_pooled { input :
@@ -1587,7 +1599,7 @@ workflow chip {
         else call_peak_pooled.peak    
 
     # macs2 signal track for pooled rep
-    if ( has_input_of_call_peak_pooled && !align_only && num_rep>1 ) {
+    if ( has_input_of_call_peak_pooled && !align_only_ && num_rep>1 ) {
         call macs2_signal_track as macs2_signal_track_pooled { input :
             tas = flatten([select_all([pool_ta.ta_pooled]), chosen_ctl_ta_pooled]),
             gensz = gensz_,
@@ -1605,7 +1617,7 @@ workflow chip {
 
     Boolean has_input_of_call_peak_ppr1 = defined(pool_ta_pr1.ta_pooled)
     Boolean has_output_of_call_peak_ppr1 = defined(peak_ppr1)
-    if ( has_input_of_call_peak_ppr1 && !has_output_of_call_peak_ppr1 && !align_only && !true_rep_only && num_rep>1 ) {
+    if ( has_input_of_call_peak_ppr1 && !has_output_of_call_peak_ppr1 && !align_only_ && !true_rep_only && num_rep>1 ) {
         # call peaks on 1st pooled pseudo replicates
         call call_peak as call_peak_ppr1 { input :
             peak_caller = peak_caller_,
@@ -1633,7 +1645,7 @@ workflow chip {
 
     Boolean has_input_of_call_peak_ppr2 = defined(pool_ta_pr2.ta_pooled)
     Boolean has_output_of_call_peak_ppr2 = defined(peak_ppr2)
-    if ( has_input_of_call_peak_ppr2 && !has_output_of_call_peak_ppr2 && !align_only && !true_rep_only && num_rep>1 ) {
+    if ( has_input_of_call_peak_ppr2 && !has_output_of_call_peak_ppr2 && !align_only_ && !true_rep_only && num_rep>1 ) {
         # call peaks on 2nd pooled pseudo replicates
         call call_peak as call_peak_ppr2 { input :
             peak_caller = peak_caller_,
@@ -1666,7 +1678,7 @@ workflow chip {
         # pair.right = 0-based index of 2nd replicate
         File? peak1_ = peak_[pair.left]
         File? peak2_ = peak_[pair.right]
-        if ( !align_only && pair.left<pair.right ) {
+        if ( !align_only_ && pair.left<pair.right ) {
             # Naive overlap on every pair of true replicates
             call overlap { input :
                 prefix = 'rep'+(pair.left+1)+'_vs_rep'+(pair.right+1),
@@ -1681,7 +1693,7 @@ workflow chip {
                 ta = pool_ta.ta_pooled,
             }
         }
-        if ( enable_idr && !align_only && pair.left<pair.right ) {
+        if ( enable_idr && !align_only_ && pair.left<pair.right ) {
             # IDR on every pair of true replicates
             call idr { input :
                 prefix = 'rep'+(pair.left+1)+'_vs_rep'+(pair.right+1),
@@ -1701,7 +1713,7 @@ workflow chip {
     }
 
     # overlap on pseudo-replicates (pr1, pr2) for each true replicate
-    if ( !align_only && !true_rep_only ) {
+    if ( !align_only_ && !true_rep_only ) {
         scatter( i in range(num_rep) ) {
             call overlap as overlap_pr { input :
                 prefix = 'rep'+(i+1)+'-pr1_vs_rep'+(i+1)+'-pr2',
@@ -1718,7 +1730,7 @@ workflow chip {
         }
     }
 
-    if ( !align_only && !true_rep_only && enable_idr ) {
+    if ( !align_only_ && !true_rep_only && enable_idr ) {
         scatter( i in range(num_rep) ) {
             # IDR on pseduo replicates
             call idr as idr_pr { input :
@@ -1738,7 +1750,7 @@ workflow chip {
         }
     }
 
-    if ( !align_only && !true_rep_only && num_rep > 1 ) {
+    if ( !align_only_ && !true_rep_only && num_rep > 1 ) {
         # Naive overlap on pooled pseudo replicates
         call overlap as overlap_ppr { input :
             prefix = 'pooled-pr1_vs_pooled-pr2',
@@ -1754,7 +1766,7 @@ workflow chip {
         }
     }
 
-    if ( !align_only && !true_rep_only && num_rep > 1 ) {
+    if ( !align_only_ && !true_rep_only && num_rep > 1 ) {
         # IDR on pooled pseduo replicates
         call idr as idr_ppr { input :
             prefix = 'pooled-pr1_vs_pooled-pr2',
@@ -1773,7 +1785,7 @@ workflow chip {
     }
 
     # reproducibility QC for overlap/IDR peaks
-    if ( !align_only && !true_rep_only && num_rep > 0 ) {
+    if ( !align_only_ && !true_rep_only && num_rep > 0 ) {
         # reproducibility QC for overlapping peaks
         call reproducibility as reproducibility_overlap { input :
             prefix = 'overlap',
@@ -1785,7 +1797,7 @@ workflow chip {
         }
     }
 
-    if ( !align_only && !true_rep_only && num_rep > 0 && enable_idr ) {
+    if ( !align_only_ && !true_rep_only && num_rep > 0 && enable_idr ) {
         # reproducibility QC for IDR peaks
         call reproducibility as reproducibility_idr { input :
             prefix = 'idr',

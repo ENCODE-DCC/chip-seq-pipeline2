@@ -9,7 +9,7 @@ An input JSON file is a file which must include all the information needed to ru
 Mandatory parameters.
 
 1) Pipeline type
-    * `chip.pipeline_type`: `tf` for TF ChIP-seq or `histone` for histone ChIP-seq. One major difference between two types is that `tf` uses `spp` peak caller with controls but `histone` uses `macs2` peak caller without controls. 
+    * `chip.pipeline_type`: `tf` for TF ChIP-seq, `histone` for histone ChIP-seq and `control` for aligning control FASTQs only. One major difference between two types is that `tf` uses `spp` peak caller with controls but `histone` uses `macs2` peak caller without controls. If it is `control` then `chip.align_only` is automatically turned on and pipeline will align FASTQs defined in `chip.fastqs_repX_RY` (where `X` means control replicate ID and `Y` is read-end) as controls. For control mode, do not define  `chip.ctl_fastqs_repX_RY`. Pipeline will skip cross-correlation analysis for control mode.
 
 2) Experiment title/description
     * `chip.title`: experiment title for a final HTML report.

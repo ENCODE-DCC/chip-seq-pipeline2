@@ -17,7 +17,7 @@ Parameter|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.pipeline_type`| `tf` | `tf` for TF ChIP-seq or `histone` for Histone ChIP-seq.
+`chip.pipeline_type`| `tf` | `tf` for TF ChIP-seq, `histone` for Histone ChIP-seq and `control` for mapping control FASTQs only. If it is `control` then `chip.align_only` is automatically turned on and pipeline will align FASTQs defined in `chip.fastqs_repX_RY` (where `X` means control replicate ID and `Y` is read-end) as controls. For control mode, do not define  `chip.ctl_fastqs_repX_RY`. Pipeline will skip cross-correlation analysis for control mode.
 `chip.align_only`| false | Peak calling and its downstream analyses will be disabled. Useful if you just want to map your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them. Even though `chip.pipeline_type` does not matter for align only mode, you still need to define it since it is a required parameter in WDL. Define it as `tf` for such cases.
 `chip.true_rep_only` | false | Disable pseudo replicate generation and all related analyses
 
