@@ -922,6 +922,7 @@ workflow chip {
         else select_first([cap_num_peak, cap_num_peak_macs2])
     Int mapq_thresh_ = mapq_thresh
     Boolean enable_xcor_ = if pipeline_type=='control' then false else true
+    Boolean enable_jsd_ = if pipeline_type=='control' then false else enable_jsd
     Boolean align_only_ = if pipeline_type=='control' then true else align_only
 
     # temporary 2-dim fastqs array [rep_id][merge_id]
@@ -1392,7 +1393,7 @@ workflow chip {
     }
 
     Boolean has_input_of_jsd = defined(blacklist_) && length(select_all(nodup_bam_))==num_rep
-    if ( has_input_of_jsd && num_rep > 0 && enable_jsd ) {
+    if ( has_input_of_jsd && num_rep > 0 && enable_jsd_ ) {
         # fingerprint and JS-distance plot
         call jsd { input :
             nodup_bams = nodup_bam_,
