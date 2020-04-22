@@ -10,7 +10,6 @@
     "chip.ctl_fastqs_rep2_R1" : ["https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled/ctl2.subsampled.25.fastq.gz"
     ],
     "chip.paired_end" : false,
-    "chip.always_use_pooled_ctl" : true,
     "chip.title" : "ENCSR000DYI (subsampled 1/25, chr19_chrM only)",
     "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab"
 }

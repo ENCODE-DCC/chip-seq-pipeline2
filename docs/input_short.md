@@ -54,7 +54,7 @@ Mandatory parameters.
 
 8) Parameters for automatically choosing an appropriate control and subsampling it.
     Before calling peaks, there is a separate (from item 7) mechanism to subsample controls to prevent using too deep controls. Pipeline has a logic to find an approriate control for each experiment replicate. Choices are 1) control with the same index (e.g. rep2 vs. ctl2), 2) pooled control (e.g. rep2 vs. ctl1 + ctl2).
-    * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
+    * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is enabled by default.
     * `chip.ctl_depth_ratio`: (For experiments with controls only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
 
     > **IMPORTANT**: Either of the following parameters are set to > 0 for automatic subsampling. Set all of them to 0 to disable automatic subsample. Such automatic control subsampling does not work with controls with mixed endedness (e.g. SE ctl-rep1 + PE ctl-rep2). Pipeline calculates `Limit1` and `Limit2` from the following two parameters. And then takes a maximum of them and calls it `Limit`. If a chosen control for experiment replicate (each one and pooled one) is deeper than `Limit` then that such control is subsampled to `Limit`.
