@@ -1044,12 +1044,12 @@ workflow chip {
                   'for individual control\'s TAG-ALIGN output according to each control\'s endedness. '
         }
     }
-    if ( pipeline_type = 'control' && num_ctl > 0 ) {
+    if ( pipeline_type == 'control' && num_ctl > 0 ) {
         call raise_exception as error_ctl_input_defined_in_control_mode { input:
             msg = 'In control mode (chip.pipeline_type: control), do not define ctl_* input variables. Define fastqs_repX_RY instead.'
         }
     }
-    if ( pipeline_type = 'control' && num_rep_fastq == 0 ) {
+    if ( pipeline_type == 'control' && num_rep_fastq == 0 ) {
         call raise_exception as error_ctl_fastq_input_required_for_control_mode { input:
             msg = 'Control mode (chip.pipeline_type: control) is for FASTQs only. Define FASTQs in fastqs_repX_RY. Pipeline will recognize them as control FASTQs.'
         }
