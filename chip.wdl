@@ -922,7 +922,9 @@ workflow chip {
         else select_first([cap_num_peak, cap_num_peak_macs2])
     Int mapq_thresh_ = mapq_thresh
     Boolean enable_xcor_ = if pipeline_type=='control' then false else true
+    Boolean enable_count_signal_track_ = if pipeline_type=='control' then false else enable_count_signal_track
     Boolean enable_jsd_ = if pipeline_type=='control' then false else enable_jsd
+    Boolean enable_gc_bias_ = if pipeline_type=='control' then false else enable_gc_bias
     Boolean align_only_ = if pipeline_type=='control' then true else align_only
 
     # temporary 2-dim fastqs array [rep_id][merge_id]
@@ -1138,7 +1140,7 @@ workflow chip {
         }
 
         Boolean has_input_of_count_signal_track = has_output_of_bam2ta || defined(bam2ta.ta)
-        if ( has_input_of_count_signal_track && enable_count_signal_track ) {
+        if ( has_input_of_count_signal_track && enable_count_signal_track_ ) {
             # generate count signal track
             call count_signal_track { input :
                 ta = ta_,
@@ -1146,7 +1148,7 @@ workflow chip {
             }
         }
 
-        if ( enable_gc_bias && defined(nodup_bam_) && defined(ref_fa_) ) {
+        if ( enable_gc_bias_ && defined(nodup_bam_) && defined(ref_fa_) ) {
             call gc_bias { input :
                 nodup_bam = nodup_bam_,
                 ref_fa = ref_fa_,
@@ -1385,7 +1387,7 @@ workflow chip {
     }
 
     Boolean has_input_of_count_signal_track_pooled = defined(pool_ta.ta_pooled)
-    if ( has_input_of_count_signal_track_pooled && enable_count_signal_track && num_rep>1 ) {
+    if ( has_input_of_count_signal_track_pooled && enable_count_signal_track_ && num_rep>1 ) {
         call count_signal_track as count_signal_track_pooled { input :
             ta = pool_ta.ta_pooled,
             chrsz = chrsz_,
