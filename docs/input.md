@@ -166,7 +166,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.always_use_pooled_ctl` | false | Choosing an appropriate control for each replicate. Always use a pooled control to compare with each replicate. If a single control is given then use it.
+`chip.always_use_pooled_ctl` | true | Choosing an appropriate control for each replicate. Always use a pooled control to compare with each replicate. If a single control is given then use it.
 `chip.ctl_depth_ratio` | 1.2 | If ratio of depth between controls is higher than this. then always use a pooled control for all replicates.
 
 ## Optional peak-calling parameters

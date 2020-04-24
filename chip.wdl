@@ -126,7 +126,7 @@ workflow chip {
         Float exp_ctl_depth_ratio_limit = 5.0
         Array[Int?] fraglen = []
         String? peak_caller
-        Boolean always_use_pooled_ctl = false
+        Boolean always_use_pooled_ctl = true
         Float ctl_depth_ratio = 1.2
         Int? cap_num_peak
         Float pval_thresh = 0.01
