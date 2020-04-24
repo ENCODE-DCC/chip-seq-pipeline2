@@ -16,37 +16,37 @@ workflow chip {
             pipeline_metadata: {
                 title: 'Pipeline metadata',
                 description: 'Metadata for a pipeline (e.g. title and description).'
-            }
+            },
             reference_genome: {
                 title: 'Reference genome',
                 description: 'Genome specific files. e.g. reference FASTA, bowtie2 index, chromosome sizes file.',
                 help: 'Choose one chip.genome_tsv file that defines all genome specific parameters in it or define each genome specific parameter in input JSON to override those defined in genome TSV file. If you use Caper then use https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/[GENOME]_caper.tsv. Caper will automatically download/install all files defined in such TSV. Otherwise download genome TSV file by using a shell script (scripts/download_genome_data.sh [GENOME] [DEST_DIR]). Supported genomes are hg38, hg19, mm10 and mm9. See pipeline documentation if you want to build genome database from your own FASTA file. If some genome data are missing then analyses using such data will be skipped.'
-            }
+            },
             input_genomic_data: {
                 title: 'Input genomic data',
                 description: 'Genomic input files for experiment.',
                 help: 'Pipeline can start with any types of experiment data (e.g. FASTQ, BAM, NODUP_BAM, TAG-ALIGN, PEAK). Choose one type and leave others empty. FASTQs have a variable for each biological replicate. e.g. chip.fastqs_rep1_R1 and chip.fastqs_rep2_R1. You can define up to 10 experiment replicates. For other types, there is an array to define file for each biological replicate. e.g. chip.bams: ["rep1.bam", "rep1.bam"]. Define sequential endedness with chip.paired_end, if you have mixed SE and PE replicates then define chip.paired_ends instead for each replicate. e.g. chip.paired_ends: [false, true].'
-            }
+            },
             input_genomic_data_control: {
                 title: 'Input genomic data (control)',
                 description: 'Genomic input files for control. TF ChIP-seq requires control for peak calling but histone ChIP-seq does not.',
                 help: 'Pipeline can start with any types of control data (e.g. FASTQ, BAM, NODUP_BAM, TAG-ALIGN). Choose one type and leave others empty. FASTQs have a variable for each control replicate. e.g. chip.ctl_fastqs_rep1_R1 and chip.ctl_fastqs_rep2_R1. You can define up to 10 control replicates. For other types, there is an array to define file for each control replicate. e.g. chip.ctl_bams: ["ctl1.bam", "ctl1.bam"]. Define sequential endedness with chip.ctl_paired_end, if you have mixed SE and PE control replicates then define chip.ctl_paired_ends instead for each replicate. e.g. chip.ctl_paired_ends: [false, true]. If none of these are defined, pipeline will use chip.paired_end for controls.'
-            }
+            },
             pipeline_parameter: {
                 title: 'Pipeline parameter',
                 description: 'Pipeline type and flags to turn on/off analyses.',
                 help: 'Use chip.align_only to align FASTQs without peak calling.'
-            }
+            },
             alignment: {
                 title: 'Alignment',
                 description: 'Parameters for alignment.',
                 help: 'Pipeline can crop FASTQs (chip.crop_length > 0) with tolerance (chip.crop_length_tol) before mapping.'
-            }
+            },
             peak_calling: {
                 title: 'Peak calling',
                 description: 'Parameters for peak calling.',
                 help: 'This group includes statistical thresholds for peak-calling or post-peak-calling analyses: p-val, FDR, IDR. It also include parameters for control choosing/subsampling. All control replicates are pooled and pooled control is used for peak calling against each experiment replicate by default (see chip.always_use_pooled_ctl). Pipeline compares read depth of experiment replicate and a chosen control. It also compare read depth of controls. If control is too deep then it is subsampled.'
-            }
+            },
             resource_parameter: {
                 title: 'Resource parameter',
                 description: 'Number of CPUs (threads), max. memory and walltime for tasks.',
