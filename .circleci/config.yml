@@ -144,6 +144,21 @@ jobs:
             ./test_chip.sh ENCSR936XTK_subsampled_chr19_only.json tmp_key.json ${TAG}
             python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_chr19_only.metadata.json
 
+  test_workflow_pe_control_mode:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - run: *make_tag
+      - run:
+          no_output_timeout: 300m
+          command: |
+            source ${BASH_ENV}
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            cd dev/test/test_workflow/
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_key.json
+            ./test_chip.sh ENCSR936XTK_subsampled_chr19_only_control_mode.json tmp_key.json ${TAG}
+            python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'outputs'][u'chip.qc_json_ref_match']))" < ENCSR936XTK_subsampled_chr19_only_control_mode.metadata.json
+
   test_workflow_ctl_sub_pe:
     <<: *machine_defaults
     steps:
@@ -239,6 +254,9 @@ workflows:
           requires:
             - build
       - test_workflow_pe:
+          requires:
+            - build
+      - test_workflow_pe_control_mode:
           requires:
             - build
       - test_workflow_ctl_sub_pe:
