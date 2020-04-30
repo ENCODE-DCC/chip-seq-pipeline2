@@ -225,7 +225,7 @@ workflow chip {
         }
         description: {
             description: 'Experiment description.',
-            group: 'pipeline_metadata'
+            group: 'pipeline_metadata',
             example: 'ZNF143 ChIP-seq on human GM12878 (subsampled 1/50)'
         }
         genome_tsv: {
@@ -516,7 +516,7 @@ workflow chip {
         ctl_fastqs_rep2_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 2.',
             group: 'input_genomic_data_control',
-            help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.',
             example: [
                 'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz'
             ]
