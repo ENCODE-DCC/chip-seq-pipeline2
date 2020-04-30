@@ -220,16 +220,19 @@ workflow chip {
     parameter_meta {
         title: {
             description: 'Experiment title.',
-            group: 'pipeline_metadata'
+            group: 'pipeline_metadata',
+            example: 'ENCSR936XTK (subsampled 1/50)'
         }
         description: {
             description: 'Experiment description.',
             group: 'pipeline_metadata'
+            example: 'ZNF143 ChIP-seq on human GM12878 (subsampled 1/50)'
         }
         genome_tsv: {
             description: 'Reference genome database TSV.',
             group: 'reference_genome',
-            help: 'This TSV files includes all genome specific parameters (e.g. reference FASTA, bowtie2 index). You can still invidiaully define any parameters in it. Parameters defined in input JSON will override those defined in genome TSV.'
+            help: 'This TSV files includes all genome specific parameters (e.g. reference FASTA, bowtie2 index). You can still invidiaully define any parameters in it. Parameters defined in input JSON will override those defined in genome TSV.',
+            example: 'https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/hg38_caper.tsv'
         }
         genome_name: {
             description: 'Genome name.',
@@ -310,7 +313,8 @@ workflow chip {
         paired_end: {
             description: 'Sequencing endedness.',
             group: 'input_genomic_data',
-            help: 'Setting this on means that all replicates are paired ended. For mixed samples, use chip.paired_ends array instead.'
+            help: 'Setting this on means that all replicates are paired ended. For mixed samples, use chip.paired_ends array instead.',
+            example: true
         }
         paired_ends: {
             description: 'Sequencing endedness array (for mixed SE/PE datasets).',
@@ -320,22 +324,34 @@ workflow chip {
         fastqs_rep1_R1: {
             description: 'Read1 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
-            help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.'
+            help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of inputs (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined. Especially for FASTQs, we have individual variable for each biological replicate to allow FASTQs of technical replicates can be merged. Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep1_R2). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R1.subsampled.50.fastq.gz'
+            ]
         }
         fastqs_rep1_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 1.',
             group: 'input_genomic_data',
-            help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep1-R2.subsampled.50.fastq.gz'
+            ]
         }
         fastqs_rep2_R1: {
             description: 'Read1 FASTQs to be merged for a biological replicate 2.',
             group: 'input_genomic_data',
-            help: 'Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read2 FASTQs (chip.fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R1.subsampled.50.fastq.gz'
+            ]
         }
         fastqs_rep2_R2: {
             description: 'Read2 FASTQs to be merged for a biological replicate 2.',
             group: 'input_genomic_data',
-            help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read1 FASTQs (chip.fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/rep2-R2.subsampled.50.fastq.gz'
+            ]
         }
         fastqs_rep3_R1: {
             description: 'Read1 FASTQs to be merged for a biological replicate 3.',
@@ -476,22 +492,34 @@ workflow chip {
         ctl_fastqs_rep1_R1: {
             description: 'Read1 FASTQs to be merged for a control replicate 1.',
             group: 'input_genomic_data_control',
-            help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of controls (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined.  Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep1_R2).'
+            help: 'Define if you want to start pipeline from FASTQs files. Pipeline can start from any type of controls (e.g. FASTQs, BAMs, ...). Choose one type and fill paramters for that type and leave other undefined.  Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep1_R2).',
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R1.subsampled.80.fastq.gz'
+            ]
         }
         ctl_fastqs_rep1_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 1.',
             group: 'input_genomic_data_control',
-            help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep1_R1). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl1-R2.subsampled.80.fastq.gz'
+            ]
         }
         ctl_fastqs_rep2_R1: {
             description: 'Read1 FASTQs to be merged for a control replicate 2.',
             group: 'input_genomic_data_control',
-            help: 'Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.'
+            help: 'Make sure that they are consistent with read2 FASTQs (chip.ctl_fastqs_rep2_R2). These FASTQs are usually technical replicates to be merged.',
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R1.subsampled.80.fastq.gz'
+            ]
         }
         ctl_fastqs_rep2_R2: {
             description: 'Read2 FASTQs to be merged for a control replicate 2.',
             group: 'input_genomic_data_control',
             help: 'Make sure that they are consistent with read1 FASTQs (chip.ctl_fastqs_rep2_R1). These FASTQs are usually technical replicates to be merged.'
+            example: [
+                'https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR936XTK/fastq_subsampled/ctl2-R2.subsampled.80.fastq.gz'
+            ]
         }
         ctl_fastqs_rep3_R1: {
             description: 'Read1 FASTQs to be merged for a control replicate 3.',
@@ -592,7 +620,9 @@ workflow chip {
         pipeline_type: {
             description: 'Pipeline type. tf for TF ChIP-Seq, histone for Histone ChIP-Seq or control for mapping controls only.',
             group: 'pipeline_parameter',
-            help: 'Default peak caller is different for each type. spp For TF ChIP-Seq and macs2 for histone ChIP-Seq. Regardless of pipeline type, spp always requires controls but macs2 doesn\'t. For control mode, chip.align_only is automatically turned on and cross-correlation analysis is disabled. Do not define ctl_* for control mode. Define fastqs_repX_RY instead.'
+            help: 'Default peak caller is different for each type. spp For TF ChIP-Seq and macs2 for histone ChIP-Seq. Regardless of pipeline type, spp always requires controls but macs2 doesn\'t. For control mode, chip.align_only is automatically turned on and cross-correlation analysis is disabled. Do not define ctl_* for control mode. Define fastqs_repX_RY instead.',
+            choices: ['tf', 'histone', 'control'],
+            example: 'tf'
         }
         align_only: {
             description: 'Align only mode.',
@@ -620,7 +650,9 @@ workflow chip {
         aligner: {
             description: 'Aligner. bowtie2 or bwa',
             group: 'alignment',
-            help: 'It is bowtie2 by default.'
+            help: 'It is bowtie2 by default.',
+            choices: ['bowtie2', 'bwa'],
+            example: 'bowtie2'
         }
         use_bwa_mem_for_pe: {
             description: 'For paired end dataset with read length >= 70bp, use bwa mem instead of bwa aln.',
@@ -650,7 +682,9 @@ workflow chip {
         dup_marker: {
             description: 'Marker for duplicate reads. picard or sambamba.',
             group: 'alignment',
-            help: 'picard for Picard MarkDuplicates or sambamba for sambamba markdup.'
+            help: 'picard for Picard MarkDuplicates or sambamba for sambamba markdup.',
+            choices: ['picard', 'sambamba'],
+            example: 'picard'
         }
         no_dup_removal: {
             description: 'Disable removal of duplicate reads during filtering BAM.',
@@ -711,7 +745,9 @@ workflow chip {
         peak_caller: {
             description: 'Peak caller.',
             group: 'peak_calling',
-            help: 'It is spp and macs2 by default for TF ChIP-seq and histone ChIP-seq, respectively. e.g. you can use macs2 for TF ChIP-Seq even though spp is by default for TF ChIP-Seq (chip.pipeline_type == tf).'
+            help: 'It is spp and macs2 by default for TF ChIP-seq and histone ChIP-seq, respectively. e.g. you can use macs2 for TF ChIP-Seq even though spp is by default for TF ChIP-Seq (chip.pipeline_type == tf).',
+            choices: ['spp', 'macs2'],
+            example: 'spp'
         }
         always_use_pooled_ctl: {
             description: 'Always choose a pooled control for each experiment replicate.',
