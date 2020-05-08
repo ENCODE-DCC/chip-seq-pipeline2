@@ -1847,7 +1847,7 @@ workflow chip {
         }
     }
 
-    if ( !align_only_ && !true_rep_only && num_rep > 1 ) {
+    if ( !align_only_ && !true_rep_only && num_rep > 1 && enable_idr ) {
         # IDR on pooled pseduo replicates
         call idr as idr_ppr { input :
             prefix = 'pooled-pr1_vs_pooled-pr2',
