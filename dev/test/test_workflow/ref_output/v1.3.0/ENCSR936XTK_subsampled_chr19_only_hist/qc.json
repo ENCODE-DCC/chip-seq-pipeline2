@@ -1,21 +1,27 @@
 {
     "general": {
-        "date": "2019-10-03 04:48:16",
+        "date": "2020-05-11 19:37:28",
         "title": "ENCSR936XTK (subsampled 1/50, chr19_chrM Only, fake histone)",
         "description": "ZNF143 ChIP-seq on human GM12878",
-        "pipeline_ver": "v1.3.0",
+        "pipeline_ver": "dev-v1.4.1",
         "pipeline_type": "histone",
         "genome": "hg38_chr19_chrM",
-        "paired_end": [
-            true,
-            true
-        ],
         "aligner": "bowtie2",
-        "peak_caller": "macs2",
-        "ctl_paired_end": [
-            true,
-            true
-        ]
+        "seq_endedness": {
+            "rep1": {
+                "paired_end": true
+            },
+            "rep2": {
+                "paired_end": true
+            },
+            "ctl1": {
+                "paired_end": true
+            },
+            "ctl2": {
+                "paired_end": true
+            }
+        },
+        "peak_caller": "macs2"
     },
     "align": {
         "samstat": {
@@ -385,9 +391,9 @@
                 "syn_elbow_pt": 0.5142923552146558,
                 "jsd": 0.330666797582514,
                 "syn_jsd": 0.5098388146136626,
-                "pct_genome_enrich": 13.98086343999122,
-                "diff_enrich": 43.409281605403336,
-                "ch_div": 0.49960569083347994
+                "pct_genome_enrich": 14.037734343041297,
+                "diff_enrich": 43.41363065684295,
+                "ch_div": 0.5005109746878262
             },
             "rep2": {
                 "auc": 0.042776133405364576,
@@ -398,9 +404,9 @@
                 "syn_elbow_pt": 0.4827296689401493,
                 "jsd": 0.31422570578123565,
                 "syn_jsd": 0.42480029203850417,
-                "pct_genome_enrich": 17.079629241621518,
-                "diff_enrich": 41.53094779560183,
-                "ch_div": 0.4851108647308313
+                "pct_genome_enrich": 17.08741157572311,
+                "diff_enrich": 41.53067362579199,
+                "ch_div": 0.48522665110975993
             }
         }
     },
@@ -447,11 +453,6 @@
                 },
                 "pooled-pr1_vs_pooled-pr2": {
                     "frip": 0.367694278086442
-                }
-            },
-            "idr": {
-                "pooled-pr1_vs_pooled-pr2": {
-                    "frip": 0.3005718305794069
                 }
             }
         }
