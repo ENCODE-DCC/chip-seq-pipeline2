@@ -71,13 +71,6 @@ workflow chip {
         String? mito_chr_name
         String? regex_bfilt_peak_chr_name
         String? gensz
-        File? tss
-        File? dnase
-        File? prom
-        File? enh
-        File? reg2map
-        File? reg2map_bed
-        File? roadmap_meta
 
         # group: input_genomic_data
         Boolean? paired_end
@@ -280,34 +273,6 @@ workflow chip {
         }
         gensz: {
             description: 'Genome sizes. "hs" for human, "mm" for mouse or sum of 2nd columnin chromosome sizes file.',
-            group: 'reference_genome'
-        }
-        tss: {
-            description: 'TSS file in BED format.',
-            group: 'reference_genome'
-        }
-        dnase: {
-            description: 'Open chromatin regions file in BED format.',
-            group: 'reference_genome'
-        }
-        prom: {
-            description: 'Promoter regions file in BED format.',
-            group: 'reference_genome'
-        }
-        enh: {
-            description: 'Enhancer regions file in BED format.',
-            group: 'reference_genome'
-        }
-        reg2map: {
-            description: 'Cell type signals file.',
-            group: 'reference_genome'
-        }
-        reg2map_bed: {
-            description: 'File of regions used to generate reg2map signals.',
-            group: 'reference_genome'
-        }
-        roadmap_meta: {
-            description: 'Roadmap metadata.',
             group: 'reference_genome'
         }
         paired_end: {
@@ -967,22 +932,6 @@ workflow chip {
     String mito_chr_name_ = select_first([mito_chr_name, read_genome_tsv.mito_chr_name])
     String regex_bfilt_peak_chr_name_ = select_first([regex_bfilt_peak_chr_name, read_genome_tsv.regex_bfilt_peak_chr_name])
     String genome_name_ = select_first([genome_name, read_genome_tsv.genome_name, basename(chrsz_)])
-
-    # read additional annotation data
-    File? tss_ = if defined(tss) then tss
-        else read_genome_tsv.tss
-    File? dnase_ = if defined(dnase) then dnase
-        else read_genome_tsv.dnase
-    File? prom_ = if defined(prom) then prom
-        else read_genome_tsv.prom
-    File? enh_ = if defined(enh) then enh
-        else read_genome_tsv.enh
-    File? reg2map_ = if defined(reg2map) then reg2map
-        else read_genome_tsv.reg2map
-    File? reg2map_bed_ = if defined(reg2map_bed) then reg2map_bed
-        else read_genome_tsv.reg2map_bed
-    File? roadmap_meta_ = if defined(roadmap_meta) then roadmap_meta
-        else read_genome_tsv.roadmap_meta
 
     ### temp vars (do not define these)
     String aligner_ = aligner
@@ -2801,8 +2750,6 @@ task read_genome_tsv {
         echo "$(basename ~{genome_tsv})" > genome_name
         # create empty files for all entries
         touch ref_fa bowtie2_idx_tar bwa_idx_tar chrsz gensz blacklist blacklist2
-        touch tss tss_enrich # for backward compatibility
-        touch dnase prom enh reg2map reg2map_bed roadmap_meta
         touch mito_chr_name
         touch regex_bfilt_peak_chr_name
 
@@ -2829,14 +2776,6 @@ task read_genome_tsv {
         String? mito_chr_name = if size('mito_chr_name')==0 then null_s else read_string('mito_chr_name')
         String? regex_bfilt_peak_chr_name = if size('regex_bfilt_peak_chr_name')==0 then 'chr[\\dXY]+'
             else read_string('regex_bfilt_peak_chr_name')
-        String? tss = if size('tss')!=0 then read_string('tss')
-            else if size('tss_enrich')!=0 then read_string('tss_enrich') else null_s
-        String? dnase = if size('dnase')==0 then null_s else read_string('dnase')
-        String? prom = if size('prom')==0 then null_s else read_string('prom')
-        String? enh = if size('enh')==0 then null_s else read_string('enh')
-        String? reg2map = if size('reg2map')==0 then null_s else read_string('reg2map')
-        String? reg2map_bed = if size('reg2map_bed')==0 then null_s else read_string('reg2map_bed')
-        String? roadmap_meta = if size('roadmap_meta')==0 then null_s else read_string('roadmap_meta')
     }
     runtime {
         maxRetries : 0
