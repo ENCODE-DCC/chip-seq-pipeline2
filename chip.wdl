@@ -2348,6 +2348,7 @@ task call_peak {
         elif [ '${peak_caller}' == 'spp' ]; then
             python3 $(which encode_task_spp.py) \
                 ${sep=' ' select_all(tas)} \
+                ${'--chrsz ' + chrsz} \
                 ${'--fraglen ' + fraglen} \
                 ${'--cap-num-peak ' + cap_num_peak} \
                 ${'--ctl-subsample ' + ctl_subsample} \
