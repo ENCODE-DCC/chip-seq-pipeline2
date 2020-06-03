@@ -72,7 +72,8 @@ def spp(ta, ctl_ta, chrsz, fraglen, cap_num_peak, fdr_thresh,
     rpeak = '{}.{}.regionPeak.gz'.format(
         prefix,
         human_readable_number(cap_num_peak))
-    rpeak_tmp = '{}.tmp'.format(rpeak)
+    rpeak_tmp_prefix = '{}.tmp'.format(rpeak)
+    rpeak_tmp_gz = '{}.tmp.gz'.format(rpeak)
     rpeak_tmp2 = '{}.tmp2'.format(rpeak)
 
     cmd0 = 'Rscript --max-ppsize=500000 $(which run_spp.R) -c={} -i={} '
@@ -83,7 +84,7 @@ def spp(ta, ctl_ta, chrsz, fraglen, cap_num_peak, fdr_thresh,
         cap_num_peak,
         os.path.abspath(out_dir),
         fraglen,
-        rpeak_tmp,
+        rpeak_tmp_prefix,
         fdr_thresh,
         nth_param)
     run_shell_cmd(cmd0)
@@ -93,14 +94,14 @@ def spp(ta, ctl_ta, chrsz, fraglen, cap_num_peak, fdr_thresh,
     cmd1 += '{{if ($2<0) $2=0; '
     cmd1 += 'print $1,int($2),int($3),$4,$5,$6,$7,$8,$9,$10;}}\' > {}'
     cmd1 = cmd1.format(
-        rpeak_tmp,
+        rpeak_tmp_gz,
         rpeak_tmp2)
     run_shell_cmd(cmd1)
+    rm_f(rpeak_tmp_gz)
 
     # clip peaks between 0-chromSize.
     bed_clip(rpeak_tmp2, chrsz, rpeak)
-
-    rm_f([rpeak_tmp, rpeak_tmp2])
+    rm_f(rpeak_tmp2)
 
     return rpeak
 
