@@ -21,24 +21,6 @@ make_tag: &make_tag
     echo "export TAG=quay.io/encode-dcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
     echo "export TAG_DOCKERHUB=encodedcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
-install_singularity: &install_singularity
-  name: install singularity
-  command: |
-    sudo apt-get update
-    sudo apt-get install \
-    python \
-    dh-autoreconf \
-    build-essential \
-    libarchive-dev \
-    squashfs-tools
-    wget https://github.com/singularityware/singularity/releases/download/2.6.0/singularity-2.6.0.tar.gz
-    tar xvf singularity-2.6.0.tar.gz
-    cd singularity-2.6.0
-    ./configure --prefix=/usr/local --sysconfdir=/etc
-    make
-    sudo make install
-    singularity --version
-
 # Define jobs here
 version: 2
 jobs:
@@ -69,6 +51,9 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
+            # add src/ to PYTHONPATH so that .py's can be imported in unittest
+            export PYTHONPATH=$PYTHONPATH:$PWD/src
+            # task level test
             cd dev/test/test_task/
             rm -rf chip-seq-pipeline-test-data
             export BOTO_CONFIG=/dev/null
@@ -83,6 +68,11 @@ jobs:
               fi
               rm -f ${result}
             done
+
+            # unittest for py
+            pip install pytest
+            cd dev/test/test_py/
+            pytest -vv
             
   test_workflow_se:
     <<: *machine_defaults
