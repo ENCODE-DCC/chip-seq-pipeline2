@@ -44,8 +44,7 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
-            # use python 3.7 for unittest
-            pyenv global 3.7.0
+            # unittest
             docker run ${TAG} bash -c "cd /software/chip-seq-pipeline/dev/test/test_py/; pytest -vv"
             
             # task level test
