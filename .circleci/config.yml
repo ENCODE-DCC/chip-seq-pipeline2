@@ -51,29 +51,33 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
+            # use python 3.7 for testing
+            pyenv global 3.7.0
             # add src/ to PYTHONPATH so that .py's can be imported in unittest
             export PYTHONPATH=$PYTHONPATH:$PWD/src
-            # task level test
-            cd dev/test/test_task/
-            rm -rf chip-seq-pipeline-test-data
-            export BOTO_CONFIG=/dev/null
-            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
-            for wdl in test_*.wdl
-            do
-              json=${wdl%.*}.json
-              result=${wdl%.*}.result.json
-              ./test.sh ${wdl} ${json} ${TAG}
-              if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
-                python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
-              fi
-              rm -f ${result}
-            done
 
             # unittest for py
-            pip3 install pytest
+            pip install pytest
             cd
             cd dev/test/test_py/
             pytest -vv
+            
+            # task level test
+            #cd dev/test/test_task/
+            #rm -rf chip-seq-pipeline-test-data
+            #export BOTO_CONFIG=/dev/null
+            #gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
+            #for wdl in test_*.wdl
+            #do
+            #  json=${wdl%.*}.json
+            #  result=${wdl%.*}.result.json
+            #  ./test.sh ${wdl} ${json} ${TAG}
+            #  if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
+            #    python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
+            #  fi
+            #  rm -f ${result}
+            #done
+
             
   test_workflow_se:
     <<: *machine_defaults
