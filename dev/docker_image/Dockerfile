@@ -125,6 +125,7 @@ RUN mkdir -p /mnt/ext_{0..9}
 RUN mkdir -p chip-seq-pipeline/src
 ENV PATH="/software/chip-seq-pipeline:/software/chip-seq-pipeline/src:${PATH}"
 RUN mkdir -p chip-seq-pipeline/dev/test/test_py
+ENV PYTHONPATH="/software/chip-seq-pipeline/src"
 
 # Get ENCODE chip-seq-pipeline container repository
 # This COPY assumes the build context is the root of the chip-seq-pipeline repo
