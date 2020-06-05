@@ -58,12 +58,12 @@ jobs:
 
             # unittest for py
             pip install pytest
-            cd
             cd dev/test/test_py/
             pytest -vv
+            cd ../../../
             
             # task level test
-            #cd dev/test/test_task/
+            cd dev/test/test_task/
             #rm -rf chip-seq-pipeline-test-data
             #export BOTO_CONFIG=/dev/null
             #gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
