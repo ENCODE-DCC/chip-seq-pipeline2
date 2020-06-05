@@ -57,10 +57,7 @@ jobs:
             export PYTHONPATH=$PYTHONPATH:$PWD/src
 
             # unittest for py
-            pip install pytest
-            cd dev/test/test_py/
-            pytest -vv
-            cd ../../../
+            docker run quay.io/encode-dcc/chip-seq-pipeline:${TAG} bash -c "cd /software/chip-seq-pipeline/dev/test/test_py/; pytest -vv"
             
             # task level test
             cd dev/test/test_task/
