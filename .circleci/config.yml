@@ -12,7 +12,7 @@ python_defaults: &python_defaults
 
 machine_defaults: &machine_defaults
   machine: 
-    image: circleci/classic:latest
+    image: circleci/classic:201808-01
   working_directory: ~/chip-seq-pipeline2
 
 make_tag: &make_tag
