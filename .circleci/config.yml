@@ -70,7 +70,8 @@ jobs:
             done
 
             # unittest for py
-            pip install pytest
+            pip3 install pytest
+            cd
             cd dev/test/test_py/
             pytest -vv
             
