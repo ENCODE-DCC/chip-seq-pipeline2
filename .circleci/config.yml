@@ -50,19 +50,19 @@ jobs:
             
             # task level test
             cd dev/test/test_task/
-            #rm -rf chip-seq-pipeline-test-data
-            #export BOTO_CONFIG=/dev/null
-            #gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
-            #for wdl in test_*.wdl
-            #do
-            #  json=${wdl%.*}.json
-            #  result=${wdl%.*}.result.json
-            #  ./test.sh ${wdl} ${json} ${TAG}
-            #  if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
-            #    python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
-            #  fi
-            #  rm -f ${result}
-            #done
+            rm -rf chip-seq-pipeline-test-data
+            export BOTO_CONFIG=/dev/null
+            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
+            for wdl in test_*.wdl
+            do
+              json=${wdl%.*}.json
+              result=${wdl%.*}.result.json
+              ./test.sh ${wdl} ${json} ${TAG}
+              if [[ $(wc -l "${result}" | awk '{print $1}') > 1 ]]; then
+                python -c "import sys; import json; data=json.loads(sys.stdin.read()); sys.exit(int(not data[u'match_overall']))" < ${result}
+              fi
+              rm -f ${result}
+            done
 
             
   test_workflow_se:
@@ -225,33 +225,33 @@ workflows:
       - test_tasks:
           requires:
             - build
-#      - test_workflow_se:
-#          requires:
-#            - build
-#      - test_workflow_ctl_sub_se:
-#          requires:
-#            - build
-#      - test_workflow_unrep_se:
-#          requires:
-#            - build
-#      - test_workflow_pe:
-#          requires:
-#            - build
-#      - test_workflow_pe_control_mode:
-#          requires:
-#            - build
-#      - test_workflow_ctl_sub_pe:
-#          requires:
-#            - build
-#      - test_workflow_ctl_sub_1ctl_pe:
-#          requires:
-#            - build
-#      - test_workflow_hist_se:
-#          requires:
-#            - build
-#      - test_workflow_hist_unrep_se:
-#          requires:
-#            - build
-#      - test_workflow_hist_pe:
-#          requires:
-#            - build
+      - test_workflow_se:
+          requires:
+            - build
+      - test_workflow_ctl_sub_se:
+          requires:
+            - build
+      - test_workflow_unrep_se:
+          requires:
+            - build
+      - test_workflow_pe:
+          requires:
+            - build
+      - test_workflow_pe_control_mode:
+          requires:
+            - build
+      - test_workflow_ctl_sub_pe:
+          requires:
+            - build
+      - test_workflow_ctl_sub_1ctl_pe:
+          requires:
+            - build
+      - test_workflow_hist_se:
+          requires:
+            - build
+      - test_workflow_hist_unrep_se:
+          requires:
+            - build
+      - test_workflow_hist_pe:
+          requires:
+            - build
