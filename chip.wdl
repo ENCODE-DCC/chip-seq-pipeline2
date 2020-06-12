@@ -8,8 +8,8 @@ workflow chip {
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'quay.io/encode-dcc/chip-seq-pipeline:dev-v1.4.1'
-        caper_singularity: 'docker://quay.io/encode-dcc/chip-seq-pipeline:dev-v1.4.1'
+        caper_docker: 'encodedcc/chip-seq-pipeline:dev-v1.4.1'
+        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:dev-v1.4.1'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v4.json'
 
         parameter_group: {
@@ -2348,6 +2348,7 @@ task call_peak {
         elif [ '${peak_caller}' == 'spp' ]; then
             python3 $(which encode_task_spp.py) \
                 ${sep=' ' select_all(tas)} \
+                ${'--chrsz ' + chrsz} \
                 ${'--fraglen ' + fraglen} \
                 ${'--cap-num-peak ' + cap_num_peak} \
                 ${'--ctl-subsample ' + ctl_subsample} \

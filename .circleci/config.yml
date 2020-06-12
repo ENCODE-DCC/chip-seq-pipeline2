@@ -5,39 +5,15 @@ defaults: &defaults
     - image: google/cloud-sdk:latest #circleci/buildpack-deps:xenial-scm
   working_directory: ~/chip-seq-pipeline2
 
-python_defaults: &python_defaults
-  docker:
-    - image: quay.io/encode-dcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}
-  working_directory: ~/chip-seq-pipeline2
-
 machine_defaults: &machine_defaults
   machine: 
-    image: circleci/classic:latest
+    image: circleci/classic:201808-01
   working_directory: ~/chip-seq-pipeline2
 
 make_tag: &make_tag
   name: make docker image tag
   command: |
-    echo "export TAG=quay.io/encode-dcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
-    echo "export TAG_DOCKERHUB=encodedcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
-
-install_singularity: &install_singularity
-  name: install singularity
-  command: |
-    sudo apt-get update
-    sudo apt-get install \
-    python \
-    dh-autoreconf \
-    build-essential \
-    libarchive-dev \
-    squashfs-tools
-    wget https://github.com/singularityware/singularity/releases/download/2.6.0/singularity-2.6.0.tar.gz
-    tar xvf singularity-2.6.0.tar.gz
-    cd singularity-2.6.0
-    ./configure --prefix=/usr/local --sysconfdir=/etc
-    make
-    sudo make install
-    singularity --version
+    echo "export TAG=encodedcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
 
 # Define jobs here
 version: 2
@@ -52,13 +28,12 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=dev-v1.3.5.1
+            export DOCKER_CACHE_TAG=v1.4.0.1
             echo "pulling ${DOCKER_CACHE_TAG}!"
-            docker pull quay.io/encode-dcc/chip-seq-pipeline:${DOCKER_CACHE_TAG}
-            docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
-            docker build --cache-from quay.io/encode-dcc/chip-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f dev/docker_image/Dockerfile .
+            docker pull encodedcc/chip-seq-pipeline:${DOCKER_CACHE_TAG}
+            docker login -u=${DOCKERHUB_USER} -p=${DOCKERHUB_PASS}
+            docker build --cache-from encodedcc/chip-seq-pipeline:${DOCKER_CACHE_TAG} --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} --build-arg BRANCH=${CIRCLE_BRANCH} --build-arg BUILD_TAG=${TAG} -t $TAG -f dev/docker_image/Dockerfile .
             docker push ${TAG}
-            #docker push ${TAG_DOCKERHUB}
             docker logout
   test_tasks:
     <<: *machine_defaults
@@ -69,6 +44,10 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
+            # unittest
+            docker run ${TAG} bash -c "cd /software/chip-seq-pipeline/dev/test/test_py/; pytest -vv"
+            
+            # task level test
             cd dev/test/test_task/
             rm -rf chip-seq-pipeline-test-data
             export BOTO_CONFIG=/dev/null
@@ -83,6 +62,7 @@ jobs:
               fi
               rm -f ${result}
             done
+
             
   test_workflow_se:
     <<: *machine_defaults
