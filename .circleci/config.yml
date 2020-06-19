@@ -13,7 +13,7 @@ machine_defaults: &machine_defaults
 make_tag: &make_tag
   name: make docker image tag
   command: |
-    echo "export TAG=encodedcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
+    echo "export TAG=encodedcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
 
 commands:
   download_task_test_data:
@@ -76,8 +76,9 @@ jobs:
               metadata=${prefix}.metadata.json
               caper run ${wdl} -i ${input} -m ${metadata} --docker ${TAG}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
+                echo "Validating outputs of ${prefix}"
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
-                [[ "$res" == false ]] && exit 1
+                [[ "$res" != true ]] && exit 100
               fi
               rm -f ${metadata}
             done
@@ -105,7 +106,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_ctl_sub_se:
     <<: *machine_defaults
@@ -130,7 +132,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_unrep_se:
     <<: *machine_defaults
@@ -155,7 +158,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_pe:
     <<: *machine_defaults
@@ -180,7 +184,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_pe_control_mode:
     <<: *machine_defaults
@@ -205,7 +210,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_ctl_sub_pe:
     <<: *machine_defaults
@@ -230,7 +236,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_ctl_sub_1ctl_pe:
     <<: *machine_defaults
@@ -255,7 +262,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_hist_se:
     <<: *machine_defaults
@@ -280,7 +288,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_hist_unrep_se:
     <<: *machine_defaults
@@ -305,7 +314,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
   test_workflow_hist_pe:
     <<: *machine_defaults
@@ -330,7 +340,8 @@ jobs:
               -i ${INPUT} -m metadata.json --docker ${TAG}
 
             res=$(jq '.outputs["chip.qc_json_ref_match"]' metadata.json)
-            [[ "$res" == false ]] && exit 1
+            [[ "$res" != true ]] && exit 100
+            rm -f metadata.json
 
 workflows:
   version: 2.1
