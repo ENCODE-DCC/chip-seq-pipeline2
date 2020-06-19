@@ -64,16 +64,17 @@ jobs:
           no_output_timeout: 300m
           command: |
             source ${BASH_ENV}
+            cd dev/test/test_task/
 
             # unittest for wrapper .py
             docker run ${TAG} bash -c "cd /software/chip-seq-pipeline/dev/test/test_py/; pytest -vv"
-            
+
             for wdl in test_*.wdl
             do
               prefix=${wdl%.*}
-              json=${prefix}.json
+              input=${prefix}.json
               metadata=${prefix}.metadata.json
-              caper run ${wdl} -i ${json} -m ${metadata} --docker ${TAG}
+              caper run ${wdl} -i ${input} -m ${metadata} --docker ${TAG}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")
                 [[ "$res" == false ]] && exit 1
@@ -342,30 +343,30 @@ workflows:
       - test_workflow_se:
           requires:
             - build
-      # - test_workflow_ctl_sub_se:
-      #     requires:
-      #       - build
-      # - test_workflow_unrep_se:
-      #     requires:
-      #       - build
-      # - test_workflow_pe:
-      #     requires:
-      #       - build
-      # - test_workflow_pe_control_mode:
-      #     requires:
-      #       - build
-      # - test_workflow_ctl_sub_pe:
-      #     requires:
-      #       - build
-      # - test_workflow_ctl_sub_1ctl_pe:
-      #     requires:
-      #       - build
-      # - test_workflow_hist_se:
-      #     requires:
-      #       - build
-      # - test_workflow_hist_unrep_se:
-      #     requires:
-      #       - build
-      # - test_workflow_hist_pe:
-      #     requires:
-      #       - build
+      - test_workflow_ctl_sub_se:
+          requires:
+            - build
+      - test_workflow_unrep_se:
+          requires:
+            - build
+      - test_workflow_pe:
+          requires:
+            - build
+      - test_workflow_pe_control_mode:
+          requires:
+            - build
+      - test_workflow_ctl_sub_pe:
+          requires:
+            - build
+      - test_workflow_ctl_sub_1ctl_pe:
+          requires:
+            - build
+      - test_workflow_hist_se:
+          requires:
+            - build
+      - test_workflow_hist_unrep_se:
+          requires:
+            - build
+      - test_workflow_hist_pe:
+          requires:
+            - build
