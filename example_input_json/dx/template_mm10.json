@@ -1,4 +1,4 @@
 {
     "chip.pipeline_type" : "tf",
-    "chip.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:/pipeline-genome-data/genome_tsv/v1/mm10_dx.tsv"
+    "chip.genome_tsv" : "dx://project-BKpvFg00VBPV975PgJ6Q03v6:/pipeline-genome-data/genome_tsv/v3/mm10.dx.tsv"
 }

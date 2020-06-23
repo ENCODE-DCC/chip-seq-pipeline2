@@ -37,7 +37,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 ## Test input JSON file
 
-Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only_caper.json` as `[INPUT_JSON]` in Caper's documentation.
+Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json` as `[INPUT_JSON]` in Caper's documentation.
 
 ## Input JSON file
 
