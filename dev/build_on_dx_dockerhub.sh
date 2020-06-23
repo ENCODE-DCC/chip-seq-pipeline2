@@ -11,7 +11,7 @@ docker pull $DOCKER
 # make a copy of WDL
 # workflows generated from original WDL cannot start from inputs other than FASTQs
 # make all vars non-optional (without ?)
-cp chip.wdl chip.dx.wdl
+cat chip.wdl | grep -v "choices:" > chip.dx.wdl
 sed -i 's/Array\[File?\] bams = \[\]/Array\[File\] bams = \[\]/g' chip.dx.wdl
 sed -i 's/Array\[File?\] nodup_bams = \[\]/Array\[File\] nodup_bams = \[\]/g' chip.dx.wdl
 sed -i 's/Array\[File?\] tas = \[\]/Array\[File\] tas = \[\]/g' chip.dx.wdl
