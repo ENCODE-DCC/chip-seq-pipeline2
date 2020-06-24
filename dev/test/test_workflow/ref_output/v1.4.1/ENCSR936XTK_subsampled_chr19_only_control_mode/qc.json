@@ -1,0 +1,166 @@
+{
+    "general": {
+        "date": "2020-04-22 23:17:07",
+        "title": "ENCSR936XTK (subsampled 1/50, chr19_chrM Only, control only)",
+        "description": "ZNF143 ChIP-seq on human GM12878",
+        "pipeline_ver": "dev-v1.4.1",
+        "pipeline_type": "control",
+        "genome": "hg38_chr19_chrM",
+        "aligner": "bowtie2",
+        "seq_endedness": {
+            "rep1": {
+                "paired_end": true
+            },
+            "rep2": {
+                "paired_end": true
+            }
+        },
+        "peak_caller": "macs2"
+    },
+    "align": {
+        "samstat": {
+            "rep1": {
+                "total_reads": 1135028,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 106882,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 9.4,
+                "paired_reads": 1135028,
+                "paired_reads_qc_failed": 0,
+                "read1": 567514,
+                "read1_qc_failed": 0,
+                "read2": 567514,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 75034,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 6.6000000000000005,
+                "with_itself": 79904,
+                "with_itself_qc_failed": 0,
+                "singletons": 26978,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 2.4,
+                "diff_chroms": 2,
+                "diff_chroms_qc_failed": 0
+            },
+            "rep2": {
+                "total_reads": 1085984,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 107693,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 9.9,
+                "paired_reads": 1085984,
+                "paired_reads_qc_failed": 0,
+                "read1": 542992,
+                "read1_qc_failed": 0,
+                "read2": 542992,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 75712,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 7.000000000000001,
+                "with_itself": 80994,
+                "with_itself_qc_failed": 0,
+                "singletons": 26699,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 2.5,
+                "diff_chroms": 6,
+                "diff_chroms_qc_failed": 0
+            }
+        },
+        "dup": {
+            "rep1": {
+                "unpaired_reads": 0,
+                "paired_reads": 14825,
+                "unmapped_reads": 0,
+                "unpaired_duplicate_reads": 0,
+                "paired_duplicate_reads": 30,
+                "paired_optical_duplicate_reads": 0,
+                "pct_duplicate_reads": 0.20240000000000002
+            },
+            "rep2": {
+                "unpaired_reads": 0,
+                "paired_reads": 15944,
+                "unmapped_reads": 0,
+                "unpaired_duplicate_reads": 0,
+                "paired_duplicate_reads": 44,
+                "paired_optical_duplicate_reads": 0,
+                "pct_duplicate_reads": 0.27599999999999997
+            }
+        },
+        "nodup_samstat": {
+            "rep1": {
+                "total_reads": 29590,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 29590,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 100.0,
+                "paired_reads": 29590,
+                "paired_reads_qc_failed": 0,
+                "read1": 14795,
+                "read1_qc_failed": 0,
+                "read2": 14795,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 29590,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 100.0,
+                "with_itself": 29590,
+                "with_itself_qc_failed": 0,
+                "singletons": 0,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 0.0,
+                "diff_chroms": 0,
+                "diff_chroms_qc_failed": 0
+            },
+            "rep2": {
+                "total_reads": 31800,
+                "total_reads_qc_failed": 0,
+                "duplicate_reads": 0,
+                "duplicate_reads_qc_failed": 0,
+                "mapped_reads": 31800,
+                "mapped_reads_qc_failed": 0,
+                "pct_mapped_reads": 100.0,
+                "paired_reads": 31800,
+                "paired_reads_qc_failed": 0,
+                "read1": 15900,
+                "read1_qc_failed": 0,
+                "read2": 15900,
+                "read2_qc_failed": 0,
+                "properly_paired_reads": 31800,
+                "properly_paired_reads_qc_failed": 0,
+                "pct_properly_paired_reads": 100.0,
+                "with_itself": 31800,
+                "with_itself_qc_failed": 0,
+                "singletons": 0,
+                "singletons_qc_failed": 0,
+                "pct_singletons": 0.0,
+                "diff_chroms": 0,
+                "diff_chroms_qc_failed": 0
+            }
+        }
+    },
+    "lib_complexity": {
+        "lib_complexity": {
+            "rep1": {
+                "total_fragments": 8144,
+                "distinct_fragments": 8133,
+                "positions_with_one_read": 11,
+                "NRF": 0.998649,
+                "PBC1": 0.998647,
+                "PBC2": 738.363636
+            },
+            "rep2": {
+                "total_fragments": 8473,
+                "distinct_fragments": 8459,
+                "positions_with_one_read": 12,
+                "NRF": 0.998348,
+                "PBC1": 0.998463,
+                "PBC2": 703.833333
+            }
+        }
+    }
+}

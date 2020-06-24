@@ -9,7 +9,7 @@ An input JSON file is a file which must include all the information needed to ru
 Mandatory parameters.
 
 1) Pipeline type
-    * `chip.pipeline_type`: `tf` for TF ChIP-seq or `histone` for histone ChIP-seq. One major difference between two types is that `tf` uses `spp` peak caller with controls but `histone` uses `macs2` peak caller without controls. 
+    * `chip.pipeline_type`: `tf` for TF ChIP-seq, `histone` for histone ChIP-seq and `control` for aligning control FASTQs only. One major difference between two types is that `tf` uses `spp` peak caller with controls but `histone` uses `macs2` peak caller without controls. If it is `control` then `chip.align_only` is automatically turned on and pipeline will align FASTQs defined in `chip.fastqs_repX_RY` (where `X` means control replicate ID and `Y` is read-end) as controls. For control mode, do not define  `chip.ctl_fastqs_repX_RY`. Pipeline will skip cross-correlation/JSD/GC-bias analysis for control mode.
 
 2) Experiment title/description
     * `chip.title`: experiment title for a final HTML report.
@@ -22,10 +22,38 @@ Mandatory parameters.
     * (Optional) `chip.ctl_paired_ends`: For controls with mixed read ends, you can define read endedness for each biological replicate (e.g. `[true, false]` means paired-ended biorep-1 and single-ended biorep-2). If not defined then `chip.paired_ends` will be used.
 
 4) Reference genome
-    * `chip.genome_tsv`: Use `https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/[GENOME]_caper.tsv`.
-    * Supported `GENOME`s: are hg38, mm10, hg19 and mm9.
-    * We provide a genome TSV file that defines all genome-specific parameters and reference data files. Caper will automatically download big reference data files from our ENCODE repository.
-    * However, we also have reference data mirrors for [some platforms](input_details.md/#reference-genome) (GCP, AWS, Sherlock, SCG, ...). On these platforms, you can use a different TSV file to prevent downloading such big reference data.
+    * `chip.genome_tsv`: Choose one from the following genome TSVs. `v3` is a standard for >=ENCODE4.
+        Genome|URL
+        -|-
+        hg38|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/hg38.tsv`
+        mm10|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/mm10.tsv`
+        hg19|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/hg19_caper.tsv`
+        mm9|`https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v1/mm9_caper.tsv`
+
+        For DNAnexus CLI (AWS project):
+        Genome|DX URI
+        -|-
+        hg38|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/hg38.dx.tsv`
+        mm10|`dx://project-BKpvFg00VBPV975PgJ6Q03v6:pipeline-genome-data/genome_tsv/v3/mm10.dx.tsv`
+
+        For DNAnexus CLI (Azure project): 
+        Genome|DX URI
+        -|-
+        hg38|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/hg38.dx_azure.tsv`
+        mm10|`dx://project-F6K911Q9xyfgJ36JFzv03Z5J:pipeline-genome-data/genome_tsv/v3/mm10.dx_azure.tsv`
+
+        For DNAnexus Web UI (AWS project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v3`.
+        Genome|File name
+        -|-
+        hg38|`hg38.dx.tsv`
+        mm10|`mm10.dx.tsv`
+
+        For DNAnexus Web UI (Azure project): Choose one of the following TSV file on `https://platform.DNAnexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v3`.
+        Genome|File name
+        -|-
+        hg38|`hg38.dx_azure.tsv`
+        mm10|`mm10.dx_azure.tsv`
+
     * To build a new TSV file from use your own FASTA (`.fa` and `.2bit`) see [this](build_genome_database.md).
     * You can also define genome specific parameters (defined in a genome TSV file) in an input JSON file. Parameters defined in an input JSON file will override those defined in a genome TSV file. For example, you can simply replace a blacklist file while keeping all other parameters in a genome TSV file for `hg38`.
         ```javascript
@@ -54,7 +82,7 @@ Mandatory parameters.
 
 8) Parameters for automatically choosing an appropriate control and subsampling it.
     Before calling peaks, there is a separate (from item 7) mechanism to subsample controls to prevent using too deep controls. Pipeline has a logic to find an approriate control for each experiment replicate. Choices are 1) control with the same index (e.g. rep2 vs. ctl2), 2) pooled control (e.g. rep2 vs. ctl1 + ctl2).
-    * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is disabled by default.
+    * `chip.always_use_pooled_ctl`: (For experiments with controls only) Always use a pooled control to compare with each replicate. If a single control is given then use it. It is enabled by default.
     * `chip.ctl_depth_ratio`: (For experiments with controls only) If ratio of depth between controls is higher than this. then always use a pooled control for all replicates. It's 1.2 by default.
 
     > **IMPORTANT**: Either of the following parameters are set to > 0 for automatic subsampling. Set all of them to 0 to disable automatic subsample. Such automatic control subsampling does not work with controls with mixed endedness (e.g. SE ctl-rep1 + PE ctl-rep2). Pipeline calculates `Limit1` and `Limit2` from the following two parameters. And then takes a maximum of them and calls it `Limit`. If a chosen control for experiment replicate (each one and pooled one) is deeper than `Limit` then that such control is subsampled to `Limit`.
@@ -259,7 +287,7 @@ Parameter|Default
 
 > **IMPORTANT**: If you see Java memory errors, check the following resource parameters.
 
-There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`.
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory (e.g. `chip.filter_mem_mb`).
 
 Parameter|Default
 ---------|-------

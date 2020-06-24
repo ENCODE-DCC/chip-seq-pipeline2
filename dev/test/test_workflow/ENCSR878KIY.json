@@ -1,7 +1,7 @@
 {
     "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.1.5/ENCSR936XTK/qc.json",
     "chip.pipeline_type" : "histone",
-    "chip.genome_tsv" : "gs://encode-pipeline-genome-data/genome_tsv/v1/hg38_gcp.tsv",
+    "chip.genome_tsv" : "https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/hg38.tsv",
     "chip.fastqs_rep1_R1" : [
         "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep1/ENCFF846MLZ.fastq.gz",
         "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR878KIY/fastq/rep1/ENCFF153OYB.fastq.gz"

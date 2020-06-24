@@ -35,7 +35,7 @@
     "chip.xcor_trim_bp" : 50,
     "chip.use_filt_pe_ta_for_xcor" : false,
 
-    "chip.always_use_pooled_ctl" : false,
+    "chip.always_use_pooled_ctl" : true,
     "chip.ctl_depth_ratio" : 1.2,
 
     "chip.peak_caller" : null,
