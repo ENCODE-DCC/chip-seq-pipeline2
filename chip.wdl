@@ -245,7 +245,7 @@ workflow chip {
             description: 'BWA index TAR file.',
             group: 'reference_genome'
         }
-        custom_aligner_idx_tar {
+        custom_aligner_idx_tar: {
             description: 'Index TAR file for a custom aligner. To use a custom aligner, define "chip.custom_align_py" too.',
             group: 'reference_genome'
         }
