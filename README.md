@@ -14,7 +14,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 ## Installation
 
 1) Git clone this pipeline.
-	> **IMPORTANT*: use `~/chip-seq-pipeline2/chip.wdl` as `[WDL]` in Caper's documentation.
+	> **IMPORTANT**: use `~/chip-seq-pipeline2/chip.wdl` as `[WDL]` in Caper's documentation.
 
 	```bash
 	$ cd
