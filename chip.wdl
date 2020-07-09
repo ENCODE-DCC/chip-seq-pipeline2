@@ -237,10 +237,6 @@ workflow chip {
             description: 'Reference FASTA file.',
             group: 'reference_genome'
         }
-        ref_mito_fa: {
-            description: 'Reference FASTA file (mitochondrial reads only).',
-            group: 'reference_genome'
-        }
         bowtie2_idx_tar: {
             description: 'BWA index TAR file.',
             group: 'reference_genome'
@@ -623,9 +619,8 @@ workflow chip {
         }
         custom_align_py: {
             description: 'Python script for a custom aligner.',
-            help: 'There is a template included in the documentation for inputs.',
             group: 'alignment',
-            help: 'Defining this parameter will automatically change "chip.aligner" to "custom". You should also define "chip.custom_aligner_idx_tar".',
+            help: 'There is a template included in the documentation for inputs. Defining this parameter will automatically change "chip.aligner" to "custom". You should also define "chip.custom_aligner_idx_tar".'
         }
         use_bwa_mem_for_pe: {
             description: 'For paired end dataset with read length >= 70bp, use bwa mem instead of bwa aln.',
