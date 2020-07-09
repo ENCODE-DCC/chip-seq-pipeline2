@@ -71,6 +71,7 @@ workflow chip {
         String? mito_chr_name
         String? regex_bfilt_peak_chr_name
         String? gensz
+        File? custom_aligner_idx_tar
 
         # group: input_genomic_data
         Boolean? paired_end
@@ -141,6 +142,7 @@ workflow chip {
 
         # group: alignment
         String aligner = 'bowtie2'
+        File? custom_align_py
         Boolean use_bwa_mem_for_pe = false
         Int crop_length = 0
         Int crop_length_tol = 2
@@ -243,8 +245,8 @@ workflow chip {
             description: 'BWA index TAR file.',
             group: 'reference_genome'
         }
-        bowtie2_mito_idx_tar: {
-            description: 'BWA index TAR file (mitochondrial reads only).',
+        custom_aligner_idx_tar: {
+            description: 'Index TAR file for a custom aligner. To use a custom aligner, define "chip.custom_align_py" too.',
             group: 'reference_genome'
         }
         chrsz: {
@@ -613,11 +615,17 @@ workflow chip {
         }
 
         aligner: {
-            description: 'Aligner. bowtie2 or bwa',
+            description: 'Aligner. bowtie2, bwa or custom',
             group: 'alignment',
-            help: 'It is bowtie2 by default.',
-            choices: ['bowtie2', 'bwa'],
+            help: 'It is bowtie2 by default. To use a custom aligner, define chip.custom_align_py and chip.custom_aligner_idx_tar.',
+            choices: ['bowtie2', 'bwa', 'custom'],
             example: 'bowtie2'
+        }
+        custom_align_py: {
+            description: 'Python script for a custom aligner.',
+            help: 'There is a template included in the documentation for inputs.',
+            group: 'alignment',
+            help: 'Defining this parameter will automatically change "chip.aligner" to "custom". You should also define "chip.custom_aligner_idx_tar".',
         }
         use_bwa_mem_for_pe: {
             description: 'For paired end dataset with read length >= 70bp, use bwa mem instead of bwa aln.',
@@ -934,7 +942,7 @@ workflow chip {
     String genome_name_ = select_first([genome_name, read_genome_tsv.genome_name, basename(chrsz_)])
 
     ### temp vars (do not define these)
-    String aligner_ = aligner
+    String aligner_ = if defined(custom_align_py) then 'custom' else aligner
     String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller, 'spp'])
                         else select_first([peak_caller, 'macs2'])
     String peak_type_ = if peak_caller_=='spp' then 'regionPeak'
@@ -1054,16 +1062,22 @@ workflow chip {
             msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
         }
     }
-    if ( (num_rep_fastq > 0 || num_ctl_fastq > 0) && aligner_ != 'bwa' && aligner_ != 'bowtie2' ) {
+    if ( (num_rep_fastq > 0 || num_ctl_fastq > 0) && aligner_ != 'bwa' && aligner_ != 'bowtie2' && aligner_ != 'custom' ) {
         call raise_exception as error_wrong_aligner { input:
-            msg = 'Choose chip.aligner between bwa and bowtie2.'
+            msg = 'Choose chip.aligner to align your fastqs. Choices: bwa, bowtie2, custom.'
         }
     }
     if ( aligner_ != 'bwa' && use_bwa_mem_for_pe ) {
         call raise_exception as error_use_bwa_mem_for_non_bwa { input:
             msg = 'To use chip.use_bwa_mem_for_pe, choose bwa for chip.aligner.'
         }
-    }    
+    }
+    if ( aligner_ == 'custom' && ( !defined(custom_align_py) || !defined(custom_aligner_idx_tar) ) ) {
+        call raise_exception as error_custom_aligner { input:
+            msg = 'To use a custom aligner, define chip.custom_align_py and chip.custom_aligner_idx_tar.'
+        }
+    }
+
     if ( ( ctl_depth_limit > 0 || exp_ctl_depth_ratio_limit > 0 ) && num_ctl > 1 && length(ctl_paired_ends) > 1  ) {
         call raise_exception as error_subsample_pooled_control_with_mixed_endedness { input:
             msg = 'Cannot use automatic control subsampling ("chip.ctl_depth_limit">0 and "chip.exp_ctl_depth_limit">0) for ' +
@@ -1103,8 +1117,10 @@ workflow chip {
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
+                custom_align_py = custom_align_py,
                 idx_tar = if aligner=='bwa' then bwa_idx_tar_
-                    else bowtie2_idx_tar_,
+                    else if aligner=='bowtie2' then bowtie2_idx_tar_
+                    else custom_aligner_idx_tar,
                 paired_end = paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 
@@ -1194,8 +1210,10 @@ workflow chip {
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
+                custom_align_py = custom_align_py,
                 idx_tar = if aligner=='bwa' then bwa_idx_tar_
-                    else bowtie2_idx_tar_,
+                    else if aligner=='bowtie2' then bowtie2_idx_tar_
+                    else custom_aligner_idx_tar,
                 paired_end = false,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 
@@ -1318,8 +1336,10 @@ workflow chip {
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
+                custom_align_py = custom_align_py,
                 idx_tar = if aligner=='bwa' then bwa_idx_tar_
-                    else bowtie2_idx_tar_,
+                    else if aligner=='bowtie2' then bowtie2_idx_tar_
+                    else custom_aligner_idx_tar,
                 paired_end = ctl_paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 
@@ -1920,8 +1940,10 @@ task align {
         Int crop_length
         Int crop_length_tol
         String aligner
+
         String mito_chr_name
         Int? multimapping
+        File? custom_align_py
         File? idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
@@ -1988,7 +2010,7 @@ task align {
         fi
 
         if [ '${aligner}' == 'bwa' ]; then
-             python3 $(which encode_task_bwa.py) \
+            python3 $(which encode_task_bwa.py) \
                 ${idx_tar} \
                 R1$SUFFIX/*.fastq.gz \
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
@@ -1997,11 +2019,18 @@ task align {
                 ${'--nth ' + cpu}
 
         elif [ '${aligner}' == 'bowtie2' ]; then
-             python3 $(which encode_task_bowtie2.py) \
+            python3 $(which encode_task_bowtie2.py) \
                 ${idx_tar} \
                 R1$SUFFIX/*.fastq.gz \
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${'--multimapping ' + multimapping} \
+                ${if paired_end then '--paired-end' else ''} \
+                ${'--nth ' + cpu}
+        else
+            python3 ${custom_align_py} \
+                ${idx_tar} \
+                R1$SUFFIX/*.fastq.gz \
+                ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${'--nth ' + cpu}
         fi 
