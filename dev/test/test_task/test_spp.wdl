@@ -7,7 +7,6 @@ workflow test_spp {
         Int cap_num_peak
 
         Int fraglen
-        Boolean ctl_paired_end
         # test spp for SE set only
         String se_ta
         String se_ctl_ta
