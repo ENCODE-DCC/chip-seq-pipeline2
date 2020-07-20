@@ -198,6 +198,8 @@ workflow chip {
         Int xcor_time_hr = 24
         String xcor_disks = 'local-disk 100 HDD'
 
+        Int subsample_ctl_mem_mb = 16000
+
         Int macs2_signal_track_mem_mb = 16000
         Int macs2_signal_track_time_hr = 24
         String macs2_signal_track_disks = 'local-disk 400 HDD'
@@ -853,6 +855,11 @@ workflow chip {
             group: 'resource_parameter',
             help: 'This is for GCP/AWS only.'
         }
+        subsample_ctl_mem_mb: {
+            description: 'Memory (MB) required for task subsample_ctl.',
+            group: 'resource_parameter',
+            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+        }
         call_peak_cpu: {
             description: 'Number of cores for task call_peak.',
             group: 'resource_parameter',
@@ -1479,15 +1486,25 @@ workflow chip {
         #    -2: there is no control
         Int chosen_ctl_ta_id = if has_all_input_of_choose_ctl && !align_only_ then
             select_first([choose_ctl.chosen_ctl_ta_ids])[i] else -2
-        Array[File] chosen_ctl_tas = if chosen_ctl_ta_id == -2 then []
-            else if chosen_ctl_ta_id == -1 then [ select_first([pool_ta_ctl.ta_pooled]) ]
-            else [ select_first([ctl_ta_[ chosen_ctl_ta_id ]]) ]
-
         Int chosen_ctl_ta_subsample = if has_all_input_of_choose_ctl && !align_only_ then
             select_first([choose_ctl.chosen_ctl_ta_subsample])[i] else 0
         Boolean chosen_ctl_paired_end = if chosen_ctl_ta_id == -2 then false
             else if chosen_ctl_ta_id == -1 then ctl_paired_end_[0]
             else ctl_paired_end_[chosen_ctl_ta_id]
+
+        if ( chosen_ctl_ta_id > -2 && chosen_ctl_ta_subsample > 0 ) {
+            call subsample_ctl { input:
+                ta = if chosen_ctl_ta_id == -1 then pool_ta_ctl.ta_pooled
+                     else ctl_ta_[ chosen_ctl_ta_id ],
+                subsample = chosen_ctl_ta_subsample,
+                paired_end = chosen_ctl_paired_end,
+                mem_mb = subsample_ctl_mem_mb,
+            }
+        }
+        Array[File] chosen_ctl_tas = if chosen_ctl_ta_id <= -2 then []
+            else if chosen_ctl_ta_subsample > 0 then [ select_first([subsample_ctl.ta_subsampled]) ]
+            else if chosen_ctl_ta_id == -1 then [ select_first([pool_ta_ctl.ta_pooled]) ]
+            else [ select_first([ctl_ta_[ chosen_ctl_ta_id ]]) ]
     }
     Int chosen_ctl_ta_pooled_subsample = if has_all_input_of_choose_ctl && !align_only_ then
         select_first([choose_ctl.chosen_ctl_ta_subsample_pooled]) else 0
@@ -1507,8 +1524,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 cap_num_peak = cap_num_peak_,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 pval_thresh = pval_thresh,
                 fdr_thresh = fdr_thresh,
                 fraglen = fraglen_tmp[i],
@@ -1531,8 +1546,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 pval_thresh = pval_thresh,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 fraglen = fraglen_tmp[i],
 
                 mem_mb = macs2_signal_track_mem_mb,
@@ -1552,8 +1565,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 cap_num_peak = cap_num_peak_,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 pval_thresh = pval_thresh,
                 fdr_thresh = fdr_thresh,
                 fraglen = fraglen_tmp[i],
@@ -1580,8 +1591,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 cap_num_peak = cap_num_peak_,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 pval_thresh = pval_thresh,
                 fdr_thresh = fdr_thresh,
                 fraglen = fraglen_tmp[i],
@@ -1607,12 +1616,20 @@ workflow chip {
     }
     # }
 
+    if ( has_all_input_of_choose_ctl && !align_only_ && chosen_ctl_ta_pooled_subsample > 0 ) {
+        call subsample_ctl as subsample_ctl_pooled { input:
+            ta = if num_ctl < 2 then ctl_ta_[0]
+                 else pool_ta_ctl.ta_pooled,
+            subsample = chosen_ctl_ta_pooled_subsample,
+            paired_end = ctl_paired_end_[0],
+            mem_mb = subsample_ctl_mem_mb,
+        }
+    }
     # actually not an array
     Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl || align_only_ then []
-        else if num_ctl < 2 then [ctl_ta_[0]] # choose first (only) control
-        else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
-    Boolean chosen_ctl_ta_pooled_paired_end = if !has_all_input_of_choose_ctl || align_only_ then false
-        else ctl_paired_end_[0]
+        else if chosen_ctl_ta_pooled_subsample > 0 then [ subsample_ctl_pooled.ta_subsampled ]
+        else if num_ctl < 2 then [ ctl_ta_[0] ]
+        else [ pool_ta_ctl.ta_pooled ]
 
     Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
     Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
@@ -1626,8 +1643,6 @@ workflow chip {
             gensz = gensz_,
             chrsz = chrsz_,
             cap_num_peak = cap_num_peak_,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             pval_thresh = pval_thresh,
             fdr_thresh = fdr_thresh,
             fraglen = fraglen_mean.rounded_mean,
@@ -1650,8 +1665,6 @@ workflow chip {
             gensz = gensz_,
             chrsz = chrsz_,
             pval_thresh = pval_thresh,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             fraglen = fraglen_mean.rounded_mean,
 
             mem_mb = macs2_signal_track_mem_mb,
@@ -1672,8 +1685,6 @@ workflow chip {
             chrsz = chrsz_,
             cap_num_peak = cap_num_peak_,
             pval_thresh = pval_thresh,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             fdr_thresh = fdr_thresh,
             fraglen = fraglen_mean.rounded_mean,
             blacklist = blacklist_,
@@ -1700,8 +1711,6 @@ workflow chip {
             chrsz = chrsz_,
             cap_num_peak = cap_num_peak_,
             pval_thresh = pval_thresh,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             fdr_thresh = fdr_thresh,
             fraglen = fraglen_mean.rounded_mean,
             blacklist = blacklist_,
@@ -2331,6 +2340,31 @@ task count_signal_track {
     }
 }
 
+task subsample_ctl {
+    input {
+        File? ta
+        Boolean paired_end
+        Int subsample
+
+        Int mem_mb
+    }
+    command {
+        python3 $(which encode_task_subsample_ctl.py) \
+            ${ta} \
+            ${'--subsample ' + subsample} \
+            ${if paired_end then '--paired-end' else ''} \
+    }
+    output {
+        File ta_subsampled = glob('*.tagAlign.gz')[0]
+    }
+    runtime {
+        cpu : 1
+        memory : '${mem_mb} MB'
+        time : 4
+        disks : 'local-disk 100 HDD'
+    }
+}
+
 task call_peak {
     input {
         String peak_caller
@@ -2341,8 +2375,6 @@ task call_peak {
                             # chr. sizes file, or hs for human, ms for mouse)
         File chrsz            # 2-col chromosome sizes file
         Int cap_num_peak    # cap number of raw peaks called from MACS2
-        Int ctl_subsample    # subsample control if >0. 0: no subsampling
-        Boolean ctl_paired_end # control is paired end
         Float pval_thresh     # p.value threshold for MACS2
         Float? fdr_thresh     # FDR threshold for SPP
 
@@ -2365,8 +2397,6 @@ task call_peak {
                 ${'--chrsz ' + chrsz} \
                 ${'--fraglen ' + fraglen} \
                 ${'--cap-num-peak ' + cap_num_peak} \
-                ${'--ctl-subsample ' + ctl_subsample} \
-                ${if ctl_paired_end then '--ctl-paired-end' else ''} \
                 ${'--pval-thresh '+ pval_thresh}
 
         elif [ '${peak_caller}' == 'spp' ]; then
@@ -2375,8 +2405,6 @@ task call_peak {
                 ${'--chrsz ' + chrsz} \
                 ${'--fraglen ' + fraglen} \
                 ${'--cap-num-peak ' + cap_num_peak} \
-                ${'--ctl-subsample ' + ctl_subsample} \
-                ${if ctl_paired_end then '--ctl-paired-end' else ''} \
                 ${'--fdr-thresh '+ fdr_thresh} \
                 ${'--nth ' + cpu}
         fi
@@ -2418,8 +2446,6 @@ task macs2_signal_track {
         String gensz        # Genome size (sum of entries in 2nd column of 
                             # chr. sizes file, or hs for human, ms for mouse)
         File chrsz            # 2-col chromosome sizes file
-        Int ctl_subsample    # subsample control if >0. 0: no subsampling
-        Boolean ctl_paired_end # control is paired end    
         Float pval_thresh     # p.value threshold
 
         Int mem_mb
@@ -2434,9 +2460,7 @@ task macs2_signal_track {
             ${'--gensz '+ gensz} \
             ${'--chrsz ' + chrsz} \
             ${'--fraglen ' + fraglen} \
-            ${'--pval-thresh '+ pval_thresh} \
-            ${'--ctl-subsample ' + ctl_subsample} \
-            ${if ctl_paired_end then '--ctl-paired-end' else ''}
+            ${'--pval-thresh '+ pval_thresh}
     }
     output {
         File pval_bw = glob('*.pval.signal.bigwig')[0]
