@@ -252,3 +252,4 @@ workflows:
       - test_workflow_hist_pe:
           requires:
             - build
+

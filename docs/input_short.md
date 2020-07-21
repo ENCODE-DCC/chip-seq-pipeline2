@@ -274,6 +274,10 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
+`chip.subsample_ctl_mem_mb` | 16000
+
+Parameter|Default
+---------|-------
 `chip.call_peak_cpu` | 2
 `chip.call_peak_mem_mb` | 16000
 `chip.call_peak_time_hr` | 24
