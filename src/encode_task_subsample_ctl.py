@@ -3,8 +3,15 @@ import sys
 import os
 import argparse
 from encode_lib_common import (
-    assert_file_not_empty, get_num_lines, log, ls_l, mkdir_p, rm_f,
-    run_shell_cmd, strip_ext_ta)
+    assert_file_not_empty,
+    get_num_lines,
+    log,
+    ls_l,
+    mkdir_p,
+    rm_f,
+    run_shell_cmd,
+    strip_ext_ta,
+)
 from encode_lib_genomic import subsample_ta_pe, subsample_ta_se
 
 def parse_arguments():
