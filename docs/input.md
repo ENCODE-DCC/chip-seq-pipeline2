@@ -30,11 +30,9 @@ Parameter|Type|Description
 `chip.genome_tsv`| File | Choose one of the TSV files listed below or build your own
 `chip.genome_name`| String | Name of genome (e.g. hg38, hg19, ...)
 `chip.ref_fa`| File | Reference FASTA file
-`chip.ref_mito_fa`| File | Mito-only reference FASTA file
-`chip.bowtie2_idx_tar`| File | Bowtie2 index TAR file (uncompressed) built from FASTA file
-`chip.bowtie2_mito_idx_tar`| File | Mito-only Bowtie2 index TAR file (uncompressed) built from FASTA file
-`chip.bwa_idx_tar`| File | BWA index TAR file (uncompressed) built from FASTA file with `bwa index`
-`chip.bwa_mito_idx_tar`| File | Mito-only BWA index TAR file (uncompressed) built from FASTA file with `bwa index`
+`chip.bowtie2_idx_tar`| File | Bowtie2 index TAR file built from FASTA file
+`chip.bwa_idx_tar`| File | BWA index TAR file built from FASTA file with `bwa index`
+`chip.custom_aligner_idx_tar`| File | Index TAR file for a custom aligner. To use a custom aligner, make sure to have `"chip.align": "custom"` and define `"chip.custom_align_py"` in your inputt JSON.
 `chip.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `chip.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
 `chip.blacklist2`| File | Second blacklist. Two blacklist files (`atac.blacklist` and `atac.blacklist2`) will be merged.
@@ -150,17 +148,19 @@ You can mix up different data types for individual replicate/control replicate. 
 
 Parameter|Type|Default|Description
 ---------|---|----|-----------
-`chip.aligner` | String | bowtie2 | Currently supported aligners: bwa and bowtie2.
+`chip.aligner` | String | bowtie2 | Currently supported aligners: bwa, bowtie2, custom. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
+`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
 `chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
 `chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
 `chip.use_bwa_mem_for_pe` | Boolean | false | For PE dataset, uise bwa mem instead of bwa aln.
+`chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 
 
 ## Optional filtering parameters
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.mapq_thresh` | 30 for bwa, 255 for bowtie2 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
+`chip.mapq_thresh` | 30 | Threshold for mapped reads quality (samtools view -q). If not defined, automatically determined according to aligner.
 `chip.dup_marker` | `picard` | Choose a dup marker between `picard` and `sambamba`. `picard` is recommended, use `sambamba` only when picard fails.
 `chip.no_dup_removal` | false | Skip dup removal in a BAM filtering stage.
 
@@ -270,6 +270,10 @@ Parameter|Default
 
 Parameter|Default
 ---------|-------
+`chip.subsample_ctl_mem_mb` | 16000
+
+Parameter|Default
+---------|-------
 `chip.call_peak_cpu` | 2
 `chip.call_peak_mem_mb` | 16000
 `chip.call_peak_time_hr` | 24
@@ -290,3 +294,80 @@ Parameter|Default
 `chip.filter_picard_java_heap` | = `chip.filter_mem_mb`
 `chip.align_trimmomatic_java_heap` | = `chip.align_mem_mb`
 `chip.gc_bias_picard_java_heap` | `10G`
+
+## How to use a custom aligner
+
+ENCODE ChIP-Seq pipeline currently supports `bwa` and `bowtie2`. In order to use your own aligner you need to define the following parameters first. You can define `custom_aligner_idx_tar` either in your input JSON file or in your genome TSV file. Such index TAR file should be an uncompressed TAR file without any directory structured.
+
+Parameter|Type|Description
+---------|-------|-----------
+`chip.custom_aligner_idx_tar` | File | Index TAR file for your custom aligner
+`chip.custom_align_py` | File | Python script for your custom aligner
+
+Here is a template for `custom_align.py`:
+
+```python
+#!/usr/bin/env python
+
+import os
+import argparse
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(prog='ENCODE template aligner')
+    parser.add_argument('index_prefix_or_tar', type=str,
+                        help='Path for prefix (or a tarball .tar) \
+                            for reference aligner index. \
+                            Tar ball must be packed without compression \
+                            and directory by using command line \
+                            "tar cvf [TAR] [TAR_PREFIX].*')
+    parser.add_argument('fastqs', nargs='+', type=str,
+                        help='List of FASTQs (R1 and R2). \
+                            FASTQs must be compressed with gzip (with .gz).')
+    parser.add_argument('--paired-end', action="store_true",
+                        help='Paired-end FASTQs.')
+    parser.add_argument('--multimapping', default=4, type=int,
+                        help='Multimapping reads')
+    parser.add_argument('--nth', type=int, default=1,
+                        help='Number of threads to parallelize.')
+    parser.add_argument('--out-dir', default='', type=str,
+                            help='Output directory.')
+    args = parser.parse_args()
+
+    # check if fastqs have correct dimension
+    if args.paired_end and len(args.fastqs)!=2:
+        raise argparse.ArgumentTypeError('Need 2 fastqs for paired end.')
+    if not args.paired_end and len(args.fastqs)!=1:
+        raise argparse.ArgumentTypeError('Need 1 fastq for single end.')
+
+    return args
+
+def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, out_dir):
+    basename = os.path.basename(os.path.splitext(fastq_R1)[0])
+    prefix = os.path.join(out_dir, basename)
+    bam = '{}.bam'.format(prefix)
+
+    # map your fastqs somehow
+    os.system('touch {}'.format(bam))
+
+    return bam
+
+def main():
+    # read params
+    args = parse_arguments()
+
+    # unpack index somehow on CWD
+    os.system('tar xvf {}'.format(args.index_prefix_or_tar))
+
+    bam = align(args.fastqs[0],
+                args.fastqs[1] if args.paired_end else None,
+                args.index_prefix_or_tar,
+                args.multimapping,
+                args.nth,
+                args.out_dir)
+
+if __name__=='__main__':
+    main()
+
+```
+
+> **IMPORTANT**: Your custom python script should generate ONLY one `*.bam` file. For example, if there are two `.bam` files then pipeline will just pick the first one in an alphatical order.

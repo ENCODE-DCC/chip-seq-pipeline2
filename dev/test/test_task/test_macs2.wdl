@@ -8,8 +8,6 @@ workflow test_macs2 {
         Float pval_thresh
 
         Int fraglen
-        Int ctl_subsample
-        Boolean ctl_paired_end
         # test macs2 for SE set only
         String se_ta
         String se_ctl_ta
@@ -17,9 +15,6 @@ workflow test_macs2 {
         String ref_se_macs2_npeak # raw narrow-peak
         String ref_se_macs2_bfilt_npeak # blacklist filtered narrow-peak
         String ref_se_macs2_frip_qc 
-        String ref_se_macs2_subsample_npeak # raw narrow-peak
-        String ref_se_macs2_subsample_bfilt_npeak # blacklist filtered narrow-peak
-        String ref_se_macs2_subsample_frip_qc 
 
         String se_blacklist
         String se_chrsz
@@ -36,28 +31,6 @@ workflow test_macs2 {
         peak_caller = 'macs2',
         peak_type = 'narrowPeak',
         tas = [se_ta, se_ctl_ta],
-        ctl_subsample = 0,
-        ctl_paired_end = ctl_paired_end,
-        gensz = se_gensz,
-        chrsz = se_chrsz,
-        fraglen = fraglen,
-        cap_num_peak = cap_num_peak,
-        pval_thresh = pval_thresh,
-        blacklist = se_blacklist,
-        regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
-
-        cpu = 1,
-        mem_mb = macs2_mem_mb,
-        time_hr = macs2_time_hr,
-        disks = macs2_disks,        
-    }
-
-    call chip.call_peak as se_macs2_subsample { input :
-        peak_caller = 'macs2',
-        peak_type = 'narrowPeak',
-        tas = [se_ta, se_ctl_ta],
-        ctl_subsample = ctl_subsample,
-        ctl_paired_end = ctl_paired_end,
         gensz = se_gensz,
         chrsz = se_chrsz,
         fraglen = fraglen,
@@ -77,25 +50,16 @@ workflow test_macs2 {
             'se_macs2_npeak',
             'se_macs2_bfilt_npeak',
             'se_macs2_frip_qc',
-            'se_macs2_subsample_npeak',
-            'se_macs2_subsample_bfilt_npeak',
-            'se_macs2_subsample_frip_qc',
         ],
         files = [
             se_macs2.peak,
             se_macs2.bfilt_peak,
             se_macs2.frip_qc,
-            se_macs2_subsample.peak,
-            se_macs2_subsample.bfilt_peak,
-            se_macs2_subsample.frip_qc,
         ],
         ref_files = [
             ref_se_macs2_npeak,
             ref_se_macs2_bfilt_npeak,
             ref_se_macs2_frip_qc,
-            ref_se_macs2_subsample_npeak,
-            ref_se_macs2_subsample_bfilt_npeak,
-            ref_se_macs2_subsample_frip_qc,
         ],
     }
 }

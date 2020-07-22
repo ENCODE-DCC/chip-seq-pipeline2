@@ -1,15 +1,15 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.5.0'
+    String pipeline_ver = 'v1.5.1'
 
     meta {
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/chip-seq-pipeline:v1.5.0'
-        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.5.0'
+        caper_docker: 'encodedcc/chip-seq-pipeline:v1.5.1'
+        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.5.1'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v4.json'
 
         parameter_group: {
@@ -71,6 +71,7 @@ workflow chip {
         String? mito_chr_name
         String? regex_bfilt_peak_chr_name
         String? gensz
+        File? custom_aligner_idx_tar
 
         # group: input_genomic_data
         Boolean? paired_end
@@ -141,6 +142,7 @@ workflow chip {
 
         # group: alignment
         String aligner = 'bowtie2'
+        File? custom_align_py
         Boolean use_bwa_mem_for_pe = false
         Int crop_length = 0
         Int crop_length_tol = 2
@@ -196,6 +198,8 @@ workflow chip {
         Int xcor_time_hr = 24
         String xcor_disks = 'local-disk 100 HDD'
 
+        Int subsample_ctl_mem_mb = 16000
+
         Int macs2_signal_track_mem_mb = 16000
         Int macs2_signal_track_time_hr = 24
         String macs2_signal_track_disks = 'local-disk 400 HDD'
@@ -235,16 +239,12 @@ workflow chip {
             description: 'Reference FASTA file.',
             group: 'reference_genome'
         }
-        ref_mito_fa: {
-            description: 'Reference FASTA file (mitochondrial reads only).',
-            group: 'reference_genome'
-        }
         bowtie2_idx_tar: {
             description: 'BWA index TAR file.',
             group: 'reference_genome'
         }
-        bowtie2_mito_idx_tar: {
-            description: 'BWA index TAR file (mitochondrial reads only).',
+        custom_aligner_idx_tar: {
+            description: 'Index TAR file for a custom aligner. To use a custom aligner, define "chip.custom_align_py" too.',
             group: 'reference_genome'
         }
         chrsz: {
@@ -613,11 +613,16 @@ workflow chip {
         }
 
         aligner: {
-            description: 'Aligner. bowtie2 or bwa',
+            description: 'Aligner. bowtie2, bwa or custom',
             group: 'alignment',
-            help: 'It is bowtie2 by default.',
-            choices: ['bowtie2', 'bwa'],
+            help: 'It is bowtie2 by default. To use a custom aligner, define chip.custom_align_py and chip.custom_aligner_idx_tar.',
+            choices: ['bowtie2', 'bwa', 'custom'],
             example: 'bowtie2'
+        }
+        custom_align_py: {
+            description: 'Python script for a custom aligner.',
+            group: 'alignment',
+            help: 'There is a template included in the documentation for inputs. Defining this parameter will automatically change "chip.aligner" to "custom". You should also define "chip.custom_aligner_idx_tar".'
         }
         use_bwa_mem_for_pe: {
             description: 'For paired end dataset with read length >= 70bp, use bwa mem instead of bwa aln.',
@@ -850,6 +855,11 @@ workflow chip {
             group: 'resource_parameter',
             help: 'This is for GCP/AWS only.'
         }
+        subsample_ctl_mem_mb: {
+            description: 'Memory (MB) required for task subsample_ctl.',
+            group: 'resource_parameter',
+            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+        }
         call_peak_cpu: {
             description: 'Number of cores for task call_peak.',
             group: 'resource_parameter',
@@ -934,7 +944,7 @@ workflow chip {
     String genome_name_ = select_first([genome_name, read_genome_tsv.genome_name, basename(chrsz_)])
 
     ### temp vars (do not define these)
-    String aligner_ = aligner
+    String aligner_ = if defined(custom_align_py) then 'custom' else aligner
     String peak_caller_ = if pipeline_type=='tf' then select_first([peak_caller, 'spp'])
                         else select_first([peak_caller, 'macs2'])
     String peak_type_ = if peak_caller_=='spp' then 'regionPeak'
@@ -1054,16 +1064,22 @@ workflow chip {
             msg = 'SPP requires control inputs. Define control input files ("chip.ctl_*") in an input JSON file.'
         }
     }
-    if ( (num_rep_fastq > 0 || num_ctl_fastq > 0) && aligner_ != 'bwa' && aligner_ != 'bowtie2' ) {
+    if ( (num_rep_fastq > 0 || num_ctl_fastq > 0) && aligner_ != 'bwa' && aligner_ != 'bowtie2' && aligner_ != 'custom' ) {
         call raise_exception as error_wrong_aligner { input:
-            msg = 'Choose chip.aligner between bwa and bowtie2.'
+            msg = 'Choose chip.aligner to align your fastqs. Choices: bwa, bowtie2, custom.'
         }
     }
     if ( aligner_ != 'bwa' && use_bwa_mem_for_pe ) {
         call raise_exception as error_use_bwa_mem_for_non_bwa { input:
             msg = 'To use chip.use_bwa_mem_for_pe, choose bwa for chip.aligner.'
         }
-    }    
+    }
+    if ( aligner_ == 'custom' && ( !defined(custom_align_py) || !defined(custom_aligner_idx_tar) ) ) {
+        call raise_exception as error_custom_aligner { input:
+            msg = 'To use a custom aligner, define chip.custom_align_py and chip.custom_aligner_idx_tar.'
+        }
+    }
+
     if ( ( ctl_depth_limit > 0 || exp_ctl_depth_ratio_limit > 0 ) && num_ctl > 1 && length(ctl_paired_ends) > 1  ) {
         call raise_exception as error_subsample_pooled_control_with_mixed_endedness { input:
             msg = 'Cannot use automatic control subsampling ("chip.ctl_depth_limit">0 and "chip.exp_ctl_depth_limit">0) for ' +
@@ -1103,8 +1119,10 @@ workflow chip {
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
+                custom_align_py = custom_align_py,
                 idx_tar = if aligner=='bwa' then bwa_idx_tar_
-                    else bowtie2_idx_tar_,
+                    else if aligner=='bowtie2' then bowtie2_idx_tar_
+                    else custom_aligner_idx_tar,
                 paired_end = paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 
@@ -1194,8 +1212,10 @@ workflow chip {
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
+                custom_align_py = custom_align_py,
                 idx_tar = if aligner=='bwa' then bwa_idx_tar_
-                    else bowtie2_idx_tar_,
+                    else if aligner=='bowtie2' then bowtie2_idx_tar_
+                    else custom_aligner_idx_tar,
                 paired_end = false,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 
@@ -1318,8 +1338,10 @@ workflow chip {
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
+                custom_align_py = custom_align_py,
                 idx_tar = if aligner=='bwa' then bwa_idx_tar_
-                    else bowtie2_idx_tar_,
+                    else if aligner=='bowtie2' then bowtie2_idx_tar_
+                    else custom_aligner_idx_tar,
                 paired_end = ctl_paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 
@@ -1464,15 +1486,25 @@ workflow chip {
         #    -2: there is no control
         Int chosen_ctl_ta_id = if has_all_input_of_choose_ctl && !align_only_ then
             select_first([choose_ctl.chosen_ctl_ta_ids])[i] else -2
-        Array[File] chosen_ctl_tas = if chosen_ctl_ta_id == -2 then []
-            else if chosen_ctl_ta_id == -1 then [ select_first([pool_ta_ctl.ta_pooled]) ]
-            else [ select_first([ctl_ta_[ chosen_ctl_ta_id ]]) ]
-
         Int chosen_ctl_ta_subsample = if has_all_input_of_choose_ctl && !align_only_ then
             select_first([choose_ctl.chosen_ctl_ta_subsample])[i] else 0
         Boolean chosen_ctl_paired_end = if chosen_ctl_ta_id == -2 then false
             else if chosen_ctl_ta_id == -1 then ctl_paired_end_[0]
             else ctl_paired_end_[chosen_ctl_ta_id]
+
+        if ( chosen_ctl_ta_id > -2 && chosen_ctl_ta_subsample > 0 ) {
+            call subsample_ctl { input:
+                ta = if chosen_ctl_ta_id == -1 then pool_ta_ctl.ta_pooled
+                     else ctl_ta_[ chosen_ctl_ta_id ],
+                subsample = chosen_ctl_ta_subsample,
+                paired_end = chosen_ctl_paired_end,
+                mem_mb = subsample_ctl_mem_mb,
+            }
+        }
+        Array[File] chosen_ctl_tas = if chosen_ctl_ta_id <= -2 then []
+            else if chosen_ctl_ta_subsample > 0 then [ select_first([subsample_ctl.ta_subsampled]) ]
+            else if chosen_ctl_ta_id == -1 then [ select_first([pool_ta_ctl.ta_pooled]) ]
+            else [ select_first([ctl_ta_[ chosen_ctl_ta_id ]]) ]
     }
     Int chosen_ctl_ta_pooled_subsample = if has_all_input_of_choose_ctl && !align_only_ then
         select_first([choose_ctl.chosen_ctl_ta_subsample_pooled]) else 0
@@ -1492,8 +1524,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 cap_num_peak = cap_num_peak_,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 pval_thresh = pval_thresh,
                 fdr_thresh = fdr_thresh,
                 fraglen = fraglen_tmp[i],
@@ -1516,8 +1546,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 pval_thresh = pval_thresh,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 fraglen = fraglen_tmp[i],
 
                 mem_mb = macs2_signal_track_mem_mb,
@@ -1537,8 +1565,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 cap_num_peak = cap_num_peak_,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 pval_thresh = pval_thresh,
                 fdr_thresh = fdr_thresh,
                 fraglen = fraglen_tmp[i],
@@ -1565,8 +1591,6 @@ workflow chip {
                 gensz = gensz_,
                 chrsz = chrsz_,
                 cap_num_peak = cap_num_peak_,
-                ctl_subsample = chosen_ctl_ta_subsample[i],
-                ctl_paired_end = chosen_ctl_paired_end[i],
                 pval_thresh = pval_thresh,
                 fdr_thresh = fdr_thresh,
                 fraglen = fraglen_tmp[i],
@@ -1592,12 +1616,20 @@ workflow chip {
     }
     # }
 
+    if ( has_all_input_of_choose_ctl && !align_only_ && chosen_ctl_ta_pooled_subsample > 0 ) {
+        call subsample_ctl as subsample_ctl_pooled { input:
+            ta = if num_ctl < 2 then ctl_ta_[0]
+                 else pool_ta_ctl.ta_pooled,
+            subsample = chosen_ctl_ta_pooled_subsample,
+            paired_end = ctl_paired_end_[0],
+            mem_mb = subsample_ctl_mem_mb,
+        }
+    }
     # actually not an array
     Array[File?] chosen_ctl_ta_pooled = if !has_all_input_of_choose_ctl || align_only_ then []
-        else if num_ctl < 2 then [ctl_ta_[0]] # choose first (only) control
-        else select_all([pool_ta_ctl.ta_pooled]) # choose pooled control
-    Boolean chosen_ctl_ta_pooled_paired_end = if !has_all_input_of_choose_ctl || align_only_ then false
-        else ctl_paired_end_[0]
+        else if chosen_ctl_ta_pooled_subsample > 0 then [ subsample_ctl_pooled.ta_subsampled ]
+        else if num_ctl < 2 then [ ctl_ta_[0] ]
+        else [ pool_ta_ctl.ta_pooled ]
 
     Boolean has_input_of_call_peak_pooled = defined(pool_ta.ta_pooled)
     Boolean has_output_of_call_peak_pooled = defined(peak_pooled)
@@ -1611,8 +1643,6 @@ workflow chip {
             gensz = gensz_,
             chrsz = chrsz_,
             cap_num_peak = cap_num_peak_,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             pval_thresh = pval_thresh,
             fdr_thresh = fdr_thresh,
             fraglen = fraglen_mean.rounded_mean,
@@ -1635,8 +1665,6 @@ workflow chip {
             gensz = gensz_,
             chrsz = chrsz_,
             pval_thresh = pval_thresh,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             fraglen = fraglen_mean.rounded_mean,
 
             mem_mb = macs2_signal_track_mem_mb,
@@ -1657,8 +1685,6 @@ workflow chip {
             chrsz = chrsz_,
             cap_num_peak = cap_num_peak_,
             pval_thresh = pval_thresh,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             fdr_thresh = fdr_thresh,
             fraglen = fraglen_mean.rounded_mean,
             blacklist = blacklist_,
@@ -1685,8 +1711,6 @@ workflow chip {
             chrsz = chrsz_,
             cap_num_peak = cap_num_peak_,
             pval_thresh = pval_thresh,
-            ctl_subsample = chosen_ctl_ta_pooled_subsample,
-            ctl_paired_end = chosen_ctl_ta_pooled_paired_end,
             fdr_thresh = fdr_thresh,
             fraglen = fraglen_mean.rounded_mean,
             blacklist = blacklist_,
@@ -1920,8 +1944,10 @@ task align {
         Int crop_length
         Int crop_length_tol
         String aligner
+
         String mito_chr_name
         Int? multimapping
+        File? custom_align_py
         File? idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
@@ -1988,7 +2014,7 @@ task align {
         fi
 
         if [ '${aligner}' == 'bwa' ]; then
-             python3 $(which encode_task_bwa.py) \
+            python3 $(which encode_task_bwa.py) \
                 ${idx_tar} \
                 R1$SUFFIX/*.fastq.gz \
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
@@ -1997,11 +2023,18 @@ task align {
                 ${'--nth ' + cpu}
 
         elif [ '${aligner}' == 'bowtie2' ]; then
-             python3 $(which encode_task_bowtie2.py) \
+            python3 $(which encode_task_bowtie2.py) \
                 ${idx_tar} \
                 R1$SUFFIX/*.fastq.gz \
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${'--multimapping ' + multimapping} \
+                ${if paired_end then '--paired-end' else ''} \
+                ${'--nth ' + cpu}
+        else
+            python3 ${custom_align_py} \
+                ${idx_tar} \
+                R1$SUFFIX/*.fastq.gz \
+                ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${'--nth ' + cpu}
         fi 
@@ -2307,6 +2340,31 @@ task count_signal_track {
     }
 }
 
+task subsample_ctl {
+    input {
+        File? ta
+        Boolean paired_end
+        Int subsample
+
+        Int mem_mb
+    }
+    command {
+        python3 $(which encode_task_subsample_ctl.py) \
+            ${ta} \
+            ${'--subsample ' + subsample} \
+            ${if paired_end then '--paired-end' else ''} \
+    }
+    output {
+        File ta_subsampled = glob('*.tagAlign.gz')[0]
+    }
+    runtime {
+        cpu : 1
+        memory : '${mem_mb} MB'
+        time : 4
+        disks : 'local-disk 100 HDD'
+    }
+}
+
 task call_peak {
     input {
         String peak_caller
@@ -2317,8 +2375,6 @@ task call_peak {
                             # chr. sizes file, or hs for human, ms for mouse)
         File chrsz            # 2-col chromosome sizes file
         Int cap_num_peak    # cap number of raw peaks called from MACS2
-        Int ctl_subsample    # subsample control if >0. 0: no subsampling
-        Boolean ctl_paired_end # control is paired end
         Float pval_thresh     # p.value threshold for MACS2
         Float? fdr_thresh     # FDR threshold for SPP
 
@@ -2341,8 +2397,6 @@ task call_peak {
                 ${'--chrsz ' + chrsz} \
                 ${'--fraglen ' + fraglen} \
                 ${'--cap-num-peak ' + cap_num_peak} \
-                ${'--ctl-subsample ' + ctl_subsample} \
-                ${if ctl_paired_end then '--ctl-paired-end' else ''} \
                 ${'--pval-thresh '+ pval_thresh}
 
         elif [ '${peak_caller}' == 'spp' ]; then
@@ -2351,8 +2405,6 @@ task call_peak {
                 ${'--chrsz ' + chrsz} \
                 ${'--fraglen ' + fraglen} \
                 ${'--cap-num-peak ' + cap_num_peak} \
-                ${'--ctl-subsample ' + ctl_subsample} \
-                ${if ctl_paired_end then '--ctl-paired-end' else ''} \
                 ${'--fdr-thresh '+ fdr_thresh} \
                 ${'--nth ' + cpu}
         fi
@@ -2394,8 +2446,6 @@ task macs2_signal_track {
         String gensz        # Genome size (sum of entries in 2nd column of 
                             # chr. sizes file, or hs for human, ms for mouse)
         File chrsz            # 2-col chromosome sizes file
-        Int ctl_subsample    # subsample control if >0. 0: no subsampling
-        Boolean ctl_paired_end # control is paired end    
         Float pval_thresh     # p.value threshold
 
         Int mem_mb
@@ -2410,9 +2460,7 @@ task macs2_signal_track {
             ${'--gensz '+ gensz} \
             ${'--chrsz ' + chrsz} \
             ${'--fraglen ' + fraglen} \
-            ${'--pval-thresh '+ pval_thresh} \
-            ${'--ctl-subsample ' + ctl_subsample} \
-            ${if ctl_paired_end then '--ctl-paired-end' else ''}
+            ${'--pval-thresh '+ pval_thresh}
     }
     output {
         File pval_bw = glob('*.pval.signal.bigwig')[0]
