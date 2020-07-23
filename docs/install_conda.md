@@ -2,7 +2,7 @@
 
 If you do not have miniconda (or anaconda) installed, follow the instructions below in steps 1 - 4 to install miniconda.
 
-** IF YOU ALREADY HAVE ANACONDA OR MINICONDA INSTALLED, SKIP TO STEP 5 ** 
+**IF YOU ALREADY HAVE ANACONDA OR MINICONDA INSTALLED, SKIP TO STEP 5** 
 
 1) Download [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh). Use default answers to all questions except for the first and last.
   ```bash
