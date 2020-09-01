@@ -150,7 +150,6 @@ Parameter|Type|Default|Description
 ---------|---|----|-----------
 `chip.aligner` | String | bowtie2 | Currently supported aligners: bwa, bowtie2, custom. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
 `chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
-`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
 `chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
 `chip.use_bwa_mem_for_pe` | Boolean | false | For PE dataset, uise bwa mem instead of bwa aln.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
