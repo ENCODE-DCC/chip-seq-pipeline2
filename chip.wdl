@@ -2877,5 +2877,8 @@ task raise_exception {
     }
     runtime {
         maxRetries : 0
+        cpu : 1
+        memory : '2 GB'
+        time : 1
     }
 }
