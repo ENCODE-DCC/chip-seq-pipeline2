@@ -1226,6 +1226,7 @@ workflow chip {
                 ta = ta_,
                 paired_end = paired_end_,
                 mem_factor = spr_mem_factor,
+                disk_factor = spr_disk_factor,
             }
         }
 
@@ -1392,7 +1393,7 @@ workflow chip {
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
                 cpu = align_cpu,
-                mem_factor = align_bwa_mem_factor_,
+                mem_factor = align_mem_factor_,
                 time_hr = align_time_hr,
                 disk_factor = align_disk_factor_,
             }
@@ -1544,6 +1545,7 @@ workflow chip {
                 subsample = chosen_ctl_ta_subsample,
                 paired_end = chosen_ctl_paired_end,
                 mem_factor = subsample_ctl_mem_factor,
+                disk_factor = subsample_ctl_disk_factor,
             }
         }
         Array[File] chosen_ctl_tas = if chosen_ctl_ta_id <= -2 then []
@@ -1576,8 +1578,8 @@ workflow chip {
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
                 cpu = call_peak_cpu,
-                mem_factor = call_peak_mem_factor,
-                disk_factor = call_peak_disk_factor,
+                mem_factor = call_peak_mem_factor_,
+                disk_factor = call_peak_disk_factor_,
                 time_hr = call_peak_time_hr,
             }
         }
@@ -1617,8 +1619,8 @@ workflow chip {
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
     
                 cpu = call_peak_cpu,
-                mem_factor = call_peak_mem_factor,
-                disk_factor = call_peak_disk_factor,
+                mem_factor = call_peak_mem_factor_,
+                disk_factor = call_peak_disk_factor_,
                 time_hr = call_peak_time_hr,
             }
         }
@@ -1643,8 +1645,8 @@ workflow chip {
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
                 cpu = call_peak_cpu,
-                mem_factor = call_peak_mem_factor,
-                disk_factor = call_peak_disk_factor,
+                mem_factor = call_peak_mem_factor_,
+                disk_factor = call_peak_disk_factor_,
                 time_hr = call_peak_time_hr,
             }
         }
@@ -1668,6 +1670,7 @@ workflow chip {
             subsample = chosen_ctl_ta_pooled_subsample,
             paired_end = ctl_paired_end_[0],
             mem_factor = subsample_ctl_mem_factor,
+            disk_factor = subsample_ctl_disk_factor,
         }
     }
     # actually not an array
@@ -1695,8 +1698,8 @@ workflow chip {
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
             cpu = call_peak_cpu,
-            mem_factor = call_peak_mem_factor,
-            disk_factor = call_peak_disk_factor,
+            mem_factor = call_peak_mem_factor_,
+            disk_factor = call_peak_disk_factor_,
             time_hr = call_peak_time_hr,
         }
     }
@@ -1736,8 +1739,8 @@ workflow chip {
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
             cpu = call_peak_cpu,
-            mem_factor = call_peak_mem_factor,
-            disk_factor = call_peak_disk_factor,
+            mem_factor = call_peak_mem_factor_,
+            disk_factor = call_peak_disk_factor_,
             time_hr = call_peak_time_hr,
         }
     }
@@ -1762,8 +1765,8 @@ workflow chip {
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
             cpu = call_peak_cpu,
-            mem_factor = call_peak_mem_factor,
-            disk_factor = call_peak_disk_factor,
+            mem_factor = call_peak_mem_factor_,
+            disk_factor = call_peak_disk_factor_,
             time_hr = call_peak_time_hr,
         }
     }
@@ -2003,7 +2006,7 @@ task align {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(fastqs_R1) + size(fastqs_R2)
+    Float input_file_size = size(fastqs_R1, "G") + size(fastqs_R2, "G")
     Float mem_gb = 5.0 + mem_factor * input_file_size
     Int disk_gb = round(20.0 + disk_factor * input_file_size)
 
@@ -2298,7 +2301,7 @@ task xcor {
         cpu : cpu
         memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
@@ -2335,7 +2338,7 @@ task jsd {
         cpu : cpu
         memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
