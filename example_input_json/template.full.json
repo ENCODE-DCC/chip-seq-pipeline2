@@ -52,40 +52,46 @@
     "chip.filter_chrs" : [],
 
     "chip.align_cpu" : 4,
-    "chip.align_mem_mb" : 20000,
+    "chip.align_bowtie2_mem_factor" : 0.05,
+    "chip.align_bwa_mem_factor" : 0.1,
     "chip.align_time_hr" : 48,
-    "chip.align_disks" : "local-disk 400 HDD",
+    "chip.align_bowtie2_disk_factor" : 5.0,
+    "chip.align_bwa_disk_factor" : 8.0,
 
     "chip.filter_cpu" : 2,
-    "chip.filter_mem_mb" : 20000,
+    "chip.filter_mem_factor" : 0.2,
     "chip.filter_time_hr" : 24,
-    "chip.filter_disks" : "local-disk 400 HDD",
+    "chip.filter_disk_factor" : 6.0,
 
     "chip.bam2ta_cpu" : 2,
-    "chip.bam2ta_mem_mb" : 10000,
+    "chip.bam2ta_mem_factor" : 0.35,
     "chip.bam2ta_time_hr" : 6,
-    "chip.bam2ta_disks" : "local-disk 100 HDD",
+    "chip.bam2ta_disk_factor" : 4.0,
 
-    "chip.spr_mem_mb" : 16000,
+    "chip.spr_mem_factor" : 4.5,
+    "chip.spr_disk_factor" : 6.0,
 
     "chip.jsd_cpu" : 2,
-    "chip.jsd_mem_mb" : 12000,
+    "chip.jsd_mem_factor" : 0.1,
     "chip.jsd_time_hr" : 6,
-    "chip.jsd_disks" : "local-disk 200 HDD",
+    "chip.jsd_disk_factor" : 2.0,
 
     "chip.xcor_cpu" : 2,
-    "chip.xcor_mem_mb" : 16000,
+    "chip.xcor_mem_factor" : 1.0,
     "chip.xcor_time_hr" : 24,
-    "chip.xcor_disks" : "local-disk 100 HDD",
+    "chip.xcor_disk_factor" : 4.5,
 
-    "chip.call_peak_cpu" : 2,
-    "chip.call_peak_mem_mb" : 16000,
+    "chip.subsample_ctl_mem_factor" : 7.0,
+    "chip.subsample_ctl_disk_factor" : 7.5,
+
+    "chip.call_peak_cpu" : 4,
+    "chip.call_peak_spp_mem_factor" : 5.0,
+    "chip.call_peak_macs2_mem_factor" : 2.5,
     "chip.call_peak_time_hr" : 72,
-    "chip.call_peak_disks" : "local-disk 200 HDD",
+    "chip.call_peak_spp_disk_factor" : 5.0,
+    "chip.call_peak_macs2_disk_factor" : 15.0,
 
-    "chip.macs2_signal_track_mem_mb" : 16000,
+    "chip.macs2_signal_track_mem_factor" : 6.0,
     "chip.macs2_signal_track_time_hr" : 24,
-    "chip.macs2_signal_track_disks" : "local-disk 400 HDD",
-
-    "chip.gc_bias_picard_java_heap" : "10G"
+    "chip.macs2_signal_track_disk_factor" : 40.0
 }
