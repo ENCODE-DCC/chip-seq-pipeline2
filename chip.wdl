@@ -2006,9 +2006,9 @@ task align {
         Int time_hr
         Float disk_factor
     }
-    Float input_file_size = size(fastqs_R1, "G") + size(fastqs_R2, "G")
-    Float mem_gb = 5.0 + mem_factor * input_file_size
-    Int disk_gb = round(20.0 + disk_factor * input_file_size)
+    Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
+    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     Float trimmomatic_java_heap_factor = 0.9
     Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
