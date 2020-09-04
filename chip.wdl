@@ -172,10 +172,10 @@ workflow chip {
 
         # group: resource_parameter
         Int align_cpu = 4
-        Float align_bowtie2_mem_factor = 0.05
-        Float align_bwa_mem_factor = 0.1
+        Float align_bowtie2_mem_factor = 0.1
+        Float align_bwa_mem_factor = 0.15
         Int align_time_hr = 48
-        Float align_bowtie2_disk_factor = 5.0
+        Float align_bowtie2_disk_factor = 8.0
         Float align_bwa_disk_factor = 8.0
 
         Int filter_cpu = 2
@@ -2008,7 +2008,7 @@ task align {
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
     Float mem_gb = 5.0 + mem_factor * input_file_size_gb
-    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
+    Int disk_gb = round(50.0 + disk_factor * input_file_size_gb)
 
     Float trimmomatic_java_heap_factor = 0.9
     Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
