@@ -59,7 +59,7 @@
     "chip.align_bwa_disk_factor" : 8.0,
 
     "chip.filter_cpu" : 2,
-    "chip.filter_mem_factor" : 0.2,
+    "chip.filter_mem_factor" : 0.4,
     "chip.filter_time_hr" : 24,
     "chip.filter_disk_factor" : 6.0,
 
