@@ -18,7 +18,7 @@ workflow test_bwa {
     }
 
     Int bwa_cpu = 1
-    Float bwa_mem_factor = 0.1
+    Float bwa_mem_factor = 0.0
     Int bwa_time_hr = 48
     Float bwa_disk_factor = 8.0
 

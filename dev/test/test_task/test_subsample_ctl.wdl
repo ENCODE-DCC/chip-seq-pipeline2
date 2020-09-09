@@ -13,7 +13,7 @@ workflow test_subsample_ctl {
         File ref_pe_ta_subsampled_trivial
         File ref_se_ta_subsampled_trivial
     }
-    Float subsample_ctl_mem_factor = 7.0
+    Float subsample_ctl_mem_factor = 0.0
     Float subsample_ctl_disk_factor = 7.5
 
     call chip.subsample_ctl as pe_subsample_ctl { input :

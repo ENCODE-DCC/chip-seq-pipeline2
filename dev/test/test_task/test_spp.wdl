@@ -22,7 +22,7 @@ workflow test_spp {
     String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
 
     Int spp_cpu = 1
-    Float spp_mem_factor = 5.0
+    Float spp_mem_factor = 0.0
     Int spp_time_hr = 72
     Float spp_disk_factor = 5.0
 

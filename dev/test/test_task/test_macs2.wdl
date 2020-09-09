@@ -23,7 +23,7 @@ workflow test_macs2 {
 
     String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
 
-    Float macs2_mem_factor = 2.5
+    Float macs2_mem_factor = 0.0
     Int macs2_time_hr = 24
     Float macs2_disk_factor = 15.0
 

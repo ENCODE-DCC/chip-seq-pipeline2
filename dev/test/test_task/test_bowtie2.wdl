@@ -25,7 +25,7 @@ workflow test_bowtie2 {
     }
 
     Int bowtie2_cpu = 1
-    Float bowtie2_mem_factor = 0.05
+    Float bowtie2_mem_factor = 0.0
     Int bowtie2_time_hr = 48
     Float bowtie2_disk_factor = 5.0
 

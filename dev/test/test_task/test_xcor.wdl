@@ -17,7 +17,7 @@ workflow test_xcor {
         String mito_chr_name = 'chrM'
     }
     Int xcor_cpu = 1
-    Float xcor_mem_factor = 1.0    
+    Float xcor_mem_factor = 0.0
     Int xcor_time_hr = 24
     Float xcor_disk_factor = 4.5
 
