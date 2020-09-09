@@ -243,13 +243,13 @@ workflows:
       # - test_workflow_ctl_sub_1ctl_pe:
       #     requires:
       #       - build
-      - test_workflow_hist_se:
-          requires:
-            - build
+      #- test_workflow_hist_se:
+      #    requires:
+      #      - build
       # - test_workflow_hist_unrep_se:
       #     requires:
       #       - build
-      - test_workflow_hist_pe:
-          requires:
-            - build
+      #- test_workflow_hist_pe:
+      #    requires:
+      #      - build
 
