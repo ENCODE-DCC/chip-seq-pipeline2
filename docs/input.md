@@ -243,7 +243,7 @@ Base memory/disk is 4GB/20GB for most tasks.
 Parameter|Default|Description
 ---------|-------|-----------
 `chip.align_cpu` | 4 |
-`chip.align_bowtie2_mem_factor` | 0.1 | Multiplied to size of FASTQs to determine required memory
+`chip.align_bowtie2_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
 `chip.align_bwa_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
 `chip.align_time_hr` | 48 | Walltime (HPCs only)
 `chip.align_bowtie2_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk

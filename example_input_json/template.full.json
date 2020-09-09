@@ -52,7 +52,7 @@
     "chip.filter_chrs" : [],
 
     "chip.align_cpu" : 4,
-    "chip.align_bowtie2_mem_factor" : 0.1,
+    "chip.align_bowtie2_mem_factor" : 0.15,
     "chip.align_bwa_mem_factor" : 0.15,
     "chip.align_time_hr" : 48,
     "chip.align_bowtie2_disk_factor" : 8.0,
