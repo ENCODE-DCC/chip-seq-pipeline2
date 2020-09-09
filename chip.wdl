@@ -2072,7 +2072,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${if use_bwa_mem_for_pe then '--use-bwa-mem-for-pe' else ''} \
-                ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
 
         elif [ '${aligner}' == 'bowtie2' ]; then
@@ -2082,7 +2082,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${'--multimapping ' + multimapping} \
                 ${if paired_end then '--paired-end' else ''} \
-                ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         else
             python3 ${custom_align_py} \
@@ -2090,14 +2090,14 @@ task align {
                 R1$SUFFIX/*.fastq.gz \
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
-                ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         fi 
 
         python3 $(which encode_task_post_align.py) \
             R1$SUFFIX/*.fastq.gz $(ls *.bam) \
             ${'--mito-chr-name ' + mito_chr_name} \
-            ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu}
         rm -rf R1 R2 R1$SUFFIX R2$SUFFIX
     }
@@ -2152,7 +2152,7 @@ task filter {
             ${'--chrsz ' + chrsz} \
             ${if no_dup_removal then '--no-dup-removal' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
-            ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu} \
             ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_gb * picard_java_heap_factor) + 'G')}
     }
@@ -2196,7 +2196,7 @@ task bam2ta {
             ${if paired_end then '--paired-end' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
             ${'--subsample ' + subsample} \
-            ${if mem_factor > 0 then ('--mem-gb ' + samtools_mem_gb) else ''} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu}
     }
     output {
