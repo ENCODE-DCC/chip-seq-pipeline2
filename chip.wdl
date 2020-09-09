@@ -2008,6 +2008,7 @@ task align {
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
     Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Float samtools_mem_gb = 0.8 * mem_gb
     Int disk_gb = round(50.0 + disk_factor * input_file_size_gb)
 
     Float trimmomatic_java_heap_factor = 0.9
@@ -2071,6 +2072,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${if use_bwa_mem_for_pe then '--use-bwa-mem-for-pe' else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
 
         elif [ '${aligner}' == 'bowtie2' ]; then
@@ -2080,6 +2082,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${'--multimapping ' + multimapping} \
                 ${if paired_end then '--paired-end' else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         else
             python3 ${custom_align_py} \
@@ -2087,12 +2090,14 @@ task align {
                 R1$SUFFIX/*.fastq.gz \
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         fi 
 
         python3 $(which encode_task_post_align.py) \
             R1$SUFFIX/*.fastq.gz $(ls *.bam) \
             ${'--mito-chr-name ' + mito_chr_name} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu}
         rm -rf R1 R2 R1$SUFFIX R2$SUFFIX
     }
@@ -2132,6 +2137,7 @@ task filter {
     Float input_file_size_gb = size(bam, "G")
     Float picard_java_heap_factor = 0.9
     Float mem_gb = 15.0 + mem_factor * input_file_size_gb
+    Float samtools_mem_gb = 0.8 * mem_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
@@ -2146,6 +2152,7 @@ task filter {
             ${'--chrsz ' + chrsz} \
             ${if no_dup_removal then '--no-dup-removal' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu} \
             ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_gb * picard_java_heap_factor) + 'G')}
     }
@@ -2178,6 +2185,7 @@ task bam2ta {
     }
     Float input_file_size_gb = size(bam, "G")
     Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Float samtools_mem_gb = 0.8 * mem_gb
     Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
@@ -2188,6 +2196,7 @@ task bam2ta {
             ${if paired_end then '--paired-end' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
             ${'--subsample ' + subsample} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu}
     }
     output {

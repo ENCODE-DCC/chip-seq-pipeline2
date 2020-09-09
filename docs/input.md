@@ -317,6 +317,8 @@ Parameter|Default
 
 ENCODE ChIP-Seq pipeline currently supports `bwa` and `bowtie2`. In order to use your own aligner you need to define the following parameters first. You can define `custom_aligner_idx_tar` either in your input JSON file or in your genome TSV file. Such index TAR file should be an uncompressed TAR file without any directory structured.
 
+> **NOTE**: The python script should take `--mem-gb`, which means total memory in GBs for a job/instance.
+
 Parameter|Type|Description
 ---------|-------|-----------
 `chip.custom_aligner_idx_tar` | File | Index TAR file for your custom aligner
@@ -345,6 +347,9 @@ def parse_arguments():
                         help='Paired-end FASTQs.')
     parser.add_argument('--multimapping', default=4, type=int,
                         help='Multimapping reads')
+    parser.add_argument('--mem-gb', type=float,
+                        help='Max. memory for samtools sort in GB. '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -359,7 +364,7 @@ def parse_arguments():
 
     return args
 
-def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, out_dir):
+def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, mem_gb, out_dir):
     basename = os.path.basename(os.path.splitext(fastq_R1)[0])
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
@@ -381,6 +386,7 @@ def main():
                 args.index_prefix_or_tar,
                 args.multimapping,
                 args.nth,
+                args.mem_gb,
                 args.out_dir)
 
 if __name__=='__main__':
