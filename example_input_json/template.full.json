@@ -58,7 +58,7 @@
     "chip.align_bowtie2_disk_factor" : 8.0,
     "chip.align_bwa_disk_factor" : 8.0,
 
-    "chip.filter_cpu" : 2,
+    "chip.filter_cpu" : 4,
     "chip.filter_mem_factor" : 0.4,
     "chip.filter_time_hr" : 24,
     "chip.filter_disk_factor" : 6.0,
@@ -71,7 +71,7 @@
     "chip.spr_mem_factor" : 4.5,
     "chip.spr_disk_factor" : 6.0,
 
-    "chip.jsd_cpu" : 2,
+    "chip.jsd_cpu" : 4,
     "chip.jsd_mem_factor" : 0.1,
     "chip.jsd_time_hr" : 6,
     "chip.jsd_disk_factor" : 2.0,
@@ -84,7 +84,7 @@
     "chip.subsample_ctl_mem_factor" : 7.0,
     "chip.subsample_ctl_disk_factor" : 7.5,
 
-    "chip.call_peak_cpu" : 4,
+    "chip.call_peak_cpu" : 6,
     "chip.call_peak_spp_mem_factor" : 5.0,
     "chip.call_peak_macs2_mem_factor" : 2.5,
     "chip.call_peak_time_hr" : 72,

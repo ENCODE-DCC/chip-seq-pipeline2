@@ -242,7 +242,7 @@ Base memory/disk is 4GB/20GB for most tasks.
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.align_cpu` | 4 |
+`chip.align_cpu` | 6 |
 `chip.align_bowtie2_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
 `chip.align_bwa_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
 `chip.align_time_hr` | 48 | Walltime (HPCs only)
@@ -251,7 +251,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.filter_cpu` | 2 |
+`chip.filter_cpu` | 4 |
 `chip.filter_mem_factor` | 0.4 | Multiplied to size of BAM to determine required memory
 `chip.filter_time_hr` | 24 | Walltime (HPCs only)
 `chip.filter_disk_factor` | 6.0 | Multiplied to size of BAM to determine required disk
@@ -270,7 +270,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.jsd_cpu` | 2 |
+`chip.jsd_cpu` | 4 |
 `chip.jsd_mem_factor` | 0.1 | Multiplied to size of filtered BAM to determine required memory
 `chip.jsd_time_hr` | 6 | Walltime (HPCs only)
 `chip.jsd_disk_factor` | 2.0 | Multiplied to size of filtered BAM to determine required disk
@@ -284,7 +284,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.call_peak_cpu` | 4 | Used for both peak callers (`spp` and `macs2`). `spp` is well multithreaded but `macs2` is single-threaded. More than 2 is not required for `macs2`.
+`chip.call_peak_cpu` | 6 | Used for both peak callers (`spp` and `macs2`). `spp` is well multithreaded but `macs2` is single-threaded. More than 2 is not required for `macs2`.
 `chip.call_peak_spp_mem_factor` | 5.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `chip.call_peak_macs2_mem_factor` | 2.5 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `chip.call_peak_time_hr` | 24 | Walltime (HPCs only)
