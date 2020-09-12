@@ -25,9 +25,9 @@ workflow test_bowtie2 {
     }
 
     Int bowtie2_cpu = 1
-    Int bowtie2_mem_mb = 20000
+    Float bowtie2_mem_factor = 0.0
     Int bowtie2_time_hr = 48
-    String bowtie2_disks = 'local-disk 100 HDD'
+    Float bowtie2_disk_factor = 5.0
 
     call chip.align as pe_bowtie2 { input :
         aligner = 'bowtie2',
@@ -41,9 +41,9 @@ workflow test_bowtie2 {
         crop_length_tol = 0,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
     call chip.align as se_bowtie2 { input :
         aligner = 'bowtie2',
@@ -57,9 +57,9 @@ workflow test_bowtie2 {
         crop_length_tol = 0,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
 
     call chip.align as pe_cropped_bowtie2 { input :
@@ -74,9 +74,9 @@ workflow test_bowtie2 {
         crop_length_tol = pe_crop_length_tol,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
     call chip.align as se_cropped_bowtie2 { input :
         aligner = 'bowtie2',
@@ -90,9 +90,9 @@ workflow test_bowtie2 {
         crop_length_tol = se_crop_length_tol,
 
         cpu = bowtie2_cpu,
-        mem_mb = bowtie2_mem_mb,
+        mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
-        disks = bowtie2_disks,
+        disk_factor = bowtie2_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

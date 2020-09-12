@@ -26,7 +26,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
 
-	> **IMPORTANT**: Make sure that you have python3(> 3.4.1) installed on your system.
+	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
 
 	```bash
 	$ pip install caper  # use pip3 if it doesn't work

@@ -21,5 +21,6 @@
     "chip.paired_end" : true,
     "chip.always_use_pooled_ctl" : true,
     "chip.title" : "ENCSR936XTK",
-    "chip.description" : "ZNF143 ChIP-seq on human GM12878"
+    "chip.description" : "ZNF143 ChIP-seq on human GM12878",
+    "chip.align_cpu" : 8
 }

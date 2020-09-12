@@ -1,15 +1,15 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.5.1'
+    String pipeline_ver = 'v1.6.0'
 
     meta {
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/chip-seq-pipeline:v1.5.1'
-        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.5.1'
+        caper_docker: 'encodedcc/chip-seq-pipeline:v1.6.0'
+        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.6.0'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v4.json'
 
         parameter_group: {
@@ -171,43 +171,49 @@ workflow chip {
         Float idr_thresh = 0.05
 
         # group: resource_parameter
-        Int align_cpu = 4
-        Int align_mem_mb = 20000
+        Int align_cpu = 6
+        Float align_bowtie2_mem_factor = 0.15
+        Float align_bwa_mem_factor = 0.15
         Int align_time_hr = 48
-        String align_disks = 'local-disk 400 HDD'
+        Float align_bowtie2_disk_factor = 8.0
+        Float align_bwa_disk_factor = 8.0
 
-        Int filter_cpu = 2
-        Int filter_mem_mb = 20000
+        Int filter_cpu = 4
+        Float filter_mem_factor = 0.4
         Int filter_time_hr = 24
-        String filter_disks = 'local-disk 400 HDD'
+        Float filter_disk_factor = 6.0
 
         Int bam2ta_cpu = 2
-        Int bam2ta_mem_mb = 10000
+        Float bam2ta_mem_factor = 0.35
         Int bam2ta_time_hr = 6
-        String bam2ta_disks = 'local-disk 100 HDD'
+        Float bam2ta_disk_factor = 4.0
 
-        Int spr_mem_mb = 16000
+        Float spr_mem_factor = 4.5
+        Float spr_disk_factor = 6.0
 
-        Int jsd_cpu = 2
-        Int jsd_mem_mb = 12000
+        Int jsd_cpu = 4
+        Float jsd_mem_factor = 0.1
         Int jsd_time_hr = 6
-        String jsd_disks = 'local-disk 200 HDD'
+        Float jsd_disk_factor = 2.0
 
         Int xcor_cpu = 2
-        Int xcor_mem_mb = 16000    
+        Float xcor_mem_factor = 1.0
         Int xcor_time_hr = 24
-        String xcor_disks = 'local-disk 100 HDD'
+        Float xcor_disk_factor = 4.5
 
-        Int subsample_ctl_mem_mb = 16000
+        Float subsample_ctl_mem_factor = 7.0
+        Float subsample_ctl_disk_factor = 7.5
 
-        Int macs2_signal_track_mem_mb = 16000
+        Float macs2_signal_track_mem_factor = 6.0
         Int macs2_signal_track_time_hr = 24
-        String macs2_signal_track_disks = 'local-disk 400 HDD'
+        Float macs2_signal_track_disk_factor = 40.0
 
-        Int call_peak_cpu = 2
-        Int call_peak_mem_mb = 16000
+        Int call_peak_cpu = 6
+        Float call_peak_spp_mem_factor = 5.0
+        Float call_peak_macs2_mem_factor = 2.5
         Int call_peak_time_hr = 72
-        String call_peak_disks = 'local-disk 200 HDD'
+        Float call_peak_spp_disk_factor = 5.0
+        Float call_peak_macs2_disk_factor = 15.0
 
         String? align_trimmomatic_java_heap
         String? filter_picard_java_heap
@@ -755,160 +761,190 @@ workflow chip {
             group: 'resource_parameter',
             help: 'Task align merges/crops/maps FASTQs.'
         }
-        align_mem_mb: {
-            description: 'Memory (MB) required for task align.',
+        align_bowtie2_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task align with bowtie2 (default) as aligner.',
             group: 'resource_parameter',
-            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of FASTQs to determine required memory of instance (GCP/AWS) or job (HPCs).'
+        }
+        align_bwa_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task align with bwa as aligner.',
+            group: 'resource_parameter',
+            help: 'This factor will be multiplied to the size of FASTQs to determine required memory of instance (GCP/AWS) or job (HPCs).'
         }
         align_time_hr: {
             description: 'Walltime (h) required for task align.',
             group: 'resource_parameter',
             help: 'This is for HPCs only. e.g. SLURM, SGE, ...'
         }
-        align_disks: {
-            description: 'Persistent disk size to store intermediate files and outputs of task align.',
+        align_bowtie2_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task align with bowtie2 (default) as aligner.',
             group: 'resource_parameter',
-            help: 'This is for GCP/AWS only.'
+            help: 'This factor will be multiplied to the size of FASTQs to determine required disk size of instance on GCP/AWS.'
+        }
+        align_bwa_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task align with bwa as aligner.',
+            group: 'resource_parameter',
+            help: 'This factor will be multiplied to the size of FASTQs to determine required disk size of instance on GCP/AWS.'
         }
         filter_cpu: {
             description: 'Number of cores for task filter.',
             group: 'resource_parameter',
             help: 'Task filter filters raw/unfilterd BAM to get filtered/deduped BAM.'
         }
-        filter_mem_mb: {
-            description: 'Memory (MB) required for task filter.',
+        filter_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task filter.',
             group: 'resource_parameter',
-            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of BAMs to determine required memory of instance (GCP/AWS) or job (HPCs).'
         }
         filter_time_hr: {
             description: 'Walltime (h) required for task filter.',
             group: 'resource_parameter',
             help: 'This is for HPCs only. e.g. SLURM, SGE, ...'
         }
-        filter_disks: {
-            description: 'Persistent disk size to store intermediate files and outputs of task filter.',
+        filter_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task filter.',
             group: 'resource_parameter',
-            help: 'This is for GCP/AWS only.'
+            help: 'This factor will be multiplied to the size of BAMs to determine required disk size of instance on GCP/AWS.'
         }
         bam2ta_cpu: {
             description: 'Number of cores for task bam2ta.',
             group: 'resource_parameter',
             help: 'Task bam2ta converts filtered/deduped BAM in to TAG-ALIGN (6-col BED) format.'
         }
-        bam2ta_mem_mb: {
-            description: 'Memory (MB) required for task bam2ta.',
+        bam2ta_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task bam2ta.',
             group: 'resource_parameter',
-            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of filtered BAMs to determine required memory of instance (GCP/AWS) or job (HPCs).'
         }
         bam2ta_time_hr: {
             description: 'Walltime (h) required for task bam2ta.',
             group: 'resource_parameter',
             help: 'This is for HPCs only. e.g. SLURM, SGE, ...'
         }
-        bam2ta_disks: {
-            description: 'Persistent disk size to store intermediate files and outputs of task bam2ta.',
+        bam2ta_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task bam2ta.',
             group: 'resource_parameter',
-            help: 'This is for GCP/AWS only.'
+            help: 'This factor will be multiplied to the size of filtered BAMs to determine required disk size of instance on GCP/AWS.'
         }
-        spr_mem_mb: {
-            description: 'Memory (MB) required for task spr.',
+        spr_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task spr.',
             group: 'resource_parameter',
-            help: 'Task spr generates two pseudo-replicates from each biological replicate. This task uses Unix shuf/sort, which can take significant amount of memory.'
+            help: 'This factor will be multiplied to the size of filtered BAMs to determine required memory of instance (GCP/AWS) or job (HPCs).'
+        }
+        spr_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task spr.',
+            group: 'resource_parameter',
+            help: 'This factor will be multiplied to the size of filtered BAMs to determine required disk size of instance on GCP/AWS.'
         }
         jsd_cpu: {
             description: 'Number of cores for task jsd.',
             group: 'resource_parameter',
             help: 'Task jsd plots Jensen-Shannon distance and metrics related to it.'
         }
-        jsd_mem_mb: {
-            description: 'Memory (MB) required for task jsd.',
+        jsd_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task jsd.',
             group: 'resource_parameter',
-            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of filtered BAMs to determine required memory of instance (GCP/AWS) or job (HPCs).'
         }
         jsd_time_hr: {
             description: 'Walltime (h) required for task jsd.',
             group: 'resource_parameter',
             help: 'This is for HPCs only. e.g. SLURM, SGE, ...'
         }
-        jsd_disks: {
-            description: 'Persistent disk size to store intermediate files and outputs of task jsd.',
+        jsd_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task jsd.',
             group: 'resource_parameter',
-            help: 'This is for GCP/AWS only.'
+            help: 'This factor will be multiplied to the size of filtered BAMs to determine required disk size of instance on GCP/AWS.'
         }
         xcor_cpu: {
             description: 'Number of cores for task xcor.',
             group: 'resource_parameter',
             help: 'Task xcor does cross-correlation analysis (including a plot) on subsampled TAG-ALIGNs.'
         }
-        xcor_mem_mb: {
-            description: 'Memory (MB) required for task xcor.',
+        xcor_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task xcor.',
             group: 'resource_parameter',
-            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required memory of instance (GCP/AWS) or job (HPCs).'
         }
         xcor_time_hr: {
             description: 'Walltime (h) required for task xcor.',
             group: 'resource_parameter',
             help: 'This is for HPCs only. e.g. SLURM, SGE, ...'
         }
-        xcor_disks: {
-            description: 'Persistent disk size to store intermediate files and outputs of task xcor.',
+        xcor_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task xcor.',
             group: 'resource_parameter',
-            help: 'This is for GCP/AWS only.'
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required disk size of instance on GCP/AWS.'
         }
-        subsample_ctl_mem_mb: {
-            description: 'Memory (MB) required for task subsample_ctl.',
+        subsample_ctl_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task subsample_ctl.',
             group: 'resource_parameter',
-            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required memory of instance (GCP/AWS) or job (HPCs).'
+        }
+        subsample_ctl_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task subsample_ctl.',
+            group: 'resource_parameter',
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required disk size of instance on GCP/AWS.'
         }
         call_peak_cpu: {
-            description: 'Number of cores for task call_peak.',
+            description: 'Number of cores for task call_peak. IF MACS2 is chosen as peak_caller (or chip.pipeline_type is histone), then cpu will be fixed at 2.',
             group: 'resource_parameter',
-            help: 'Task call_peak call peaks on TAG-ALIGNs by using MACS2 peak caller.'
+            help: 'Task call_peak call peaks on TAG-ALIGNs by using SPP/MACS2 peak caller. MACS2 is single-threaded so cpu will be fixed at 2 for MACS2.'
         }
-        call_peak_mem_mb: {
-            description: 'Memory (MB) required for task call_peak.',
+        call_peak_spp_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task call_peak with spp as peak_caller.',
             group: 'resource_parameter',
-            help: 'This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required memory of instance (GCP/AWS) or job (HPCs).'
+        }
+        call_peak_macs2_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task call_peak with macs2 as peak_caller.',
+            group: 'resource_parameter',
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required memory of instance (GCP/AWS) or job (HPCs).'
         }
         call_peak_time_hr: {
             description: 'Walltime (h) required for task call_peak.',
             group: 'resource_parameter',
             help: 'This is for HPCs only. e.g. SLURM, SGE, ...'
         }
-        call_peak_disks: {
-            description: 'Persistent disk size to store intermediate files and outputs of task call_peak.',
+        call_peak_spp_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task call_peak with spp as peak_caller.',
             group: 'resource_parameter',
-            help: 'This is for GCP/AWS only.'
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required disk size of instance on GCP/AWS.'
         }
-        macs2_signal_track_mem_mb: {
-            description: 'Memory (MB) required for task macs2_signal_track.',
+        call_peak_macs2_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task call_peak with macs2 as peak_caller.',
             group: 'resource_parameter',
-            help: 'Task macs2_signal_track_mem_mb uses MACS2 to get signal tracks for p-val (suffixed with .pval.) and fold enrichment (suffixed with .fc.). This will be used for determining instance type for GCP/AWS or job\'s maximum required memory for HPC.'
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required disk size of instance on GCP/AWS.'
+        }
+        macs2_signal_track_mem_factor: {
+            description: 'Multiplication factor to determine memory required for task macs2_signal_track.',
+            group: 'resource_parameter',
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required memory of instance (GCP/AWS) or job (HPCs).'
         }
         macs2_signal_track_time_hr: {
             description: 'Walltime (h) required for task macs2_signal_track.',
             group: 'resource_parameter',
             help: 'This is for HPCs only. e.g. SLURM, SGE, ...'
         }
-        macs2_signal_track_disks: {
-            description: 'Persistent disk size to store intermediate files and outputs of task macs2_signal_track.',
+        macs2_signal_track_disk_factor: {
+            description: 'Multiplication factor to determine persistent disk size for task macs2_signal_track.',
             group: 'resource_parameter',
-            help: 'This is for GCP/AWS only.'
+            help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required disk size of instance on GCP/AWS.'
         }
         align_trimmomatic_java_heap: {
             description: 'Maximum Java heap (java -Xmx) in task align.',
             group: 'resource_parameter',
-            help: 'Maximum memory for Trimmomatic. If not defined, 90% of align_mem_mb will be used.'
+            help: 'Maximum memory for Trimmomatic. If not defined, 90% of align task\'s memory will be used.'
         }
         filter_picard_java_heap: {
             description: 'Maximum Java heap (java -Xmx) in task filter.',
             group: 'resource_parameter',
-            help: 'Maximum memory for Picard tools MarkDuplicates. If not defined, 90% of filter_mem_mb will be used.'
+            help: 'Maximum memory for Picard tools MarkDuplicates. If not defined, 90% of filter task\'s memory will be used.'
         }
         gc_bias_picard_java_heap: {
             description: 'Maximum Java heap (java -Xmx) in task gc_bias.',
             group: 'resource_parameter',
-            help: 'Maximum memory for Picard tools CollectGcBiasMetrics. If not defined, 90% of 10000 MB will be used.'
+            help: 'Maximum memory for Picard tools CollectGcBiasMetrics. If not defined, 90% of gc_bias task\'s memory will be used.'
         }
     }
 
@@ -963,6 +999,15 @@ workflow chip {
     Boolean enable_jsd_ = if pipeline_type=='control' then false else enable_jsd
     Boolean enable_gc_bias_ = if pipeline_type=='control' then false else enable_gc_bias
     Boolean align_only_ = if pipeline_type=='control' then true else align_only
+
+    Float align_mem_factor_ = if aligner_ =='bowtie2' then align_bowtie2_mem_factor
+        else align_bwa_mem_factor
+    Float align_disk_factor_ = if aligner_ =='bowtie2' then align_bowtie2_disk_factor
+        else align_bwa_disk_factor
+    Float call_peak_mem_factor_ = if peak_caller_ =='spp' then call_peak_spp_mem_factor
+        else call_peak_macs2_mem_factor
+    Float call_peak_disk_factor_ = if peak_caller_ =='spp' then call_peak_spp_disk_factor
+        else call_peak_macs2_disk_factor
 
     # temporary 2-dim fastqs array [rep_id][merge_id]
     Array[Array[File]] fastqs_R1 = 
@@ -1128,9 +1173,9 @@ workflow chip {
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
                 cpu = align_cpu,
-                mem_mb = align_mem_mb,
+                mem_factor = align_mem_factor_,
                 time_hr = align_time_hr,
-                disks = align_disks,
+                disk_factor = align_disk_factor_,
             }
         }
         File? bam_ = if has_output_of_align then bams[i] else align.bam
@@ -1150,10 +1195,10 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = filter_cpu,
-                mem_mb = filter_mem_mb,
+                mem_factor = filter_mem_factor,
                 picard_java_heap = filter_picard_java_heap,
                 time_hr = filter_time_hr,
-                disks = filter_disks,
+                disk_factor = filter_disk_factor,
             }
         }
         File? nodup_bam_ = if has_output_of_filter then nodup_bams[i] else filter.nodup_bam
@@ -1168,9 +1213,9 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = bam2ta_cpu,
-                mem_mb = bam2ta_mem_mb,
+                mem_factor = bam2ta_mem_factor,
                 time_hr = bam2ta_time_hr,
-                disks = bam2ta_disks,
+                disk_factor = bam2ta_disk_factor,
             }
         }
         File? ta_ = if has_output_of_bam2ta then tas[i] else bam2ta.ta
@@ -1180,7 +1225,8 @@ workflow chip {
             call spr { input :
                 ta = ta_,
                 paired_end = paired_end_,
-                mem_mb = spr_mem_mb,
+                mem_factor = spr_mem_factor,
+                disk_factor = spr_disk_factor,
             }
         }
 
@@ -1220,9 +1266,9 @@ workflow chip {
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
 
                 cpu = align_cpu,
-                mem_mb = align_mem_mb,
+                mem_factor = align_mem_factor_,
                 time_hr = align_time_hr,
-                disks = align_disks,
+                disk_factor = align_disk_factor_,
             }
             # no bam deduping for xcor
             call filter as filter_R1 { input :
@@ -1236,10 +1282,10 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = filter_cpu,
-                mem_mb = filter_mem_mb,
+                mem_factor = filter_mem_factor,
                 picard_java_heap = filter_picard_java_heap,
                 time_hr = filter_time_hr,
-                disks = filter_disks,
+                disk_factor = filter_disk_factor,
             }
             call bam2ta as bam2ta_no_dedup_R1 { input :
                 bam = filter_R1.nodup_bam,  # it's named as nodup bam but it's not deduped but just filtered
@@ -1248,9 +1294,9 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = bam2ta_cpu,
-                mem_mb = bam2ta_mem_mb,
+                mem_factor = bam2ta_mem_factor,
                 time_hr = bam2ta_time_hr,
-                disks = bam2ta_disks,
+                disk_factor = bam2ta_disk_factor,
             }
         }
 
@@ -1269,10 +1315,10 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = filter_cpu,
-                mem_mb = filter_mem_mb,
+                mem_factor = filter_mem_factor,
                 picard_java_heap = filter_picard_java_heap,
                 time_hr = filter_time_hr,
-                disks = filter_disks,
+                disk_factor = filter_disk_factor,
             }
             call bam2ta as bam2ta_no_dedup { input :
                 bam = filter_no_dedup.nodup_bam,  # output name is nodup but it's not deduped
@@ -1281,9 +1327,9 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = bam2ta_cpu,
-                mem_mb = bam2ta_mem_mb,
+                mem_factor = bam2ta_mem_factor,
                 time_hr = bam2ta_time_hr,
-                disks = bam2ta_disks,
+                disk_factor = bam2ta_disk_factor,
             }
         }
 
@@ -1308,9 +1354,9 @@ workflow chip {
                 exclusion_range_min = xcor_exclusion_range_min,
                 exclusion_range_max = xcor_exclusion_range_max,
                 cpu = xcor_cpu,
-                mem_mb = xcor_mem_mb,
+                mem_factor = xcor_mem_factor,
                 time_hr = xcor_time_hr,
-                disks = xcor_disks,
+                disk_factor = xcor_disk_factor,
             }
         }
 
@@ -1347,9 +1393,9 @@ workflow chip {
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
                 cpu = align_cpu,
-                mem_mb = align_mem_mb,
+                mem_factor = align_mem_factor_,
                 time_hr = align_time_hr,
-                disks = align_disks,
+                disk_factor = align_disk_factor_,
             }
         }
         File? ctl_bam_ = if has_output_of_align_ctl then ctl_bams[i] else align_ctl.bam
@@ -1369,10 +1415,10 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = filter_cpu,
-                mem_mb = filter_mem_mb,
+                mem_factor = filter_mem_factor,
                 picard_java_heap = filter_picard_java_heap,
                 time_hr = filter_time_hr,
-                disks = filter_disks,
+                disk_factor = filter_disk_factor,
             }
         }
         File? ctl_nodup_bam_ = if has_output_of_filter_ctl then ctl_nodup_bams[i] else filter_ctl.nodup_bam
@@ -1387,9 +1433,9 @@ workflow chip {
                 mito_chr_name = mito_chr_name_,
 
                 cpu = bam2ta_cpu,
-                mem_mb = bam2ta_mem_mb,
+                mem_factor = bam2ta_mem_factor,
                 time_hr = bam2ta_time_hr,
-                disks = bam2ta_disks,
+                disk_factor = bam2ta_disk_factor,
             }
         }
         File? ctl_ta_ = if has_output_of_bam2ta_ctl then ctl_tas[i] else bam2ta_ctl.ta
@@ -1453,9 +1499,9 @@ workflow chip {
             mapq_thresh = mapq_thresh_,
 
             cpu = jsd_cpu,
-            mem_mb = jsd_mem_mb,
+            mem_factor = jsd_mem_factor,
             time_hr = jsd_time_hr,
-            disks = jsd_disks,
+            disk_factor = jsd_disk_factor,
         }
     }
 
@@ -1498,7 +1544,8 @@ workflow chip {
                      else ctl_ta_[ chosen_ctl_ta_id ],
                 subsample = chosen_ctl_ta_subsample,
                 paired_end = chosen_ctl_paired_end,
-                mem_mb = subsample_ctl_mem_mb,
+                mem_factor = subsample_ctl_mem_factor,
+                disk_factor = subsample_ctl_disk_factor,
             }
         }
         Array[File] chosen_ctl_tas = if chosen_ctl_ta_id <= -2 then []
@@ -1531,8 +1578,8 @@ workflow chip {
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
                 cpu = call_peak_cpu,
-                mem_mb = call_peak_mem_mb,
-                disks = call_peak_disks,
+                mem_factor = call_peak_mem_factor_,
+                disk_factor = call_peak_disk_factor_,
                 time_hr = call_peak_time_hr,
             }
         }
@@ -1548,8 +1595,8 @@ workflow chip {
                 pval_thresh = pval_thresh,
                 fraglen = fraglen_tmp[i],
 
-                mem_mb = macs2_signal_track_mem_mb,
-                disks = macs2_signal_track_disks,
+                mem_factor = macs2_signal_track_mem_factor,
+                disk_factor = macs2_signal_track_disk_factor,
                 time_hr = macs2_signal_track_time_hr,
             }
         }
@@ -1572,8 +1619,8 @@ workflow chip {
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
     
                 cpu = call_peak_cpu,
-                mem_mb = call_peak_mem_mb,
-                disks = call_peak_disks,
+                mem_factor = call_peak_mem_factor_,
+                disk_factor = call_peak_disk_factor_,
                 time_hr = call_peak_time_hr,
             }
         }
@@ -1598,8 +1645,8 @@ workflow chip {
                 regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
                 cpu = call_peak_cpu,
-                mem_mb = call_peak_mem_mb,
-                disks = call_peak_disks,
+                mem_factor = call_peak_mem_factor_,
+                disk_factor = call_peak_disk_factor_,
                 time_hr = call_peak_time_hr,
             }
         }
@@ -1622,7 +1669,8 @@ workflow chip {
                  else pool_ta_ctl.ta_pooled,
             subsample = chosen_ctl_ta_pooled_subsample,
             paired_end = ctl_paired_end_[0],
-            mem_mb = subsample_ctl_mem_mb,
+            mem_factor = subsample_ctl_mem_factor,
+            disk_factor = subsample_ctl_disk_factor,
         }
     }
     # actually not an array
@@ -1650,8 +1698,8 @@ workflow chip {
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
             cpu = call_peak_cpu,
-            mem_mb = call_peak_mem_mb,
-            disks = call_peak_disks,
+            mem_factor = call_peak_mem_factor_,
+            disk_factor = call_peak_disk_factor_,
             time_hr = call_peak_time_hr,
         }
     }
@@ -1667,8 +1715,8 @@ workflow chip {
             pval_thresh = pval_thresh,
             fraglen = fraglen_mean.rounded_mean,
 
-            mem_mb = macs2_signal_track_mem_mb,
-            disks = macs2_signal_track_disks,
+            mem_factor = macs2_signal_track_mem_factor,
+            disk_factor = macs2_signal_track_disk_factor,
             time_hr = macs2_signal_track_time_hr,
         }
     }
@@ -1691,8 +1739,8 @@ workflow chip {
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
             cpu = call_peak_cpu,
-            mem_mb = call_peak_mem_mb,
-            disks = call_peak_disks,
+            mem_factor = call_peak_mem_factor_,
+            disk_factor = call_peak_disk_factor_,
             time_hr = call_peak_time_hr,
         }
     }
@@ -1717,8 +1765,8 @@ workflow chip {
             regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name_,
 
             cpu = call_peak_cpu,
-            mem_mb = call_peak_mem_mb,
-            disks = call_peak_disks,
+            mem_factor = call_peak_mem_factor_,
+            disk_factor = call_peak_disk_factor_,
             time_hr = call_peak_time_hr,
         }
     }
@@ -1954,10 +2002,14 @@ task align {
 
         String? trimmomatic_java_heap
         Int cpu
-        Int mem_mb
+        Float mem_factor
         Int time_hr
-        String disks
+        Float disk_factor
     }
+    Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
+    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Float samtools_mem_gb = 0.8 * mem_gb
+    Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
 
     Float trimmomatic_java_heap_factor = 0.9
     Array[Array[File]] tmp_fastqs = if paired_end then transpose([fastqs_R1, fastqs_R2])
@@ -2008,7 +2060,7 @@ task align {
                 --crop-length-tol "${crop_length_tol}" \
                 --out-dir-R1 R1$NEW_SUFFIX \
                 ${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
-                ${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (round(mem_mb * trimmomatic_java_heap_factor) + 'M')} \
+                ${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (round(mem_gb * trimmomatic_java_heap_factor) + 'G')} \
                 ${'--nth ' + cpu}
             SUFFIX=$NEW_SUFFIX
         fi
@@ -2020,6 +2072,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${if use_bwa_mem_for_pe then '--use-bwa-mem-for-pe' else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
 
         elif [ '${aligner}' == 'bowtie2' ]; then
@@ -2029,6 +2082,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${'--multimapping ' + multimapping} \
                 ${if paired_end then '--paired-end' else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         else
             python3 ${custom_align_py} \
@@ -2036,12 +2090,14 @@ task align {
                 R1$SUFFIX/*.fastq.gz \
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
+                ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         fi 
 
         python3 $(which encode_task_post_align.py) \
             R1$SUFFIX/*.fastq.gz $(ls *.bam) \
             ${'--mito-chr-name ' + mito_chr_name} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu}
         rm -rf R1 R2 R1$SUFFIX R2$SUFFIX
     }
@@ -2053,9 +2109,9 @@ task align {
     }
     runtime {
         cpu : cpu
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0
     }
 }
@@ -2073,12 +2129,16 @@ task filter {
         String mito_chr_name
 
         Int cpu
-        Int mem_mb
+        Float mem_factor
         String? picard_java_heap
         Int time_hr
-        String disks
+        Float disk_factor
     }
+    Float input_file_size_gb = size(bam, "G")
     Float picard_java_heap_factor = 0.9
+    Float mem_gb = 6.0 + mem_factor * input_file_size_gb
+    Float samtools_mem_gb = 0.8 * mem_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2092,8 +2152,9 @@ task filter {
             ${'--chrsz ' + chrsz} \
             ${if no_dup_removal then '--no-dup-removal' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu} \
-            ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
+            ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_gb * picard_java_heap_factor) + 'G')}
     }
     output {
         File nodup_bam = glob('*.bam')[0]
@@ -2104,9 +2165,9 @@ task filter {
     }
     runtime {
         cpu : cpu
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
@@ -2118,10 +2179,14 @@ task bam2ta {
         Int subsample                 # number of reads to subsample TAGALIGN
                                     # this affects all downstream analysis
         Int cpu
-        Int mem_mb
+        Float mem_factor
         Int time_hr
-        String disks
+        Float disk_factor
     }
+    Float input_file_size_gb = size(bam, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Float samtools_mem_gb = 0.8 * mem_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2131,6 +2196,7 @@ task bam2ta {
             ${if paired_end then '--paired-end' else ''} \
             ${'--mito-chr-name ' + mito_chr_name} \
             ${'--subsample ' + subsample} \
+            ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu}
     }
     output {
@@ -2138,9 +2204,9 @@ task bam2ta {
     }
     runtime {
         cpu : cpu
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
@@ -2149,8 +2215,12 @@ task spr {
         File? ta
         Boolean paired_end
 
-        Int mem_mb
+        Float mem_factor
+        Float disk_factor
     }
+    Float input_file_size_gb = size(ta, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2164,9 +2234,9 @@ task spr {
     }
     runtime {
         cpu : 1
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : 1
-        disks : 'local-disk 50 HDD'
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
@@ -2189,9 +2259,9 @@ task pool_ta {
     }
     runtime {
         cpu : 1
-        memory : '4000 MB'
+        memory : '8 GB'
         time : 1
-        disks : 'local-disk 50 HDD'
+        disks : 'local-disk 100 SSD'
     }
 }
 
@@ -2208,10 +2278,13 @@ task xcor {
         Int? exclusion_range_max
 
         Int cpu
-        Int mem_mb    
+        Float mem_factor    
         Int time_hr
-        String disks
+        Float disk_factor
     }
+    Float input_file_size_gb = size(ta, "G")
+    Float mem_gb = 8.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2235,9 +2308,9 @@ task xcor {
     }
     runtime {
         cpu : cpu
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
@@ -2249,10 +2322,13 @@ task jsd {
         Int mapq_thresh
 
         Int cpu
-        Int mem_mb
+        Float mem_factor
         Int time_hr
-        String disks
+        Float disk_factor
     }
+    Float input_file_size_gb = size(nodup_bams, "G") + size(ctl_bams, "G")
+    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2269,9 +2345,9 @@ task jsd {
     }
     runtime {
         cpu : cpu
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
@@ -2310,10 +2386,10 @@ task choose_ctl {
     }
     runtime {
         cpu : 1
-        memory : '8000 MB'
+        memory : '4 GB'
         time : 1
-        disks : 'local-disk 50 HDD'
-    }    
+        disks : 'local-disk 50 SSD'
+    }
 }
 
 task count_signal_track {
@@ -2334,9 +2410,9 @@ task count_signal_track {
     }
     runtime {
         cpu : 1
-        memory : '8000 MB'
+        memory : '8 GB'
         time : 4
-        disks : 'local-disk 50 HDD'
+        disks : 'local-disk 50 SSD'
     }
 }
 
@@ -2346,8 +2422,13 @@ task subsample_ctl {
         Boolean paired_end
         Int subsample
 
-        Int mem_mb
+        Float mem_factor
+        Float disk_factor
     }
+    Float input_file_size_gb = size(ta, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
+
     command {
         python3 $(which encode_task_subsample_ctl.py) \
             ${ta} \
@@ -2359,9 +2440,9 @@ task subsample_ctl {
     }
     runtime {
         cpu : 1
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : 4
-        disks : 'local-disk 100 HDD'
+        disks : 'local-disk ${disk_gb} SSD'
     }
 }
 
@@ -2382,10 +2463,13 @@ task call_peak {
         String? regex_bfilt_peak_chr_name
 
         Int cpu    
-        Int mem_mb
+        Float mem_factor
         Int time_hr
-        String disks
+        Float disk_factor
     }
+    Float input_file_size_gb = size(tas, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2431,10 +2515,10 @@ task call_peak {
         File num_peak_qc = glob('*.num_peak.qc')[0]
     }
     runtime {
-        cpu : if peak_caller == 'macs2' then 1 else cpu
-        memory : '${mem_mb} MB'
+        cpu : if peak_caller == 'macs2' then 2 else cpu
+        memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0        
     }
 }
@@ -2448,10 +2532,13 @@ task macs2_signal_track {
         File chrsz            # 2-col chromosome sizes file
         Float pval_thresh     # p.value threshold
 
-        Int mem_mb
+        Float mem_factor
         Int time_hr
-        String disks
+        Float disk_factor
     }
+    Float input_file_size_gb = size(tas, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
+    Int disk_gb = round(20.0 + disk_factor * input_file_size_gb)
 
     command {
         set -e
@@ -2468,9 +2555,9 @@ task macs2_signal_track {
     }
     runtime {
         cpu : 1
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : time_hr
-        disks : disks
+        disks : 'local-disk ${disk_gb} SSD'
         preemptible: 0
     }
 }
@@ -2521,9 +2608,9 @@ task idr {
     }
     runtime {
         cpu : 1
-        memory : '4000 MB'
+        memory : '4 GB'
         time : 1
-        disks : 'local-disk 50 HDD'
+        disks : 'local-disk 50 SSD'
     }    
 }
 
@@ -2567,9 +2654,9 @@ task overlap {
     }
     runtime {
         cpu : 1
-        memory : '4000 MB'
+        memory : '4 GB'
         time : 1
-        disks : 'local-disk 50 HDD'
+        disks : 'local-disk 50 SSD'
     }    
 }
 
@@ -2613,9 +2700,9 @@ task reproducibility {
     }
     runtime {
         cpu : 1
-        memory : '4000 MB'
+        memory : '4 GB'
         time : 1
-        disks : 'local-disk 50 HDD'
+        disks : 'local-disk 50 SSD'
     }    
 }
 
@@ -2626,7 +2713,9 @@ task gc_bias {
 
         String? picard_java_heap
     }
-    Int mem_mb = 10000
+    Float mem_factor = 0.3
+    Float input_file_size_gb = size(nodup_bam, "G")
+    Float mem_gb = 4.0 + mem_factor * input_file_size_gb
     Float picard_java_heap_factor = 0.9
 
     command {
@@ -2634,7 +2723,7 @@ task gc_bias {
         python3 $(which encode_task_gc_bias.py) \
             ${'--nodup-bam ' + nodup_bam} \
             ${'--ref-fa ' + ref_fa} \
-            ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_mb * picard_java_heap_factor) + 'M')}
+            ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_gb * picard_java_heap_factor) + 'G')}
     }
     output {
         File gc_plot = glob('*.gc_plot.png')[0]
@@ -2642,9 +2731,9 @@ task gc_bias {
     }
     runtime {
         cpu : 1
-        memory : '${mem_mb} MB'
+        memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 100 HDD'
+        disks : 'local-disk 100 SSD'
     }
 }
 
@@ -2783,9 +2872,9 @@ task qc_report {
     }
     runtime {
         cpu : 1
-        memory : '4000 MB'
+        memory : '4 GB'
         time : 1
-        disks : 'local-disk 50 HDD'
+        disks : 'local-disk 50 SSD'
     }    
 }
 
@@ -2829,9 +2918,9 @@ task read_genome_tsv {
     runtime {
         maxRetries : 0
         cpu : 1
-        memory : '4000 MB'
+        memory : '2 GB'
         time : 1
-        disks : 'local-disk 50 HDD'        
+        disks : 'local-disk 10 SSD'        
     }
 }
 
@@ -2856,10 +2945,10 @@ task rounded_mean {
     }
     runtime {
         cpu : 1
-        memory : '4000 MB'
+        memory : '2 GB'
         time : 1
-        disks : 'local-disk 50 HDD'
-    }    
+        disks : 'local-disk 10 SSD'
+    }
 }
 
 task raise_exception {
@@ -2877,5 +2966,9 @@ task raise_exception {
     }
     runtime {
         maxRetries : 0
+        cpu : 1
+        memory : '2 GB'
+        time : 1
+        disks : 'local-disk 10 SSD'
     }
 }
