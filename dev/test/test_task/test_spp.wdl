@@ -22,9 +22,9 @@ workflow test_spp {
     String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
 
     Int spp_cpu = 1
-    Int spp_mem_mb = 16000
+    Float spp_mem_factor = 0.0
     Int spp_time_hr = 72
-    String spp_disks = 'local-disk 100 HDD'
+    Float spp_disk_factor = 5.0
 
     call chip.call_peak as se_spp { input :
         peak_caller = 'spp',
@@ -39,9 +39,9 @@ workflow test_spp {
         regex_bfilt_peak_chr_name = regex_bfilt_peak_chr_name,
 
         cpu = spp_cpu,
-        mem_mb = spp_mem_mb,
+        mem_factor = spp_mem_factor,
         time_hr = spp_time_hr,
-        disks = spp_disks,
+        disk_factor = spp_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

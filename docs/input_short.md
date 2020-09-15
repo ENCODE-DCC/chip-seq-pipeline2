@@ -90,7 +90,7 @@ Mandatory parameters.
     * `chip.ctl_depth_limit`: (For experiments with controls only) Hard limit on control's depth. If control is deeper than this hard limit then such control is subsampled to it.
 
 9) [Resources](#resources)
-    * If your FASTQs/BAMs are big (>10GB) then try with higher resource settings, especially for memory (`chip.[TASK_NAME]_mem_mb`).
+    * It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task.
 
 Optional parameters.
 
@@ -230,71 +230,6 @@ You can also mix up different data types for individual bio replicate and contro
 
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
-Resources defined here are **PER BIO REPLICATE**. Therefore, total number of cores will be approximately `chip.align_cpu` x `NUMBER_OF_BIO_REPLICATES` because `align` is a bottlenecking task of the pipeline. This total number of cores will be useful **ONLY** when you use a `local` backend of Caper and manually `qsub` or `sbatch` your job. `disks` is used for Google Cloud and DNAnexus only.
+Resources defined here are **PER BIO REPLICATE**. Therefore, total number of cores will be approximately `chip.align_cpu` x `NUMBER_OF_BIO_REPLICATES` because `align` is a bottlenecking task of the pipeline. This total number of cores will be useful **ONLY** when you use a `local` backend of Caper and manually `qsub` or `sbatch` your job. `disk_factor` is used for GCP/AWS/DNAnexus only.
 
-
-Parameter|Default
----------|-------
-`chip.align_cpu` | 4
-`chip.align_mem_mb` | 20000
-`chip.align_time_hr` | 48
-`chip.align_disks` | `local-disk 400 HDD`
-
-Parameter|Default
----------|-------
-`chip.filter_cpu` | 2
-`chip.filter_mem_mb` | 20000
-`chip.filter_time_hr` | 24
-`chip.filter_disks` | `local-disk 400 HDD`
-
-Parameter|Default
----------|-------
-`chip.bam2ta_cpu` | 2
-`chip.bam2ta_mem_mb` | 10000
-`chip.bam2ta_time_hr` | 6
-`chip.bam2ta_disks` | `local-disk 100 HDD`
-
-Parameter|Default
----------|-------
-`chip.spr_mem_mb` | 16000
-
-Parameter|Default
----------|-------
-`chip.jsd_cpu` | 2
-`chip.jsd_mem_mb` | 12000
-`chip.jsd_time_hr` | 6
-`chip.jsd_disks` | `local-disk 200 HDD`
-
-Parameter|Default
----------|-------
-`chip.xcor_cpu` | 2
-`chip.xcor_mem_mb` | 16000
-`chip.xcor_time_hr` | 24
-`chip.xcor_disks` | `local-disk 100 HDD`
-
-Parameter|Default
----------|-------
-`chip.subsample_ctl_mem_mb` | 16000
-
-Parameter|Default
----------|-------
-`chip.call_peak_cpu` | 2
-`chip.call_peak_mem_mb` | 16000
-`chip.call_peak_time_hr` | 24
-`chip.call_peak_disks` | `local-disk 200 HDD`
-
-Parameter|Default
----------|-------
-`chip.macs2_signal_track_mem_mb` | 16000
-`chip.macs2_signal_track_time_hr` | 24
-`chip.macs2_signal_track_disks` | `local-disk 400 HDD`
-
-> **IMPORTANT**: If you see Java memory errors, check the following resource parameters.
-
-There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory (e.g. `chip.filter_mem_mb`).
-
-Parameter|Default
----------|-------
-`chip.filter_picard_java_heap` | = `chip.filter_mem_mb`
-`chip.align_trimmomatic_java_heap` | = `chip.align_mem_mb`
-`chip.gc_bias_picard_java_heap` | `10G`
+See [this](input.md#resource-parameters) for details.

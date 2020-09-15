@@ -35,7 +35,7 @@ Parameter|Type|Description
 `chip.custom_aligner_idx_tar`| File | Index TAR file for a custom aligner. To use a custom aligner, make sure to have `"chip.align": "custom"` and define `"chip.custom_align_py"` in your inputt JSON.
 `chip.chrsz`| File | 2-col chromosome sizes file built from FASTA file with `faidx`
 `chip.blacklist`| File | 3-col BED file. Peaks overlapping these regions will be filtered out
-`chip.blacklist2`| File | Second blacklist. Two blacklist files (`atac.blacklist` and `atac.blacklist2`) will be merged.
+`chip.blacklist2`| File | Second blacklist. Two blacklist files (`chip.blacklist` and `chip.blacklist2`) will be merged.
 `chip.gensz`| String | MACS2's genome sizes (hs for human, mm for mouse or sum of 2nd col in chrsz)
 `chip.mito_chr_name`| String | Name of mitochondrial chromosome (e.g. chrM)
 `chip.regex_bfilt_peak_chr_name`| String | Perl style reg-ex to keep peaks on selected chromosomes only matching with this pattern (default: `chr[\dXY]+`. This will keep chr1, chr2, ... chrX and chrY in `.bfilt.` peaks file. chrM is not included here)
@@ -150,7 +150,6 @@ Parameter|Type|Default|Description
 ---------|---|----|-----------
 `chip.aligner` | String | bowtie2 | Currently supported aligners: bwa, bowtie2, custom. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
 `chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
-`chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
 `chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
 `chip.use_bwa_mem_for_pe` | Boolean | false | For PE dataset, uise bwa mem instead of bwa aln.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
@@ -227,77 +226,98 @@ Parameter|Default|Description
 
 > **WARNING**: It is recommened not to change the following parameters unless you get resource-related errors for a certain task and you want to increase resources for such task. The following parameters are provided for users who want to run our pipeline with Caper's `local` on HPCs and 2).
 
-Resources defined here are PER REPLICATE. Therefore, total number of cores will be MAX(`chip.align_cpu` x `NUMBER_OF_REPLICATES`, `chip.call_peak_cpu` x 2 x `NUMBER_OF_REPLICATES`) because `align` and `call_peak` (especially for `spp`) are bottlenecking tasks of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disks` is used for Google Cloud and DNAnexus only.
+Resources defined here are PER REPLICATE. Therefore, total number of cores will be MAX(`chip.align_cpu` x `NUMBER_OF_REPLICATES`, `chip.call_peak_cpu` x 2 x `NUMBER_OF_REPLICATES`) because `align` and `call_peak` (especially for `spp`) are bottlenecking tasks of the pipeline. Use this total number of cores if you manually `qsub` or `sbatch` your job (using local mode of Caper). `disk_factor` is used for Google Cloud and DNAnexus only.
+
+Different resource multipliers are used for different `chip.aligner` and `chip.peak_caller`.
+- `chip.aligner`: `bowtie2` (default) or `bwa`.
+- `chip.peak_caller`: `spp` (default for TF ChIP-seq: `chip.pipeline_type` as `tf`) or `macs2` (default for histone ChIP-seq: `chip.pipeline_type` as `histone`).
+
+Choose appropriate resource parameters (check suffix of parameter: e.g. `_bowtie2_`, `_spp_`) for chosen aligner and peak caller.
+
+For example, if sum of your FASTQs are 20GB then 4GB (base) + `chip.align_bowtie2_mem_factor` x 20GB = 5GB will be used for `align` task's instance memory.
+
+If sum of your TAG-ALIGN BEDs (intermediate outputs) are 5GB then 4GB (base) + `chip.macs2_signal_track_mem_factor` x 5GB = 34GB will be used for `macs2_signal_track` task's instance memory.
+
+Base memory/disk is 4GB/20GB for most tasks.
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.align_cpu` | 6 |
+`chip.align_bowtie2_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
+`chip.align_bwa_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
+`chip.align_time_hr` | 48 | Walltime (HPCs only)
+`chip.align_bowtie2_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk
+`chip.align_bwa_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.filter_cpu` | 4 |
+`chip.filter_mem_factor` | 0.4 | Multiplied to size of BAM to determine required memory
+`chip.filter_time_hr` | 24 | Walltime (HPCs only)
+`chip.filter_disk_factor` | 6.0 | Multiplied to size of BAM to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.bam2ta_cpu` | 2 |
+`chip.bam2ta_mem_factor` | 0.35 | Multiplied to size of filtered BAM to determine required memory
+`chip.bam2ta_time_hr` | 6 | Walltime (HPCs only)
+`chip.bam2ta_disk_factor` | 4.0 | Multiplied to size of filtered BAM to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.spr_mem_factor` | 4.5 | Multiplied to size of filtered BAM to determine required memory
+`chip.spr_disk_factor` | 6.0 | Multiplied to size of filtered BAM to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.jsd_cpu` | 4 |
+`chip.jsd_mem_factor` | 0.1 | Multiplied to size of filtered BAM to determine required memory
+`chip.jsd_time_hr` | 6 | Walltime (HPCs only)
+`chip.jsd_disk_factor` | 2.0 | Multiplied to size of filtered BAM to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.xcor_cpu` | 2 |
+`chip.xcor_mem_factor` | 1.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.xcor_time_hr` | 6 | Walltime (HPCs only)
+`chip.xcor_disk_factor` | 4.5 | Multiplied to size of TAG-ALIGN BED to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.call_peak_cpu` | 6 | Used for both peak callers (`spp` and `macs2`). `spp` is well multithreaded but `macs2` is single-threaded. More than 2 is not required for `macs2`.
+`chip.call_peak_spp_mem_factor` | 5.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.call_peak_macs2_mem_factor` | 2.5 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.call_peak_time_hr` | 24 | Walltime (HPCs only)
+`chip.call_peak_spp_disk_factor` | 5.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
+`chip.call_peak_macs2_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.macs2_signal_track_mem_factor` | 6.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
+`chip.macs2_signal_track_disk_factor` | 40.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
+
+Parameter|Default|Description
+---------|-------|-----------
+`chip.subsample_ctl_mem_factor` | 7.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
+`chip.subsample_ctl_disk_factor` | 7.5 | Multiplied to size of TAG-ALIGN BED to determine required disk
+
+If your system/cluster does not allow large memory allocation for Java applications, check the following resource parameters to manually define Java memory. It is **NOT RECOMMENDED** for most users to change these parameters since pipeline automatically takes 90% of task's memory for Java apps.
+
+There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Java applications (e.g. Picard tools). They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory.
 
 Parameter|Default
 ---------|-------
-`chip.align_cpu` | 4
-`chip.align_mem_mb` | 20000
-`chip.align_time_hr` | 48
-`chip.align_disks` | `local-disk 400 HDD`
-
-Parameter|Default
----------|-------
-`chip.filter_cpu` | 2
-`chip.filter_mem_mb` | 20000
-`chip.filter_time_hr` | 24
-`chip.filter_disks` | `local-disk 400 HDD`
-
-Parameter|Default
----------|-------
-`chip.bam2ta_cpu` | 2
-`chip.bam2ta_mem_mb` | 10000
-`chip.bam2ta_time_hr` | 6
-`chip.bam2ta_disks` | `local-disk 100 HDD`
-
-Parameter|Default
----------|-------
-`chip.spr_mem_mb` | 16000
-
-Parameter|Default
----------|-------
-`chip.jsd_cpu` | 2
-`chip.jsd_mem_mb` | 12000
-`chip.jsd_time_hr` | 6
-`chip.jsd_disks` | `local-disk 200 HDD`
-
-Parameter|Default
----------|-------
-`chip.xcor_cpu` | 2
-`chip.xcor_mem_mb` | 16000
-`chip.xcor_time_hr` | 24
-`chip.xcor_disks` | `local-disk 100 HDD`
-
-Parameter|Default
----------|-------
-`chip.subsample_ctl_mem_mb` | 16000
-
-Parameter|Default
----------|-------
-`chip.call_peak_cpu` | 2
-`chip.call_peak_mem_mb` | 16000
-`chip.call_peak_time_hr` | 24
-`chip.call_peak_disks` | `local-disk 200 HDD`
-
-Parameter|Default
----------|-------
-`chip.macs2_signal_track_mem_mb` | 16000
-`chip.macs2_signal_track_time_hr` | 24
-`chip.macs2_signal_track_disks` | `local-disk 400 HDD`
-
-> **IMPORTANT**: If you see Java memory errors, check the following resource parameters.
-
-There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Picard tools. They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory (e.g. `chip.filter_mem_mb`).
-
-Parameter|Default
----------|-------
-`chip.filter_picard_java_heap` | = `chip.filter_mem_mb`
-`chip.align_trimmomatic_java_heap` | = `chip.align_mem_mb`
-`chip.gc_bias_picard_java_heap` | `10G`
+`chip.filter_picard_java_heap` | 90% of memory for task `chip.filter` (dynamic)
+`chip.align_trimmomatic_java_heap` | 90% of memory for task `chip.align` (dynamic)
+`chip.gc_bias_picard_java_heap` | 90% of memory for task `chip.gc_bias` (8GB)
 
 ## How to use a custom aligner
 
 ENCODE ChIP-Seq pipeline currently supports `bwa` and `bowtie2`. In order to use your own aligner you need to define the following parameters first. You can define `custom_aligner_idx_tar` either in your input JSON file or in your genome TSV file. Such index TAR file should be an uncompressed TAR file without any directory structured.
+
+> **NOTE**: The python script should take `--mem-gb`, which means total memory in GBs for a job/instance.
 
 Parameter|Type|Description
 ---------|-------|-----------
@@ -327,6 +347,9 @@ def parse_arguments():
                         help='Paired-end FASTQs.')
     parser.add_argument('--multimapping', default=4, type=int,
                         help='Multimapping reads')
+    parser.add_argument('--mem-gb', type=float,
+                        help='Max. memory for samtools sort in GB. '
+                        'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--out-dir', default='', type=str,
@@ -341,7 +364,7 @@ def parse_arguments():
 
     return args
 
-def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, out_dir):
+def align(fastq_R1, fastq_R2, ref_index_prefix, multimapping, nth, mem_gb, out_dir):
     basename = os.path.basename(os.path.splitext(fastq_R1)[0])
     prefix = os.path.join(out_dir, basename)
     bam = '{}.bam'.format(prefix)
@@ -363,6 +386,7 @@ def main():
                 args.index_prefix_or_tar,
                 args.multimapping,
                 args.nth,
+                args.mem_gb,
                 args.out_dir)
 
 if __name__=='__main__':

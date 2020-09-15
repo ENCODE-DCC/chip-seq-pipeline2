@@ -17,9 +17,9 @@ workflow test_bam2ta {
     String mito_chr_name = 'chrM'
 
     Int bam2ta_cpu = 1
-    Int bam2ta_mem_mb = 10000
+    Float bam2ta_mem_factor = 0.0
     Int bam2ta_time_hr = 6
-    String bam2ta_disks = 'local-disk 100 HDD'
+    Float bam2ta_disk_factor = 4.0
 
     call chip.bam2ta as pe_bam2ta { input :
         bam = pe_nodup_bam,
@@ -28,9 +28,9 @@ workflow test_bam2ta {
         mito_chr_name = mito_chr_name,
 
         cpu = bam2ta_cpu,
-        mem_mb = bam2ta_mem_mb,
+        mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
-        disks = bam2ta_disks,
+        disk_factor = bam2ta_disk_factor,
     }
     call chip.bam2ta as pe_bam2ta_subsample { input :
         bam = pe_nodup_bam,
@@ -39,9 +39,9 @@ workflow test_bam2ta {
         mito_chr_name = mito_chr_name,
 
         cpu = bam2ta_cpu,
-        mem_mb = bam2ta_mem_mb,
+        mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
-        disks = bam2ta_disks,
+        disk_factor = bam2ta_disk_factor,
     }
     call chip.bam2ta as se_bam2ta { input :
         bam = se_nodup_bam,
@@ -50,9 +50,9 @@ workflow test_bam2ta {
         mito_chr_name = mito_chr_name,
 
         cpu = bam2ta_cpu,
-        mem_mb = bam2ta_mem_mb,
+        mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
-        disks = bam2ta_disks,
+        disk_factor = bam2ta_disk_factor,
     }
     call chip.bam2ta as se_bam2ta_subsample { input :
         bam = se_nodup_bam,
@@ -61,9 +61,9 @@ workflow test_bam2ta {
         mito_chr_name = mito_chr_name,
 
         cpu = bam2ta_cpu,
-        mem_mb = bam2ta_mem_mb,
+        mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
-        disks = bam2ta_disks,
+        disk_factor = bam2ta_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

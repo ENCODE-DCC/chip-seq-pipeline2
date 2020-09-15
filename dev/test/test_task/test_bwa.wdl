@@ -18,9 +18,9 @@ workflow test_bwa {
     }
 
     Int bwa_cpu = 1
-    Int bwa_mem_mb = 20000
+    Float bwa_mem_factor = 0.0
     Int bwa_time_hr = 48
-    String bwa_disks = 'local-disk 100 HDD'
+    Float bwa_disk_factor = 8.0
 
     call chip.align as pe_bwa { input :
         aligner = 'bwa',
@@ -34,9 +34,9 @@ workflow test_bwa {
         crop_length_tol = 0,
 
         cpu = bwa_cpu,
-        mem_mb = bwa_mem_mb,
+        mem_factor = bwa_mem_factor,
         time_hr = bwa_time_hr,
-        disks = bwa_disks,
+        disk_factor = bwa_disk_factor,
     }
     call chip.align as se_bwa { input :
         aligner = 'bwa',
@@ -50,9 +50,9 @@ workflow test_bwa {
         crop_length_tol = 0,
 
         cpu = bwa_cpu,
-        mem_mb = bwa_mem_mb,
+        mem_factor = bwa_mem_factor,
         time_hr = bwa_time_hr,
-        disks = bwa_disks,
+        disk_factor = bwa_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :

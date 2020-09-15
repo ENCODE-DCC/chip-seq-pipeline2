@@ -13,21 +13,24 @@ workflow test_subsample_ctl {
         File ref_pe_ta_subsampled_trivial
         File ref_se_ta_subsampled_trivial
     }
-    Int subsample_ctl_mem_mb = 16000
+    Float subsample_ctl_mem_factor = 0.0
+    Float subsample_ctl_disk_factor = 7.5
 
     call chip.subsample_ctl as pe_subsample_ctl { input :
         ta = pe_ta,
         paired_end = true,
         subsample = pe_subsample,
 
-        mem_mb = subsample_ctl_mem_mb,
+        mem_factor = subsample_ctl_mem_factor,
+        disk_factor = subsample_ctl_disk_factor,
     }    
     call chip.subsample_ctl as se_subsample_ctl { input :
         ta = se_ta,
         paired_end = false,
         subsample = se_subsample,
 
-        mem_mb = subsample_ctl_mem_mb,
+        mem_factor = subsample_ctl_mem_factor,
+        disk_factor = subsample_ctl_disk_factor,
     }
     # subsample > number of reads in TA
     # output will be just a shuffled TA.
@@ -36,14 +39,16 @@ workflow test_subsample_ctl {
         paired_end = true,
         subsample = 100000000,
 
-        mem_mb = subsample_ctl_mem_mb,
+        mem_factor = subsample_ctl_mem_factor,
+        disk_factor = subsample_ctl_disk_factor,
     }    
     call chip.subsample_ctl as se_subsample_ctl_trivial { input :
         ta = se_ta,
         paired_end = false,
         subsample = 100000000,
 
-        mem_mb = subsample_ctl_mem_mb,
+        mem_factor = subsample_ctl_mem_factor,
+        disk_factor = subsample_ctl_disk_factor,
     }
 
     call compare_md5sum.compare_md5sum { input :
