@@ -31,9 +31,14 @@ commands:
     steps:      
       - run:
           command: |
-            pyenv global 3.7.0
-            pip install --upgrade pip
-            pip install caper google-cloud-storage
+            sudo apt-get update && sudo apt-get install software-properties-common git wget curl default-jre -y
+            sudo add-apt-repository ppa:deadsnakes/ppa -y
+            sudo apt-get update && sudo apt-get install python3.6 -y
+            sudo wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py
+            sudo python3.6 get-pip.py
+            sudo ln -s /usr/bin/python3.6 /usr/local/bin/python3
+            pip3 install --upgrade pip
+            pip3 install caper google-cloud-storage
 
   run_workflow_test:
     description: "Run workflow test. This requires an env var INPUT as input JSON's basename."
