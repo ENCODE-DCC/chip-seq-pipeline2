@@ -177,6 +177,10 @@
       "path": "peak/rep${i+1}/${basename}",
       "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak (BigBed)"
     },
+    "bfilt_peak_starch": {
+      "path": "peak/rep${i+1}/${basename}",
+      "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak (starch)"
+    },
     "bfilt_peak_hammock": {
       "path": "peak/rep${i+1}/${basename}",
       "table": "Peak/Replicate ${i+1}/Blacklist-filtered narrowpeak (hammock)"
@@ -199,6 +203,10 @@
       "path": "peak/rep${i+1}/pseudorep1/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak (BigBed)"
     },
+    "bfilt_peak_starch": {
+      "path": "peak/rep${i+1}/pseudorep1/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak (starch)"
+    },
     "bfilt_peak_hammock": {
       "path": "peak/rep${i+1}/pseudorep1/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 1/Blacklist-filtered narrowpeak (hammock)"
@@ -220,6 +228,10 @@
     "bfilt_peak_bb": {
       "path": "peak/rep${i+1}/pseudorep2/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_peak_starch": {
+      "path": "peak/rep${i+1}/pseudorep2/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudoreplicate 2/Blacklist-filtered narrowpeak (starch)"
     },
     "bfilt_peak_hammock": {
       "path": "peak/rep${i+1}/pseudorep2/${basename}",
@@ -247,6 +259,10 @@
       "path": "peak/pooled-rep/${basename}",
       "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak (BigBed)"
     },
+    "bfilt_peak_starch": {
+      "path": "peak/pooled-rep/${basename}",
+      "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak (starch)"
+    },
     "bfilt_peak_hammock": {
       "path": "peak/pooled-rep/${basename}",
       "table": "Peak/Pooled replicate/Blacklist-filtered narrowpeak (hammock)"
@@ -269,6 +285,10 @@
       "path": "peak/pooled-rep/pseudorep1/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak (BigBed)"
     },
+    "bfilt_peak_starch": {
+      "path": "peak/pooled-rep/pseudorep1/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak (starch)"
+    },
     "bfilt_peak_hammock": {
       "path": "peak/pooled-rep/pseudorep1/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 1/Blacklist-filtered narrowpeak (hammock)"
@@ -290,6 +310,10 @@
     "bfilt_peak_bb": {
       "path": "peak/pooled-rep/pseudorep2/${basename}",
       "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak (BigBed)"
+    },
+    "bfilt_peak_starch": {
+      "path": "peak/pooled-rep/pseudorep2/${basename}",
+      "table": "Peak/Pooled replicate/Pseudoreplicate 2/Blacklist-filtered narrowpeak (starch)"
     },
     "bfilt_peak_hammock": {
       "path": "peak/pooled-rep/pseudorep2/${basename}",
@@ -370,6 +394,10 @@
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak (BigBed)"
     },
+    "bfilt_idr_peak_starch": {
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak (starch)"
+    },
     "bfilt_idr_peak_hammock": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered IDR peak (hammock)"
@@ -402,6 +430,10 @@
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
       "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered IDR peak (BigBed)"
     },
+    "bfilt_idr_peak_starch": {
+      "path": "peak/pooled-pseudorep1_vs_2/${basename}",
+      "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered IDR peak (starch)"
+    },
     "bfilt_idr_peak_hammock": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
       "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered IDR peak (hammock)"
@@ -432,6 +464,10 @@
     "bfilt_idr_peak_bb": {
       "path": "peak/rep${i+1}-pseudorep1_vs_2/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudorep 1 vs. pseudorep 2/Blacklist-filtered IDR peak (BigBed)"
+    },
+    "bfilt_idr_peak_starch": {
+      "path": "peak/rep${i+1}-pseudorep1_vs_2/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudorep 1 vs. pseudorep 2/Blacklist-filtered IDR peak (starch)"
     },
     "bfilt_idr_peak_hammock": {
       "path": "peak/rep${i+1}-pseudorep1_vs_2/${basename}",
@@ -464,6 +500,10 @@
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak (BigBed)"
     },
+    "bfilt_overlap_peak_starch": {
+      "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
+      "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak (starch)"
+    },
     "bfilt_overlap_peak_hammock": {
       "path": "peak/${basename.split('.')[0].replace('_vs_','_').replace('_','_vs_').replace('-','_vs_')}/${basename}",
       "table": "Peak/${basename.split('.')[0].replace('_vs_','_').replace('_',' vs. ').replace('-',' vs. ').capitalize()}/Blacklist-filtered overlap peak (hammock)"
@@ -483,6 +523,10 @@
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
       "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered overlap peak (BigBed)"
     },
+    "bfilt_overlap_peak_starch": {
+      "path": "peak/pooled-pseudorep1_vs_2/${basename}",
+      "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered overlap peak (starch)"
+    },
     "bfilt_overlap_peak_hammock": {
       "path": "peak/pooled-pseudorep1_vs_2/${basename}",
       "table": "Peak/Pooled pseudoreplicate 1 vs. 2/Blacklist-filtered overlap peak (hammock)"
@@ -500,6 +544,10 @@
     "bfilt_overlap_peak_bb": {
       "path": "peak/rep${i+1}-pseudorep1_vs_2/${basename}",
       "table": "Peak/Replicate ${i+1}/Pseudorep 1 vs. pseudorep 2/Blacklist-filtered overlap peak (BigBed)"
+    },
+    "bfilt_overlap_peak_starch": {
+      "path": "peak/rep${i+1}-pseudorep1_vs_2/${basename}",
+      "table": "Peak/Replicate ${i+1}/Pseudorep 1 vs. pseudorep 2/Blacklist-filtered overlap peak (starch)"
     },
     "bfilt_overlap_peak_hammock": {
       "path": "peak/rep${i+1}-pseudorep1_vs_2/${basename}",
@@ -521,6 +569,10 @@
       "table": "Peak/IDR reproducibility/Optimal peak (BigBed)",
       "ucsc_track": "track type=bigBed name=\"Optimal IDR peak\" priority=100 color=0,0,255 visibility=full"
     },
+    "optimal_peak_starch": {
+      "path": "peak/idr_reproducibility/${basename}",
+      "table": "Peak/IDR reproducibility/Optimal peak (starch)"
+    },
     "optimal_peak_hammock": {
       "path": "peak/idr_reproducibility/${basename}",
       "table": "Peak/IDR reproducibility/Optimal peak (hammock)"
@@ -533,6 +585,10 @@
       "path": "peak/idr_reproducibility/${basename}",
       "table": "Peak/IDR reproducibility/Conservative peak (BigBed)",
       "ucsc_track": "track type=bigBed name=\"Conservative IDR peak\" priority=100 color=0,0,255 visibility=full"
+    },
+    "conservative_peak_starch": {
+      "path": "peak/idr_reproducibility/${basename}",
+      "table": "Peak/IDR reproducibility/Conservative peak (starch)"
     },
     "conservative_peak_hammock": {
       "path": "peak/idr_reproducibility/${basename}",
@@ -567,6 +623,10 @@
       "path": "peak/overlap_reproducibility/${basename}",
       "table": "Peak/Overlap reproducibility/Conservative peak (BigBed)",
       "ucsc_track": "track type=bigBed name=\"Conservative overlap peak\" priority=100 color=0,0,255 visibility=full"
+    },
+    "conservative_peak_starch": {
+      "path": "peak/overlap_reproducibility/${basename}",
+      "table": "Peak/Overlap reproducibility/Conservative peak (starch)"
     },
     "conservative_peak_hammock": {
       "path": "peak/overlap_reproducibility/${basename}",
