@@ -98,6 +98,7 @@ Optional parameters.
     * `chip.fraglen`: Array of Integers. Fragment length for each bio replicate. If you start from FASTQs then our pipeline automatically estimate it from cross-correlation analysis (task `xcor`) result since such analysis requires a special treamtment for FASTQs. It is possible that fragment length is not estimated correctly (or pipeline can fail due to negative fraglen) if you start from different types (BAM/TAG-ALIGN). For such case, you can manually define fragment length for each bio rep. (e.g. `[200, 150]` means 200 for rep1 and 150 for rep2).
 
 11) Flags
+    * `chip.redact_bam`: BAMs aligned from FASTQs will be redacted. Variations like indels will be replaced with corresponding reference sequence. **THIS FLAG IS FOR PIPELINE STARTING FROM FASTQS ONLY**. Starting from BAMs will deactivate this flag.
     * `chip.align_only`: Peak calling and its downstream analyses will be disabled. Useful if you just want to align your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them. **IMPORTANT**: Even though `chip.pipeline_type` does not matter for align only mode, you still need to define it since it is a required parameter in WDL. Define it as `tf` for such cases.
     * `chip.true_rep_only`: Disable pseudo replicate generation and all related analyses
 

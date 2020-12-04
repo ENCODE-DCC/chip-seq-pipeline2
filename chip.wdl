@@ -135,6 +135,7 @@ workflow chip {
         # group: pipeline_parameter
         String pipeline_type
         Boolean align_only = false
+        Boolean redact_bam = false
         Boolean true_rep_only = false
         Boolean enable_count_signal_track = false
         Boolean enable_jsd = true
@@ -594,6 +595,11 @@ workflow chip {
             help: 'Default peak caller is different for each type. spp For TF ChIP-Seq and macs2 for histone ChIP-Seq. Regardless of pipeline type, spp always requires controls but macs2 doesn\'t. For control mode, chip.align_only is automatically turned on and cross-correlation analysis is disabled. Do not define ctl_* for control mode. Define fastqs_repX_RY instead.',
             choices: ['tf', 'histone', 'control'],
             example: 'tf'
+        }
+        redact_bam: {
+            description: 'Convert BAM into pBAM (redacted BAM).',
+            group: 'pipeline_parameter',
+            help: 'BAM will be converted into pBAM. This parameter is active only if inputs are FASTQs since BAM to pBAM conversion is done at the end of the alignment (FASTQ->BAM). If you start from BAMs then this parameter will not be active.'
         }
         align_only: {
             description: 'Align only mode.',
@@ -1170,6 +1176,8 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                redact_bam = redact_bam,
+                ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
                 cpu = align_cpu,
@@ -1264,6 +1272,8 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = false,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                redact_bam = redact_bam,
+                ref_fa = ref_fa_,
 
                 cpu = align_cpu,
                 mem_factor = align_mem_factor_,
@@ -1390,6 +1400,8 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = ctl_paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                redact_bam = redact_bam,
+                ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
                 cpu = align_cpu,
@@ -1988,6 +2000,7 @@ task align {
     input {
         Array[File] fastqs_R1         # [merge_id]
         Array[File] fastqs_R2
+        File? ref_fa
         Int? trim_bp            # this is for R1 only
         Int crop_length
         Int crop_length_tol
@@ -1999,6 +2012,7 @@ task align {
         File? idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
+        Boolean redact_bam
 
         String? trimmomatic_java_heap
         Int cpu
@@ -2093,6 +2107,13 @@ task align {
                 ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         fi 
+
+        if [ '${redact_bam}' == 'true' ]; then
+            python3 $(which encode_task_bam_to_pbam.py) \
+                $(ls *.bam) \
+                ${'--ref-fa ' + ref_fa} \
+                '--delete-original-bam'
+        fi
 
         python3 $(which encode_task_post_align.py) \
             R1$SUFFIX/*.fastq.gz $(ls *.bam) \
