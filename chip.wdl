@@ -597,9 +597,9 @@ workflow chip {
             example: 'tf'
         }
         redact_bam: {
-            description: 'Convert BAM into pBAM (redacted BAM).',
+            description: 'Redact BAM (convert BAM into pBAM) when aligning FASTQs.',
             group: 'pipeline_parameter',
-            help: 'BAM will be converted into pBAM. This parameter is active only if inputs are FASTQs since BAM to pBAM conversion is done at the end of the alignment (FASTQ->BAM). If you start from BAMs then this parameter will not be active.'
+            help: 'BAM will be converted into redacted BAM (pBAM). This parameter is active only if inputs are FASTQs since BAM to pBAM conversion is done at the end of the alignment (FASTQ->BAM). If you start from BAMs then this parameter will not be active.'
         }
         align_only: {
             description: 'Align only mode.',

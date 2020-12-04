@@ -32,6 +32,7 @@ workflow test_bwa {
         use_bwa_mem_for_pe = false,
         crop_length = 0,
         crop_length_tol = 0,
+        redact_bam = false,        
 
         cpu = bwa_cpu,
         mem_factor = bwa_mem_factor,
@@ -48,6 +49,7 @@ workflow test_bwa {
         use_bwa_mem_for_pe = false,
         crop_length = 0,
         crop_length_tol = 0,
+        redact_bam = false,        
 
         cpu = bwa_cpu,
         mem_factor = bwa_mem_factor,
