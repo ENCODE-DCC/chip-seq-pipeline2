@@ -1,0 +1,19 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.5.0/ENCSR000DYI_subsampled_chr19_only/qc.json",
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/hg38_chr19_chrM.tsv",
+    "chip.fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled/rep1.subsampled.25.fastq.gz"
+    ],
+    "chip.fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled/rep2.subsampled.20.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep1_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled/ctl1.subsampled.25.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep2_R1" : ["gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled/ctl2.subsampled.25.fastq.gz"
+    ],
+    "chip.paired_end" : false,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.redact_bam" : true,
+    "chip.true_rep_only" : true,
+    "chip.title" : "ENCSR000DYI (subsampled 1/25, chr19_chrM only, redacted BAM)",
+    "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab (redacted BAM)"
+}
