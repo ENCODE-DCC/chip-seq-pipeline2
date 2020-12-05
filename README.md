@@ -2,6 +2,17 @@
 
 [![CircleCI](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master)
 
+
+## About redacting BAM (new feature >= v1.7.0)
+
+Added `"chip.redact_bam"` to redact BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repos.
+Conda users need to install it from our temporary PIP repo (`ptools_bin`). Docker/Singularity users do not need to install it. `ptools` is included in new pieline's docker image. This is for Conda users only.
+```
+$ source activate encode-chip-seq-pipeline
+# install pttols_bin inside the environment
+(encode-chip-seq-pipeline) $ pip3 install ptools_bin
+```
+
 ## Introduction 
 This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor and histone ChIP-seq pipeline specifications (by Anshul Kundaje) in [this google doc](https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit#).
 
