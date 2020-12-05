@@ -249,36 +249,36 @@ workflows:
       - test_tasks:
           requires:
             - build
-      # - test_workflow_se:
-      #     requires:
-      #       - build
-      # - test_workflow_ctl_sub_se:
-      #     requires:
-      #       - build
-      # - test_workflow_unrep_se:
-      #     requires:
-      #       - build
-      # - test_workflow_pe:
-      #     requires:
-      #       - build
-      # - test_workflow_pe_control_mode:
-      #     requires:
-      #       - build
-      # - test_workflow_ctl_sub_pe:
-      #     requires:
-      #       - build
-      # - test_workflow_ctl_sub_1ctl_pe:
-      #     requires:
-      #       - build
-      # - test_workflow_hist_se:
-      #     requires:
-      #       - build
-      # - test_workflow_hist_unrep_se:
-      #     requires:
-      #       - build
-      # - test_workflow_hist_pe:
-      #     requires:
-      #       - build
+      - test_workflow_se:
+          requires:
+            - build
+      - test_workflow_ctl_sub_se:
+          requires:
+            - build
+      - test_workflow_unrep_se:
+          requires:
+            - build
+      - test_workflow_pe:
+          requires:
+            - build
+      - test_workflow_pe_control_mode:
+          requires:
+            - build
+      - test_workflow_ctl_sub_pe:
+          requires:
+            - build
+      - test_workflow_ctl_sub_1ctl_pe:
+          requires:
+            - build
+      - test_workflow_hist_se:
+          requires:
+            - build
+      - test_workflow_hist_unrep_se:
+          requires:
+            - build
+      - test_workflow_hist_pe:
+          requires:
+            - build
       - test_workflow_true_rep_only_pbam_se:
           requires:
             - build
