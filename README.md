@@ -3,14 +3,31 @@
 [![CircleCI](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master)
 
 
-## About redacting BAM (new feature >= v1.7.0)
+## Important notice for Conda users
 
-Added `"chip.redact_bam"` to redact BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repos.
-Conda users need to install it from our temporary PIP repo (`ptools_bin`). Docker/Singularity users do not need to install it. `ptools` is included in new pieline's docker image. This is for Conda users only.
+For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-chip-seq-pipeline`) even though they don't use new added features.
 ```
+$ cd chip-seq-pipeline2
+$ scripts/update_conda_env.sh
+```
+
+Docker/Singularity users don't need to do this since all software dependencies are already installed in pipeline's Docker/Singularity containers and those containers are linked to pipeline's WDL file. Docker users include users running pipelines on GCP and AWS (or running pipelines locally with `--docker` or `--singularity`).
+
+
+## Redacting BAM (new feature >= v1.7.0)
+
+Added `"chip.redact_bam"` to redact (de-identify) BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repository (`bioconda`) yet.
+Conda users need to install it from our temporary PIP repo (`ptools_bin`). GCP/AWS/Docker/Singularity users do not need to install it. `ptools` is already included in new pipeline's Docker/Singularity image. This is for Conda users only. We will remove this warning in the next release after `ptools` is registered to `bioconda` and added to the requirements list (`scripts/requirements.txt`).
+
+```
+# Activate pipeline's conda environment
 $ source activate encode-chip-seq-pipeline
-# install pttols_bin inside the environment
+
+# Install ptools_bin inside the environment
 (encode-chip-seq-pipeline) $ pip3 install ptools_bin
+
+# Run pipelines in the environment
+(encode-chip-seq-pipeline) $ caper run ...
 ```
 
 ## Introduction 
@@ -34,7 +51,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG). Use 
 	> **IMPORTANT**: use `encode-chip-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
-
+ 
 3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
 
 	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
