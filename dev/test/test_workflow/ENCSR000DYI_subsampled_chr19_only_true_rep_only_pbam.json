@@ -12,7 +12,7 @@
     ],
     "chip.paired_end" : false,
     "chip.always_use_pooled_ctl" : true,
-    "chip.redact_bam" : true,
+    "chip.redact_nodup_bam" : true,
     "chip.true_rep_only" : true,
     "chip.title" : "ENCSR000DYI (subsampled 1/25, chr19_chrM only, redacted BAM)",
     "chip.description" : "CEBPB ChIP-seq on human A549 produced by the Snyder lab (redacted BAM)"

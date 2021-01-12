@@ -4,93 +4,92 @@ import 'compare_md5sum.wdl' as compare_md5sum
 
 workflow test_bam_to_pbam {
     input {
-        Array[File] pe_fastqs_R1
-        Array[File] pe_fastqs_R2
-        Array[File] se_fastqs
+        String dup_marker = 'picard'
+        Int mapq_thresh = 30
+        Boolean no_dup_removal = false
         File ref_fa
+        File pe_bam
+        File se_bam
 
-        File ref_pe_pbam_sam_gz
-        File ref_se_pbam_sam_gz
+        File chrsz
 
-        File pe_bowtie2_idx_tar
-        File se_bowtie2_idx_tar
+        File ref_pe_samtools_flagstat_qc
+        File ref_se_samtools_flagstat_qc
     }
+    String mito_chr_name = 'chrM'
 
-    # use bowtie2 as aligner
-    Int bowtie2_cpu = 1
-    Float bowtie2_mem_factor = 0.0
-    Int bowtie2_time_hr = 48
-    Float bowtie2_disk_factor = 5.0
+    Int filter_cpu = 1
+    Float filter_mem_factor = 0.0
+    Int filter_time_hr = 24
+    Float filter_disk_factor = 6.0
 
-    call chip.align as pe_pbam_bowtie2 { input :
-        aligner = 'bowtie2',
-        idx_tar = pe_bowtie2_idx_tar,
-        mito_chr_name = 'chrM',
-        fastqs_R1 = pe_fastqs_R1,
-        fastqs_R2 = pe_fastqs_R2,
+    call chip.filter as pe_filter { input :
+        bam = pe_bam,
+        no_dup_removal = false,
         paired_end = true,
-        use_bwa_mem_for_pe = false,
-        crop_length = 0,
-        crop_length_tol = 0,
-        redact_bam = true,
         ref_fa = ref_fa,
+        redact_nodup_bam = false,
+        dup_marker = dup_marker,
+        mapq_thresh = mapq_thresh,
+        mito_chr_name = mito_chr_name,
+        filter_chrs = [],
+        chrsz = chrsz,
 
-        cpu = bowtie2_cpu,
-        mem_factor = bowtie2_mem_factor,
-        time_hr = bowtie2_time_hr,
-        disk_factor = bowtie2_disk_factor,
+        cpu = filter_cpu,
+        mem_factor = filter_mem_factor,
+        picard_java_heap = '4G',
+        time_hr = filter_time_hr,
+        disk_factor = filter_disk_factor,
     }
-    call chip.align as se_pbam_bowtie2 { input :
-        aligner = 'bowtie2',
-        idx_tar = se_bowtie2_idx_tar,
-        mito_chr_name = 'chrM',
-        fastqs_R1 = se_fastqs,
-        fastqs_R2 = [],
+    call chip.filter as se_filter { input :
+        bam = se_bam,
+        no_dup_removal = false,
         paired_end = false,
-        use_bwa_mem_for_pe = false,
-        crop_length = 0,
-        crop_length_tol = 0,
-        redact_bam = true,
         ref_fa = ref_fa,
+        redact_nodup_bam = false,
+        dup_marker = dup_marker,
+        mapq_thresh = mapq_thresh,
+        mito_chr_name = mito_chr_name,
+        filter_chrs = [],
+        chrsz = chrsz,
 
-        cpu = bowtie2_cpu,
-        mem_factor = bowtie2_mem_factor,
-        time_hr = bowtie2_time_hr,
-        disk_factor = bowtie2_disk_factor,
+        cpu = filter_cpu,
+        mem_factor = filter_mem_factor,
+        picard_java_heap = '4G',
+        time_hr = filter_time_hr,
+        disk_factor = filter_disk_factor,
     }
-
-    call bam_to_sam_gz as pe_bam_to_sam_gz { input:
-        pbam = pe_pbam_bowtie2.bam,
+    call samtools_flagstat as pe_samtools_flagstat { input :
+        bam = pe_filter.nodup_bam,
     }
-
-    call bam_to_sam_gz as se_bam_to_sam_gz { input:
-        pbam = se_pbam_bowtie2.bam,
+    call samtools_flagstat as se_samtools_flagstat { input :
+        bam = se_filter.nodup_bam,
     }
 
     call compare_md5sum.compare_md5sum { input :
         labels = [
-            'pe_pbam_sam_gz',
-            'se_pbam_sam_gz',
+            'pe_bam_to_pbam',
+            'se_bam_to_pbam',
         ],
         files = [
-            pe_bam_to_sam_gz.sam_gz,
-            se_bam_to_sam_gz.sam_gz,
+            pe_samtools_flagstat.flagstat_qc,
+            se_samtools_flagstat.flagstat_qc,
         ],
         ref_files = [
-            ref_pe_pbam_sam_gz,
-            ref_se_pbam_sam_gz,
+            ref_pe_samtools_flagstat_qc,
+            ref_se_samtools_flagstat_qc,
         ],
     }
 }
 
-task bam_to_sam_gz {
+task samtools_flagstat {
     input {
-        File pbam
+        File bam
     }
     command {
-        samtools view ~{pbam} | gzip -nc > sam.gz
+        samtools flagstat ~{bam} > flagstat.qc
     }
     output {
-        File sam_gz = "sam.gz"
+        File flagstat_qc = 'flagstat.qc'
     }
 }
