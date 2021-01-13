@@ -599,7 +599,7 @@ workflow chip {
         redact_nodup_bam: {
             description: 'Redact filtered/nodup BAM.',
             group: 'pipeline_parameter',
-            help: 'Redact filtered/nodup BAM at the end of the filtering step (task filter). Raw BAM from the aligner (task align) will still remain unredacted. Quality metrics on filtered BAM will be calculated before being redacted. However, all downstream analyses (e.g. peak-calling) will be done on the redacted BAM. If you start from nodup BAM then this flag will be not active.'
+            help: 'Redact filtered/nodup BAM at the end of the filtering step (task filter). Raw BAM from the aligner (task align) will still remain unredacted. Quality metrics on filtered BAM will be calculated before being redacted. However, all downstream analyses (e.g. peak-calling) will be done on the redacted BAM. If you start from nodup BAM then this flag will not be active.'
         }
         align_only: {
             description: 'Align only mode.',

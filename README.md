@@ -14,9 +14,12 @@ $ scripts/update_conda_env.sh
 Docker/Singularity users don't need to do this since all software dependencies are already installed in pipeline's Docker/Singularity containers and those containers are linked to pipeline's WDL file. Docker users include users running pipelines on GCP and AWS (or running pipelines locally with `--docker` or `--singularity`).
 
 
-## Redacting BAM (new feature >= v1.7.0)
+## Redacting filtered/deduped BAM (new feature >= v1.7.0)
 
-Added `"chip.redact_bam"` to redact (de-identify) BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repository (`bioconda`) yet.
+Added `"chip.redact_nodup_bam"` to redact (de-identify) BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repository (`bioconda`) yet.
+
+> **IMPORTANT**: Alignment quality metrics calculated during/before filtering (task `filter`) will still be based on non-redacted original BAMs. However, all downstream analyses (e.g. peak-calling) will be based on redact nodup BAM.
+
 Conda users need to install it from our temporary PIP repo (`ptools_bin`). GCP/AWS/Docker/Singularity users do not need to install it. `ptools` is already included in new pipeline's Docker/Singularity image. This is for Conda users only. We will remove this warning in the next release after `ptools` is registered to `bioconda` and added to the requirements list (`scripts/requirements.txt`).
 
 ```
@@ -27,7 +30,7 @@ $ source activate encode-chip-seq-pipeline
 (encode-chip-seq-pipeline) $ pip3 install ptools_bin
 
 # Run pipelines in the environment
-(encode-chip-seq-pipeline) $ caper run ...
+(encode-chip-seq-pipeline) $ caper run/submit ...
 ```
 
 ## Introduction 
