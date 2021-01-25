@@ -174,7 +174,7 @@ workflow chip {
         # group: resource_parameter
         Int align_cpu = 6
         Float align_bowtie2_mem_factor = 0.15
-        Float align_bwa_mem_factor = 0.15
+        Float align_bwa_mem_factor = 0.3
         Int align_time_hr = 48
         Float align_bowtie2_disk_factor = 8.0
         Float align_bwa_disk_factor = 8.0
