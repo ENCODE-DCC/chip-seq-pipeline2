@@ -6,12 +6,16 @@
 ## Important notice for Conda users
 
 For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-chip-seq-pipeline`) even though they don't use new added features.
-```
+```bash
 $ cd chip-seq-pipeline2
 $ scripts/update_conda_env.sh
 ```
 
-Docker/Singularity users don't need to do this since all software dependencies are already installed in pipeline's Docker/Singularity containers and those containers are linked to pipeline's WDL file. Docker users include users running pipelines on GCP and AWS (or running pipelines locally with `--docker` or `--singularity`).
+For pipelines >= v1.7.0, Conda users also need to manually install Caper and Croo **INSIDE** the environment. These two tools have been removed from pipeline's Conda environment since v1.7.0.
+```bash
+$ source activate encode-chip-seq-pipeline
+$ pip install caper croo
+```
 
 
 ## Redacting filtered/deduped BAM (new feature >= v1.7.0)
