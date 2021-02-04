@@ -219,6 +219,28 @@ jobs:
             echo "export INPUT=ENCSR936XTK_subsampled_chr19_only_hist.json" >> ${BASH_ENV}
       - run_workflow_test
 
+  test_workflow_true_rep_only_pbam_se:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - install_python3_caper_gcs
+      - run: *make_tag
+      - run:
+          command: |
+            echo "export INPUT=ENCSR000DYI_subsampled_chr19_only_true_rep_only_pbam.json" >> ${BASH_ENV}
+      - run_workflow_test
+
+  test_workflow_true_rep_only_pbam_pe:
+    <<: *machine_defaults
+    steps:
+      - checkout
+      - install_python3_caper_gcs
+      - run: *make_tag
+      - run:
+          command: |
+            echo "export INPUT=ENCSR936XTK_subsampled_chr19_only_true_rep_only_pbam.json" >> ${BASH_ENV}
+      - run_workflow_test
+
 workflows:
   version: 2.1
   build_workflow:
@@ -255,6 +277,12 @@ workflows:
           requires:
             - build
       - test_workflow_hist_pe:
+          requires:
+            - build
+      - test_workflow_true_rep_only_pbam_se:
+          requires:
+            - build
+      - test_workflow_true_rep_only_pbam_pe:
           requires:
             - build
 

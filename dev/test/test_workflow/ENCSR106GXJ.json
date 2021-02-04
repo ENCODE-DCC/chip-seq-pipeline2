@@ -1,0 +1,17 @@
+{
+    "chip.qc_report.qc_json_ref" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/ref_output/v1.1.5/ENCSR000DYI/qc.json",
+    "chip.pipeline_type" : "tf",
+    "chip.genome_tsv" : "https://storage.googleapis.com/encode-pipeline-genome-data/genome_tsv/v3/hg38.tsv",
+    "chip.fastqs_rep1_R1" : [
+	"gs://input-data-mirrored/input_fastqs/parathyroid_fastqs/ENCFF002AVN.fastq.gz",
+	"gs://input-data-mirrored/input_fastqs/parathyroid_fastqs/ENCFF361EQE.fastq.gz"
+    ],
+    "chip.ctl_fastqs_rep1_R1" : [
+	"gs://input-data-mirrored/input_fastqs/parathyroid_fastqs/ENCFF407DUW.fastq.gz"
+    ],
+    "chip.paired_end" : false,
+    "chip.redact_nodup_bam" : false,
+    "chip.always_use_pooled_ctl" : true,
+    "chip.title" : "ENCSR106GXJ",
+    "chip.description" : ""ENCSR106GXJ"
+}
