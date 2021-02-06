@@ -78,7 +78,7 @@ Mandatory parameters.
     These parameters are used for subsampling on filtered (nodup) BAMs. Therefore, setting these parameters will affect all downsteam analyses including peak-calling. It's 0 by default, which means no subsampling. These parameters will be applied to each experiment replicate and control.
    
     * `chip.subsample_reads`: Subsample experiment replicate's reads. For PE dataset, this is not a number of read pairs but number of reads. 
-    * `chip.ctl_subsample_reads`: Subsample control's reads. For PE dataset, this is not a number of read pairs but number of reads. 
+    * `chip.ctl_subsample_reads`: Subsample control's reads. For PE dataset, this is not a number of read pairs but number of reads.
 
 8) Parameters for automatically choosing an appropriate control and subsampling it.
     Before calling peaks, there is a separate (from item 7) mechanism to subsample controls to prevent using too deep controls. Pipeline has a logic to find an approriate control for each experiment replicate. Choices are 1) control with the same index (e.g. rep2 vs. ctl2), 2) pooled control (e.g. rep2 vs. ctl1 + ctl2).
