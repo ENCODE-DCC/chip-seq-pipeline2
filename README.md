@@ -111,3 +111,8 @@ $ qc2tsv /sample1/qc.json gs://sample2/qc.json s3://sample3/qc.json ... > spread
 ```
 
 QC metrics for each experiment (`qc.json`) will be split into multiple rows (1 for overall experiment + 1 for each bio replicate) in a spreadsheet.
+
+
+## Troubleshooting
+
+See [this document](docs/troubleshooting.md) for troubleshooting. I will keep updating this document for errors reported by users.

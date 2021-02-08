@@ -147,6 +147,7 @@ workflow chip {
         Boolean use_bwa_mem_for_pe = false
         Int crop_length = 0
         Int crop_length_tol = 2
+        String trimmomatic_phred_score_format = 'auto'
         Int xcor_trim_bp = 50
         Boolean use_filt_pe_ta_for_xcor = false
         String dup_marker = 'picard'
@@ -650,6 +651,12 @@ workflow chip {
             description: 'Tolerance for cropping reads in FASTQs.',
             group: 'alignment',
             help: 'Drop all reads shorter than chip.crop_length - chip.crop_length_tol. Activated only when chip.crop_length is defined.'
+        }
+        trimmomatic_phred_score_format: {
+            description: 'Base encoding (format) for Phred score in FASTQs.',
+            group: 'alignment',
+            choices: ['auto', 'phred33', 'phred64'],
+            help: 'This is used for Trimmomatic only. It is auto by default, which means that Trimmomatic automatically detect it from FASTQs. Otherwise -phred33 or -phred64 will be passed to the Trimmomatic command line. Use this if you see an error like "Error: Unable to detect quality encoding".'
         }
         xcor_trim_bp: {
             description: 'Trim experiment read1 FASTQ (for both SE and PE) for cross-correlation analysis.',
@@ -1167,6 +1174,7 @@ workflow chip {
                 fastqs_R2 = fastqs_R2[i],
                 crop_length = crop_length,
                 crop_length_tol = crop_length_tol,
+                trimmomatic_phred_score_format = trimmomatic_phred_score_format,
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
@@ -1264,6 +1272,7 @@ workflow chip {
                 trim_bp = xcor_trim_bp,
                 crop_length = 0,
                 crop_length_tol = 0,
+                trimmomatic_phred_score_format = trimmomatic_phred_score_format,
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
@@ -1393,6 +1402,7 @@ workflow chip {
                 fastqs_R2 = ctl_fastqs_R2[i],
                 crop_length = crop_length,
                 crop_length_tol = crop_length_tol,
+                trimmomatic_phred_score_format = trimmomatic_phred_score_format,
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
@@ -2007,6 +2017,8 @@ task align {
         Int? trim_bp            # this is for R1 only
         Int crop_length
         Int crop_length_tol
+        String? trimmomatic_phred_score_format
+
         String aligner
 
         String mito_chr_name
@@ -2074,6 +2086,7 @@ task align {
                 ${if paired_end then '--paired-end' else ''} \
                 --crop-length ${crop_length} \
                 --crop-length-tol "${crop_length_tol}" \
+                ${'--phred-score-format ' + trimmomatic_phred_score_format } \
                 --out-dir-R1 R1$NEW_SUFFIX \
                 ${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
                 ${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (round(mem_gb * trimmomatic_java_heap_factor) + 'G')} \

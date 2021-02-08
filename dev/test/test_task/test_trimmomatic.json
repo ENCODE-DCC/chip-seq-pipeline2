@@ -1,0 +1,21 @@
+{
+    "test_trimmomatic.pe_bowtie2_idx_tar" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar",
+    "test_trimmomatic.se_bowtie2_idx_tar" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar",
+
+    "test_trimmomatic.pe_fastqs_R1" : [
+        "chip-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/rep1-R1.subsampled.67.fastq.gz"
+    ],
+    "test_trimmomatic.pe_fastqs_R2" : [
+        "chip-seq-pipeline-test-data/input/pe/fastqs/rep1/pair2/rep1-R2.subsampled.67.fastq.gz"
+    ],
+    "test_trimmomatic.se_fastqs" : [
+        "chip-seq-pipeline-test-data/input/se/fastqs/rep1/rep1.subsampled.25.fastq.gz"
+    ],
+    "test_trimmomatic.pe_crop_length" : 50,
+    "test_trimmomatic.se_crop_length" : 30,
+
+    "test_trimmomatic.ref_pe_cropped_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_trimmomatic/pe/rep1-R1.subsampled.67.merged.crop_50bp.samstats.qc",
+    "test_trimmomatic.ref_se_cropped_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_trimmomatic/se/rep1.subsampled.25.merged.crop_30bp.samstats.qc",
+    "test_trimmomatic.ref_pe_cropped_phred33_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_trimmomatic/pe/rep1-R1.subsampled.67.merged.crop_50bp.samstats.qc",
+    "test_trimmomatic.ref_se_cropped_phred64_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_trimmomatic/se/rep1.subsampled.25.merged.crop_30bp.samstats.qc"
+}
