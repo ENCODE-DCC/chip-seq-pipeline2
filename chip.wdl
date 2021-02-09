@@ -1,15 +1,15 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.6.1'
+    String pipeline_ver = 'v1.7.0'
 
     meta {
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/chip-seq-pipeline:v1.6.1'
-        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.6.1'
+        caper_docker: 'encodedcc/chip-seq-pipeline:v1.7.0'
+        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.7.0'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
@@ -135,6 +135,7 @@ workflow chip {
         # group: pipeline_parameter
         String pipeline_type
         Boolean align_only = false
+        Boolean redact_nodup_bam = false
         Boolean true_rep_only = false
         Boolean enable_count_signal_track = false
         Boolean enable_jsd = true
@@ -146,6 +147,7 @@ workflow chip {
         Boolean use_bwa_mem_for_pe = false
         Int crop_length = 0
         Int crop_length_tol = 2
+        String trimmomatic_phred_score_format = 'auto'
         Int xcor_trim_bp = 50
         Boolean use_filt_pe_ta_for_xcor = false
         String dup_marker = 'picard'
@@ -173,7 +175,7 @@ workflow chip {
         # group: resource_parameter
         Int align_cpu = 6
         Float align_bowtie2_mem_factor = 0.15
-        Float align_bwa_mem_factor = 0.15
+        Float align_bwa_mem_factor = 0.3
         Int align_time_hr = 48
         Float align_bowtie2_disk_factor = 8.0
         Float align_bwa_disk_factor = 8.0
@@ -595,6 +597,11 @@ workflow chip {
             choices: ['tf', 'histone', 'control'],
             example: 'tf'
         }
+        redact_nodup_bam: {
+            description: 'Redact filtered/nodup BAM.',
+            group: 'pipeline_parameter',
+            help: 'Redact filtered/nodup BAM at the end of the filtering step (task filter). Raw BAM from the aligner (task align) will still remain unredacted. Quality metrics on filtered BAM will be calculated before being redacted. However, all downstream analyses (e.g. peak-calling) will be done on the redacted BAM. If you start from nodup BAM then this flag will not be active.'
+        }
         align_only: {
             description: 'Align only mode.',
             group: 'pipeline_parameter',
@@ -644,6 +651,12 @@ workflow chip {
             description: 'Tolerance for cropping reads in FASTQs.',
             group: 'alignment',
             help: 'Drop all reads shorter than chip.crop_length - chip.crop_length_tol. Activated only when chip.crop_length is defined.'
+        }
+        trimmomatic_phred_score_format: {
+            description: 'Base encoding (format) for Phred score in FASTQs.',
+            group: 'alignment',
+            choices: ['auto', 'phred33', 'phred64'],
+            help: 'This is used for Trimmomatic only. It is auto by default, which means that Trimmomatic automatically detect it from FASTQs. Otherwise -phred33 or -phred64 will be passed to the Trimmomatic command line. Use this if you see an error like "Error: Unable to detect quality encoding".'
         }
         xcor_trim_bp: {
             description: 'Trim experiment read1 FASTQ (for both SE and PE) for cross-correlation analysis.',
@@ -789,7 +802,7 @@ workflow chip {
         filter_cpu: {
             description: 'Number of cores for task filter.',
             group: 'resource_parameter',
-            help: 'Task filter filters raw/unfilterd BAM to get filtered/deduped BAM.'
+            help: 'Task filter filters raw/unfiltered BAM to get filtered/deduped BAM.'
         }
         filter_mem_factor: {
             description: 'Multiplication factor to determine memory required for task filter.',
@@ -1161,6 +1174,7 @@ workflow chip {
                 fastqs_R2 = fastqs_R2[i],
                 crop_length = crop_length,
                 crop_length_tol = crop_length_tol,
+                trimmomatic_phred_score_format = trimmomatic_phred_score_format,
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
@@ -1170,6 +1184,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
                 cpu = align_cpu,
@@ -1187,6 +1202,8 @@ workflow chip {
             call filter { input :
                 bam = bam_,
                 paired_end = paired_end_,
+                ref_fa = ref_fa_,
+                redact_nodup_bam = redact_nodup_bam,
                 dup_marker = dup_marker,
                 mapq_thresh = mapq_thresh_,
                 filter_chrs = filter_chrs,
@@ -1255,6 +1272,7 @@ workflow chip {
                 trim_bp = xcor_trim_bp,
                 crop_length = 0,
                 crop_length_tol = 0,
+                trimmomatic_phred_score_format = trimmomatic_phred_score_format,
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
@@ -1264,6 +1282,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = false,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                ref_fa = ref_fa_,
 
                 cpu = align_cpu,
                 mem_factor = align_mem_factor_,
@@ -1274,6 +1293,7 @@ workflow chip {
             call filter as filter_R1 { input :
                 bam = align_R1.bam,
                 paired_end = false,
+                redact_nodup_bam = false,
                 dup_marker = dup_marker,
                 mapq_thresh = mapq_thresh_,
                 filter_chrs = filter_chrs,
@@ -1307,6 +1327,7 @@ workflow chip {
             call filter as filter_no_dedup { input :
                 bam = bam_,
                 paired_end = paired_end_,
+                redact_nodup_bam = false,
                 dup_marker = dup_marker,
                 mapq_thresh = mapq_thresh_,
                 filter_chrs = filter_chrs,
@@ -1381,6 +1402,7 @@ workflow chip {
                 fastqs_R2 = ctl_fastqs_R2[i],
                 crop_length = crop_length,
                 crop_length_tol = crop_length_tol,
+                trimmomatic_phred_score_format = trimmomatic_phred_score_format,
 
                 aligner = aligner_,
                 mito_chr_name = mito_chr_name_,
@@ -1390,6 +1412,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = ctl_paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
                 cpu = align_cpu,
@@ -1407,6 +1430,8 @@ workflow chip {
             call filter as filter_ctl { input :
                 bam = ctl_bam_,
                 paired_end = ctl_paired_end_,
+                ref_fa = ref_fa_,
+                redact_nodup_bam = redact_nodup_bam,
                 dup_marker = dup_marker,
                 mapq_thresh = mapq_thresh_,
                 filter_chrs = filter_chrs,
@@ -1988,9 +2013,12 @@ task align {
     input {
         Array[File] fastqs_R1         # [merge_id]
         Array[File] fastqs_R2
+        File? ref_fa
         Int? trim_bp            # this is for R1 only
         Int crop_length
         Int crop_length_tol
+        String? trimmomatic_phred_score_format
+
         String aligner
 
         String mito_chr_name
@@ -2058,6 +2086,7 @@ task align {
                 ${if paired_end then '--paired-end' else ''} \
                 --crop-length ${crop_length} \
                 --crop-length-tol "${crop_length_tol}" \
+                ${'--phred-score-format ' + trimmomatic_phred_score_format } \
                 --out-dir-R1 R1$NEW_SUFFIX \
                 ${if paired_end then '--out-dir-R2 R2$NEW_SUFFIX' else ''} \
                 ${'--trimmomatic-java-heap ' + if defined(trimmomatic_java_heap) then trimmomatic_java_heap else (round(mem_gb * trimmomatic_java_heap_factor) + 'G')} \
@@ -2120,6 +2149,8 @@ task filter {
     input {
         File? bam
         Boolean paired_end
+        File? ref_fa
+        Boolean redact_nodup_bam
         String dup_marker             # picard.jar MarkDuplicates (picard) or 
                                     # sambamba markdup (sambamba)
         Int mapq_thresh                # threshold for low MAPQ reads removal
@@ -2155,6 +2186,13 @@ task filter {
             ${'--mem-gb ' + samtools_mem_gb} \
             ${'--nth ' + cpu} \
             ${'--picard-java-heap ' + if defined(picard_java_heap) then picard_java_heap else (round(mem_gb * picard_java_heap_factor) + 'G')}
+
+        if [ '${redact_nodup_bam}' == 'true' ]; then
+            python3 $(which encode_task_bam_to_pbam.py) \
+                $(ls *.bam) \
+                ${'--ref-fa ' + ref_fa} \
+                '--delete-original-bam'
+        fi
     }
     output {
         File nodup_bam = glob('*.bam')[0]

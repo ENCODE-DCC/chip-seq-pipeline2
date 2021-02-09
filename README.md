@@ -2,6 +2,41 @@
 
 [![CircleCI](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master)
 
+
+## Important notice for Conda users
+
+For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-chip-seq-pipeline`) even though they don't use new added features.
+```bash
+$ cd chip-seq-pipeline2
+$ scripts/update_conda_env.sh
+```
+
+For pipelines >= v1.7.0, Conda users also need to manually install Caper and Croo **INSIDE** the environment. These two tools have been removed from pipeline's Conda environment since v1.7.0.
+```bash
+$ source activate encode-chip-seq-pipeline
+$ pip install caper croo
+```
+
+
+## Redacting filtered/deduped BAM (new feature >= v1.7.0)
+
+Added `"chip.redact_nodup_bam"` to redact (de-identify) BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repository (`bioconda`) yet.
+
+> **IMPORTANT**: Alignment quality metrics calculated during/before filtering (task `filter`) will still be based on non-redacted original BAMs. However, all downstream analyses (e.g. peak-calling) will be based on redact nodup BAM.
+
+Conda users need to install it from our temporary PIP repo (`ptools_bin`). GCP/AWS/Docker/Singularity users do not need to install it. `ptools` is already included in new pipeline's Docker/Singularity image. This is for Conda users only. We will remove this warning in the next release after `ptools` is registered to `bioconda` and added to the requirements list (`scripts/requirements.txt`).
+
+```
+# Activate pipeline's conda environment
+$ source activate encode-chip-seq-pipeline
+
+# Install ptools_bin inside the environment
+(encode-chip-seq-pipeline) $ pip3 install ptools_bin
+
+# Run pipelines in the environment
+(encode-chip-seq-pipeline) $ caper run/submit ...
+```
+
 ## Introduction 
 This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor and histone ChIP-seq pipeline specifications (by Anshul Kundaje) in [this google doc](https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit#).
 
@@ -23,7 +58,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG). Use 
 	> **IMPORTANT**: use `encode-chip-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
-
+ 
 3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
 
 	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
@@ -76,3 +111,8 @@ $ qc2tsv /sample1/qc.json gs://sample2/qc.json s3://sample3/qc.json ... > spread
 ```
 
 QC metrics for each experiment (`qc.json`) will be split into multiple rows (1 for overall experiment + 1 for each bio replicate) in a spreadsheet.
+
+
+## Troubleshooting
+
+See [this document](docs/troubleshooting.md) for troubleshooting. I will keep updating this document for errors reported by users.

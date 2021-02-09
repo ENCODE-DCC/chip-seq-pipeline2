@@ -18,6 +18,7 @@ Parameter|Description
 Parameter|Default|Description
 ---------|-------|-----------
 `chip.pipeline_type`| `tf` | `tf` for TF ChIP-seq, `histone` for Histone ChIP-seq and `control` for mapping control FASTQs only. If it is `control` then `chip.align_only` is automatically turned on and pipeline will align FASTQs defined in `chip.fastqs_repX_RY` (where `X` means control replicate ID and `Y` is read-end) as controls. For control mode, do not define  `chip.ctl_fastqs_repX_RY`. Pipeline will skip cross-correlation/JSD/GC-bias analysis for control mode.
+`chip.redact_nodup_bam`| false | Redact filtered/nodup BAM at the end of the filtering step (task `filter`). Raw BAM from the aligner (task `align`) will still remain unredacted. Quality metrics on filtered BAM will be calculated before being redacted. However, all downstream analyses (e.g. peak-calling) will be done on the redacted BAM. If you start from nodup BAM then this flag will not be active. BAM will be redacted with [`ptools`](https://github.com/ENCODE-DCC/ptools). To convert BAM into TAG-ALIGN our pipeline uses `bedtools bamtobed` to interpret CIGAR string to determine read length but redacted BAM will always have `M` only in CIGAR string. For example, this flag can introduce slight noise to the analysis since original BAM's read length is number of `M` - number of `I` + number of `D`, which can be different from redacted BAM's read length (number of `M` only).
 `chip.align_only`| false | Peak calling and its downstream analyses will be disabled. Useful if you just want to map your FASTQs into filtered BAMs/TAG-ALIGNs and don't want to call peaks on them. Even though `chip.pipeline_type` does not matter for align only mode, you still need to define it since it is a required parameter in WDL. Define it as `tf` for such cases.
 `chip.true_rep_only` | false | Disable pseudo replicate generation and all related analyses
 
@@ -151,6 +152,7 @@ Parameter|Type|Default|Description
 `chip.aligner` | String | bowtie2 | Currently supported aligners: bwa, bowtie2, custom. To use your own custom aligner, see the below parameter `chip.custom_align_py`.
 `chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
 `chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
+`chip.trimmomatic_phred_score_format` | String | auto | Base encoding (format) for phred score in FASTQs. Choices: `auto`, `phred33` or `phred64` (without hyphen). This is used for Trimmomatic only. It is `auto` by default, which means that Trimmomatic automatically detect it from FASTQs. Otherwise `-phred33` or `-phred64` will be passed to the Trimmomatic command line. Use this parameter if you get an error `Error: Unable to detect quality encoding` in Trimmomatic.
 `chip.use_bwa_mem_for_pe` | Boolean | false | For PE dataset, uise bwa mem instead of bwa aln.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 
@@ -244,7 +246,7 @@ Parameter|Default|Description
 ---------|-------|-----------
 `chip.align_cpu` | 6 |
 `chip.align_bowtie2_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
-`chip.align_bwa_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
+`chip.align_bwa_mem_factor` | 0.30 | Multiplied to size of FASTQs to determine required memory
 `chip.align_time_hr` | 48 | Walltime (HPCs only)
 `chip.align_bowtie2_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk
 `chip.align_bwa_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk
