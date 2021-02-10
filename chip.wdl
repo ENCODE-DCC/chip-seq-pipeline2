@@ -183,7 +183,7 @@ workflow chip {
         Int filter_cpu = 4
         Float filter_mem_factor = 0.4
         Int filter_time_hr = 24
-        Float filter_disk_factor = 6.0
+        Float filter_disk_factor = 8.0
 
         Int bam2ta_cpu = 2
         Float bam2ta_mem_factor = 0.35

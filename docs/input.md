@@ -256,7 +256,7 @@ Parameter|Default|Description
 `chip.filter_cpu` | 4 |
 `chip.filter_mem_factor` | 0.4 | Multiplied to size of BAM to determine required memory
 `chip.filter_time_hr` | 24 | Walltime (HPCs only)
-`chip.filter_disk_factor` | 6.0 | Multiplied to size of BAM to determine required disk
+`chip.filter_disk_factor` | 8.0 | Multiplied to size of BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
