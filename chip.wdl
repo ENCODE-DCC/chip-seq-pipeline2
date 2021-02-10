@@ -190,8 +190,8 @@ workflow chip {
         Int bam2ta_time_hr = 6
         Float bam2ta_disk_factor = 4.0
 
-        Float spr_mem_factor = 4.5
-        Float spr_disk_factor = 6.0
+        Float spr_mem_factor = 13.5
+        Float spr_disk_factor = 18.0
 
         Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
@@ -203,19 +203,19 @@ workflow chip {
         Int xcor_time_hr = 24
         Float xcor_disk_factor = 4.5
 
-        Float subsample_ctl_mem_factor = 7.0
-        Float subsample_ctl_disk_factor = 7.5
+        Float subsample_ctl_mem_factor = 14.0
+        Float subsample_ctl_disk_factor = 15.0
 
-        Float macs2_signal_track_mem_factor = 6.0
+        Float macs2_signal_track_mem_factor = 12.0
         Int macs2_signal_track_time_hr = 24
-        Float macs2_signal_track_disk_factor = 40.0
+        Float macs2_signal_track_disk_factor = 80.0
 
         Int call_peak_cpu = 6
         Float call_peak_spp_mem_factor = 5.0
-        Float call_peak_macs2_mem_factor = 2.5
+        Float call_peak_macs2_mem_factor = 5.0
         Int call_peak_time_hr = 72
         Float call_peak_spp_disk_factor = 5.0
-        Float call_peak_macs2_disk_factor = 15.0
+        Float call_peak_macs2_disk_factor = 30.0
 
         String? align_trimmomatic_java_heap
         String? filter_picard_java_heap
