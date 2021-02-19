@@ -2776,7 +2776,7 @@ task gc_bias {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 100 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
