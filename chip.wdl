@@ -1,7 +1,7 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.7.0'
+    String pipeline_ver = 'v1.7.1'
 
     meta {
         version: 'v1.7.0'
