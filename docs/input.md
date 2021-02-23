@@ -256,7 +256,7 @@ Parameter|Default|Description
 `chip.filter_cpu` | 4 |
 `chip.filter_mem_factor` | 0.4 | Multiplied to size of BAM to determine required memory
 `chip.filter_time_hr` | 24 | Walltime (HPCs only)
-`chip.filter_disk_factor` | 6.0 | Multiplied to size of BAM to determine required disk
+`chip.filter_disk_factor` | 8.0 | Multiplied to size of BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
@@ -267,8 +267,8 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.spr_mem_factor` | 4.5 | Multiplied to size of filtered BAM to determine required memory
-`chip.spr_disk_factor` | 6.0 | Multiplied to size of filtered BAM to determine required disk
+`chip.spr_mem_factor` | 13.5 | Multiplied to size of filtered BAM to determine required memory
+`chip.spr_disk_factor` | 18.0 | Multiplied to size of filtered BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
@@ -288,22 +288,22 @@ Parameter|Default|Description
 ---------|-------|-----------
 `chip.call_peak_cpu` | 6 | Used for both peak callers (`spp` and `macs2`). `spp` is well multithreaded but `macs2` is single-threaded. More than 2 is not required for `macs2`.
 `chip.call_peak_spp_mem_factor` | 5.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
-`chip.call_peak_macs2_mem_factor` | 2.5 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.call_peak_macs2_mem_factor` | 5.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `chip.call_peak_time_hr` | 24 | Walltime (HPCs only)
 `chip.call_peak_spp_disk_factor` | 5.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
-`chip.call_peak_macs2_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
+`chip.call_peak_macs2_disk_factor` | 30.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.macs2_signal_track_mem_factor` | 6.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.macs2_signal_track_mem_factor` | 12.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `chip.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
-`chip.macs2_signal_track_disk_factor` | 40.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
+`chip.macs2_signal_track_disk_factor` | 80.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.subsample_ctl_mem_factor` | 7.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.subsample_ctl_mem_factor` | 14.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `chip.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
-`chip.subsample_ctl_disk_factor` | 7.5 | Multiplied to size of TAG-ALIGN BED to determine required disk
+`chip.subsample_ctl_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
 If your system/cluster does not allow large memory allocation for Java applications, check the following resource parameters to manually define Java memory. It is **NOT RECOMMENDED** for most users to change these parameters since pipeline automatically takes 90% of task's memory for Java apps.
 

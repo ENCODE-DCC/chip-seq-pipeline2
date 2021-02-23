@@ -5,6 +5,11 @@
 
 ## Important notice for Conda users
 
+If it takes too long to resolve Conda package conflicts while installing pipeline's Conda environment, then try with `mamba` instead. Add `mamba` to the install command line.
+```bash
+$ scripts/install_conda_env.sh mamba
+```
+
 For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-chip-seq-pipeline`) even though they don't use new added features.
 ```bash
 $ cd chip-seq-pipeline2
@@ -82,6 +87,11 @@ An input JSON file specifies all the input parameters and files that are necessa
 
 1) [Input JSON file specification (short)](docs/input_short.md)
 2) [Input JSON file specification (long)](docs/input.md)
+
+## Running and sharing on Truwl
+You can run this pipeline on [truwl.com](https://truwl.com/). This provides a web interface that allows you to define inputs and parameters, run the job on GCP, and monitor progress. To run it you will need to create an account on the platform then request early access by emailing [info@truwl.com](mailto:info@truwl.com) to get the right permissions. You can see the example cases from this repo at [https://truwl.com/workflows/instance/WF_dd6938.8f.340f/command](https://truwl.com/workflows/instance/WF_dd6938.8f.340f/command) and [https://truwl.com/workflows/instance/WF_dd6938.8f.8aa3/command](https://truwl.com/workflows/instance/WF_dd6938.8f.8aa3/command). The example jobs (or other jobs) can be forked to pre-populate the inputs for your own job.
+
+If you do not run the pipeline on Truwl, you can still share your use-case/job on the platform by getting in touch at [info@truwl.com](mailto:info@truwl.com) and providing your inputs.json file.
 
 ## Running a pipeline on DNAnexus
 

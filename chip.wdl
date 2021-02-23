@@ -1,15 +1,16 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.7.0'
+    String pipeline_ver = 'v1.7.1'
 
     meta {
+        version: 'v1.7.1'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/chip-seq-pipeline:v1.7.0'
-        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.7.0'
+        caper_docker: 'encodedcc/chip-seq-pipeline:v1.7.1'
+        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.7.1'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
@@ -183,15 +184,15 @@ workflow chip {
         Int filter_cpu = 4
         Float filter_mem_factor = 0.4
         Int filter_time_hr = 24
-        Float filter_disk_factor = 6.0
+        Float filter_disk_factor = 8.0
 
         Int bam2ta_cpu = 2
         Float bam2ta_mem_factor = 0.35
         Int bam2ta_time_hr = 6
         Float bam2ta_disk_factor = 4.0
 
-        Float spr_mem_factor = 4.5
-        Float spr_disk_factor = 6.0
+        Float spr_mem_factor = 13.5
+        Float spr_disk_factor = 18.0
 
         Int jsd_cpu = 4
         Float jsd_mem_factor = 0.1
@@ -203,19 +204,19 @@ workflow chip {
         Int xcor_time_hr = 24
         Float xcor_disk_factor = 4.5
 
-        Float subsample_ctl_mem_factor = 7.0
-        Float subsample_ctl_disk_factor = 7.5
+        Float subsample_ctl_mem_factor = 14.0
+        Float subsample_ctl_disk_factor = 15.0
 
-        Float macs2_signal_track_mem_factor = 6.0
+        Float macs2_signal_track_mem_factor = 12.0
         Int macs2_signal_track_time_hr = 24
-        Float macs2_signal_track_disk_factor = 40.0
+        Float macs2_signal_track_disk_factor = 80.0
 
         Int call_peak_cpu = 6
         Float call_peak_spp_mem_factor = 5.0
-        Float call_peak_macs2_mem_factor = 2.5
+        Float call_peak_macs2_mem_factor = 5.0
         Int call_peak_time_hr = 72
         Float call_peak_spp_disk_factor = 5.0
-        Float call_peak_macs2_disk_factor = 15.0
+        Float call_peak_macs2_disk_factor = 30.0
 
         String? align_trimmomatic_java_heap
         String? filter_picard_java_heap
@@ -2776,7 +2777,7 @@ task gc_bias {
         cpu : 1
         memory : '${mem_gb} GB'
         time : 6
-        disks : 'local-disk 100 SSD'
+        disks : 'local-disk 150 SSD'
     }
 }
 
