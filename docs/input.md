@@ -154,6 +154,7 @@ Parameter|Type|Default|Description
 `chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
 `chip.trimmomatic_phred_score_format` | String | auto | Base encoding (format) for phred score in FASTQs. Choices: `auto`, `phred33` or `phred64` (without hyphen). This is used for Trimmomatic only. It is `auto` by default, which means that Trimmomatic automatically detect it from FASTQs. Otherwise `-phred33` or `-phred64` will be passed to the Trimmomatic command line. Use this parameter if you get an error `Error: Unable to detect quality encoding` in Trimmomatic.
 `chip.use_bwa_mem_for_pe` | Boolean | false | For PE dataset, uise bwa mem instead of bwa aln.
+`chip.use_bowtie2_local` | Boolean | false | Use bowtie2's local mode (adding `--local` to bowtie2 command line). If not defined, the default mode (end-to-end) will be used.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 
 

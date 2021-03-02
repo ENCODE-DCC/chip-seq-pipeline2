@@ -146,6 +146,7 @@ workflow chip {
         String aligner = 'bowtie2'
         File? custom_align_py
         Boolean use_bwa_mem_for_pe = false
+        Boolean use_bowtie2_local_mode = false
         Int crop_length = 0
         Int crop_length_tol = 2
         String trimmomatic_phred_score_format = 'auto'
@@ -643,6 +644,11 @@ workflow chip {
             group: 'alignment',
             help: 'Use it only for paired end reads >= 70bp.'
         }
+        use_bowtie2_local_mode {
+            description: 'Use bowtie2\'s local mode (soft-clipping).',
+            group: 'alignment',
+            help: 'This will add --local to bowtie2 command line so that it will replace the default end-to-end mode.'
+        }
         crop_length: {
             description: 'Crop FASTQs\' reads longer than this length.',
             group: 'alignment',
@@ -1133,6 +1139,11 @@ workflow chip {
             msg = 'To use chip.use_bwa_mem_for_pe, choose bwa for chip.aligner.'
         }
     }
+    if ( aligner_ != 'bowtie2' && use_bowtie2_local_mode ) {
+        call raise_exception as error_use_bwa_mem_for_non_bwa { input:
+            msg = 'To use chip.use_bowtie2_local_mode, choose bowtie2 for chip.aligner.'
+        }
+    }
     if ( aligner_ == 'custom' && ( !defined(custom_align_py) || !defined(custom_aligner_idx_tar) ) ) {
         call raise_exception as error_custom_aligner { input:
             msg = 'To use a custom aligner, define chip.custom_align_py and chip.custom_aligner_idx_tar.'
@@ -1185,6 +1196,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
@@ -1283,6 +1295,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = false,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
                 cpu = align_cpu,
@@ -1413,6 +1426,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = ctl_paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
@@ -2028,6 +2042,7 @@ task align {
         File? idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
+        Boolean use_bowtie2_local_mode
 
         String? trimmomatic_java_heap
         Int cpu
@@ -2112,6 +2127,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${'--multimapping ' + multimapping} \
                 ${if paired_end then '--paired-end' else ''} \
+                ${if use_bowtie2_local_mode then '--local' else ''} \
                 ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         else
