@@ -1140,7 +1140,7 @@ workflow chip {
         }
     }
     if ( aligner_ != 'bowtie2' && use_bowtie2_local_mode ) {
-        call raise_exception as error_use_bwa_mem_for_non_bwa { input:
+        call raise_exception as error_use_bowtie2_local_mode_for_non_bowtie2 { input:
             msg = 'To use chip.use_bowtie2_local_mode, choose bowtie2 for chip.aligner.'
         }
     }
