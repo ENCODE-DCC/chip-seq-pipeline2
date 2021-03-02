@@ -644,7 +644,7 @@ workflow chip {
             group: 'alignment',
             help: 'Use it only for paired end reads >= 70bp.'
         }
-        use_bowtie2_local_mode {
+        use_bowtie2_local_mode: {
             description: 'Use bowtie2\'s local mode (soft-clipping).',
             group: 'alignment',
             help: 'This will add --local to bowtie2 command line so that it will replace the default end-to-end mode.'
