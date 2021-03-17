@@ -22,6 +22,10 @@
     "chip.ctl_fastqs_rep2_R1" : [ "ctl2_R1.fastq.gz" ],
     "chip.ctl_fastqs_rep2_R2" : [ "ctl2_R2.fastq.gz" ],
 
+    "chip.use_bwa_mem_for_pe" : false,
+    "chip.bwa_mem_read_len_limit" : 70,
+    "chip.use_bowtie2_local_mode" : false,
+
     "chip.crop_length" : 0,
 
     "chip.mapq_thresh" : 30,

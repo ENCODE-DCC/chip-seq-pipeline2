@@ -146,6 +146,7 @@ workflow chip {
         String aligner = 'bowtie2'
         File? custom_align_py
         Boolean use_bwa_mem_for_pe = false
+        Int bwa_mem_read_len_limit = 70
         Boolean use_bowtie2_local_mode = false
         Int crop_length = 0
         Int crop_length_tol = 2
@@ -640,9 +641,14 @@ workflow chip {
             help: 'There is a template included in the documentation for inputs. Defining this parameter will automatically change "chip.aligner" to "custom". You should also define "chip.custom_aligner_idx_tar".'
         }
         use_bwa_mem_for_pe: {
-            description: 'For paired end dataset with read length >= 70bp, use bwa mem instead of bwa aln.',
+            description: 'For paired end dataset with read length >= chip.bwa_mem_read_len_limit (default 70) bp, use bwa mem instead of bwa aln.',
             group: 'alignment',
-            help: 'Use it only for paired end reads >= 70bp.'
+            help: 'Use it only for paired end reads >= chip.bwa_mem_read_len_limit (default 70) bp. Otherwise keep using bwa aln.'
+        }
+        bwa_mem_read_len_limit {
+            description: 'Read length limit for bwa mem (for PE FASTQs only).',
+            group: 'alignment',
+            help: 'If chip.use_bwa_mem_for_pe is activated and reads are shorter than this limit, then bwa aln will be used instead of bwa mem.'
         }
         use_bowtie2_local_mode: {
             description: 'Use bowtie2\'s local mode (soft-clipping).',
@@ -1196,6 +1202,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                bwa_mem_read_len_limit = bwa_mem_read_len_limit,
                 use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
@@ -1295,6 +1302,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = false,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                bwa_mem_read_len_limit = bwa_mem_read_len_limit,
                 use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
@@ -1426,6 +1434,7 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = ctl_paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                bwa_mem_read_len_limit = bwa_mem_read_len_limit,
                 use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
@@ -2042,6 +2051,7 @@ task align {
         File? idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
+        Int bwa_mem_read_len_limit
         Boolean use_bowtie2_local_mode
 
         String? trimmomatic_java_heap
@@ -2117,6 +2127,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${if use_bwa_mem_for_pe then '--use-bwa-mem-for-pe' else ''} \
+                ${'--bwa-mem-read-len-limit ' + bwa_mem_read_len_limit} \
                 ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
 
