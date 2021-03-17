@@ -12,5 +12,9 @@
         "chip-seq-pipeline-test-data/input/se/fastqs/rep1/rep1.subsampled.25.fastq.gz"
     ],
     "test_bowtie2.ref_pe_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/pe/rep1-R1.subsampled.67.samstats.qc",
-    "test_bowtie2.ref_se_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/se/rep1.subsampled.25.samstats.qc"
+    "test_bowtie2.ref_se_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/se/rep1.subsampled.25.samstats.qc",
+
+    "test_bowtie2.ref_pe_local_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/pe/local/rep1-R1.subsampled.67.srt.samstats.qc",
+    "test_bowtie2.ref_se_local_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/se/local/rep1.subsampled.25.srt.samstats.qc"
+   
 }
