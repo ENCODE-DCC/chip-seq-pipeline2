@@ -36,6 +36,7 @@ workflow test_trimmomatic {
         fastqs_R2 = pe_fastqs_R2,
         paired_end = true,
         use_bwa_mem_for_pe = false,
+        use_bowtie2_local_mode = false,
         crop_length = pe_crop_length,
         crop_length_tol = pe_crop_length_tol,
 
@@ -52,6 +53,7 @@ workflow test_trimmomatic {
         fastqs_R2 = [],
         paired_end = false,
         use_bwa_mem_for_pe = false,
+        use_bowtie2_local_mode = false,
         crop_length = se_crop_length,
         crop_length_tol = se_crop_length_tol,
 
@@ -69,6 +71,7 @@ workflow test_trimmomatic {
         fastqs_R2 = pe_fastqs_R2,
         paired_end = true,
         use_bwa_mem_for_pe = false,
+        use_bowtie2_local_mode = false,
         crop_length = pe_crop_length,
         crop_length_tol = pe_crop_length_tol,
         trimmomatic_phred_score_format = 'phred33',
@@ -86,6 +89,7 @@ workflow test_trimmomatic {
         fastqs_R2 = [],
         paired_end = false,
         use_bwa_mem_for_pe = false,
+        use_bowtie2_local_mode = false,
         crop_length = se_crop_length,
         crop_length_tol = se_crop_length_tol,
         trimmomatic_phred_score_format = 'phred64',
