@@ -226,7 +226,7 @@ def main():
         bam = bwa_pe(
             args.fastqs[0], args.fastqs[1],
             bwa_index_prefix, args.nth, args.mem_gb, args.use_bwa_mem_for_pe,
-            bwa_mem_read_len_limit,
+            args.bwa_mem_read_len_limit,
             args.out_dir)
     else:
         bam = bwa_se(
