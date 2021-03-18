@@ -645,7 +645,7 @@ workflow chip {
             group: 'alignment',
             help: 'Use it only for paired end reads >= chip.bwa_mem_read_len_limit (default 70) bp. Otherwise keep using bwa aln.'
         }
-        bwa_mem_read_len_limit {
+        bwa_mem_read_len_limit: {
             description: 'Read length limit for bwa mem (for PE FASTQs only).',
             group: 'alignment',
             help: 'If chip.use_bwa_mem_for_pe is activated and reads are shorter than this limit, then bwa aln will be used instead of bwa mem.'
