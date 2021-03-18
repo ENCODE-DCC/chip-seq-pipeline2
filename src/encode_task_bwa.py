@@ -109,18 +109,18 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, bw
     temp_files = []
     read_len = get_read_length(fastq1)
 
-    logger.info(
+    log.info(
         'Guessed read length of R1 FASTQ: {read_len}'.format(
             read_len=read_len,
         )
     )
     if use_bwa_mem_for_pe and read_len >= bwa_mem_read_len_limit:
-        logger.info('Use bwa mem.')
+        log.info('Use bwa mem.')
         cmd = 'bwa mem -M -t {} {} {} {} | gzip -nc > {}'
         cmd = cmd.format(nth, ref_index_prefix, fastq1, fastq2, sam)
         temp_files.append(sam)
     else:
-        logger.info('Use bwa aln for each (R1 and R2) and then bwa sampe.')
+        log.info('Use bwa aln for each (R1 and R2) and then bwa sampe.')
         sai1 = bwa_aln(fastq1, ref_index_prefix, nth, out_dir)
         sai2 = bwa_aln(fastq2, ref_index_prefix, nth, out_dir)
 
