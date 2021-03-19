@@ -2048,7 +2048,7 @@ task align {
         String mito_chr_name
         Int? multimapping
         File? custom_align_py
-        File? idx_tar            # reference index tar
+        File idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
         Int bwa_mem_read_len_limit
@@ -2061,7 +2061,7 @@ task align {
         Float disk_factor
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
-    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Float mem_gb = 2.0 + size(idx_tar, "G") + mem_factor * input_file_size_gb
     Float samtools_mem_gb = 0.8 * mem_gb
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
 
