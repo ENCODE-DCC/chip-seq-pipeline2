@@ -2048,7 +2048,7 @@ task align {
         String mito_chr_name
         Int? multimapping
         File? custom_align_py
-        File idx_tar            # reference index tar
+        File? idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
         Int bwa_mem_read_len_limit
