@@ -1301,8 +1301,8 @@ workflow chip {
                     else if aligner=='bowtie2' then bowtie2_idx_tar_
                     else custom_aligner_idx_tar,
                 paired_end = false,
-                use_bwa_mem_for_pe = use_bwa_mem_for_pe,
-                bwa_mem_read_len_limit = bwa_mem_read_len_limit,
+                use_bwa_mem_for_pe = false,
+                bwa_mem_read_len_limit = 0,
                 use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
