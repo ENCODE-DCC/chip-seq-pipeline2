@@ -1,16 +1,16 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.7.2'
+    String pipeline_ver = 'v1.8.0'
 
     meta {
-        version: 'v1.7.2'
+        version: 'v1.8.0'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/chip-seq-pipeline:v1.7.2'
-        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.7.2'
+        caper_docker: 'encodedcc/chip-seq-pipeline:v1.8.0'
+        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.8.0'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
