@@ -153,7 +153,9 @@ Parameter|Type|Default|Description
 `chip.crop_length` | Int | 0 | Crop FASTQs with Trimmomatic (using parameters `CROP`). 0: cropping disabled.
 `chip.crop_length_tol` | Int | 2 | Trimmomatic's `MINLEN` will be set as `chip.crop_length` - `abs(chip.crop_length_tol)` where reads shorter than `MINLEN` will be removed, hence not included in output BAM files and all downstream analyses.
 `chip.trimmomatic_phred_score_format` | String | auto | Base encoding (format) for phred score in FASTQs. Choices: `auto`, `phred33` or `phred64` (without hyphen). This is used for Trimmomatic only. It is `auto` by default, which means that Trimmomatic automatically detect it from FASTQs. Otherwise `-phred33` or `-phred64` will be passed to the Trimmomatic command line. Use this parameter if you get an error `Error: Unable to detect quality encoding` in Trimmomatic.
-`chip.use_bwa_mem_for_pe` | Boolean | false | For PE dataset, uise bwa mem instead of bwa aln.
+`chip.use_bwa_mem_for_pe` | Boolean | false | For `chip.aligner` as `bwa` and PE datasets only, use `bwa mem` instead of `bwa aln`. If read length of R1 FASTQ is shorter than `chip.bwa_mem_read_len_limit` (70 by default) then `bwa aln` will be used instead.
+`chip.bwa_mem_read_len_limit` | Int | 70 | For `chip.aligner` as `bwa` and PE dataset only, R1 FASTQ's read length limit for `bwa mem`.
+`chip.use_bowtie2_local_mode` | Boolean | false | Use bowtie2's local mode (adding `--local` to bowtie2 command line). If not defined, the default mode (end-to-end) will be used.
 `chip.custom_align_py` | File | | Python script for your custom aligner. See details about [how to use a custom aligner](#how-to-use-a-custom-aligner)
 
 
@@ -245,8 +247,8 @@ Base memory/disk is 4GB/20GB for most tasks.
 Parameter|Default|Description
 ---------|-------|-----------
 `chip.align_cpu` | 6 |
-`chip.align_bowtie2_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory
-`chip.align_bwa_mem_factor` | 0.30 | Multiplied to size of FASTQs to determine required memory
+`chip.align_bowtie2_mem_factor` | 0.15 | Multiplied to size of FASTQs to determine required memory. 5.0 + bowtie2_index_file_size + sum(all_fastqs) GB.
+`chip.align_bwa_mem_factor` | 1.0 | Multiplied to size of FASTQs to determine required memory. 5.0 + bwa_index_file_size + sum(all_fastqs) GB.
 `chip.align_time_hr` | 48 | Walltime (HPCs only)
 `chip.align_bowtie2_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk
 `chip.align_bwa_disk_factor` | 8.0 | Multiplied to size of FASTQs to determine required disk

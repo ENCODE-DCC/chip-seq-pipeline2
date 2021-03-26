@@ -1,16 +1,16 @@
 version 1.0
 
 workflow chip {
-    String pipeline_ver = 'v1.7.1'
+    String pipeline_ver = 'v1.7.2'
 
     meta {
-        version: 'v1.7.1'
+        version: 'v1.7.2'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        caper_docker: 'encodedcc/chip-seq-pipeline:v1.7.1'
-        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.7.1'
+        caper_docker: 'encodedcc/chip-seq-pipeline:v1.7.2'
+        caper_singularity: 'docker://encodedcc/chip-seq-pipeline:v1.7.2'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
@@ -146,6 +146,8 @@ workflow chip {
         String aligner = 'bowtie2'
         File? custom_align_py
         Boolean use_bwa_mem_for_pe = false
+        Int bwa_mem_read_len_limit = 70
+        Boolean use_bowtie2_local_mode = false
         Int crop_length = 0
         Int crop_length_tol = 2
         String trimmomatic_phred_score_format = 'auto'
@@ -176,7 +178,7 @@ workflow chip {
         # group: resource_parameter
         Int align_cpu = 6
         Float align_bowtie2_mem_factor = 0.15
-        Float align_bwa_mem_factor = 0.3
+        Float align_bwa_mem_factor = 1.0
         Int align_time_hr = 48
         Float align_bowtie2_disk_factor = 8.0
         Float align_bwa_disk_factor = 8.0
@@ -639,9 +641,19 @@ workflow chip {
             help: 'There is a template included in the documentation for inputs. Defining this parameter will automatically change "chip.aligner" to "custom". You should also define "chip.custom_aligner_idx_tar".'
         }
         use_bwa_mem_for_pe: {
-            description: 'For paired end dataset with read length >= 70bp, use bwa mem instead of bwa aln.',
+            description: 'For paired end dataset with read length >= chip.bwa_mem_read_len_limit (default 70) bp, use bwa mem instead of bwa aln.',
             group: 'alignment',
-            help: 'Use it only for paired end reads >= 70bp.'
+            help: 'Use it only for paired end reads >= chip.bwa_mem_read_len_limit (default 70) bp. Otherwise keep using bwa aln.'
+        }
+        bwa_mem_read_len_limit: {
+            description: 'Read length limit for bwa mem (for PE FASTQs only).',
+            group: 'alignment',
+            help: 'If chip.use_bwa_mem_for_pe is activated and reads are shorter than this limit, then bwa aln will be used instead of bwa mem.'
+        }
+        use_bowtie2_local_mode: {
+            description: 'Use bowtie2\'s local mode (soft-clipping).',
+            group: 'alignment',
+            help: 'This will add --local to bowtie2 command line so that it will replace the default end-to-end mode.'
         }
         crop_length: {
             description: 'Crop FASTQs\' reads longer than this length.',
@@ -1133,6 +1145,11 @@ workflow chip {
             msg = 'To use chip.use_bwa_mem_for_pe, choose bwa for chip.aligner.'
         }
     }
+    if ( aligner_ != 'bowtie2' && use_bowtie2_local_mode ) {
+        call raise_exception as error_use_bowtie2_local_mode_for_non_bowtie2 { input:
+            msg = 'To use chip.use_bowtie2_local_mode, choose bowtie2 for chip.aligner.'
+        }
+    }
     if ( aligner_ == 'custom' && ( !defined(custom_align_py) || !defined(custom_aligner_idx_tar) ) ) {
         call raise_exception as error_custom_aligner { input:
             msg = 'To use a custom aligner, define chip.custom_align_py and chip.custom_aligner_idx_tar.'
@@ -1185,6 +1202,8 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                bwa_mem_read_len_limit = bwa_mem_read_len_limit,
+                use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
@@ -1282,7 +1301,9 @@ workflow chip {
                     else if aligner=='bowtie2' then bowtie2_idx_tar_
                     else custom_aligner_idx_tar,
                 paired_end = false,
-                use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                use_bwa_mem_for_pe = false,
+                bwa_mem_read_len_limit = 0,
+                use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
                 cpu = align_cpu,
@@ -1413,6 +1434,8 @@ workflow chip {
                     else custom_aligner_idx_tar,
                 paired_end = ctl_paired_end_,
                 use_bwa_mem_for_pe = use_bwa_mem_for_pe,
+                bwa_mem_read_len_limit = bwa_mem_read_len_limit,
+                use_bowtie2_local_mode = use_bowtie2_local_mode,
                 ref_fa = ref_fa_,
 
                 trimmomatic_java_heap = align_trimmomatic_java_heap,
@@ -2028,6 +2051,8 @@ task align {
         File? idx_tar            # reference index tar
         Boolean paired_end
         Boolean use_bwa_mem_for_pe
+        Int bwa_mem_read_len_limit
+        Boolean use_bowtie2_local_mode
 
         String? trimmomatic_java_heap
         Int cpu
@@ -2036,7 +2061,7 @@ task align {
         Float disk_factor
     }
     Float input_file_size_gb = size(fastqs_R1, "G") + size(fastqs_R2, "G")
-    Float mem_gb = 5.0 + mem_factor * input_file_size_gb
+    Float mem_gb = 5.0 + size(idx_tar, "G") + mem_factor * input_file_size_gb
     Float samtools_mem_gb = 0.8 * mem_gb
     Int disk_gb = round(40.0 + disk_factor * input_file_size_gb)
 
@@ -2102,6 +2127,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${if paired_end then '--paired-end' else ''} \
                 ${if use_bwa_mem_for_pe then '--use-bwa-mem-for-pe' else ''} \
+                ${'--bwa-mem-read-len-limit ' + bwa_mem_read_len_limit} \
                 ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
 
@@ -2112,6 +2138,7 @@ task align {
                 ${if paired_end then 'R2$SUFFIX/*.fastq.gz' else ''} \
                 ${'--multimapping ' + multimapping} \
                 ${if paired_end then '--paired-end' else ''} \
+                ${if use_bowtie2_local_mode then '--local' else ''} \
                 ${'--mem-gb ' + samtools_mem_gb} \
                 ${'--nth ' + cpu}
         else
