@@ -30,6 +30,8 @@ workflow test_bwa {
         fastqs_R2 = pe_fastqs_R2,
         paired_end = true,
         use_bwa_mem_for_pe = false,
+        bwa_mem_read_len_limit = 70,
+        use_bowtie2_local_mode = false,
         crop_length = 0,
         crop_length_tol = 0,
 
@@ -46,6 +48,8 @@ workflow test_bwa {
         fastqs_R2 = [],
         paired_end = false,
         use_bwa_mem_for_pe = false,
+        bwa_mem_read_len_limit = 70,
+        use_bowtie2_local_mode = false,
         crop_length = 0,
         crop_length_tol = 0,
 

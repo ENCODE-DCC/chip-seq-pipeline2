@@ -28,7 +28,16 @@ def parse_arguments():
                             FASTQs must be compressed with gzip (with .gz).')
     parser.add_argument(
         '--use-bwa-mem-for-pe', action="store_true",
-        help='Use "bwa mem" for paired end dataset with read length >=70bp.')
+        help='Use "bwa mem" for PAIRED-ENDED dataset with R1 FASTQ\'s read length >= --bwa-mem-read-len-limit. '
+             'For shorter reads, bwa aln will be used. ')
+    parser.add_argument(
+        '--rescue-reads-for-bwa-mem', action="store_true",
+        help='Use -P for "bwa mem" to rescue missing hits only (by using SW algorithm) '
+             'but do not try to find hits that fit a proper pair.'
+    )
+    parser.add_argument('--bwa-mem-read-len-limit', type=int, default=70,
+                        help='Read length limit for bwa mem (for paired-ended FASTQs only). '
+                             'bwa aln will be used instead of bwa mem if R1 reads are shorter than this.')
     parser.add_argument('--paired-end', action="store_true",
                         help='Paired-end FASTQs.')
     parser.add_argument('--nth', type=int, default=1,
@@ -50,6 +59,15 @@ def parse_arguments():
         raise argparse.ArgumentTypeError('Need 2 fastqs for paired end.')
     if not args.paired_end and len(args.fastqs) != 1:
         raise argparse.ArgumentTypeError('Need 1 fastq for single end.')
+
+    if args.use_bwa_mem_for_pe and not args.paired_end:
+        raise ValueError(
+            '--use-bwa-mem-for-pe is for paired ended FASTQs only.'
+        )
+    if not args.use_bwa_mem_for_pe and args.rescue_reads_for_bwa_mem:
+        raise ValueError(
+            '--rescue-reads-for-bwa-mem is available only when --use-bwa-mem-for-pe is activated.'
+        )
 
     log.setLevel(args.log_level)
     log.info(sys.argv)
@@ -95,7 +113,8 @@ def bwa_se(fastq, ref_index_prefix, nth, mem_gb, out_dir):
     return bam
 
 
-def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, out_dir):
+def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe,
+           bwa_mem_read_len_limit, rescue_reads_for_bwa_mem, out_dir):
     basename = os.path.basename(strip_ext_fastq(fastq1))
     prefix = os.path.join(out_dir, basename)
     sam = '{}.sam'.format(prefix)
@@ -104,11 +123,27 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe, ou
 
     temp_files = []
     read_len = get_read_length(fastq1)
-    if use_bwa_mem_for_pe and read_len >= 70:
-        cmd = 'bwa mem -M -t {} {} {} {} | gzip -nc > {}'
-        cmd = cmd.format(nth, ref_index_prefix, fastq1, fastq2, sam)
+
+    log.info(
+        'Guessed read length of R1 FASTQ: {read_len}'.format(
+            read_len=read_len,
+        )
+    )
+    if use_bwa_mem_for_pe and read_len >= bwa_mem_read_len_limit:
+        log.info('Use bwa mem.')
+
+        cmd = 'bwa mem -M {extra_param} -t {nth} {ref_index_prefix} {fastq1} {fastq2} | gzip -nc > {sam}'.format(
+            extra_param='-P' if rescue_reads_for_bwa_mem else '',
+            nth=nth,
+            ref_index_prefix=ref_index_prefix,
+            fastq1=fastq1,
+            fastq2=fastq2,
+            sam=sam,
+        )
         temp_files.append(sam)
+
     else:
+        log.info('Use bwa aln for each (R1 and R2) and then bwa sampe.')
         sai1 = bwa_aln(fastq1, ref_index_prefix, nth, out_dir)
         sai2 = bwa_aln(fastq2, ref_index_prefix, nth, out_dir)
 
@@ -214,6 +249,7 @@ def main():
         bam = bwa_pe(
             args.fastqs[0], args.fastqs[1],
             bwa_index_prefix, args.nth, args.mem_gb, args.use_bwa_mem_for_pe,
+            args.bwa_mem_read_len_limit, args.rescue_reads_for_bwa_mem,
             args.out_dir)
     else:
         bam = bwa_se(
