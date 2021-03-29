@@ -3,6 +3,7 @@
 # ENCODE DCC MACS2 signal track wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
+import math
 import sys
 import os
 import argparse
@@ -111,11 +112,18 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen,
         fc_bedgraph)
     run_shell_cmd(cmd4)
 
+    fc_bedgraph_size = os.path.getsize(fc_bedgraph)
+    log.info('FC Bedgraph file size, bytes: {}'.format(fc_bedgraph_size))
+
+    # optimal value for merge sorting is 2 * file size
+    sort_mem_mb = int(math.ceil(fc_bedgraph_size * 2 / (1024 * 1024)))
+
     # sort and remove any overlapping regions in bedgraph by comparing two lines in a row
-    cmd5 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | ' \
+    cmd5 = 'LC_COLLATE=C sort -S {}M -k1,1 -k2,2n {} | ' \
         'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 || '\
         'prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
+            sort_mem_mb,
             fc_bedgraph,
             fc_bedgraph_srt)
     run_shell_cmd(cmd5)
@@ -152,11 +160,18 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen,
         pval_bedgraph)
     run_shell_cmd(cmd8)
 
+    pval_bedgraph_size = os.path.getsize(pval_bedgraph)
+    log.info('Pval Bedgraph file size, bytes: {}'.format(pval_bedgraph_size))
+
+    # optimal value for merge sorting is 2 * file size
+    sort_mem_mb = int(math.ceil(pval_bedgraph_size * 2 / (1024 * 1024)))
+
     # sort and remove any overlapping regions in bedgraph by comparing two lines in a row
-    cmd9 = 'LC_COLLATE=C sort -k1,1 -k2,2n {} | ' \
+    cmd9 = 'LC_COLLATE=C sort -S {}M -k1,1 -k2,2n {} | ' \
         'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 || '\
         'prev_chr==$1 && prev_chr_e<=$2)) ' \
         '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
+            sort_mem_mb,
             pval_bedgraph,
             pval_bedgraph_srt)
     run_shell_cmd(cmd9)

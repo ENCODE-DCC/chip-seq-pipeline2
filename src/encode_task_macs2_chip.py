@@ -3,6 +3,7 @@
 # ENCODE DCC MACS2 call peak wrapper
 # Author: Jin Lee (leepc12@gmail.com)
 
+import math
 import sys
 import os
 import argparse
@@ -96,11 +97,18 @@ def macs2(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen, cap_num_peak,
         fraglen)
     run_shell_cmd(cmd0)
 
-    cmd1 = 'LC_COLLATE=C sort -k 8gr,8gr "{}"_peaks.narrowPeak | '
+    peaks_size = os.path.getsize('{}_peaks.narrowPeak'.format(prefix))
+    log.info('Peaks file size, bytes: {}'.format(peaks_size))
+
+    # optimal buffer size for merge sorting is 2 * file size
+    sort_mem_mb = int(math.ceil(peaks_size * 2 / (1024 * 1024)))
+
+    cmd1 = 'LC_COLLATE=C sort -S {}M -k 8gr,8gr "{}_peaks.narrowPeak" | '
     cmd1 += 'awk \'BEGIN{{OFS="\\t"}}'
     cmd1 += '{{$4="Peak_"NR; if ($2<0) $2=0; if ($3<0) $3=0; if ($10==-1) '
     cmd1 += '$10=$2+int(($3-$2+1)/2.0); print $0}}\' > {}'
     cmd1 = cmd1.format(
+        sort_mem_mb,
         prefix,
         npeak_tmp)
     run_shell_cmd(cmd1)
