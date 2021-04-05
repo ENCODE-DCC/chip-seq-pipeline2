@@ -2463,12 +2463,14 @@ task count_signal_track {
         File? ta             # tag-align
         File chrsz            # 2-col chromosome sizes file
     }
+    Float mem_gb = 8.0
 
     command {
         set -e
         python3 $(which encode_task_count_signal_track.py) \
             ${ta} \
-            ${'--chrsz ' + chrsz}
+            ${'--chrsz ' + chrsz} \
+            ${'--mem-gb ' + mem_gb}
     }
     output {
         File pos_bw = glob('*.positive.bigwig')[0]
@@ -2476,7 +2478,7 @@ task count_signal_track {
     }
     runtime {
         cpu : 1
-        memory : '8 GB'
+        memory : '${mem_gb} GB'
         time : 4
         disks : 'local-disk 50 SSD'
     }
@@ -2547,7 +2549,8 @@ task call_peak {
                 ${'--chrsz ' + chrsz} \
                 ${'--fraglen ' + fraglen} \
                 ${'--cap-num-peak ' + cap_num_peak} \
-                ${'--pval-thresh '+ pval_thresh}
+                ${'--pval-thresh '+ pval_thresh} \
+                ${'--mem-gb ' + mem_gb}
 
         elif [ '${peak_caller}' == 'spp' ]; then
             python3 $(which encode_task_spp.py) \
@@ -2614,7 +2617,8 @@ task macs2_signal_track {
             ${'--gensz '+ gensz} \
             ${'--chrsz ' + chrsz} \
             ${'--fraglen ' + fraglen} \
-            ${'--pval-thresh '+ pval_thresh}
+            ${'--pval-thresh '+ pval_thresh} \
+            ${'--mem-gb ' + mem_gb}
     }
     output {
         File pval_bw = glob('*.pval.signal.bigwig')[0]

@@ -9,7 +9,9 @@ import re
 import argparse
 from encode_lib_common import (
     get_num_lines, log, ls_l, mkdir_p, rm_f, run_shell_cmd, strip_ext_fastq,
-    strip_ext_tar, untar)
+    strip_ext_tar, untar,
+    get_gnu_sort_param,
+)
 from encode_lib_genomic import (
     get_read_length, samtools_sort, bam_is_empty, get_samtools_res_param)
 
@@ -43,7 +45,8 @@ def parse_arguments():
     parser.add_argument('--nth', type=int, default=1,
                         help='Number of threads to parallelize.')
     parser.add_argument('--mem-gb', type=float,
-                        help='Max. memory for samtools sort in GB. '
+                        help='Max. memory for samtools sort and GNU sort -S '
+                        '(half of this value will be used for GNU sort) in GB. '
                         'It should be total memory for this task (not memory per thread).')
     parser.add_argument('--out-dir', default='', type=str,
                         help='Output directory.')
@@ -147,27 +150,30 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe,
         sai1 = bwa_aln(fastq1, ref_index_prefix, nth, out_dir)
         sai2 = bwa_aln(fastq2, ref_index_prefix, nth, out_dir)
 
-        cmd = 'bwa sampe {} {} {} {} {} | gzip -nc > {}'.format(
-            ref_index_prefix,
-            sai1,
-            sai2,
-            fastq1,
-            fastq2,
-            sam)
+        cmd = 'bwa sampe {ref_index_prefix} {sai1} {sai2} {fastq1} {fastq2} | gzip -nc > {sam}'.format(
+            ref_index_prefix=ref_index_prefix,
+            sai1=sai1,
+            sai2=sai2,
+            fastq1=fastq1,
+            fastq2=fastq2,
+            sam=sam,
+        )
         temp_files.extend([sai1, sai2, sam])
     run_shell_cmd(cmd)
 
-    cmd2 = 'zcat -f {} | '
-    cmd2 += 'awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
-    cmd2 += '{{ cigar=$6; gsub("[0-9]+D","",cigar); '
-    cmd2 += 'n = split(cigar,vals,"[A-Z]"); s = 0; '
-    cmd2 += 'for (i=1;i<=n;i++) s=s+vals[i]; seqlen=length($10); '
-    cmd2 += 'if (s!=seqlen) print $1"\\t"; }}\' | '
-    cmd2 += 'sort | uniq > {}'
-    cmd2 = cmd2.format(
-        sam,
-        badcigar)
-    run_shell_cmd(cmd2)
+    run_shell_cmd(
+        'zcat -f {sam} | '
+        'awk \'BEGIN {{FS="\\t" ; OFS="\\t"}} ! /^@/ && $6!="*" '
+        '{{ cigar=$6; gsub("[0-9]+D","",cigar); '
+        'n = split(cigar,vals,"[A-Z]"); s = 0; '
+        'for (i=1;i<=n;i++) s=s+vals[i]; seqlen=length($10); '
+        'if (s!=seqlen) print $1"\\t"; }}\' | '
+        'sort {sort_param} | uniq > {badcigar}'.format(
+            sam=sam,
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, , ratio=0.5),
+            badcigar=badcigar,
+        )
+    )
 
     # Remove bad CIGAR read pairs
     if get_num_lines(badcigar) > 0:
