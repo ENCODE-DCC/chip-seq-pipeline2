@@ -290,7 +290,7 @@ def pbc_qc_se(bam, mito_chr_name, mem_gb, out_dir):
         'mt,m0,m1,m2,m0_mt,m1_m0,m1_m2}}\' > {pbc_qc}'.format(
             bam=bam,
             mito_chr_name=mito_chr_name,
-            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, , ratio=0.5),
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
             pbc_qc=pbc_qc,
         )
     )

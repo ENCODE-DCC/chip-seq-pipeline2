@@ -10,6 +10,7 @@ import re
 import subprocess
 
 from encode_lib_common import (
+    get_gnu_sort_param,
     get_num_lines,
     get_peak_type,
     human_readable_number,

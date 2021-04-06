@@ -168,7 +168,7 @@ def macs2_signal_track(ta, ctl_ta, chrsz, gensz, pval_thresh, shift, fraglen,
         'LC_COLLATE=C sort -k1,1 -k2,2n {sort_param} {pval_bedgraph} | '
         'awk \'BEGIN{{OFS="\\t"}}{{if (NR==1 || NR>1 && (prev_chr!=$1 || '
         'prev_chr==$1 && prev_chr_e<=$2)) '
-        '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {}'.format(
+        '{{print $0}}; prev_chr=$1; prev_chr_e=$3;}}\' > {pval_bedgraph_srt}'.format(
             sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
             pval_bedgraph=pval_bedgraph,
             pval_bedgraph_srt=pval_bedgraph_srt,

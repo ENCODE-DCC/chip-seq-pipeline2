@@ -170,7 +170,7 @@ def bwa_pe(fastq1, fastq2, ref_index_prefix, nth, mem_gb, use_bwa_mem_for_pe,
         'if (s!=seqlen) print $1"\\t"; }}\' | '
         'sort {sort_param} | uniq > {badcigar}'.format(
             sam=sam,
-            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, , ratio=0.5),
+            sort_param=get_gnu_sort_param(mem_gb * 1024 ** 3, ratio=0.5),
             badcigar=badcigar,
         )
     )
