@@ -3,7 +3,7 @@ set -e
 
 VER=$(cat chip.wdl | grep "String pipeline_ver = " | awk '{gsub("'"'"'",""); print $4}')
 DOCKER=encodedcc/chip-seq-pipeline:$VER
-DXWDL=~/dxWDL-v1.46.4.jar
+DXWDL=~/dxWDL-v1.50.jar
 
 # check if docker image exists on dockerhub
 docker pull $DOCKER
