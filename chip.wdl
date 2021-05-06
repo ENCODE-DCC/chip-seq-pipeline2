@@ -162,6 +162,7 @@ workflow chip {
         Int xcor_subsample_reads = 15000000
         Int xcor_exclusion_range_min = -500
         Int? xcor_exclusion_range_max
+        Int pseudoreplication_random_seed = 0
 
         # group: peak_calling
         Int ctl_depth_limit = 200000000
@@ -728,7 +729,11 @@ workflow chip {
             group: 'alignment',
             help: 'For run_spp.R -s. If not defined default value of `max(read length + 10, 50)` for TF and `max(read_len + 10, 100)` for histone are used'
         }
-
+        pseudoreplication_random_seed: {
+            description: 'Random seed (positive integer) used for pseudo-replication (shuffling reads in TAG-ALIGN and then split it into two).',
+            group: 'alignment',
+            help: 'Pseudo-replication (task spr) is done by using GNU "shuf --random-source=sha256(random_seed)". If this parameter == 0, then pipeline uses input TAG-ALIGN file\'s size (in bytes) for the random_seed.'
+        }
         ctl_depth_limit: {
             description: 'Hard limit for chosen control\'s depth.',
             group: 'peak_calling',
@@ -1262,6 +1267,7 @@ workflow chip {
             call spr { input :
                 ta = ta_,
                 paired_end = paired_end_,
+                pseudoreplication_random_seed = pseudoreplication_random_seed,
                 mem_factor = spr_mem_factor,
                 disk_factor = spr_disk_factor,
             }
@@ -2280,6 +2286,7 @@ task spr {
     input {
         File? ta
         Boolean paired_end
+        Int pseudoreplication_random_seed
 
         Float mem_factor
         Float disk_factor
@@ -2292,6 +2299,7 @@ task spr {
         set -e
         python3 $(which encode_task_spr.py) \
             ${ta} \
+            ${'--pseudoreplication-random-seed ' + pseudoreplication_random_seed} \
             ${if paired_end then '--paired-end' else ''}
     }
     output {
