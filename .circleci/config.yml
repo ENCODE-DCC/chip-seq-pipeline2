@@ -72,7 +72,7 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=v1.4.0.1
+            export DOCKER_CACHE_TAG=v1.8.1
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull encodedcc/chip-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${DOCKERHUB_USER} -p=${DOCKERHUB_PASS}
