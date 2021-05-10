@@ -225,6 +225,7 @@ Parameter|Type | Description
 Parameter|Default|Description
 ---------|-------|-----------
 `chip.filter_chrs` | `[]` (empty array of string) | Array of chromosome names to be filtered out from a final (filtered/nodup) BAM. No chromosomes are filtered out by default.
+`chip.pseudoreplication_random_seed` | `0` | Random seed (positive integer) used for pseudo-replication (shuffling reads in TAG-ALIGN and then split it into two). If `0` then TAG-ALIGN file's size (in bytes) is used for random seed.
 
 ## Resource parameters
 
