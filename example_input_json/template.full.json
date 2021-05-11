@@ -35,6 +35,7 @@
     "chip.subsample_reads" : 0,
     "chip.ctl_subsample_reads" : 0,
     "chip.xcor_subsample_reads" : 15000000,
+    "chip.pseudoreplication_random_seed" : 0,
 
     "chip.xcor_trim_bp" : 50,
     "chip.use_filt_pe_ta_for_xcor" : false,
