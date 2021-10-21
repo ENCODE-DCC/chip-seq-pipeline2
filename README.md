@@ -3,43 +3,11 @@
 [![CircleCI](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master)
 
 
-## Important notice for Conda users
+## Download new Caper>=2.0
 
-If it takes too long to resolve Conda package conflicts while installing pipeline's Conda environment, then try with `mamba` instead. Add `mamba` to the install command line.
+New Caper is out. You need to update your Caper to work with the latest ENCODE ATAC-seq pipeline.
 ```bash
-$ scripts/install_conda_env.sh mamba
-```
-
-For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-chip-seq-pipeline`) even though they don't use new added features.
-```bash
-$ cd chip-seq-pipeline2
-$ scripts/update_conda_env.sh
-```
-
-For pipelines >= v1.7.0, Conda users also need to manually install Caper and Croo **INSIDE** the environment. These two tools have been removed from pipeline's Conda environment since v1.7.0.
-```bash
-$ source activate encode-chip-seq-pipeline
-$ pip install caper croo
-```
-
-
-## Redacting filtered/deduped BAM (new feature >= v1.7.0)
-
-Added `"chip.redact_nodup_bam"` to redact (de-identify) BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repository (`bioconda`) yet.
-
-> **IMPORTANT**: Alignment quality metrics calculated during/before filtering (task `filter`) will still be based on non-redacted original BAMs. However, all downstream analyses (e.g. peak-calling) will be based on redact nodup BAM.
-
-Conda users need to install it from our temporary PIP repo (`ptools_bin`). GCP/AWS/Docker/Singularity users do not need to install it. `ptools` is already included in new pipeline's Docker/Singularity image. This is for Conda users only. We will remove this warning in the next release after `ptools` is registered to `bioconda` and added to the requirements list (`scripts/requirements.txt`).
-
-```
-# Activate pipeline's conda environment
-$ source activate encode-chip-seq-pipeline
-
-# Install ptools_bin inside the environment
-(encode-chip-seq-pipeline) $ pip3 install ptools_bin
-
-# Run pipelines in the environment
-(encode-chip-seq-pipeline) $ caper run/submit ...
+$ pip install caper --upgrade
 ```
 
 ## Introduction 
@@ -53,7 +21,15 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 ## Installation
 
-1) Git clone this pipeline.
+
+1) Make sure that you have Python>=3.6. Caper does not work with Python2. Install Caper and check its version >=2.0.
+	```bash
+	$ python --version
+	$ pip install caper
+	$ caper -v
+	```
+
+2) Git clone this pipeline.
 	> **IMPORTANT**: use `~/chip-seq-pipeline2/chip.wdl` as `[WDL]` in Caper's documentation.
 
 	```bash
@@ -61,23 +37,36 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 	$ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
 	```
 
-2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG). Use 
-	> **IMPORTANT**: use `encode-chip-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
- 
-3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
 
-	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
-
+3) (Optional for Conda) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda.
 	```bash
-	$ pip install caper  # use pip3 if it doesn't work
+	$ cd chip-seq-pipeline2
+	$ bash scripts/install_conda_env.sh
 	```
 
-4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform.
-	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
+4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform and run `caper init`. Edit the initialized Caper's configuration file (`~/.caper/default.conf`).
+	```bash
+	$ caper init [YOUR_PLATFORM]
+	$ vi ~/.caper/default.conf
+	```
 
-## Test input JSON file
+## Test run
 
-Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json` as `[INPUT_JSON]` in Caper's documentation.
+You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and input JSON file then Caper will automatically download/localize such files. Input JSON file URL: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json
+
+According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
+
+The followings are just examples. Please read [Caper's README](https://github.com/ENCODE-DCC/caper) very carefully to find an actual working command line for your chosen platform.
+    ```bash
+    # Run it locally with Conda (You don't need to activate it, make sure to install Conda envs first)
+    $ caper run chip.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json --conda
+
+    # Or submit it as a leader job (with long/enough resources) to SLURM (Stanford Sherlock) with Singularity
+    # It will fail if you directly run the leader job on login nodes
+    $ sbatch -p [SLURM_PARTITON] -J [WORKFLOW_NAME] --export=ALL --mem 4G -t 4-0 --wrap "caper chip atac.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json --singularity"
+	```
+
+
 
 ## Input JSON file
 
