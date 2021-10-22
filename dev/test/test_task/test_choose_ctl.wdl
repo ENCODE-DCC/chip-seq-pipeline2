@@ -193,7 +193,8 @@ workflow test_choose_ctl {
         if ( v.left != v.right ) {
             call chip.raise_exception { input:
                 msg = k,
-                vals = [v.left, v.right]
+                vals = [v.left, v.right],
+                runtime_environment = runtime_environment,
             }
         }
     }
