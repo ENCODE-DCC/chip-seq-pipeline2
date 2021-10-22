@@ -2443,7 +2443,7 @@ task spr {
     runtime {
         cpu : 1
         memory : '${mem_gb} GB'
-        time : 1
+        time : 4
         disks : 'local-disk ${disk_gb} SSD'
 
         docker : runtime_environment.docker
@@ -2474,7 +2474,7 @@ task pool_ta {
     runtime {
         cpu : 1
         memory : '8 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 100 SSD'
 
         docker : runtime_environment.docker
@@ -2619,7 +2619,7 @@ task choose_ctl {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
 
         docker : runtime_environment.docker
@@ -2877,7 +2877,7 @@ task idr {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
 
         docker : runtime_environment.docker
@@ -2930,7 +2930,7 @@ task overlap {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
 
         docker : runtime_environment.docker
@@ -2984,7 +2984,7 @@ task reproducibility {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
 
         docker : runtime_environment.docker
@@ -3168,7 +3168,7 @@ task qc_report {
     runtime {
         cpu : 1
         memory : '4 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 50 SSD'
 
         docker : runtime_environment.docker
@@ -3220,7 +3220,7 @@ task read_genome_tsv {
         maxRetries : 0
         cpu : 1
         memory : '2 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 10 SSD'        
 
         docker : runtime_environment.docker
@@ -3253,7 +3253,7 @@ task rounded_mean {
     runtime {
         cpu : 1
         memory : '2 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 10 SSD'
 
         docker : runtime_environment.docker
@@ -3281,7 +3281,7 @@ task raise_exception {
         maxRetries : 0
         cpu : 1
         memory : '2 GB'
-        time : 1
+        time : 4
         disks : 'local-disk 10 SSD'
 
         docker : runtime_environment.docker
