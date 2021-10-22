@@ -33,6 +33,7 @@ ptools_bin
 jsondiff ==1.1.1
 ghostscript
 tabix
+bgzip
 matplotlib
 numpy
 scikit-learn
