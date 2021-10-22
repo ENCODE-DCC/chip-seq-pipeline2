@@ -55,6 +55,12 @@ workflow test_choose_ctl {
         Float ctl_depth_ratio
         Int ctl_depth_limit
         Float exp_ctl_depth_ratio_limit
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call chip.choose_ctl as se_choose_ctl { input :
@@ -66,6 +72,7 @@ workflow test_choose_ctl {
         ctl_depth_ratio = ctl_depth_ratio,
         ctl_depth_limit = ctl_depth_limit,
         exp_ctl_depth_ratio_limit = exp_ctl_depth_ratio_limit,
+        runtime_environment = runtime_environment,
     }
 
     call chip.choose_ctl as se_choose_ctl_always_use_pooled_ctl { input :
@@ -77,6 +84,7 @@ workflow test_choose_ctl {
         ctl_depth_ratio = ctl_depth_ratio,
         ctl_depth_limit = ctl_depth_limit,
         exp_ctl_depth_ratio_limit = exp_ctl_depth_ratio_limit,
+        runtime_environment = runtime_environment,
     }
 
     # INTENTIONALLY swapped ctl_tas 
@@ -88,6 +96,7 @@ workflow test_choose_ctl {
         ctl_depth_ratio = ctl_depth_ratio,
         ctl_depth_limit = ctl_depth_limit,
         exp_ctl_depth_ratio_limit = exp_ctl_depth_ratio_limit,
+        runtime_environment = runtime_environment,
     }
 
     call chip.choose_ctl as se_choose_ctl_single_ctl { input :
@@ -98,6 +107,7 @@ workflow test_choose_ctl {
         ctl_depth_ratio = ctl_depth_ratio,
         ctl_depth_limit = ctl_depth_limit,
         exp_ctl_depth_ratio_limit = exp_ctl_depth_ratio_limit,
+        runtime_environment = runtime_environment,
     }
 
     call chip.choose_ctl as se_choose_ctl_disabled { input :
@@ -109,6 +119,7 @@ workflow test_choose_ctl {
         ctl_depth_ratio = ctl_depth_ratio,
         ctl_depth_limit = 0,
         exp_ctl_depth_ratio_limit = 0.0,
+        runtime_environment = runtime_environment,
     }
 
     call chip.choose_ctl as se_choose_ctl_ctl_depth_limit_only { input :
@@ -120,6 +131,7 @@ workflow test_choose_ctl {
         ctl_depth_ratio = ctl_depth_ratio,
         ctl_depth_limit = ctl_depth_limit,
         exp_ctl_depth_ratio_limit = 0,
+        runtime_environment = runtime_environment,
     }
 
     call chip.choose_ctl as se_choose_ctl_exp_ctl_depth_ratio_limit_only { input :
@@ -131,6 +143,7 @@ workflow test_choose_ctl {
         ctl_depth_ratio = ctl_depth_ratio,
         ctl_depth_limit = 0,
         exp_ctl_depth_ratio_limit = exp_ctl_depth_ratio_limit,
+        runtime_environment = runtime_environment,
     }
 
     Array[Pair[String, Pair[Int, Int]]] tests = [

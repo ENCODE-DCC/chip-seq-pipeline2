@@ -38,7 +38,7 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 	```
 
 
-3) (Optional for Conda) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda.
+3) (Optional for Conda) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda. If you don't have Conda on your system, install [Miniconda3](https://docs.conda.io/en/latest/miniconda.html).
 	```bash
 	$ cd chip-seq-pipeline2
 	$ bash scripts/install_conda_env.sh

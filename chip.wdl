@@ -68,7 +68,7 @@ workflow chip {
     input {
         # group: runtime_environment
         String docker = 'encodedcc/chip-seq-pipeline:dev-v2.0.0'
-        String singularity = 'docker://encodedcc/chip-seq-pipeline:dev-v2.0.0'
+        String singularity = 'library://leepc12/default/chip-seq-pipeline:dev-v2.0.0'
         String conda = 'encode-chip-seq-pipeline'
         String conda_macs2 = 'encode-chip-seq-pipeline-macs2'
         String conda_spp = 'encode-chip-seq-pipeline-spp'
@@ -114,9 +114,9 @@ workflow chip {
         Array[File] fastqs_rep9_R2 = []
         Array[File] fastqs_rep10_R1 = []
         Array[File] fastqs_rep10_R2 = []
-        Array[File?] bams = []
-        Array[File?] nodup_bams = []
-        Array[File?] tas = []
+        Array[File] bams = []
+        Array[File] nodup_bams = []
+        Array[File] tas = []
         Array[File?] peaks = []
         Array[File?] peaks_pr1 = []
         Array[File?] peaks_pr2 = []
@@ -146,9 +146,9 @@ workflow chip {
         Array[File] ctl_fastqs_rep9_R2 = []
         Array[File] ctl_fastqs_rep10_R1 = []
         Array[File] ctl_fastqs_rep10_R2 = []
-        Array[File?] ctl_bams = []
-        Array[File?] ctl_nodup_bams = []
-        Array[File?] ctl_tas = []
+        Array[File] ctl_bams = []
+        Array[File] ctl_nodup_bams = []
+        Array[File] ctl_tas = []
 
         # group: pipeline_parameter
         String pipeline_type

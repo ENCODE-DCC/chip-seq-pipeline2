@@ -15,6 +15,12 @@ workflow test_bwa {
 
         String pe_bwa_idx_tar
         String se_bwa_idx_tar
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     Int bwa_cpu = 1
@@ -39,6 +45,7 @@ workflow test_bwa {
         mem_factor = bwa_mem_factor,
         time_hr = bwa_time_hr,
         disk_factor = bwa_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.align as se_bwa { input :
         aligner = 'bwa',
@@ -57,6 +64,7 @@ workflow test_bwa {
         mem_factor = bwa_mem_factor,
         time_hr = bwa_time_hr,
         disk_factor = bwa_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

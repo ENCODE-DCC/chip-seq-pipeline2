@@ -99,8 +99,13 @@ jobs:
             do
               prefix=${wdl%.*}
               input=${prefix}.json
+              input_with_docker=${prefix}.docker.json
               metadata=${prefix}.metadata.json
-              caper run ${wdl} -i ${input} -m ${metadata} --docker ${TAG}
+
+              # add docker image to input JSON
+              cat ${input} | jq ".+{\"${prefix}.docker\": \"${TAG}\"}" > ${input_with_docker}
+
+              caper run ${wdl} -i ${input_with_docker} -m ${metadata}
               if [[ "${wdl}" != "test_choose_ctl.wdl" ]]; then
                 echo "Validating outputs of ${prefix}"
                 res=$(jq '.outputs["'${prefix}'.compare_md5sum.match_overall"]' "${metadata}")

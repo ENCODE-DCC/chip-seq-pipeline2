@@ -7,12 +7,19 @@ workflow test_gc_bias {
         File nodup_bam
         File ref_fa
         File ref_gc_log
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     call chip.gc_bias { input : 
         nodup_bam = nodup_bam,
         ref_fa = ref_fa,
         picard_java_heap = '4G',
+        runtime_environment = runtime_environment,
     }
 
     call remove_comments_from_gc_log { input :

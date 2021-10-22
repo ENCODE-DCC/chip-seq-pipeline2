@@ -16,6 +16,12 @@ workflow test_overlap {
         String se_blacklist
         String se_chrsz
         Int fraglen
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
@@ -33,6 +39,7 @@ workflow test_overlap {
         chrsz = se_chrsz,
         fraglen = fraglen,
         ta = se_ta_pooled,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

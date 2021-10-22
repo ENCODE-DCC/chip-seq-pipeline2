@@ -16,6 +16,12 @@ workflow test_filter {
         String ref_pe_filt_samstat_qc
         String ref_se_nodup_samstat_qc
         String ref_se_filt_samstat_qc
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
     String mito_chr_name = 'chrM'
 
@@ -40,6 +46,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.filter as pe_filter_no_dup_removal { input :
         bam = pe_bam,
@@ -57,6 +64,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.filter as se_filter { input :
         bam = se_bam,
@@ -74,6 +82,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.filter as se_filter_no_dup_removal { input :
         bam = se_bam,
@@ -91,6 +100,7 @@ workflow test_filter {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :
