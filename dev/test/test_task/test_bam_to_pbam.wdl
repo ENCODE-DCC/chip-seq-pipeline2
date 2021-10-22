@@ -69,11 +69,9 @@ workflow test_bam_to_pbam {
     }
     call samtools_flagstat as pe_samtools_flagstat { input :
         bam = pe_filter.nodup_bam,
-        runtime_environment = runtime_environment,
     }
     call samtools_flagstat as se_samtools_flagstat { input :
         bam = se_filter.nodup_bam,
-        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :
