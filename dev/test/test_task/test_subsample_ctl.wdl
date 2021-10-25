@@ -12,6 +12,12 @@ workflow test_subsample_ctl {
         File ref_se_ta_subsampled
         File ref_pe_ta_subsampled_trivial
         File ref_se_ta_subsampled_trivial
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
     Float subsample_ctl_mem_factor = 0.0
     Float subsample_ctl_disk_factor = 7.5
@@ -23,6 +29,7 @@ workflow test_subsample_ctl {
 
         mem_factor = subsample_ctl_mem_factor,
         disk_factor = subsample_ctl_disk_factor,
+        runtime_environment = runtime_environment,
     }    
     call chip.subsample_ctl as se_subsample_ctl { input :
         ta = se_ta,
@@ -31,6 +38,7 @@ workflow test_subsample_ctl {
 
         mem_factor = subsample_ctl_mem_factor,
         disk_factor = subsample_ctl_disk_factor,
+        runtime_environment = runtime_environment,
     }
     # subsample > number of reads in TA
     # output will be just a shuffled TA.
@@ -41,6 +49,7 @@ workflow test_subsample_ctl {
 
         mem_factor = subsample_ctl_mem_factor,
         disk_factor = subsample_ctl_disk_factor,
+        runtime_environment = runtime_environment,
     }    
     call chip.subsample_ctl as se_subsample_ctl_trivial { input :
         ta = se_ta,
@@ -49,6 +58,7 @@ workflow test_subsample_ctl {
 
         mem_factor = subsample_ctl_mem_factor,
         disk_factor = subsample_ctl_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

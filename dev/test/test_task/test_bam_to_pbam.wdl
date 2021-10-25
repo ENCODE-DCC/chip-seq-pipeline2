@@ -15,6 +15,12 @@ workflow test_bam_to_pbam {
 
         File ref_pe_samtools_flagstat_qc
         File ref_se_samtools_flagstat_qc
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
     String mito_chr_name = 'chrM'
 
@@ -40,6 +46,7 @@ workflow test_bam_to_pbam {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.filter as se_filter { input :
         bam = se_bam,
@@ -58,12 +65,15 @@ workflow test_bam_to_pbam {
         picard_java_heap = '4G',
         time_hr = filter_time_hr,
         disk_factor = filter_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call samtools_flagstat as pe_samtools_flagstat { input :
         bam = pe_filter.nodup_bam,
+        runtime_environment = runtime_environment,
     }
     call samtools_flagstat as se_samtools_flagstat { input :
         bam = se_filter.nodup_bam,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :
@@ -85,11 +95,17 @@ workflow test_bam_to_pbam {
 task samtools_flagstat {
     input {
         File bam
+        RuntimeEnvironment runtime_environment
     }
     command {
         samtools flagstat ~{bam} > flagstat.qc
     }
     output {
         File flagstat_qc = 'flagstat.qc'
+    }
+    runtime {
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
+        conda: runtime_environment.conda
     }
 }
