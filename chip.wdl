@@ -795,7 +795,6 @@ workflow chip {
             description: 'Peak caller.',
             group: 'peak_calling',
             help: 'It is spp and macs2 by default for TF ChIP-seq and histone ChIP-seq, respectively. e.g. you can use macs2 for TF ChIP-Seq even though spp is by default for TF ChIP-Seq (chip.pipeline_type == tf).',
-            choices: ['spp', 'macs2'],
             example: 'spp'
         }
         always_use_pooled_ctl: {
