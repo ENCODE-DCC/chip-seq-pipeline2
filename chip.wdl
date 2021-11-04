@@ -7,16 +7,16 @@ struct RuntimeEnvironment {
 }
 
 workflow chip {
-    String pipeline_ver = 'v2.0.0'
+    String pipeline_ver = 'v2.0.1'
 
     meta {
-        version: 'v2.0.0'
+        version: 'v2.0.1'
         author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
         description: 'ENCODE TF/Histone ChIP-Seq pipeline'
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        default_docker: 'encodedcc/chip-seq-pipeline:v2.0.0'
-        default_singularity: 'library://leepc12/default/chip-seq-pipeline:v2.0.0'
+        default_docker: 'encodedcc/chip-seq-pipeline:v2.0.1'
+        default_singularity: 'library://leepc12/default/chip-seq-pipeline:v2.0.1'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
@@ -67,8 +67,8 @@ workflow chip {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/chip-seq-pipeline:v2.0.0'
-        String singularity = 'library://leepc12/default/chip-seq-pipeline:v2.0.0'
+        String docker = 'encodedcc/chip-seq-pipeline:v2.0.1'
+        String singularity = 'library://leepc12/default/chip-seq-pipeline:v2.0.1'
         String conda = 'encode-chip-seq-pipeline'
         String conda_macs2 = 'encode-chip-seq-pipeline-macs2'
         String conda_spp = 'encode-chip-seq-pipeline-spp'
