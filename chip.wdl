@@ -11,8 +11,12 @@ workflow chip {
 
     meta {
         version: 'v2.0.1'
-        author: 'Jin wook Lee (leepc12@gmail.com) at ENCODE-DCC'
-        description: 'ENCODE TF/Histone ChIP-Seq pipeline'
+
+        author: 'Jin wook Lee'
+        email: 'leepc12@gmail.com'
+        description: 'ENCODE TF/Histone ChIP-Seq pipeline. See https://github.com/ENCODE-DCC/chip-seq-pipeline2 for more details. e.g. example input JSON for Terra/Anvil.'
+        organization: 'ENCODE DCC'
+
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
         default_docker: 'encodedcc/chip-seq-pipeline:v2.0.1'
