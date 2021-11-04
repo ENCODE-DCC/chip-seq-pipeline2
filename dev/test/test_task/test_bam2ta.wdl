@@ -13,6 +13,12 @@ workflow test_bam2ta {
         String ref_pe_ta_subsample
         String ref_se_ta
         String ref_se_ta_subsample
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
     String mito_chr_name = 'chrM'
 
@@ -31,6 +37,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.bam2ta as pe_bam2ta_subsample { input :
         bam = pe_nodup_bam,
@@ -42,6 +49,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.bam2ta as se_bam2ta { input :
         bam = se_nodup_bam,
@@ -53,6 +61,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.bam2ta as se_bam2ta_subsample { input :
         bam = se_nodup_bam,
@@ -64,6 +73,7 @@ workflow test_bam2ta {
         mem_factor = bam2ta_mem_factor,
         time_hr = bam2ta_time_hr,
         disk_factor = bam2ta_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

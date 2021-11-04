@@ -270,8 +270,8 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.spr_mem_factor` | 13.5 | Multiplied to size of filtered BAM to determine required memory
-`chip.spr_disk_factor` | 18.0 | Multiplied to size of filtered BAM to determine required disk
+`chip.spr_mem_factor` | 20.0 | Multiplied to size of filtered BAM to determine required memory
+`chip.spr_disk_factor` | 30.0 | Multiplied to size of filtered BAM to determine required disk
 
 Parameter|Default|Description
 ---------|-------|-----------

@@ -15,6 +15,12 @@ workflow test_xcor {
         String ref_se_xcor_log
         String ref_se_xcor_log_subsample
         String mito_chr_name = 'chrM'
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
     Int xcor_cpu = 1
     Float xcor_mem_factor = 0.0
@@ -31,6 +37,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.xcor as pe_xcor_subsample { input :
         ta = pe_ta,
@@ -42,6 +49,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.xcor as se_xcor { input :
         ta = se_ta,
@@ -53,6 +61,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.xcor as se_xcor_subsample { input :
         ta = se_ta,
@@ -64,6 +73,7 @@ workflow test_xcor {
         mem_factor = xcor_mem_factor,
         time_hr = xcor_time_hr,
         disk_factor = xcor_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

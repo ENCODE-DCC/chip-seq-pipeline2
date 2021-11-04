@@ -21,6 +21,12 @@ workflow test_trimmomatic {
 
         File pe_bowtie2_idx_tar
         File se_bowtie2_idx_tar
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     Int bowtie2_cpu = 1
@@ -45,6 +51,7 @@ workflow test_trimmomatic {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.align as se_cropped_bowtie2 { input :
         aligner = 'bowtie2',
@@ -63,6 +70,7 @@ workflow test_trimmomatic {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call chip.align as pe_cropped_phred33_bowtie2 { input :
@@ -83,6 +91,7 @@ workflow test_trimmomatic {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.align as se_cropped_phred64_bowtie2 { input :
         aligner = 'bowtie2',
@@ -102,6 +111,7 @@ workflow test_trimmomatic {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

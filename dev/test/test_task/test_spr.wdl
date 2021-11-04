@@ -15,6 +15,12 @@ workflow test_spr {
         File ref_pe_seed_10_ta_pr2
         File ref_se_seed_10_ta_pr1
         File ref_se_seed_10_ta_pr2
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
     Float spr_mem_factor = 0.0
     Float spr_disk_factor = 6.0
@@ -25,6 +31,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 0,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }    
     call chip.spr as se_spr { input :
         ta = se_ta,
@@ -32,6 +39,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 0,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.spr as pe_spr_seed_10 { input :
         ta = pe_ta,
@@ -39,6 +47,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 10,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.spr as se_spr_seed_10 { input :
         ta = se_ta,
@@ -46,6 +55,7 @@ workflow test_spr {
         pseudoreplication_random_seed = 10,
         mem_factor = spr_mem_factor,
         disk_factor = spr_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

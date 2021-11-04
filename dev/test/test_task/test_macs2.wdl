@@ -19,6 +19,12 @@ workflow test_macs2 {
         String se_blacklist
         String se_chrsz
         String se_gensz
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     String regex_bfilt_peak_chr_name = 'chr[\\dXY]+'
@@ -43,6 +49,7 @@ workflow test_macs2 {
         mem_factor = macs2_mem_factor,
         time_hr = macs2_time_hr,
         disk_factor = macs2_disk_factor,        
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

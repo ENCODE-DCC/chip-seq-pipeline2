@@ -17,6 +17,12 @@ workflow test_bowtie2 {
 
         String pe_bowtie2_idx_tar
         String se_bowtie2_idx_tar
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     Int bowtie2_cpu = 1
@@ -41,6 +47,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.align as se_bowtie2 { input :
         aligner = 'bowtie2',
@@ -59,6 +66,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call chip.align as pe_bowtie2_local { input :
@@ -78,6 +86,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
     call chip.align as se_bowtie2_local { input :
         aligner = 'bowtie2',
@@ -96,6 +105,7 @@ workflow test_bowtie2 {
         mem_factor = bowtie2_mem_factor,
         time_hr = bowtie2_time_hr,
         disk_factor = bowtie2_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :

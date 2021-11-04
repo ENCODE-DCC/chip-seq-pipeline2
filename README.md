@@ -3,44 +3,34 @@
 [![CircleCI](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master)
 
 
-## Important notice for Conda users
+## Download new Caper>=2.0
 
-If it takes too long to resolve Conda package conflicts while installing pipeline's Conda environment, then try with `mamba` instead. Add `mamba` to the install command line.
+New Caper is out. You need to update your Caper to work with the latest ENCODE ChIP-seq pipeline.
 ```bash
-$ scripts/install_conda_env.sh mamba
+$ pip install caper --upgrade
 ```
 
-For every new pipeline release, Conda users always need to update pipeline's Conda environment (`encode-chip-seq-pipeline`) even though they don't use new added features.
+## Local/HPC users and new Caper>=2.0
+
+There are tons of changes for local/HPC backends: `local`, `slurm`, `sge`, `pbs` and `lsf`(added). Make a backup of your current Caper configuration file `~/.caper/default.conf` and run `caper init`. Local/HPC users need to reset/initialize Caper's configuration file according to your chosen backend. Edit the configuration file and follow instructions in there.
 ```bash
-$ cd chip-seq-pipeline2
-$ scripts/update_conda_env.sh
+$ cd ~/.caper
+$ cp default.conf default.conf.bak
+$ caper init [YOUR_BACKEND]
 ```
 
-For pipelines >= v1.7.0, Conda users also need to manually install Caper and Croo **INSIDE** the environment. These two tools have been removed from pipeline's Conda environment since v1.7.0.
+In order to run a pipeline, you need to add one of the following flags to specify the environment to run each task within. i.e. `--conda`, `--singularity` and `--docker`. These flags are not required for cloud backend users (`aws` and `gcp`).
 ```bash
-$ source activate encode-chip-seq-pipeline
-$ pip install caper croo
+# for example
+$ caper run ... --singularity
 ```
 
-
-## Redacting filtered/deduped BAM (new feature >= v1.7.0)
-
-Added `"chip.redact_nodup_bam"` to redact (de-identify) BAM. Such conversion is done with `ptools` which is not officially registered to PIP and Conda repository (`bioconda`) yet.
-
-> **IMPORTANT**: Alignment quality metrics calculated during/before filtering (task `filter`) will still be based on non-redacted original BAMs. However, all downstream analyses (e.g. peak-calling) will be based on redact nodup BAM.
-
-Conda users need to install it from our temporary PIP repo (`ptools_bin`). GCP/AWS/Docker/Singularity users do not need to install it. `ptools` is already included in new pipeline's Docker/Singularity image. This is for Conda users only. We will remove this warning in the next release after `ptools` is registered to `bioconda` and added to the requirements list (`scripts/requirements.txt`).
-
+For Conda users, **RE-INSTALL PIPELINE'S CONDA ENVIRONMENT AND DO NOT ACTIVATE CONDA ENVIRONMENT BEFORE RUNNING PIPELINES**. Caper will internally call `conda run -n ENV_NAME CROMWELL_JOB_SCRIPT`. Just make sure that pipeline's new Conda environments are correctly installed.
+```bash
+$ scripts/uninstall_conda_env.sh
+$ scripts/install_conda_env.sh
 ```
-# Activate pipeline's conda environment
-$ source activate encode-chip-seq-pipeline
 
-# Install ptools_bin inside the environment
-(encode-chip-seq-pipeline) $ pip3 install ptools_bin
-
-# Run pipelines in the environment
-(encode-chip-seq-pipeline) $ caper run/submit ...
-```
 
 ## Introduction 
 This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor and histone ChIP-seq pipeline specifications (by Anshul Kundaje) in [this google doc](https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit#).
@@ -53,31 +43,78 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 
 ## Installation
 
-1) Git clone this pipeline.
-	> **IMPORTANT**: use `~/chip-seq-pipeline2/chip.wdl` as `[WDL]` in Caper's documentation.
+1) Make sure that you have Python>=3.6. Caper does not work with Python2. Install Caper and check its version >=2.0.
+	```bash
+	$ python --version
+	$ pip install caper
+	```
+2) Make a backup of your Caper configuration file `~/.caper/default.conf` if you are upgrading from old Caper(<2.0.0). Reset/initialize Caper's configuration file. Read Caper's [README](https://github.com/ENCODE-DCC/caper/blob/master/README.md) carefully to choose a backend for your system. Follow the instruction in the configuration file.
+	```bash
+	# make a backup of ~/.caper/default.conf if you already have it
+	$ caper init [YOUR_BACKEND]
 
+	# then edit ~/.caper/default.conf
+	$ vi ~/.caper/default.conf
+	```
+
+3) Git clone this pipeline.
+	> **IMPORTANT**: use `~/chip-seq-pipeline2/chip.wdl` as `[WDL]` in Caper's documentation.
 	```bash
 	$ cd
 	$ git clone https://github.com/ENCODE-DCC/chip-seq-pipeline2
 	```
 
-2) Install pipeline's [Conda environment](docs/install_conda.md) if you want to use Conda instead of Docker/Singularity. Conda is recommneded on local computer and HPCs (e.g. Stanford Sherlock/SCG). Use 
-	> **IMPORTANT**: use `encode-chip-seq-pipeline` as `[PIPELINE_CONDA_ENV]` in Caper's documentation.
- 
-3) **Skip this step if you have installed pipeline's Conda environment**. Caper is already included in the Conda environment. [Install Caper](https://github.com/ENCODE-DCC/caper#installation). Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
-
-	> **IMPORTANT**: Make sure that you have python3(>= 3.6.0) installed on your system.
-
+4) (Optional for Conda) Install pipeline's Conda environments if you don't have Singularity or Docker installed on your system. We recommend to use Singularity instead of Conda. If you don't have Conda on your system, install [Miniconda3](https://docs.conda.io/en/latest/miniconda.html).
 	```bash
-	$ pip install caper  # use pip3 if it doesn't work
+	$ cd chip-seq-pipeline2
+	# uninstall old environments (<2.0.0)
+	$ bash scripts/uninstall_conda_env.sh
+	$ bash scripts/install_conda_env.sh
 	```
 
-4) Follow [Caper's README](https://github.com/ENCODE-DCC/caper) carefully. Find an instruction for your platform.
-	> **IMPORTANT**: Configure your Caper configuration file `~/.caper/default.conf` correctly for your platform.
 
-## Test input JSON file
+## Test run
 
-Use `https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json` as `[INPUT_JSON]` in Caper's documentation.
+You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and input JSON file then Caper will automatically download/localize such files. Input JSON file URL: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json
+
+According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
+
+The followings are just examples. Please read [Caper's README](https://github.com/ENCODE-DCC/caper) very carefully to find an actual working command line for your chosen platform.
+    ```bash
+    # Run it locally with Conda (You don't need to activate it, make sure to install Conda envs first)
+    $ caper run chip.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json --conda
+
+    # Or submit it as a leader job (with long/enough resources) to SLURM (Stanford Sherlock) with Singularity
+    # It will fail if you directly run the leader job on login nodes
+    $ sbatch -p [SLURM_PARTITON] -J [WORKFLOW_NAME] --export=ALL --mem 4G -t 4-0 --wrap "caper chip chip.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json --singularity"
+	```
+
+
+## Running a pipeline on Terra/Anvil (using Dockstore)
+
+Visit our pipeline repo on [Dockstore](https://dockstore.org/workflows/github.com/ENCODE-DCC/chip-seq-pipeline2). Click on `Terra` or `Anvil`. Follow Terra's instruction to create a workspace on Terra and add Terra's billing bot to your Google Cloud account.
+
+Download this [test input JSON for Terra](https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.terra.json) and upload it to Terra's UI and then run analysis.
+
+If you want to use your own input JSON file, then make sure that all files in the input JSON are on a Google Cloud Storage bucket (`gs://`). URLs will not work.
+
+
+## Running a pipeline on DNAnexus (using Dockstore)
+
+Sign up for a new account on [DNAnexus](https://platform.dnanexus.com/) and create a new project on either AWS or Azure. Visit our pipeline repo on [Dockstore](https://dockstore.org/workflows/github.com/ENCODE-DCC/chip-seq-pipeline2). Click on `DNAnexus`. Choose a destination directory on your DNAnexus project. Click on `Submit` and visit DNAnexus. This will submit a conversion job so that you can check status of it on `Monitor` on DNAnexus UI.
+
+Once conversion is done download one of the following input JSON files according to your chosen platform (AWS or Azure) for your DNAnexus project:
+- AWS: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only_dx.json
+- Azure: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only_dx_azure.json
+
+You cannot use these input JSON files directly. Go to the destination directory on DNAnexus and click on the converted workflow `chip`. You will see input file boxes in the left-hand side of the task graph. Expand it and define FASTQs (`fastq_repX_R1`) and `genome_tsv` as in the downloaded input JSON file. Click on the `common` task box and define other non-file pipeline parameters.
+
+
+## Running a pipeline on DNAnexus (using our pre-built workflows)
+
+See [this](docs/tutorial_dx_web.md) for details.
+
+
 
 ## Input JSON file
 
@@ -92,13 +129,6 @@ An input JSON file specifies all the input parameters and files that are necessa
 You can run this pipeline on [truwl.com](https://truwl.com/). This provides a web interface that allows you to define inputs and parameters, run the job on GCP, and monitor progress. To run it you will need to create an account on the platform then request early access by emailing [info@truwl.com](mailto:info@truwl.com) to get the right permissions. You can see the example cases from this repo at [https://truwl.com/workflows/instance/WF_dd6938.8f.340f/command](https://truwl.com/workflows/instance/WF_dd6938.8f.340f/command) and [https://truwl.com/workflows/instance/WF_dd6938.8f.8aa3/command](https://truwl.com/workflows/instance/WF_dd6938.8f.8aa3/command). The example jobs (or other jobs) can be forked to pre-populate the inputs for your own job.
 
 If you do not run the pipeline on Truwl, you can still share your use-case/job on the platform by getting in touch at [info@truwl.com](mailto:info@truwl.com) and providing your inputs.json file.
-
-## Running a pipeline on DNAnexus
-
-You can also run this pipeline on DNAnexus without using Caper or Cromwell. There are two ways to build a workflow on DNAnexus based on our WDL.
-
-1) [dxWDL CLI](docs/tutorial_dx_cli.md)
-2) [DNAnexus Web UI](docs/tutorial_dx_web.md)
 
 ## How to organize outputs
 

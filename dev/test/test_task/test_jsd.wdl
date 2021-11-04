@@ -8,6 +8,12 @@ workflow test_jsd {
         File se_ctl_nodup_bam
         File se_blacklist
         Array[File] ref_se_jsd_logs
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
     # task level test data (BAM) is generated from BWA
     # so we keep using 30 here, this should be 255 for bowtie2 BAMs
@@ -28,6 +34,7 @@ workflow test_jsd {
         mem_factor = jsd_mem_factor,
         time_hr = jsd_time_hr,
         disk_factor = jsd_disk_factor,
+        runtime_environment = runtime_environment,
     }
 
     # take first 8 columns (vaule in other columns are random)

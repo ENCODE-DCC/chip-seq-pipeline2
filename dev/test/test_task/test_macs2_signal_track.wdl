@@ -14,6 +14,12 @@ workflow test_macs2_signal_track {
         String ref_se_macs2_pval_bw # p-val signal
         String se_chrsz
         String se_gensz
+        String docker
+    }
+    RuntimeEnvironment runtime_environment = {
+        "docker": docker,
+        "singularity": "",
+        "conda": ""
     }
 
     Float macs2_mem_factor = 0.0
@@ -30,6 +36,7 @@ workflow test_macs2_signal_track {
         mem_factor = macs2_mem_factor,
         time_hr = macs2_time_hr,
         disk_factor = macs2_disk_factor,        
+        runtime_environment = runtime_environment,
     }
 
     call compare_md5sum.compare_md5sum { input :
