@@ -1564,7 +1564,7 @@ workflow chip {
         if ( has_input_of_bam2ta_ctl && !has_output_of_bam2ta_ctl ) {
             call bam2ta as bam2ta_ctl { input :
                 bam = ctl_nodup_bam_,
-                subsample = subsample_reads,
+                subsample = ctl_subsample_reads,
                 paired_end = ctl_paired_end_,
                 mito_chr_name = mito_chr_name_,
 
