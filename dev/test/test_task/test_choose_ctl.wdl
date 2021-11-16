@@ -191,11 +191,40 @@ workflow test_choose_ctl {
         String k = test.left
         Pair[Int, Int] v = test.right
         if ( v.left != v.right ) {
-            call chip.raise_exception { input:
+            call raise_exception_and_print { input:
                 msg = k,
                 vals = [v.left, v.right],
                 runtime_environment = runtime_environment,
             }
         }
+    }
+}
+
+
+task raise_exception_and_print {
+    input {
+        String msg
+        Array[String]? vals
+
+        RuntimeEnvironment runtime_environment
+    }
+    command {
+        echo -e "\n* Error: ${msg}\n" >&2
+        echo -e "* Vals: ${sep=',' vals}\n" >&2
+        exit 2
+    }
+    output {
+        String error_msg = '${msg}'
+    }
+    runtime {
+        maxRetries : 0
+        cpu : 1
+        memory : '2 GB'
+        time : 4
+        disks : 'local-disk 10 SSD'
+
+        docker : runtime_environment.docker
+        singularity : runtime_environment.singularity
+        conda : runtime_environment.conda
     }
 }
