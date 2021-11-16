@@ -3,14 +3,14 @@
 [![CircleCI](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/chip-seq-pipeline2/tree/master)
 
 
-## Download new Caper>=2.0
+## Download new Caper>=2.1
 
 New Caper is out. You need to update your Caper to work with the latest ENCODE ChIP-seq pipeline.
 ```bash
 $ pip install caper --upgrade
 ```
 
-## Local/HPC users and new Caper>=2.0
+## Local/HPC users and new Caper>=2.1
 
 There are tons of changes for local/HPC backends: `local`, `slurm`, `sge`, `pbs` and `lsf`(added). Make a backup of your current Caper configuration file `~/.caper/default.conf` and run `caper init`. Local/HPC users need to reset/initialize Caper's configuration file according to your chosen backend. Edit the configuration file and follow instructions in there.
 ```bash
@@ -72,10 +72,19 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 	$ bash scripts/install_conda_env.sh
 	```
 
+## Input JSON file
 
-## Test run
+> **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE.
 
-You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and input JSON file then Caper will automatically download/localize such files. Input JSON file URL: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json
+An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
+
+1) [Input JSON file specification (short)](docs/input_short.md)
+2) [Input JSON file specification (long)](docs/input.md)
+
+
+## Running on local computer/HPCs
+
+You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and input JSON file then Caper will automatically download/localize such files. Input JSON file example: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json
 
 According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
 
@@ -87,10 +96,16 @@ The followings are just examples. Please read [Caper's README](https://github.co
     # Or submit it as a leader job (with long/enough resources) to SLURM (Stanford Sherlock) with Singularity
     # It will fail if you directly run the leader job on login nodes
     $ sbatch -p [SLURM_PARTITON] -J [WORKFLOW_NAME] --export=ALL --mem 4G -t 4-0 --wrap "caper chip chip.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json --singularity"
+
+    # Check status of your leader job
+    $ squeue -u $USER | grep [WORKFLOW_NAME]
+
+    # Cancel the leader node to close all of its children jobs
+    $ scancel -j [JOB_ID]    
 	```
 
 
-## Running a pipeline on Terra/Anvil (using Dockstore)
+## Running on Terra/Anvil (using Dockstore)
 
 Visit our pipeline repo on [Dockstore](https://dockstore.org/workflows/github.com/ENCODE-DCC/chip-seq-pipeline2). Click on `Terra` or `Anvil`. Follow Terra's instruction to create a workspace on Terra and add Terra's billing bot to your Google Cloud account.
 
@@ -99,7 +114,7 @@ Download this [test input JSON for Terra](https://storage.googleapis.com/encode-
 If you want to use your own input JSON file, then make sure that all files in the input JSON are on a Google Cloud Storage bucket (`gs://`). URLs will not work.
 
 
-## Running a pipeline on DNAnexus (using Dockstore)
+## Running on DNAnexus (using Dockstore)
 
 Sign up for a new account on [DNAnexus](https://platform.dnanexus.com/) and create a new project on either AWS or Azure. Visit our pipeline repo on [Dockstore](https://dockstore.org/workflows/github.com/ENCODE-DCC/chip-seq-pipeline2). Click on `DNAnexus`. Choose a destination directory on your DNAnexus project. Click on `Submit` and visit DNAnexus. This will submit a conversion job so that you can check status of it on `Monitor` on DNAnexus UI.
 
@@ -107,23 +122,23 @@ Once conversion is done download one of the following input JSON files according
 - AWS: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only_dx.json
 - Azure: https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only_dx_azure.json
 
-You cannot use these input JSON files directly. Go to the destination directory on DNAnexus and click on the converted workflow `chip`. You will see input file boxes in the left-hand side of the task graph. Expand it and define FASTQs (`fastq_repX_R1`) and `genome_tsv` as in the downloaded input JSON file. Click on the `common` task box and define other non-file pipeline parameters.
+You cannot use these input JSON files directly. Go to the destination directory on DNAnexus and click on the converted workflow `chip`. You will see input file boxes in the left-hand side of the task graph. Expand it and define FASTQs (`fastq_repX_R1` and `fastq_repX_R1`) and `genome_tsv` as in the downloaded input JSON file. Click on the `common` task box and define other non-file pipeline parameters.  e.g. `pipeline_type`, `paired_end` and `ctl_paired_end`.
+
+We have a separate project on DNANexus to provide example FASTQs and `genome_tsv` for `hg38` and `mm10` (also chr19-only version of those two. Use chr19-only versions for testing). We recommend to make copies of these directories on your own project.
+
+`genome_tsv`
+- AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v3
+- Azure: https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v3
+
+Example FASTQs
+- AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled
+- Azure: https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled
 
 
-## Running a pipeline on DNAnexus (using our pre-built workflows)
+## Running on DNAnexus (using our pre-built workflows)
 
 See [this](docs/tutorial_dx_web.md) for details.
 
-
-
-## Input JSON file
-
-> **IMPORTANT**: DO NOT BLINDLY USE A TEMPLATE/EXAMPLE INPUT JSON. READ THROUGH THE FOLLOWING GUIDE TO MAKE A CORRECT INPUT JSON FILE.
-
-An input JSON file specifies all the input parameters and files that are necessary for successfully running this pipeline. This includes a specification of the path to the genome reference files and the raw data fastq file. Please make sure to specify absolute paths rather than relative paths in your input JSON files.
-
-1) [Input JSON file specification (short)](docs/input_short.md)
-2) [Input JSON file specification (long)](docs/input.md)
 
 ## Running and sharing on Truwl
 You can run this pipeline on [truwl.com](https://truwl.com/). This provides a web interface that allows you to define inputs and parameters, run the job on GCP, and monitor progress. To run it you will need to create an account on the platform then request early access by emailing [info@truwl.com](mailto:info@truwl.com) to get the right permissions. You can see the example cases from this repo at [https://truwl.com/workflows/instance/WF_dd6938.8f.340f/command](https://truwl.com/workflows/instance/WF_dd6938.8f.340f/command) and [https://truwl.com/workflows/instance/WF_dd6938.8f.8aa3/command](https://truwl.com/workflows/instance/WF_dd6938.8f.8aa3/command). The example jobs (or other jobs) can be forked to pre-populate the inputs for your own job.

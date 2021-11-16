@@ -7,10 +7,10 @@ struct RuntimeEnvironment {
 }
 
 workflow chip {
-    String pipeline_ver = 'v2.1.0'
+    String pipeline_ver = 'v2.1.1'
 
     meta {
-        version: 'v2.1.0'
+        version: 'v2.1.1'
 
         author: 'Jin wook Lee'
         email: 'leepc12@gmail.com'
@@ -19,8 +19,8 @@ workflow chip {
 
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        default_docker: 'encodedcc/chip-seq-pipeline:v2.1.0'
-        default_singularity: 'library://leepc12/default/chip-seq-pipeline:v2.1.0'
+        default_docker: 'encodedcc/chip-seq-pipeline:v2.1.1'
+        default_singularity: 'library://leepc12/default/chip-seq-pipeline:v2.1.1'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
@@ -71,8 +71,8 @@ workflow chip {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/chip-seq-pipeline:v2.1.0'
-        String singularity = 'library://leepc12/default/chip-seq-pipeline:v2.1.0'
+        String docker = 'encodedcc/chip-seq-pipeline:v2.1.1'
+        String singularity = 'library://leepc12/default/chip-seq-pipeline:v2.1.1'
         String conda = 'encode-chip-seq-pipeline'
         String conda_macs2 = 'encode-chip-seq-pipeline-macs2'
         String conda_spp = 'encode-chip-seq-pipeline-spp'
@@ -1257,11 +1257,11 @@ workflow chip {
             else select_first([paired_end])
 
         Boolean has_input_of_align = i<length(fastqs_R1) && length(fastqs_R1[i])>0
-        Boolean has_output_of_align = i<length(bams) && defined(bams[i])
+        Boolean has_output_of_align = i<length(bams)
         if ( has_input_of_align && !has_output_of_align ) {
             call align { input :
                 fastqs_R1 = fastqs_R1[i],
-                fastqs_R2 = fastqs_R2[i],
+                fastqs_R2 = if paired_end_ then fastqs_R2[i] else [],
                 crop_length = crop_length,
                 crop_length_tol = crop_length_tol,
                 trimmomatic_phred_score_format = trimmomatic_phred_score_format,
@@ -1289,7 +1289,7 @@ workflow chip {
         File? bam_ = if has_output_of_align then bams[i] else align.bam
 
         Boolean has_input_of_filter = has_output_of_align || defined(align.bam)
-        Boolean has_output_of_filter = i<length(nodup_bams) && defined(nodup_bams[i])
+        Boolean has_output_of_filter = i<length(nodup_bams)
         # skip if we already have output of this step
         if ( has_input_of_filter && !has_output_of_filter ) {
             call filter { input :
@@ -1315,7 +1315,7 @@ workflow chip {
         File? nodup_bam_ = if has_output_of_filter then nodup_bams[i] else filter.nodup_bam
 
         Boolean has_input_of_bam2ta = has_output_of_filter || defined(filter.nodup_bam)
-        Boolean has_output_of_bam2ta = i<length(tas) && defined(tas[i])
+        Boolean has_output_of_bam2ta = i<length(tas)
         if ( has_input_of_bam2ta && !has_output_of_bam2ta ) {
             call bam2ta { input :
                 bam = nodup_bam_,
@@ -1490,7 +1490,7 @@ workflow chip {
 
         # before peak calling, get fragment length from xcor analysis or given input
         # if fraglen [] is defined in the input JSON, fraglen from xcor will be ignored
-        Int? fraglen_ = if i<length(fraglen) && defined(fraglen[i]) then fraglen[i]
+        Int? fraglen_ = if i<length(fraglen) then fraglen[i]
             else xcor.fraglen
     }
 
@@ -1502,11 +1502,11 @@ workflow chip {
             else select_first([ctl_paired_end, paired_end])
 
         Boolean has_input_of_align_ctl = i<length(ctl_fastqs_R1) && length(ctl_fastqs_R1[i])>0
-        Boolean has_output_of_align_ctl = i<length(ctl_bams) && defined(ctl_bams[i])
+        Boolean has_output_of_align_ctl = i<length(ctl_bams)
         if ( has_input_of_align_ctl && !has_output_of_align_ctl ) {
             call align as align_ctl { input :
                 fastqs_R1 = ctl_fastqs_R1[i],
-                fastqs_R2 = ctl_fastqs_R2[i],
+                fastqs_R2 = if ctl_paired_end_ then ctl_fastqs_R2[i] else [],
                 crop_length = crop_length,
                 crop_length_tol = crop_length_tol,
                 trimmomatic_phred_score_format = trimmomatic_phred_score_format,
@@ -1534,7 +1534,7 @@ workflow chip {
         File? ctl_bam_ = if has_output_of_align_ctl then ctl_bams[i] else align_ctl.bam
 
         Boolean has_input_of_filter_ctl = has_output_of_align_ctl || defined(align_ctl.bam)
-        Boolean has_output_of_filter_ctl = i<length(ctl_nodup_bams) && defined(ctl_nodup_bams[i])
+        Boolean has_output_of_filter_ctl = i<length(ctl_nodup_bams)
         # skip if we already have output of this step
         if ( has_input_of_filter_ctl && !has_output_of_filter_ctl ) {
             call filter as filter_ctl { input :
@@ -1560,7 +1560,7 @@ workflow chip {
         File? ctl_nodup_bam_ = if has_output_of_filter_ctl then ctl_nodup_bams[i] else filter_ctl.nodup_bam
 
         Boolean has_input_of_bam2ta_ctl = has_output_of_filter_ctl || defined(filter_ctl.nodup_bam)
-        Boolean has_output_of_bam2ta_ctl = i<length(ctl_tas) && defined(ctl_tas[i])
+        Boolean has_output_of_bam2ta_ctl = i<length(ctl_tas)
         if ( has_input_of_bam2ta_ctl && !has_output_of_bam2ta_ctl ) {
             call bam2ta as bam2ta_ctl { input :
                 bam = ctl_nodup_bam_,
@@ -3268,13 +3268,11 @@ task rounded_mean {
 task raise_exception {
     input {
         String msg
-        Array[String]? vals
 
         RuntimeEnvironment runtime_environment
     }
     command {
         echo -e "\n* Error: ${msg}\n" >&2
-        echo -e "* Vals: ${sep=',' vals}\n" >&2
         exit 2
     }
     output {
