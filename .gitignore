@@ -125,3 +125,5 @@ tmp_db*
 temp_db*
 
 cromwell.out
+cromwell.out.*
+
