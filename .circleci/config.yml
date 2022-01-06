@@ -95,6 +95,9 @@ jobs:
             source ${BASH_ENV}
             cd dev/test/test_task/
 
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
+
             # unittest for wrapper .py
             docker run ${TAG} bash -c "cd /software/chip-seq-pipeline/dev/test/test_py/; pytest -vv"
 
