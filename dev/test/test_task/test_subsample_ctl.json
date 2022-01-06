@@ -1,11 +1,11 @@
 {
-    "test_subsample_ctl.pe_ta" : "chip-seq-pipeline-test-data/input/pe/tas/rep1/rep1-R1.subsampled.67.merged.nodup.tagAlign.gz",
-    "test_subsample_ctl.se_ta" : "chip-seq-pipeline-test-data/input/se/tas/pooled_ctl/ctl1.subsampled.25.merged.nodup.pooled.tagAlign.gz",
+    "test_subsample_ctl.pe_ta" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/pe/tas/rep1/rep1-R1.subsampled.67.merged.nodup.tagAlign.gz",
+    "test_subsample_ctl.se_ta" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/tas/pooled_ctl/ctl1.subsampled.25.merged.nodup.pooled.tagAlign.gz",
     "test_subsample_ctl.pe_subsample": 17000,
     "test_subsample_ctl.se_subsample": 48000,
 
-    "test_subsample_ctl.ref_pe_ta_subsampled" : "chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/pe/rep1-R1.subsampled.67.merged.nodup.17K.tagAlign.gz",
-    "test_subsample_ctl.ref_se_ta_subsampled" : "chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/se/ctl1.subsampled.25.merged.nodup.pooled.48K.tagAlign.gz",
-    "test_subsample_ctl.ref_pe_ta_subsampled_trivial" : "chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/pe/rep1-R1.subsampled.67.merged.nodup.100M.tagAlign.gz",
-    "test_subsample_ctl.ref_se_ta_subsampled_trivial" : "chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/se/ctl1.subsampled.25.merged.nodup.pooled.100M.tagAlign.gz"
+    "test_subsample_ctl.ref_pe_ta_subsampled" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/pe/rep1-R1.subsampled.67.merged.nodup.17K.tagAlign.gz",
+    "test_subsample_ctl.ref_se_ta_subsampled" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/se/ctl1.subsampled.25.merged.nodup.pooled.48K.tagAlign.gz",
+    "test_subsample_ctl.ref_pe_ta_subsampled_trivial" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/pe/rep1-R1.subsampled.67.merged.nodup.100M.tagAlign.gz",
+    "test_subsample_ctl.ref_se_ta_subsampled_trivial" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_subsample_ctl/se/ctl1.subsampled.25.merged.nodup.pooled.100M.tagAlign.gz"
 }

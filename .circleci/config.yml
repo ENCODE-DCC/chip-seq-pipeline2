@@ -16,16 +16,6 @@ make_tag: &make_tag
     echo "export TAG=encodedcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
 
 commands:
-  download_task_test_data:
-    description: "Download task test data. This is based on py2 so run this before installing py3."
-    steps:
-      - run:
-          command: |
-            cd dev/test/test_task/
-            rm -rf chip-seq-pipeline-test-data
-            export BOTO_CONFIG=/dev/null
-            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
-
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
     steps:      
@@ -86,7 +76,7 @@ jobs:
           name: build image
           command: |
             source ${BASH_ENV}
-            export DOCKER_CACHE_TAG=v1.8.1
+            export DOCKER_CACHE_TAG=v2.1.0
             echo "pulling ${DOCKER_CACHE_TAG}!"
             docker pull encodedcc/chip-seq-pipeline:${DOCKER_CACHE_TAG}
             docker login -u=${DOCKERHUB_USER} -p=${DOCKERHUB_PASS}
@@ -97,7 +87,6 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - download_task_test_data
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
@@ -105,6 +94,9 @@ jobs:
           command: |
             source ${BASH_ENV}
             cd dev/test/test_task/
+
+            echo ${GCLOUD_SERVICE_ACCOUNT_SECRET_JSON} > tmp_secret_key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=$PWD/tmp_secret_key.json
 
             # unittest for wrapper .py
             docker run ${TAG} bash -c "cd /software/chip-seq-pipeline/dev/test/test_py/; pytest -vv"

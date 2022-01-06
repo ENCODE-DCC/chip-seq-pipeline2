@@ -1,20 +1,20 @@
 {
-    "test_bowtie2.pe_bowtie2_idx_tar" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar",
-    "test_bowtie2.se_bowtie2_idx_tar" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar",
+    "test_bowtie2.pe_bowtie2_idx_tar" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar",
+    "test_bowtie2.se_bowtie2_idx_tar" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/bowtie2_index/GRCh38_no_alt_analysis_set_GCA_000001405.15.chr19_chrM.fasta.tar",
 
     "test_bowtie2.pe_fastqs_R1" : [
-        "chip-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/rep1-R1.subsampled.67.fastq.gz"
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/pe/fastqs/rep1/pair1/rep1-R1.subsampled.67.fastq.gz"
     ],
     "test_bowtie2.pe_fastqs_R2" : [
-        "chip-seq-pipeline-test-data/input/pe/fastqs/rep1/pair2/rep1-R2.subsampled.67.fastq.gz"
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/pe/fastqs/rep1/pair2/rep1-R2.subsampled.67.fastq.gz"
     ],
     "test_bowtie2.se_fastqs" : [
-        "chip-seq-pipeline-test-data/input/se/fastqs/rep1/rep1.subsampled.25.fastq.gz"
+        "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/fastqs/rep1/rep1.subsampled.25.fastq.gz"
     ],
-    "test_bowtie2.ref_pe_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/pe/rep1-R1.subsampled.67.samstats.qc",
-    "test_bowtie2.ref_se_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/se/rep1.subsampled.25.samstats.qc",
+    "test_bowtie2.ref_pe_flagstat" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_bowtie2/pe/rep1-R1.subsampled.67.samstats.qc",
+    "test_bowtie2.ref_se_flagstat" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_bowtie2/se/rep1.subsampled.25.samstats.qc",
 
-    "test_bowtie2.ref_pe_local_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/pe/local/rep1-R1.subsampled.67.srt.samstats.qc",
-    "test_bowtie2.ref_se_local_flagstat" : "chip-seq-pipeline-test-data/ref_output/test_bowtie2/se/local/rep1.subsampled.25.srt.samstats.qc"
+    "test_bowtie2.ref_pe_local_flagstat" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_bowtie2/pe/local/rep1-R1.subsampled.67.srt.samstats.qc",
+    "test_bowtie2.ref_se_local_flagstat" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_bowtie2/se/local/rep1.subsampled.25.srt.samstats.qc"
    
 }
