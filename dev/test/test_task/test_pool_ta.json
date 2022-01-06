@@ -1,6 +1,6 @@
 {
-    "test_pool_ta.se_ta_rep1" : "chip-seq-pipeline-test-data/input/se/tas/rep1/rep1.subsampled.25.merged.nodup.tagAlign.gz",
-    "test_pool_ta.se_ta_rep2" : "chip-seq-pipeline-test-data/input/se/tas/rep2/rep2.subsampled.20.merged.nodup.tagAlign.gz",
+    "test_pool_ta.se_ta_rep1" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/tas/rep1/rep1.subsampled.25.merged.nodup.tagAlign.gz",
+    "test_pool_ta.se_ta_rep2" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/tas/rep2/rep2.subsampled.20.merged.nodup.tagAlign.gz",
 
-    "test_pool_ta.ref_se_pooled_ta" : "chip-seq-pipeline-test-data/ref_output/test_pool_ta/rep1.subsampled.25.merged.nodup.pooled.tagAlign.gz"
+    "test_pool_ta.ref_se_pooled_ta" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_pool_ta/rep1.subsampled.25.merged.nodup.pooled.tagAlign.gz"
 }

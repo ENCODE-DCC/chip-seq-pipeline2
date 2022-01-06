@@ -1,11 +1,11 @@
 {
-    "test_xcor.pe_ta" : "chip-seq-pipeline-test-data/input/pe/tas/rep1/rep1-R1.subsampled.67.merged.nodup.tagAlign.gz",
-    "test_xcor.se_ta" : "chip-seq-pipeline-test-data/input/se/tas/rep1/rep1.subsampled.25.merged.nodup.tagAlign.gz",
+    "test_xcor.pe_ta" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/pe/tas/rep1/rep1-R1.subsampled.67.merged.nodup.tagAlign.gz",
+    "test_xcor.se_ta" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/tas/rep1/rep1.subsampled.25.merged.nodup.tagAlign.gz",
 
-    "test_xcor.ref_pe_xcor_log" : "chip-seq-pipeline-test-data/ref_output/test_xcor/pe/rep1-R1.subsampled.67.merged.nodup.no_chrM.R1.15M.cc.qc",
-    "test_xcor.ref_pe_xcor_log_subsample" : "chip-seq-pipeline-test-data/ref_output/test_xcor/pe/subsample/fix_PIP-917/rep1-R1.subsampled.67.merged.nodup.no_chrM.R1.17K.cc.qc",
-    "test_xcor.ref_se_xcor_log" : "chip-seq-pipeline-test-data/ref_output/test_xcor/se/rep1.subsampled.25.merged.nodup.no_chrM.15M.cc.qc",
-    "test_xcor.ref_se_xcor_log_subsample" : "chip-seq-pipeline-test-data/ref_output/test_xcor/se/subsample/rep1.subsampled.25.merged.nodup.no_chrM.17K.cc.qc",
+    "test_xcor.ref_pe_xcor_log" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_xcor/pe/rep1-R1.subsampled.67.merged.nodup.no_chrM.R1.15M.cc.qc",
+    "test_xcor.ref_pe_xcor_log_subsample" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_xcor/pe/subsample/fix_PIP-917/rep1-R1.subsampled.67.merged.nodup.no_chrM.R1.17K.cc.qc",
+    "test_xcor.ref_se_xcor_log" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_xcor/se/rep1.subsampled.25.merged.nodup.no_chrM.15M.cc.qc",
+    "test_xcor.ref_se_xcor_log_subsample" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_xcor/se/subsample/rep1.subsampled.25.merged.nodup.no_chrM.17K.cc.qc",
 
     "test_xcor.xcor_subsample" : 17000
 }
