@@ -16,16 +16,6 @@ make_tag: &make_tag
     echo "export TAG=encodedcc/chip-seq-pipeline:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" > ${BASH_ENV}
 
 commands:
-  download_task_test_data:
-    description: "Download task test data. This is based on py2 so run this before installing py3."
-    steps:
-      - run:
-          command: |
-            cd dev/test/test_task/
-            rm -rf chip-seq-pipeline-test-data
-            export BOTO_CONFIG=/dev/null
-            gsutil -m cp -r gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data .
-
   install_python3_caper_gcs:
     description: "Install py3, caper and gcs. Set py3 as default python."
     steps:      
@@ -97,7 +87,6 @@ jobs:
     <<: *machine_defaults
     steps:
       - checkout
-      - download_task_test_data
       - install_python3_caper_gcs
       - run: *make_tag
       - run:
