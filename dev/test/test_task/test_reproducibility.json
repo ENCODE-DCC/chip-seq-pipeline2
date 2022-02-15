@@ -1,9 +1,9 @@
 {
-    "test_reproducibility.se_overlap_peak_rep1_vs_rep2" : "chip-seq-pipeline-test-data/input/se/overlap_peaks/rep1-rep2.overlap.bfilt.regionPeak.gz",
-    "test_reproducibility.se_overlap_peak_rep1_pr" : "chip-seq-pipeline-test-data/input/se/overlap_peaks/rep1-pr.overlap.bfilt.regionPeak.gz",
-    "test_reproducibility.se_overlap_peak_rep2_pr" : "chip-seq-pipeline-test-data/input/se/overlap_peaks/rep2-pr.overlap.bfilt.regionPeak.gz",
-    "test_reproducibility.se_overlap_peak_ppr" : "chip-seq-pipeline-test-data/input/se/overlap_peaks/ppr.overlap.bfilt.regionPeak.gz",
-    "test_reproducibility.se_chrsz" : "chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes",
+    "test_reproducibility.se_overlap_peak_rep1_vs_rep2" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/overlap_peaks/rep1-rep2.overlap.bfilt.regionPeak.gz",
+    "test_reproducibility.se_overlap_peak_rep1_pr" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/overlap_peaks/rep1-pr.overlap.bfilt.regionPeak.gz",
+    "test_reproducibility.se_overlap_peak_rep2_pr" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/overlap_peaks/rep2-pr.overlap.bfilt.regionPeak.gz",
+    "test_reproducibility.se_overlap_peak_ppr" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/input/se/overlap_peaks/ppr.overlap.bfilt.regionPeak.gz",
+    "test_reproducibility.se_chrsz" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/genome_data/hg38_chr19_chrM/hg38_chr19_chrM.chrom.sizes",
 
-    "test_reproducibility.ref_se_reproducibility_qc" : "chip-seq-pipeline-test-data/ref_output/test_reproducibility/overlap.reproducibility.qc"
+    "test_reproducibility.ref_se_reproducibility_qc" : "gs://encode-pipeline-test-samples/encode-chip-seq-pipeline/chip-seq-pipeline-test-data/ref_output/test_reproducibility/overlap.reproducibility.qc"
 }

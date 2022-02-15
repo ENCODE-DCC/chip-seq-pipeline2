@@ -127,8 +127,8 @@ You cannot use these input JSON files directly. Go to the destination directory 
 We have a separate project on DNANexus to provide example FASTQs and `genome_tsv` for `hg38` and `mm10` (also chr19-only version of those two. Use chr19-only versions for testing). We recommend to make copies of these directories on your own project.
 
 `genome_tsv`
-- AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v3
-- Azure: https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v3
+- AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-genome-data/genome_tsv/v4
+- Azure: https://platform.dnanexus.com/projects/F6K911Q9xyfgJ36JFzv03Z5J/data/pipeline-genome-data/genome_tsv/v4
 
 Example FASTQs
 - AWS: https://platform.dnanexus.com/projects/BKpvFg00VBPV975PgJ6Q03v6/data/pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI/fastq_subsampled
