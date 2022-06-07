@@ -73,9 +73,9 @@ workflow chip {
         # group: runtime_environment
         String docker = 'encodedcc/chip-seq-pipeline:v2.1.6'
         String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.1.6.sif'
-        String conda = 'encode-chip-seq-pipeline'
-        String conda_macs2 = 'encode-chip-seq-pipeline-macs2'
-        String conda_spp = 'encode-chip-seq-pipeline-spp'
+        String conda = 'encd-chip'
+        String conda_macs2 = 'encd-chip-macs2'
+        String conda_spp = 'encd-chip-spp'
 
         # group: pipeline_metadata
         String title = 'Untitled'
