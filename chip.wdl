@@ -228,7 +228,7 @@ workflow chip {
         Int xcor_time_hr = 24
         Float xcor_disk_factor = 4.5
 
-        Float subsample_ctl_mem_factor = 14.0
+        Float subsample_ctl_mem_factor = 22.0
         Float subsample_ctl_disk_factor = 15.0
 
         Float macs2_signal_track_mem_factor = 12.0
