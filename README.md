@@ -66,7 +66,9 @@ This ChIP-Seq pipeline is based off the ENCODE (phase-3) transcription factor an
 	# uninstall old environments
 	$ bash scripts/uninstall_conda_env.sh
 
-	# install new envs, you need to run this for every pipeline version update
+	# install new envs, you need to run this for every pipeline version update.
+	# it may be killed if you run this command line on a login node.
+	# it's recommended to make an interactive node and run it there.
 	$ bash scripts/install_conda_env.sh
 	```
 
@@ -86,7 +88,8 @@ You can use URIs(`s3://`, `gs://` and `http(s)://`) in Caper's command lines and
 
 According to your chosen platform of Caper, run Caper or submit Caper command line to the cluster. You can choose other environments like `--singularity` or `--docker` instead of `--conda`. But you must define one of the environments.
 
-The followings are just examples. Please read [Caper's README](https://github.com/ENCODE-DCC/caper) very carefully to find an actual working command line for your chosen platform.
+PLEASE READ [CAPER'S README](https://github.com/ENCODE-DCC/caper) VERY CAREFULLY BEFORE RUNNING ANY PIPELINES. YOU WILL NEED TO CORRECTLY CONFIGURE CAPER FIRST. These are just example command lines.
+
     ```bash
     # Run it locally with Conda (DO NOT ACTIVATE PIPELINE'S CONDA ENVIRONEMT)
     $ caper run chip.wdl -i https://storage.googleapis.com/encode-pipeline-test-samples/encode-chip-seq-pipeline/ENCSR000DYI_subsampled_chr19_only.json --conda
