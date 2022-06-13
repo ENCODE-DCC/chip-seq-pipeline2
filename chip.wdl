@@ -261,17 +261,17 @@ workflow chip {
         conda: {
             description: 'Default Conda environment name to run WDL tasks. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline'
+            example: 'encd-chip'
         }
         conda_macs2: {
             description: 'Conda environment name for task macs2. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline-macs2'
+            example: 'encd-chip-macs2'
         }
         conda_spp: {
             description: 'Conda environment name for tasks spp/xcor. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline-spp'
+            example: 'encd-chip-spp'
         }
         title: {
             description: 'Experiment title.',
