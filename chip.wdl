@@ -7,10 +7,10 @@ struct RuntimeEnvironment {
 }
 
 workflow chip {
-    String pipeline_ver = 'v2.1.6'
+    String pipeline_ver = 'v2.2.0'
 
     meta {
-        version: 'v2.1.6'
+        version: 'v2.2.0'
 
         author: 'Jin wook Lee'
         email: 'leepc12@gmail.com'
@@ -19,8 +19,8 @@ workflow chip {
 
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        default_docker: 'encodedcc/chip-seq-pipeline:v2.1.6'
-        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.1.6.sif'
+        default_docker: 'encodedcc/chip-seq-pipeline:v2.2.0'
+        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.2.0.sif'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
@@ -71,11 +71,11 @@ workflow chip {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/chip-seq-pipeline:v2.1.6'
-        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.1.6.sif'
-        String conda = 'encode-chip-seq-pipeline'
-        String conda_macs2 = 'encode-chip-seq-pipeline-macs2'
-        String conda_spp = 'encode-chip-seq-pipeline-spp'
+        String docker = 'encodedcc/chip-seq-pipeline:v2.2.0'
+        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.2.0.sif'
+        String conda = 'encd-chip'
+        String conda_macs2 = 'encd-chip-macs2'
+        String conda_spp = 'encd-chip-spp'
 
         # group: pipeline_metadata
         String title = 'Untitled'
@@ -228,7 +228,7 @@ workflow chip {
         Int xcor_time_hr = 24
         Float xcor_disk_factor = 4.5
 
-        Float subsample_ctl_mem_factor = 14.0
+        Float subsample_ctl_mem_factor = 22.0
         Float subsample_ctl_disk_factor = 15.0
 
         Float macs2_signal_track_mem_factor = 12.0
@@ -261,17 +261,17 @@ workflow chip {
         conda: {
             description: 'Default Conda environment name to run WDL tasks. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline'
+            example: 'encd-chip'
         }
         conda_macs2: {
             description: 'Conda environment name for task macs2. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline-macs2'
+            example: 'encd-chip-macs2'
         }
         conda_spp: {
             description: 'Conda environment name for tasks spp/xcor. For Conda users only.',
             group: 'runtime_environment',
-            example: 'encode-atac-seq-pipeline-spp'
+            example: 'encd-chip-spp'
         }
         title: {
             description: 'Experiment title.',

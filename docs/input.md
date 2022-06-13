@@ -302,7 +302,7 @@ Parameter|Default|Description
 
 Parameter|Default|Description
 ---------|-------|-----------
-`chip.subsample_ctl_mem_factor` | 14.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
+`chip.subsample_ctl_mem_factor` | 22.0 | Multiplied to size of TAG-ALIGN BED to determine required memory
 `chip.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
 `chip.subsample_ctl_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
