@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PIPELINE_CONDA_ENVS=(
-  encode-chip-seq-pipeline
-  encode-chip-seq-pipeline-macs2
-  encode-chip-seq-pipeline-spp
+  encd-chip
+  encd-chip-macs2
+  encd-chip-spp
 )
 for PIPELINE_CONDA_ENV in "${PIPELINE_CONDA_ENVS[@]}"
 do
