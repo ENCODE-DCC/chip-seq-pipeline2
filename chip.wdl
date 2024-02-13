@@ -7,10 +7,10 @@ struct RuntimeEnvironment {
 }
 
 workflow chip {
-    String pipeline_ver = 'v2.2.1'
+    String pipeline_ver = 'v2.2.3'
 
     meta {
-        version: 'v2.2.1'
+        version: 'v2.2.3'
 
         author: 'Jin wook Lee'
         email: 'leepc12@gmail.com'
@@ -19,8 +19,8 @@ workflow chip {
 
         specification_document: 'https://docs.google.com/document/d/1lG_Rd7fnYgRpSIqrIfuVlAz2dW1VaSQThzk836Db99c/edit?usp=sharing'
 
-        default_docker: 'encodedcc/chip-seq-pipeline:v2.2.1'
-        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.2.1.sif'
+        default_docker: 'encodedcc/chip-seq-pipeline:v2.2.3'
+        default_singularity: 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.2.3.sif'
         croo_out_def: 'https://storage.googleapis.com/encode-pipeline-output-definition/chip.croo.v5.json'
 
         parameter_group: {
@@ -71,8 +71,8 @@ workflow chip {
     }
     input {
         # group: runtime_environment
-        String docker = 'encodedcc/chip-seq-pipeline:v2.2.1'
-        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.2.1.sif'
+        String docker = 'encodedcc/chip-seq-pipeline:v2.2.3'
+        String singularity = 'https://encode-pipeline-singularity-image.s3.us-west-2.amazonaws.com/chip-seq-pipeline_v2.2.3.sif'
         String conda = 'encd-chip'
         String conda_macs2 = 'encd-chip-macs2'
         String conda_spp = 'encd-chip-spp'
