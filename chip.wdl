@@ -242,6 +242,9 @@ workflow chip {
         Float call_peak_spp_disk_factor = 5.0
         Float call_peak_macs2_disk_factor = 30.0
 
+        Int qc_report_mem_gb = 4
+        Int qc_report_disk_gb = 50
+
         String? align_trimmomatic_java_heap
         String? filter_picard_java_heap
         String? gc_bias_picard_java_heap
@@ -1006,6 +1009,16 @@ workflow chip {
             description: 'Multiplication factor to determine persistent disk size for task macs2_signal_track.',
             group: 'resource_parameter',
             help: 'This factor will be multiplied to the size of TAG-ALIGNs (BEDs) to determine required disk size of instance on GCP/AWS.'
+        }
+        qc_report_mem_gb: {
+            description: 'Memory (GB) required for task qc_report.',
+            group: 'resource_parameter',
+            help: 'Increase this if task qc_report fails due to insufficient memory.'
+        }
+        qc_report_disk_gb: {
+            description: 'Persistent disk size (GB) required for task qc_report.',
+            group: 'resource_parameter',
+            help: 'Task qc_report localizes all NODUP_BAMs and TAG-ALIGNs (BEDs) from all replicates/controls to pass them through as pipeline outputs. Increase this if the task runs out of disk space.'
         }
         align_trimmomatic_java_heap: {
             description: 'Maximum Java heap (java -Xmx) in task align.',
@@ -2151,6 +2164,22 @@ workflow chip {
         overlap_opt_peak_region_size_qc = reproducibility_overlap.peak_region_size_qc,
         overlap_opt_peak_region_size_plot = reproducibility_overlap.peak_region_size_plot,
         overlap_opt_num_peak_qc = reproducibility_overlap.num_peak_qc,
+        
+        nodup_bams = nodup_bam_,
+        ctrl_nodup_bams = ctl_nodup_bam_,
+        ctrl_ta = ctl_ta_,
+        ta = ta_,
+        
+        macs_signal_track_fc_op = macs2_signal_track.fc_bw,
+        macs_signal_track_pval_op = macs2_signal_track.pval_bw,
+        
+        bfilt_peaks_op = call_peak_pooled.bfilt_peak,
+        
+        idr_peaks_conservative_op = reproducibility_idr.conservative_peak,
+        overlap_peaks_conservative_op = reproducibility_overlap.conservative_peak,
+
+        mem_gb = qc_report_mem_gb,
+        disk_gb = qc_report_disk_gb,
 
         runtime_environment = runtime_environment
     }
@@ -2159,6 +2188,20 @@ workflow chip {
         File report = qc_report.report
         File qc_json = qc_report.qc_json
         Boolean qc_json_ref_match = qc_report.qc_json_ref_match
+        Array[File?] output_bams = qc_report.output_bams
+        Array[File?] ctrl_output_bams = qc_report.ctrl_output_bams
+        Array[File?] output_ctrl_ta = qc_report.output_ctrl_ta
+        Array[File?] output_ta = qc_report.output_ta
+        
+        Array[File?] output_macs_signal_fc_op = qc_report.output_macs_signal_fc_op
+        Array[File?] output_macs_signal_pval_op = qc_report.output_macs_signal_pval_op
+        
+        File? output_bfilt_peaks_op = qc_report.output_bfilt_peaks_op
+        
+        File? idr_peaks_conservative_op = qc_report.output_idr_peaks_conservative_op
+        
+        File? overlap_peaks_conservative_op = qc_report.output_overlap_peaks_conservative_op
+        
     }
 }
 
@@ -3100,6 +3143,23 @@ task qc_report {
         File? overlap_opt_num_peak_qc
 
         File? qc_json_ref
+        
+        Array[File?] nodup_bams
+        Array[File?] ctrl_nodup_bams 
+        
+        Array[File?] ctrl_ta
+        Array[File?] ta
+        
+        Array[File?] macs_signal_track_fc_op
+        Array[File?] macs_signal_track_pval_op
+        
+        File? bfilt_peaks_op
+        
+        File? idr_peaks_conservative_op
+        File? overlap_peaks_conservative_op
+
+        Int mem_gb
+        Int disk_gb
 
         RuntimeEnvironment runtime_environment
     }
@@ -3171,17 +3231,26 @@ task qc_report {
         File report = glob('*qc.html')[0]
         File qc_json = glob('*qc.json')[0]
         Boolean qc_json_ref_match = read_string('qc_json_ref_match.txt')=='True'
+        Array[File?] output_bams = nodup_bams
+        Array[File?] ctrl_output_bams = ctrl_nodup_bams
+        Array[File?] output_ctrl_ta = ctrl_ta
+        Array[File?] output_ta = ta
+        Array[File?] output_macs_signal_fc_op = macs_signal_track_fc_op
+        Array[File?] output_macs_signal_pval_op = macs_signal_track_pval_op
+        File? output_bfilt_peaks_op = bfilt_peaks_op
+        File? output_idr_peaks_conservative_op = idr_peaks_conservative_op
+        File? output_overlap_peaks_conservative_op = overlap_peaks_conservative_op
     }
     runtime {
         cpu : 1
-        memory : '4 GB'
+        memory : '${mem_gb} GB'
         time : 4
-        disks : 'local-disk 50 SSD'
+        disks : 'local-disk ${disk_gb} SSD'
 
         docker : runtime_environment.docker
         singularity : runtime_environment.singularity
         conda : runtime_environment.conda
-    }    
+    }
 }
 
 ### workflow system tasks

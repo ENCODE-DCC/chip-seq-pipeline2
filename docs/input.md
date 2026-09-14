@@ -306,6 +306,11 @@ Parameter|Default|Description
 `chip.macs2_signal_track_time_hr` | 24 | Walltime (HPCs only)
 `chip.subsample_ctl_disk_factor` | 15.0 | Multiplied to size of TAG-ALIGN BED to determine required disk
 
+Parameter|Default|Description
+---------|-------|-----------
+`chip.qc_report_mem_gb` | 4 | Required memory (GB). Increase this if task `qc_report` fails due to insufficient memory
+`chip.qc_report_disk_gb` | 50 | Required disk size (GB). Task `qc_report` localizes all NODUP_BAMs and TAG-ALIGNs (BEDs) from all replicates/controls, so increase this if it runs out of disk space
+
 If your system/cluster does not allow large memory allocation for Java applications, check the following resource parameters to manually define Java memory. It is **NOT RECOMMENDED** for most users to change these parameters since pipeline automatically takes 90% of task's memory for Java apps.
 
 There are special parameters to control maximum Java heap memory (e.g. `java -Xmx4G`) for Java applications (e.g. Picard tools). They are strings including size units. Such string will be directly appended to Java's parameter `-Xmx`. If these parameters are not defined then pipeline uses 90% of each task's memory.
